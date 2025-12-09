@@ -16,17 +16,43 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
+    defer-datasource-initialization: true
+  
+  sql:
+    init:
+      mode: ${SQL_INIT_MODE:always}
+      data-locations: classpath:sample-data.sql
+      continue-on-error: false
   
   jackson:
     default-property-inclusion: non_null
     serialization:
       write-dates-as-timestamps: false
+  
+  mail:
+    host: smtp.gmail.com
+    port: 465
+    username: kishankumarnaukri@gmail.com
+    password: bnahttalkuyagjzu
+    properties:
+      mail:
+        smtp:
+          auth: true
+          ssl:
+            enable: true
+          socketFactory:
+            class: javax.net.ssl.SSLSocketFactory
+            port: 465
 
 server:
   port: 8080
 
+app:
+  frontend:
+    url: ${FRONTEND_URL:http://localhost:5173}
+
 stripe:
-  secret-key: ${STRIPE_SECRET_KEY:sk_test_placeholder}
+  secret-key: ${STRIPE_SECRET_KEY:sk_test_51ScB6pHeMlZ8XrLrbZGco0CoSzZu2YEz5rsF3dBm1bwWu6CEcLIE15dy7Gl1htIxetETag0dpK6F9gwnY5oFjfBw00QveSRuc3}
   webhook-secret: ${STRIPE_WEBHOOK_SECRET:whsec_placeholder}
   success-url: ${STRIPE_SUCCESS_URL:http://localhost:5173/donate/success?session_id={CHECKOUT_SESSION_ID}}
   cancel-url: ${STRIPE_CANCEL_URL:http://localhost:5173/donate/cancel}
@@ -35,3 +61,4 @@ logging:
   level:
     com.myfoundation.school: INFO
     org.hibernate.SQL: DEBUG
+    org.springframework.web.servlet.resource: WARN

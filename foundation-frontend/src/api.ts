@@ -2,6 +2,17 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
 
 // Types matching backend DTOs
+export interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  icon: string;
+  color: string;
+  active: boolean;
+  displayOrder: number;
+}
+
 export interface Campaign {
   id: string;
   title: string;
@@ -9,8 +20,18 @@ export interface Campaign {
   shortDescription: string;
   description: string;
   targetAmount: number;
+  currentAmount?: number;
   currency: string;
   active: boolean;
+  categoryId?: string;
+  categoryName?: string;
+  categoryIcon?: string;
+  categoryColor?: string;
+  imageUrl?: string;
+  location?: string;
+  beneficiariesCount?: number;
+  featured?: boolean;
+  urgent?: boolean;
 }
 
 export interface DonationRequest {
@@ -28,9 +49,26 @@ export interface CheckoutSessionResponse {
 
 // API Functions
 export const api = {
-  // Get all active campaigns
-  getCampaigns: async (): Promise<Campaign[]> => {
-    const response = await fetch(`${API_BASE_URL}/campaigns`);
+  // Get all active categories
+  getCategories: async (): Promise<Category[]> => {
+    const response = await fetch(`${API_BASE_URL}/categories`);
+    if (!response.ok) throw new Error('Failed to fetch categories');
+    return response.json();
+  },
+
+  // Get campaigns with optional filters
+  getCampaigns: async (filters?: { 
+    categoryId?: string; 
+    featured?: boolean; 
+    urgent?: boolean;
+  }): Promise<Campaign[]> => {
+    const params = new URLSearchParams();
+    if (filters?.categoryId) params.append('categoryId', filters.categoryId);
+    if (filters?.featured !== undefined) params.append('featured', String(filters.featured));
+    if (filters?.urgent !== undefined) params.append('urgent', String(filters.urgent));
+    
+    const url = `${API_BASE_URL}/campaigns${params.toString() ? '?' + params.toString() : ''}`;
+    const response = await fetch(url);
     if (!response.ok) throw new Error('Failed to fetch campaigns');
     return response.json();
   },

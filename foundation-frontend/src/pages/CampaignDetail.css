@@ -1,5 +1,5 @@
 .campaign-detail {
-  max-width: 1000px;
+  max-width: 1100px;
   margin: 0 auto;
 }
 
@@ -9,13 +9,18 @@
   align-items: center;
   margin-bottom: 2rem;
   padding-bottom: 1.5rem;
-  border-bottom: 2px solid #e2e8f0;
+  border-bottom: 3px solid transparent;
+  background: linear-gradient(white, white) padding-box,
+              linear-gradient(to right, #667eea, #764ba2) border-box;
+  border-image: linear-gradient(to right, #667eea, #764ba2) 1;
 }
 
 .detail-header h1 {
-  font-size: 2.5rem;
+  font-size: 2.25rem;
   color: #1e293b;
   margin: 0;
+  font-weight: 800;
+  letter-spacing: -0.5px;
 }
 
 .detail-content {
@@ -27,13 +32,15 @@
 
 .main-content h2 {
   color: #1e293b;
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
+  font-size: 1.5rem;
+  font-weight: 700;
 }
 
 .full-description {
-  line-height: 1.8;
+  line-height: 1.9;
   color: #475569;
-  font-size: 1.125rem;
+  font-size: 1rem;
   white-space: pre-wrap;
 }
 
@@ -45,23 +52,37 @@
 
 .donation-box {
   background: white;
-  border: 2px solid #e2e8f0;
-  border-radius: 1rem;
+  border: none;
+  border-radius: 20px;
   padding: 2rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  position: relative;
+  overflow: hidden;
+}
+
+.donation-box::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background: linear-gradient(to right, #667eea, #764ba2);
 }
 
 .donation-box h3 {
   color: #1e293b;
   margin-bottom: 1.5rem;
   text-align: center;
+  font-size: 1.25rem;
+  font-weight: 700;
 }
 
 .goal-info {
   text-align: center;
   padding: 1.5rem;
-  background: #f8fafc;
-  border-radius: 0.75rem;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 16px;
   margin-bottom: 1.5rem;
 }
 
@@ -73,66 +94,77 @@
 }
 
 .amount {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #2563eb;
+  font-size: 2.25rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .currency {
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   color: #64748b;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .goal-label {
   color: #64748b;
-  margin-top: 0.5rem;
-  font-size: 0.875rem;
+  margin-top: 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 600;
 }
 
 .btn-donate-large {
   display: block;
   width: 100%;
-  background: #2563eb;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   padding: 1rem;
-  border-radius: 0.75rem;
+  border-radius: 50px;
   text-decoration: none;
   font-weight: 700;
   font-size: 1.125rem;
   text-align: center;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
   border: none;
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
 
 .btn-donate-large:hover {
-  background: #1d4ed8;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(102, 126, 234, 0.5);
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
 }
 
 .secure-note {
   text-align: center;
   color: #64748b;
-  font-size: 0.875rem;
-  margin-top: 1rem;
+  font-size: 0.9rem;
+  margin-top: 1.25rem;
+  font-weight: 500;
 }
 
 .back-link {
-  margin-top: 3rem;
-  padding-top: 2rem;
-  border-top: 1px solid #e2e8f0;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid #f1f5f9;
 }
 
 .back-link a {
-  color: #2563eb;
+  color: #667eea;
   text-decoration: none;
-  font-weight: 600;
-  transition: color 0.2s;
+  font-weight: 700;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
 }
 
 .back-link a:hover {
-  color: #1d4ed8;
+  color: #764ba2;
+  transform: translateX(-4px);
 }
 
 @media (max-width: 768px) {

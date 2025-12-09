@@ -11,5 +11,11 @@ public interface CampaignRepository extends JpaRepository<Campaign, String> {
     
     List<Campaign> findByActiveTrue();
     
+    List<Campaign> findByActiveTrueAndCategoryId(String categoryId);
+    
+    List<Campaign> findByActiveTrueAndFeaturedTrue();
+    
+    List<Campaign> findByActiveTrueAndUrgentTrue();
+    
     Optional<Campaign> findBySlug(String slug);
 }

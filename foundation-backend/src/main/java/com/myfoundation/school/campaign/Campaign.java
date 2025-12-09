@@ -32,15 +32,37 @@ public class Campaign {
     @Column(columnDefinition = "TEXT")
     private String description;
     
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "category_id")
+    private Category category;
+    
     @Column(nullable = false)
     private Long targetAmount;
+    
+    @Column
+    private Long currentAmount;
     
     @Column(nullable = false, length = 3)
     private String currency;
     
+    @Column
+    private String imageUrl;
+    
+    @Column
+    private String location;
+    
+    @Column
+    private Integer beneficiariesCount;
+    
     @Column(nullable = false)
     @Builder.Default
     private Boolean active = true;
+    
+    @Column
+    private Boolean featured;
+    
+    @Column
+    private Boolean urgent;
     
     @Column(nullable = false, updatable = false)
     private Instant createdAt;

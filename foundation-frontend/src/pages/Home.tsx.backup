@@ -1,0 +1,156 @@
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import ImageCarousel from '../components/ImageCarousel';
+import { cmsApi, type Testimonial, type HomepageStat, type CarouselImage } from '../cmsApi';
+import './Home.css';
+
+export default function Home() {
+  const [heroContent, setHeroContent] = useState<Record<string, string>>({});
+  const [whyDonateContent, setWhyDonateContent] = useState<Record<string, string>>({});
+  const [carouselContent, setCarouselContent] = useState<Record<string, string>>({});
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+  const [stats, setStats] = useState<HomepageStat[]>([]);
+  const [carouselImages, setCarouselImages] = useState<CarouselImage[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadContent = async () => {
+      try {
+        const [hero, whyDonate, carousel, testimonialsData, statsData, imagesData] = await Promise.all([
+          cmsApi.getContent('hero'),
+          cmsApi.getContent('why_donate'),
+          cmsApi.getContent('carousel'),
+          cmsApi.getTestimonials(),
+          cmsApi.getStats(),
+          cmsApi.getCarouselImages()
+        ]);
+        
+        setHeroContent(hero);
+        setWhyDonateContent(whyDonate);
+        setCarouselContent(carousel);
+        setTestimonials(testimonialsData);
+        setStats(statsData);
+        setCarouselImages(imagesData);
+      } catch (error) {
+        console.error('Error loading CMS content:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadContent();
+  }, []);
+
+  if (loading) {
+    return <div className="home"><p>Loading...</p></div>;
+  }
+
+  return (
+    <div className="home">
+      <section className="hero">
+        <div className="container">
+          <h1>{heroContent.title || 'Every Act of Kindness Changes Lives'}</h1>
+          <p className="hero-text">
+            {heroContent.description || 'From feeding the hungry to empowering women, from educating children to providing clean water - your generosity creates ripples of hope across communities. Join thousands of donors making a real difference today.'}
+          </p>
+          <Link to="/campaigns" className="btn-hero">
+            {heroContent.cta_text || 'Explore All Causes →'}
+          </Link>
+        </div>
+      </section>
+
+      {/* Impact Carousel */}
+      <section className="impact-showcase">
+        <div className="container">
+          <h2 className="carousel-title">{carouselContent.title || 'See the Impact of Your Generosity'}</h2>
+          <ImageCarousel
+            images={carouselImages.map(img => img.imageUrl)}
+            autoPlay={true}
+            interval={4500}
+          />
+        </div>
+      </section>
+
+      {/* Impact Statistics */}
+      <section className="impact-stats">
+        <div className="container">
+          <div className="stats-grid">
+            {stats.map(stat => (
+              <div key={stat.id} className="stat-card">
+                <h3 className="stat-number">{stat.statValue}</h3>
+                <p className="stat-label">{stat.statLabel}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Why Donate Section */}
+      <section className="why-donate">
+        <div className="container">
+          <h2 className="section-title">{whyDonateContent.title || 'Why Your Donation Matters'}</h2>
+          <div className="why-grid">
+            <div className="why-card">
+              <h3>{whyDonateContent.card1_title || '🎯 Direct Impact'}</h3>
+              <p>{whyDonateContent.card1_text || '92% of donations go directly to programs. See exactly where your money goes.'}</p>
+            </div>
+            <div className="why-card">
+              <h3>{whyDonateContent.card2_title || '🌍 Global Reach'}</h3>
+              <p>{whyDonateContent.card2_text || 'Supporting communities in 25+ countries across Asia, Africa, and South America.'}</p>
+            </div>
+            <div className="why-card">
+              <h3>{whyDonateContent.card3_title || '✅ Proven Results'}</h3>
+              <p>{whyDonateContent.card3_text || 'Track record of sustainable change with measurable outcomes and transparency.'}</p>
+            </div>
+            <div className="why-card">
+              <h3>{whyDonateContent.card4_title || '🤝 Local Partners'}</h3>
+              <p>{whyDonateContent.card4_text || 'Working with trusted community leaders who know the needs firsthand.'}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section className="testimonials">
+        <div className="container">
+          <h2 className="section-title">Stories from Our Donors</h2>
+          <div className="testimonial-grid">
+            <div className="testimonial-card">
+              <div className="quote-icon">“</div>
+              <p className="testimonial-text">
+                "Seeing the school we helped build brought tears to my eyes. The photos of 
+                smiling children made every dollar worth it. This is real change happening."
+              </p>
+              <div className="testimonial-author">
+                <strong>Sarah Mitchell</strong>
+                <span>Monthly Donor since 2023</span>
+              </div>
+            </div>
+            <div className="testimonial-card">
+              <div className="quote-icon">“</div>
+              <p className="testimonial-text">
+                "I love how transparent Hope Foundation is. Regular updates, real photos, 
+                and clear impact reports. I know my money is making a difference."
+              </p>
+              <div className="testimonial-author">
+                <strong>James Chen</strong>
+                <span>Donor since 2022</span>
+              </div>
+            </div>
+            <div className="testimonial-card">
+              <div className="quote-icon">“</div>
+              <p className="testimonial-text">
+                "Started with $25 and now I'm a monthly donor. The stories of transformation 
+                inspire me. Every campaign shows real people, real impact."
+              </p>
+              <div className="testimonial-author">
+                <strong>Priya Sharma</strong>
+                <span>Monthly Champion</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}

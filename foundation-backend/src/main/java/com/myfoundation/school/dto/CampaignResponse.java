@@ -17,6 +17,16 @@ public class CampaignResponse {
     private String shortDescription;
     private String description;
     private Long targetAmount;
+    private Long currentAmount;
     private String currency;
     private Boolean active;
+    private String categoryId;
+    private String categoryName;
+    private String categoryIcon;
+    private String categoryColor;
+    private String imageUrl;
+    private String location;
+    private Integer beneficiariesCount;
+    private Boolean featured;
+    private Boolean urgent;
 }

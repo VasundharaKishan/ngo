@@ -17,11 +17,29 @@ public class CampaignService {
     
     private final CampaignRepository campaignRepository;
     
-    public List<CampaignResponse> getAllActiveCampaigns() {
-        log.info("Fetching all active campaigns");
-        return campaignRepository.findByActiveTrue().stream()
+    public List<CampaignResponse> getCampaigns(String categoryId, Boolean featured, Boolean urgent) {
+        log.info("Fetching campaigns with filters: categoryId={}, featured={}, urgent={}", 
+                categoryId, featured, urgent);
+        
+        List<Campaign> campaigns;
+        
+        if (featured != null && featured) {
+            campaigns = campaignRepository.findByActiveTrueAndFeaturedTrue();
+        } else if (urgent != null && urgent) {
+            campaigns = campaignRepository.findByActiveTrueAndUrgentTrue();
+        } else if (categoryId != null && !categoryId.isEmpty()) {
+            campaigns = campaignRepository.findByActiveTrueAndCategoryId(categoryId);
+        } else {
+            campaigns = campaignRepository.findByActiveTrue();
+        }
+        
+        return campaigns.stream()
                 .map(this::toCampaignResponse)
                 .collect(Collectors.toList());
+    }
+    
+    public List<CampaignResponse> getAllActiveCampaigns() {
+        return getCampaigns(null, null, null);
     }
     
     public CampaignResponse getCampaignById(String id) {
@@ -39,8 +57,18 @@ public class CampaignService {
                 .shortDescription(campaign.getShortDescription())
                 .description(campaign.getDescription())
                 .targetAmount(campaign.getTargetAmount())
+                .currentAmount(campaign.getCurrentAmount())
                 .currency(campaign.getCurrency())
                 .active(campaign.getActive())
+                .categoryId(campaign.getCategory() != null ? campaign.getCategory().getId() : null)
+                .categoryName(campaign.getCategory() != null ? campaign.getCategory().getName() : null)
+                .categoryIcon(campaign.getCategory() != null ? campaign.getCategory().getIcon() : null)
+                .categoryColor(campaign.getCategory() != null ? campaign.getCategory().getColor() : null)
+                .imageUrl(campaign.getImageUrl())
+                .location(campaign.getLocation())
+                .beneficiariesCount(campaign.getBeneficiariesCount())
+                .featured(campaign.getFeatured())
+                .urgent(campaign.getUrgent())
                 .build();
     }
 }
