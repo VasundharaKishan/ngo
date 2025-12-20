@@ -19,7 +19,17 @@ public class AdminCampaignService {
     
     @Transactional
     public Campaign createCampaign(AdminCampaignRequest request) {
-        Category category = categoryRepository.findById(request.getCategoryId().toString())
+        // Validate featured campaign requirements
+        if (Boolean.TRUE.equals(request.getFeatured())) {
+            if (request.getImageUrl() == null || request.getImageUrl().trim().isEmpty()) {
+                throw new RuntimeException("Featured campaigns must have an image URL");
+            }
+            if (Boolean.FALSE.equals(request.getActive())) {
+                throw new RuntimeException("Featured campaigns cannot be inactive");
+            }
+        }
+        
+        Category category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new RuntimeException("Category not found"));
         
         Campaign campaign = new Campaign();
@@ -30,7 +40,7 @@ public class AdminCampaignService {
         campaign.setCurrency("USD");
         campaign.setCategory(category);
         campaign.setTargetAmount(request.getTargetAmount());
-        campaign.setCurrentAmount(request.getCurrentAmount() != null ? request.getCurrentAmount() : 0L);
+        // Note: currentAmount is now calculated from donations, not stored
         campaign.setImageUrl(request.getImageUrl());
         campaign.setLocation(request.getLocation());
         campaign.setBeneficiariesCount(request.getBeneficiariesCount());
@@ -45,10 +55,20 @@ public class AdminCampaignService {
     
     @Transactional
     public Campaign updateCampaign(String id, AdminCampaignRequest request) {
+        // Validate featured campaign requirements
+        if (Boolean.TRUE.equals(request.getFeatured())) {
+            if (request.getImageUrl() == null || request.getImageUrl().trim().isEmpty()) {
+                throw new RuntimeException("Featured campaigns must have an image URL");
+            }
+            if (Boolean.FALSE.equals(request.getActive())) {
+                throw new RuntimeException("Featured campaigns cannot be inactive");
+            }
+        }
+        
         Campaign campaign = campaignRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Campaign not found"));
         
-        Category category = categoryRepository.findById(request.getCategoryId().toString())
+        Category category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new RuntimeException("Category not found"));
         
         campaign.setTitle(request.getTitle());
@@ -56,7 +76,7 @@ public class AdminCampaignService {
         campaign.setDescription(request.getFullDescription());
         campaign.setCategory(category);
         campaign.setTargetAmount(request.getTargetAmount());
-        campaign.setCurrentAmount(request.getCurrentAmount() != null ? request.getCurrentAmount() : campaign.getCurrentAmount());
+        // Note: currentAmount is now calculated from donations, not stored
         campaign.setImageUrl(request.getImageUrl());
         campaign.setLocation(request.getLocation());
         campaign.setBeneficiariesCount(request.getBeneficiariesCount());

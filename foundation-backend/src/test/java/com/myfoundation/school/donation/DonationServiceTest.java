@@ -77,7 +77,7 @@ class DonationServiceTest {
             donationService.createStripeCheckoutSession(testRequest);
         });
         
-        assertTrue(exception.getMessage().contains("Campaign is not active"));
+        assertTrue(exception.getMessage().contains("not accepting donations"));
         verify(donationRepository, never()).save(any());
     }
     

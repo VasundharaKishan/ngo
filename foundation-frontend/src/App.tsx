@@ -1,12 +1,16 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
+import AdminLayout from './components/AdminLayout';
 import Home from './pages/Home';
 import CampaignList from './pages/CampaignList';
 import CampaignDetail from './pages/CampaignDetail';
 import DonationForm from './pages/DonationForm';
 import Success from './pages/Success';
 import Cancel from './pages/Cancel';
-import AdminDashboardNew from './pages/AdminDashboardNew';
+import Dashboard from './pages/Dashboard';
+import Donations from './pages/Donations';
+import Campaigns from './pages/Campaigns';
+import Categories from './pages/Categories';
 import AdminCampaignForm from './pages/AdminCampaignForm';
 import AdminSettings from './pages/AdminSettings';
 import AdminLogin from './pages/AdminLogin';
@@ -21,12 +25,21 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Admin Routes - No Layout */}
+        {/* Admin Login (No Sidebar) */}
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin/setup-password" element={<PasswordSetup />} />
-        <Route path="/admin" element={<AdminDashboardNew />} />
-        <Route path="/admin/users" element={<AdminUsers />} />
-        <Route path="/admin/settings" element={<AdminSettings />} />
+        
+        {/* Admin Routes - Nested with Sidebar */}
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<Dashboard />} />
+          <Route path="donations" element={<Donations />} />
+          <Route path="campaigns" element={<Campaigns />} />
+          <Route path="categories" element={<Categories />} />
+          <Route path="users" element={<AdminUsers />} />
+          <Route path="settings" element={<AdminSettings />} />
+        </Route>
+        
+        {/* Campaign Form Routes (No Sidebar - separate) */}
         <Route path="/admin/campaigns/new" element={<AdminCampaignForm />} />
         <Route path="/admin/campaigns/:id" element={<AdminCampaignForm />} />
         

@@ -75,11 +75,6 @@ export default function AdminSettings() {
 
   return (
     <div className="admin-settings">
-      <div className="settings-header">
-        <h1>⚙️ Site Settings</h1>
-        <button onClick={() => navigate('/admin')} className="btn-back">← Back to Dashboard</button>
-      </div>
-
       <div className="settings-container">
         <div className="settings-section">
           <h2>Display Settings</h2>
@@ -87,8 +82,13 @@ export default function AdminSettings() {
             Control how many items are displayed on different pages
           </p>
 
-          {configs.map((config, index) => (
-            <div key={config.id} className="config-item">
+          {configs.length === 0 ? (
+            <p style={{ textAlign: 'center', color: '#64748b', padding: '2rem' }}>
+              No configuration settings found. Click "Initialize" to create defaults.
+            </p>
+          ) : (
+            configs.map((config, index) => (
+            <div key={config.id || index} className="config-item">
               <div className="config-info">
                 <label>{config.description || config.configKey}</label>
                 <code className="config-key">{config.configKey}</code>
@@ -111,7 +111,8 @@ export default function AdminSettings() {
                 </button>
               </div>
             </div>
-          ))}
+          ))
+          )}
         </div>
 
         <div className="settings-info">
@@ -127,7 +128,8 @@ export default function AdminSettings() {
                 campaigns list page. Recommended: 9-12 campaigns.
               </li>
               <li>
-                Changes take effect immediately for new visitors.
+                <strong>⚡ Instant Updates:</strong> Changes take effect immediately. Users will see 
+                the new settings as soon as they load or refresh the page.
               </li>
             </ul>
           </div>

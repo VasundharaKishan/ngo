@@ -36,7 +36,7 @@ public class DonationService {
                 .orElseThrow(() -> new RuntimeException("Campaign not found with id: " + request.getCampaignId()));
         
         if (!campaign.getActive()) {
-            throw new RuntimeException("Campaign is not active");
+            throw new RuntimeException("This campaign is not accepting donations at this time. Please choose another campaign.");
         }
         
         // Create donation entity with PENDING status
@@ -100,29 +100,49 @@ public class DonationService {
     
     @Transactional
     public void markDonationSuccessFromStripe(String donationId, String paymentIntentId) {
-        log.info("Marking donation {} as SUCCESS", donationId);
+        log.info("[Webhook] Attempting to mark donation {} as SUCCESS with paymentIntent: {}", donationId, paymentIntentId);
         
         Donation donation = donationRepository.findById(donationId)
                 .orElseThrow(() -> new RuntimeException("Donation not found with id: " + donationId));
         
+        // Idempotency check: if already SUCCESS, skip update (duplicate webhook)
+        if (donation.getStatus() == DonationStatus.SUCCESS) {
+            log.info("[Webhook] Donation {} already marked as SUCCESS - idempotent webhook, skipping", donationId);
+            return;
+        }
+        
+        log.info("[Webhook] Updating donation {} from {} to SUCCESS", donationId, donation.getStatus());
         donation.setStatus(DonationStatus.SUCCESS);
         donation.setStripePaymentIntentId(paymentIntentId);
         donationRepository.save(donation);
         
-        log.info("Donation {} marked as SUCCESS", donationId);
+        log.info("[Webhook] Donation {} successfully marked as SUCCESS. Campaign totals will be derived from this donation.", donationId);
     }
     
     @Transactional
     public void markDonationFailed(String donationId) {
-        log.info("Marking donation {} as FAILED", donationId);
+        log.info("[Webhook] Attempting to mark donation {} as FAILED", donationId);
         
         Donation donation = donationRepository.findById(donationId)
                 .orElseThrow(() -> new RuntimeException("Donation not found with id: " + donationId));
         
+        // Idempotency check: if already SUCCESS, don't change it (payment succeeded)
+        if (donation.getStatus() == DonationStatus.SUCCESS) {
+            log.warn("[Webhook] Donation {} already marked as SUCCESS - cannot mark as FAILED, skipping", donationId);
+            return;
+        }
+        
+        // Idempotency check: if already FAILED, skip update (duplicate webhook)
+        if (donation.getStatus() == DonationStatus.FAILED) {
+            log.info("[Webhook] Donation {} already marked as FAILED - idempotent webhook, skipping", donationId);
+            return;
+        }
+        
+        log.info("[Webhook] Updating donation {} from {} to FAILED", donationId, donation.getStatus());
         donation.setStatus(DonationStatus.FAILED);
         donationRepository.save(donation);
         
-        log.info("Donation {} marked as FAILED", donationId);
+        log.info("[Webhook] Donation {} successfully marked as FAILED", donationId);
     }
     
     @Transactional(readOnly = true)

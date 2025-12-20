@@ -5,8 +5,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
-import java.util.UUID;
-
 @Data
 public class AdminCampaignRequest {
     
@@ -19,13 +17,17 @@ public class AdminCampaignRequest {
     @NotBlank(message = "Full description is required")
     private String fullDescription;
     
-    @NotNull(message = "Category ID is required")
-    private UUID categoryId;
+    @NotBlank(message = "Category ID is required")
+    private String categoryId;
     
     @NotNull(message = "Target amount is required")
     @Positive(message = "Target amount must be positive")
     private Long targetAmount;
     
+    /**
+     * @deprecated This field is no longer used. Current amount is calculated from successful donations.
+     */
+    @Deprecated
     private Long currentAmount;
     
     private String imageUrl;

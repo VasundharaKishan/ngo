@@ -3,9 +3,9 @@ spring:
     name: school-foundation-donation-backend
   
   datasource:
-    url: jdbc:postgresql://ep-mute-scene-abnd9qj2-pooler.eu-west-2.aws.neon.tech/neondb?sslmode=require
-    username: neondb_owner
-    password: npg_zC7GDKo2JeUq
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/ngo_donations?sslmode=prefer}
+    username: ${DATABASE_USERNAME:postgres}
+    password: ${DATABASE_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
   
   jpa:
@@ -29,11 +29,17 @@ spring:
     serialization:
       write-dates-as-timestamps: false
   
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+      enabled: true
+  
   mail:
-    host: smtp.gmail.com
-    port: 465
-    username: kishankumarnaukri@gmail.com
-    password: bnahttalkuyagjzu
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:465}
+    username: ${MAIL_USERNAME:your-email@gmail.com}
+    password: ${MAIL_PASSWORD:your-app-password}
     properties:
       mail:
         smtp:
@@ -52,8 +58,8 @@ app:
     url: ${FRONTEND_URL:http://localhost:5173}
 
 stripe:
-  secret-key: ${STRIPE_SECRET_KEY:sk_test_51ScB6pHeMlZ8XrLrbZGco0CoSzZu2YEz5rsF3dBm1bwWu6CEcLIE15dy7Gl1htIxetETag0dpK6F9gwnY5oFjfBw00QveSRuc3}
-  webhook-secret: ${STRIPE_WEBHOOK_SECRET:whsec_placeholder}
+  secret-key: ${STRIPE_SECRET_KEY:sk_test_your_key_here}
+  webhook-secret: ${STRIPE_WEBHOOK_SECRET:whsec_your_webhook_secret_here}
   success-url: ${STRIPE_SUCCESS_URL:http://localhost:5173/donate/success?session_id={CHECKOUT_SESSION_ID}}
   cancel-url: ${STRIPE_CANCEL_URL:http://localhost:5173/donate/cancel}
 

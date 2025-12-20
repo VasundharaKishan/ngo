@@ -39,6 +39,12 @@ public class Campaign {
     @Column(nullable = false)
     private Long targetAmount;
     
+    /**
+     * @deprecated This field is kept for backward compatibility but is no longer used.
+     * The current amount is now dynamically calculated from successful donations.
+     * Use CampaignResponse.currentAmount instead, which is calculated at runtime.
+     */
+    @Deprecated
     @Column
     private Long currentAmount;
     

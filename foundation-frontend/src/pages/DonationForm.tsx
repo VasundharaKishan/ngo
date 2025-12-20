@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { useParams } from 'react-router-dom';
 import { api, type Campaign } from '../api';
+import { getCurrencySymbol, amountToCents, centsToAmount } from '../utils/currency';
 import './DonationForm.css';
 
 const PRESET_AMOUNTS = [500, 1000, 2500, 5000, 10000];
@@ -88,14 +89,40 @@ export default function DonationForm() {
 
   const handleCustomAmountChange = (value: string) => {
     setCustomAmount(value);
-    const cents = Math.round(parseFloat(value) * 100);
-    if (!isNaN(cents) && cents > 0) {
+    const cents = amountToCents(value);
+    if (cents > 0) {
       setAmount(cents);
     }
   };
 
   if (!campaign) {
     return <div className="container"><p className="loading">Loading...</p></div>;
+  }
+
+  // Safety check for campaign data
+  if (!campaign.id || !campaign.title) {
+    return (
+      <div className="container">
+        <p className="error">Invalid campaign data. Please try again.</p>
+      </div>
+    );
+  }
+
+  // Check if campaign is inactive
+  if (campaign.active === false) {
+    return (
+      <div className="container">
+        <div className="donation-form-container">
+          <div className="form-header">
+            <h1>Campaign Not Available</h1>
+          </div>
+          <div className="inactive-notice" style={{ padding: '2rem', textAlign: 'center' }}>
+            <p className="inactive-message">⚠️ This campaign is not currently accepting donations</p>
+            <a href="/campaigns" style={{ marginTop: '1rem', display: 'inline-block' }}>← Back to campaigns</a>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -105,7 +132,7 @@ export default function DonationForm() {
           <h1>Make a Donation</h1>
           <p className="campaign-name">
             {campaign.categoryIcon && <span className="category-icon">{campaign.categoryIcon}</span>}
-            <strong>{campaign.title}</strong>
+            <strong>{campaign.title || 'Untitled Campaign'}</strong>
           </p>
         </div>
 
@@ -161,7 +188,7 @@ export default function DonationForm() {
                         setCustomAmount('');
                       }}
                     >
-                      {currency === 'eur' ? '€' : currency === 'gbp' ? '£' : '$'}{(preset / 100).toFixed(0)}
+                      {getCurrencySymbol(currency)}{(preset / 100).toFixed(0)}
                     </button>
                   ))}
                 </div>
@@ -169,7 +196,7 @@ export default function DonationForm() {
                 <div className="custom-amount">
                   <label className="form-label">Or Enter Custom Amount</label>
                   <div className="input-with-prefix">
-                    <span className="prefix">{currency === 'eur' ? '€' : currency === 'gbp' ? '£' : '$'}</span>
+                    <span className="prefix">{getCurrencySymbol(currency)}</span>
                     <input
                       type="number"
                       className="form-input"
@@ -183,7 +210,7 @@ export default function DonationForm() {
                 </div>
 
                 <div className="amount-display">
-                  Your donation: <strong>{currency === 'eur' ? '€' : currency === 'gbp' ? '£' : '$'}{(amount / 100).toFixed(2)}</strong> {currency.toUpperCase()}
+                  Your donation: <strong>{getCurrencySymbol(currency)}{centsToAmount(amount).toFixed(2)}</strong> {currency.toUpperCase()}
                 </div>
               </div>
 
@@ -273,7 +300,7 @@ export default function DonationForm() {
                 </div>
                 <div className="summary-row">
                   <span>Amount:</span>
-                  <strong>{currency === 'eur' ? '€' : currency === 'gbp' ? '£' : '$'}{(amount / 100).toFixed(2)} {currency.toUpperCase()}</strong>
+                  <strong>{getCurrencySymbol(currency)}{centsToAmount(amount).toFixed(2)} {currency.toUpperCase()}</strong>
                 </div>
                 {!anonymous && donorName && (
                   <div className="summary-row">

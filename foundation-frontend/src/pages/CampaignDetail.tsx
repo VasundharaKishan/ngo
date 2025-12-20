@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { api, type Campaign } from '../api';
+import { formatCurrency, formatCurrencyCode } from '../utils/currency';
 import './CampaignDetail.css';
 
 export default function CampaignDetail() {
@@ -39,6 +40,19 @@ export default function CampaignDetail() {
           {campaign.active && <span className="badge-active">Active Campaign</span>}
         </div>
 
+        {campaign.imageUrl && (
+          <div className="detail-image-container">
+            <img 
+              src={campaign.imageUrl} 
+              alt={campaign.title}
+              className="detail-image"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+              }}
+            />
+          </div>
+        )}
+
         <div className="detail-content">
           <div className="main-content">
             <h2>About This Campaign</h2>
@@ -50,17 +64,28 @@ export default function CampaignDetail() {
               <h3>Support This Campaign</h3>
               <div className="goal-info">
                 <div className="goal-amount">
-                  <span className="amount">${(campaign.targetAmount / 100).toLocaleString()}</span>
-                  <span className="currency">{campaign.currency.toUpperCase()}</span>
+                  <span className="amount">
+                    {campaign.targetAmount != null 
+                      ? formatCurrency(campaign.targetAmount, campaign.currency || 'eur', { includeSymbol: false })
+                      : 'N/A'}
+                  </span>
+                  <span className="currency">{formatCurrencyCode(campaign.currency || 'eur')}</span>
                 </div>
                 <p className="goal-label">Funding Goal</p>
               </div>
               
-              <Link to={`/donate/${campaign.id}`} className="btn-donate-large">
-                Donate Now
-              </Link>
-              
-              <p className="secure-note">🔒 Secure payment via Stripe</p>
+              {campaign.active ? (
+                <>
+                  <Link to={`/donate/${campaign.id}`} className="btn-donate-large">
+                    Donate Now
+                  </Link>
+                  <p className="secure-note">🔒 Secure payment via Stripe</p>
+                </>
+              ) : (
+                <div className="inactive-notice">
+                  <p className="inactive-message">⚠️ This campaign is not currently accepting donations</p>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -1,38 +1,38 @@
-package com.myfoundation.school.dto;
+package com.myfoundation.school.admin;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+import com.myfoundation.school.campaign.Category;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
+import java.time.Instant;
+
+/**
+ * Response DTO for admin campaign operations.
+ * Includes all campaign fields with currentAmount calculated from successful donations.
+ */
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class CampaignResponse {
+public class AdminCampaignResponse {
     
     private String id;
     private String title;
     private String slug;
     private String shortDescription;
-    private String description;
+    private String fullDescription;
     private Long targetAmount;
     
     /**
      * The current amount raised for this campaign.
      * This value is dynamically calculated from the sum of all successful donations.
-     * It is NOT stored in the database but computed at runtime.
      */
     private Long currentAmount;
+    
     private String currency;
-    private Boolean active;
-    private String categoryId;
-    private String categoryName;
-    private String categoryIcon;
-    private String categoryColor;
     private String imageUrl;
     private String location;
     private Integer beneficiariesCount;
+    private Boolean active;
     private Boolean featured;
     private Boolean urgent;
+    private Instant createdAt;
+    private Instant updatedAt;
+    private Category category;
 }

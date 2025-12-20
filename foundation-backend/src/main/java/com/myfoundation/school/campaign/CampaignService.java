@@ -1,5 +1,6 @@
 package com.myfoundation.school.campaign;
 
+import com.myfoundation.school.donation.DonationRepository;
 import com.myfoundation.school.dto.CampaignResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
 public class CampaignService {
     
     private final CampaignRepository campaignRepository;
+    private final DonationRepository donationRepository;
     
     public List<CampaignResponse> getCampaigns(String categoryId, Boolean featured, Boolean urgent) {
         log.info("Fetching campaigns with filters: categoryId={}, featured={}, urgent={}", 
@@ -50,6 +52,9 @@ public class CampaignService {
     }
     
     private CampaignResponse toCampaignResponse(Campaign campaign) {
+        // Calculate current amount from successful donations only
+        Long currentAmount = donationRepository.sumSuccessfulDonationsByCampaignId(campaign.getId());
+        
         return CampaignResponse.builder()
                 .id(campaign.getId())
                 .title(campaign.getTitle())
@@ -57,7 +62,7 @@ public class CampaignService {
                 .shortDescription(campaign.getShortDescription())
                 .description(campaign.getDescription())
                 .targetAmount(campaign.getTargetAmount())
-                .currentAmount(campaign.getCurrentAmount())
+                .currentAmount(currentAmount) // Calculated from successful donations
                 .currency(campaign.getCurrency())
                 .active(campaign.getActive())
                 .categoryId(campaign.getCategory() != null ? campaign.getCategory().getId() : null)

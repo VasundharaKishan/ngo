@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { amountToCents, formatAmountForInput } from '../utils/currency';
 import './AdminCampaignForm.css';
 
 interface Category {
@@ -56,23 +57,38 @@ export default function AdminCampaignForm() {
   const loadCampaign = async () => {
     try {
       const res = await fetch(`http://localhost:8080/api/admin/campaigns/${id}`);
+      if (!res.ok) {
+        alert('Failed to load campaign');
+        navigate('/admin');
+        return;
+      }
       const data = await res.json();
+      
+      // Validate required fields
+      if (!data || !data.title) {
+        alert('Invalid campaign data received');
+        navigate('/admin');
+        return;
+      }
+      
       setFormData({
-        title: data.title,
-        shortDescription: data.shortDescription,
-        fullDescription: data.fullDescription,
+        title: data.title || '',
+        shortDescription: data.shortDescription || '',
+        fullDescription: data.fullDescription || '',
         categoryId: data.category?.id || '',
-        targetAmount: String(data.targetAmount / 100),
-        currentAmount: String(data.currentAmount / 100),
+        targetAmount: formatAmountForInput(data.targetAmount || 0),
+        currentAmount: formatAmountForInput(data.currentAmount || 0),
         imageUrl: data.imageUrl || '',
         location: data.location || '',
         beneficiariesCount: data.beneficiariesCount ? String(data.beneficiariesCount) : '',
-        featured: data.featured,
-        urgent: data.urgent,
-        active: data.active
+        featured: data.featured ?? false,
+        urgent: data.urgent ?? false,
+        active: data.active ?? true
       });
     } catch (error) {
       console.error('Error loading campaign:', error);
+      alert('Failed to load campaign. Please try again.');
+      navigate('/admin');
     }
   };
 
@@ -102,10 +118,24 @@ export default function AdminCampaignForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Validate required fields
+    if (!formData.title?.trim()) {
+      alert('Title is required');
+      return;
+    }
+    if (!formData.categoryId) {
+      alert('Please select a category');
+      return;
+    }
+    if (!formData.targetAmount || parseFloat(formData.targetAmount) <= 0) {
+      alert('Please enter a valid target amount');
+      return;
+    }
+
     const payload = {
       ...formData,
-      targetAmount: Math.round(parseFloat(formData.targetAmount) * 100),
-      currentAmount: Math.round(parseFloat(formData.currentAmount) * 100),
+      targetAmount: amountToCents(formData.targetAmount),
+      currentAmount: amountToCents(formData.currentAmount || '0'),
       beneficiariesCount: formData.beneficiariesCount ? parseInt(formData.beneficiariesCount) : null
     };
 

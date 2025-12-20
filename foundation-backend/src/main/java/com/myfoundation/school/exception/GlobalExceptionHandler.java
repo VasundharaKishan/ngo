@@ -9,6 +9,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.HashMap;
@@ -58,6 +59,17 @@ public class GlobalExceptionHandler {
         // Silently handle missing static resources (like favicon.ico)
         // No need to log as ERROR since it's expected behavior
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+    
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErrorResponse> handleMaxUploadSizeExceeded(MaxUploadSizeExceededException ex) {
+        log.error("File upload size exceeded", ex);
+        ErrorResponse error = ErrorResponse.builder()
+                .message("File size exceeds maximum allowed limit of 10MB")
+                .status(HttpStatus.PAYLOAD_TOO_LARGE.value())
+                .timestamp(System.currentTimeMillis())
+                .build();
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(error);
     }
     
     @ExceptionHandler(Exception.class)

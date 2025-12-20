@@ -3,6 +3,22 @@
   margin: 0 auto;
 }
 
+.detail-image-container {
+  width: 100%;
+  margin-bottom: 2rem;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.detail-image {
+  width: 100%;
+  height: auto;
+  max-height: 500px;
+  object-fit: cover;
+  display: block;
+}
+
 .detail-header {
   display: flex;
   justify-content: space-between;
@@ -143,6 +159,22 @@
   font-size: 0.9rem;
   margin-top: 1.25rem;
   font-weight: 500;
+}
+
+.inactive-notice {
+  padding: 1.5rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.inactive-message {
+  margin: 0;
+  color: #991b1b;
+  font-weight: 600;
+  font-size: 1rem;
 }
 
 .back-link {

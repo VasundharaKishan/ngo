@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api, type Campaign } from '../api';
+import { formatCurrency, calculateProgress } from '../utils/currency';
 import './FeaturedCampaignModal.css';
 
 interface FeaturedCampaignModalProps {
@@ -98,20 +99,20 @@ export default function FeaturedCampaignModal({ isOpen, onClose }: FeaturedCampa
                 <div className="modal-progress-bar">
                   <div 
                     className="modal-progress-fill" 
-                    style={{ width: `${Math.min(((selectedCampaign.currentAmount || 0) / selectedCampaign.targetAmount) * 100, 100)}%` }}
+                    style={{ width: `${calculateProgress(selectedCampaign.currentAmount, selectedCampaign.targetAmount)}%` }}
                   />
                 </div>
                 <div className="modal-progress-stats">
                   <div className="modal-stat">
-                    <span className="modal-stat-value">€{(selectedCampaign.currentAmount || 0).toLocaleString()}</span>
+                    <span className="modal-stat-value">{formatCurrency(selectedCampaign.currentAmount, 'eur', { decimals: 0 })}</span>
                     <span className="modal-stat-label">raised</span>
                   </div>
                   <div className="modal-stat">
-                    <span className="modal-stat-value">€{selectedCampaign.targetAmount.toLocaleString()}</span>
+                    <span className="modal-stat-value">{formatCurrency(selectedCampaign.targetAmount, 'eur', { decimals: 0 })}</span>
                     <span className="modal-stat-label">goal</span>
                   </div>
                   <div className="modal-stat">
-                    <span className="modal-stat-value">{Math.round(((selectedCampaign.currentAmount || 0) / selectedCampaign.targetAmount) * 100)}%</span>
+                    <span className="modal-stat-value">{calculateProgress(selectedCampaign.currentAmount, selectedCampaign.targetAmount, 0)}%</span>
                     <span className="modal-stat-label">funded</span>
                   </div>
                 </div>
@@ -136,7 +137,9 @@ export default function FeaturedCampaignModal({ isOpen, onClose }: FeaturedCampa
                   value={selectedCampaign.id}
                   onChange={(e) => {
                     const campaign = campaigns.find(c => c.id === e.target.value);
-                    if (campaign) setSelectedCampaign(campaign);
+                    if (campaign) {
+                      setSelectedCampaign(campaign);
+                    }
                   }}
                 >
                   {campaigns.map(campaign => (

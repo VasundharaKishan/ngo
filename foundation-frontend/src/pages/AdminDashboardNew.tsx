@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { formatCurrency, calculateProgress } from '../utils/currency';
 import './AdminDashboardNew.css';
 
 interface Campaign {
@@ -253,29 +254,31 @@ export default function AdminDashboardNew() {
   const renderContent = () => {
     switch (activeMenu) {
       case 'dashboard':
-        // Calculate statistics
+        // Calculate statistics from donations table
         const successfulDonations = donations.filter(d => d.status === 'SUCCESS').length;
         const pendingDonations = donations.filter(d => d.status === 'PENDING').length;
         
-        // Group donations by campaign
-        const donationsByCampaign = donations.reduce((acc, donation) => {
-          const campaignId = donation.campaignId;
-          if (!acc[campaignId]) {
-            acc[campaignId] = {
-              campaignTitle: donation.campaignTitle,
-              totalAmount: 0,
-              count: 0,
-              donations: []
-            };
-          }
-          acc[campaignId].totalAmount += donation.amount;
-          acc[campaignId].count += 1;
-          acc[campaignId].donations.push(donation);
-          return acc;
-        }, {} as Record<string, { campaignTitle: string; totalAmount: number; count: number; donations: typeof donations }>);
+        // Group SUCCESSFUL donations by campaign for ranking
+        const successfulDonationsByCampaign = donations
+          .filter(d => d.status === 'SUCCESS')
+          .reduce((acc, donation) => {
+            const campaignId = donation.campaignId;
+            if (!acc[campaignId]) {
+              acc[campaignId] = {
+                campaignTitle: donation.campaignTitle,
+                totalAmount: 0,
+                count: 0,
+                donations: []
+              };
+            }
+            acc[campaignId].totalAmount += donation.amount;
+            acc[campaignId].count += 1;
+            acc[campaignId].donations.push(donation);
+            return acc;
+          }, {} as Record<string, { campaignTitle: string; totalAmount: number; count: number; donations: typeof donations }>);
 
-        // Get top 5 campaigns by donation amount
-        const topCampaigns = Object.entries(donationsByCampaign)
+        // Get top 5 campaigns by SUCCESSFUL donation amount
+        const topCampaigns = Object.entries(successfulDonationsByCampaign)
           .sort(([, a], [, b]) => b.totalAmount - a.totalAmount)
           .slice(0, 5);
 
@@ -321,11 +324,16 @@ export default function AdminDashboardNew() {
                 <div className="dashboard-section">
                   <h2>🏆 Top 5 Campaigns by Donations</h2>
                   <div className="campaigns-chart">
-                    {topCampaigns.map(([campaignId, data], index) => {
-                      const campaign = campaigns.find(c => c.id === campaignId);
-                      const percentage = campaign 
-                        ? Math.min((data.totalAmount / campaign.targetAmount) * 100, 100)
-                        : 0;
+                    {topCampaigns.length === 0 ? (
+                      <p style={{ textAlign: 'center', color: '#64748b', padding: '2rem' }}>
+                        No donation data available yet
+                      </p>
+                    ) : (
+                      topCampaigns.map(([campaignId, data], index) => {
+                        const campaign = campaigns.find(c => c.id === campaignId);
+                        const percentage = campaign && campaign.targetAmount > 0
+                          ? Math.min((data.totalAmount / campaign.targetAmount) * 100, 100)
+                          : 0;
                       
                       return (
                         <div key={campaignId} className="campaign-bar-item">
@@ -333,7 +341,7 @@ export default function AdminDashboardNew() {
                             <span className="campaign-rank">#{index + 1}</span>
                             <span className="campaign-name">{data.campaignTitle}</span>
                             <span className="campaign-stats">
-                              <strong>${data.totalAmount.toLocaleString()}</strong>
+                              <strong>{formatCurrency(data.totalAmount, 'usd', { decimals: 0 })}</strong>
                               <span className="donation-count">({data.count} donations)</span>
                             </span>
                           </div>
@@ -352,47 +360,62 @@ export default function AdminDashboardNew() {
                           </div>
                           {campaign && (
                             <div className="campaign-target">
-                              Target: ${campaign.targetAmount.toLocaleString()}
+                              Target: {formatCurrency(campaign.targetAmount, 'usd', { decimals: 0 })}
                             </div>
                           )}
                         </div>
                       );
-                    })}
+                    })
+                    )}
                   </div>
                 </div>
 
                 {/* Recent Donations */}
                 <div className="dashboard-section">
                   <h2>📋 Recent Donations</h2>
+                  {donations.length === 0 ? (
+                    <p style={{ textAlign: 'center', color: '#64748b', padding: '2rem' }}>
+                      No donations yet
+                    </p>
+                  ) : (
                   <div className="recent-donations-list">
                     {donations.slice(0, 10).map((donation) => (
                       <div key={donation.id} className="recent-donation-item">
                         <div className="donation-avatar">
-                          {donation.donorName.charAt(0).toUpperCase()}
+                          {(donation.donorName || 'A').charAt(0).toUpperCase()}
                         </div>
                         <div className="donation-details">
-                          <strong>{donation.donorName}</strong>
-                          <span className="donation-campaign">{donation.campaignTitle}</span>
+                          <strong>{donation.donorName || 'Anonymous'}</strong>
+                          <span className="donation-campaign">{donation.campaignTitle || 'Unknown Campaign'}</span>
                         </div>
                         <div className="donation-amount-badge">
-                          {donation.currency.toUpperCase()} {donation.amount.toLocaleString()}
+                          {formatCurrency(donation.amount || 0, donation.currency || 'eur')}
                         </div>
-                        <span className={`status-badge ${donation.status.toLowerCase()}`}>
-                          {donation.status}
+                        <span className={`status-badge ${(donation.status || 'pending').toLowerCase()}`}>
+                          {donation.status || 'PENDING'}
                         </span>
                       </div>
                     ))}
                   </div>
+                  )}
                 </div>
 
                 {/* Campaign Performance Grid */}
                 <div className="dashboard-section">
                   <h2>📊 All Campaigns Performance</h2>
+                  {campaigns.length === 0 ? (
+                    <p style={{ textAlign: 'center', color: '#64748b', padding: '2rem' }}>
+                      No campaigns created yet
+                    </p>
+                  ) : (
                   <div className="campaigns-grid">
                     {campaigns.map((campaign) => {
-                      const campaignDonations = donations.filter(d => d.campaignId === campaign.id);
-                      const totalRaised = campaignDonations.reduce((sum, d) => sum + d.amount, 0);
-                      const progress = (totalRaised / campaign.targetAmount) * 100;
+                      // Calculate metrics from SUCCESSFUL donations only
+                      const successfulCampaignDonations = donations.filter(
+                        d => d.campaignId === campaign.id && d.status === 'SUCCESS'
+                      );
+                      const totalRaised = successfulCampaignDonations.reduce((sum, d) => sum + d.amount, 0);
+                      const progress = calculateProgress(totalRaised, campaign.targetAmount);
                       
                       return (
                         <div key={campaign.id} className="campaign-performance-card">
@@ -404,15 +427,15 @@ export default function AdminDashboardNew() {
                           <div className="campaign-card-stats">
                             <div className="stat-item">
                               <span className="stat-label">Raised</span>
-                              <span className="stat-value">${totalRaised.toLocaleString()}</span>
+                              <span className="stat-value">{formatCurrency(totalRaised, 'usd', { decimals: 0 })}</span>
                             </div>
                             <div className="stat-item">
                               <span className="stat-label">Goal</span>
-                              <span className="stat-value">${campaign.targetAmount.toLocaleString()}</span>
+                              <span className="stat-value">{formatCurrency(campaign.targetAmount, 'usd', { decimals: 0 })}</span>
                             </div>
                             <div className="stat-item">
                               <span className="stat-label">Donations</span>
-                              <span className="stat-value">{campaignDonations.length}</span>
+                              <span className="stat-value">{successfulCampaignDonations.length}</span>
                             </div>
                           </div>
                           <div className="progress-bar-container">
@@ -432,6 +455,7 @@ export default function AdminDashboardNew() {
                       );
                     })}
                   </div>
+                  )}
                 </div>
               </>
             )}
@@ -466,24 +490,24 @@ export default function AdminDashboardNew() {
                     ) : (
                       donations.map((donation) => (
                         <tr key={donation.id}>
-                          <td>{donation.donorName}</td>
+                          <td>{donation.donorName || 'Anonymous'}</td>
                           <td>{donation.donorEmail || 'N/A'}</td>
                           <td style={{ fontWeight: 'bold' }}>
-                            {donation.currency.toUpperCase()} {donation.amount.toLocaleString()}
+                            {formatCurrency(donation.amount || 0, donation.currency || 'eur')}
                           </td>
-                          <td>{donation.campaignTitle}</td>
+                          <td>{donation.campaignTitle || 'Unknown Campaign'}</td>
                           <td>
-                            <span className={`status-badge ${donation.status.toLowerCase()}`}>
-                              {donation.status}
+                            <span className={`status-badge ${(donation.status || 'pending').toLowerCase()}`}>
+                              {donation.status || 'PENDING'}
                             </span>
                           </td>
-                          <td>{new Date(donation.createdAt).toLocaleDateString('en-US', {
+                          <td>{donation.createdAt ? new Date(donation.createdAt).toLocaleDateString('en-US', {
                             year: 'numeric',
                             month: 'short',
                             day: 'numeric',
                             hour: '2-digit',
                             minute: '2-digit'
-                          })}</td>
+                          }) : 'N/A'}</td>
                         </tr>
                       ))
                     )}
@@ -516,6 +540,10 @@ export default function AdminDashboardNew() {
             
             {loading ? (
               <p>Loading campaigns...</p>
+            ) : campaigns.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}>
+                <p>No campaigns found. Create your first campaign!</p>
+              </div>
             ) : (
               <table className="data-table">
                 <thead>
@@ -524,26 +552,47 @@ export default function AdminDashboardNew() {
                     <th>Category</th>
                     <th>Target</th>
                     <th>Current</th>
+                    <th>Progress</th>
                     <th>Status</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {campaigns.map(campaign => (
-                    <tr key={campaign.id}>
-                      <td><strong>{campaign.title}</strong></td>
-                      <td>{campaign.category?.icon} {campaign.category?.name}</td>
-                      <td>${(campaign.targetAmount / 100).toFixed(2)}</td>
-                      <td>${(campaign.currentAmount / 100).toFixed(2)}</td>
-                      <td>{campaign.active ? '✓ Active' : '✗ Inactive'}</td>
-                      <td>
-                        <div className="table-actions">
-                          <Link to={`/admin/campaigns/${campaign.id}`} className="btn-edit">Edit</Link>
-                          <button onClick={() => deleteCampaign(campaign.id)} className="btn-delete">Delete</button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                  {campaigns.map(campaign => {
+                    // currentAmount is derived from successful donations via backend
+                    const progress = calculateProgress(campaign.currentAmount || 0, campaign.targetAmount);
+                    
+                    return (
+                      <tr key={campaign.id}>
+                        <td><strong>{campaign.title}</strong></td>
+                        <td>
+                          {campaign.category ? (
+                            <span>{campaign.category.icon} {campaign.category.name}</span>
+                          ) : (
+                            <span style={{ color: '#94a3b8' }}>No category</span>
+                          )}
+                        </td>
+                        <td>{formatCurrency(campaign.targetAmount, 'usd', { decimals: 0 })}</td>
+                        <td>{formatCurrency(campaign.currentAmount || 0, 'usd', { decimals: 0 })}</td>
+                        <td>
+                          <span style={{ fontWeight: 'bold', color: progress >= 100 ? '#10b981' : '#667eea' }}>
+                            {progress.toFixed(1)}%
+                          </span>
+                        </td>
+                        <td>
+                          <span className={`status-badge ${campaign.active ? 'active' : 'inactive'}`}>
+                            {campaign.active ? '✓ Active' : '✗ Inactive'}
+                          </span>
+                        </td>
+                        <td>
+                          <div className="table-actions">
+                            <Link to={`/admin/campaigns/${campaign.id}`} className="btn-edit">Edit</Link>
+                            <button onClick={() => deleteCampaign(campaign.id)} className="btn-delete">Delete</button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             )}

@@ -47,8 +47,25 @@ export interface CheckoutSessionResponse {
   url: string;
 }
 
+export interface SiteConfig {
+  featuredCampaignsCount: number;
+  itemsPerPage: number;
+}
+
 // API Functions
 export const api = {
+  // Get public site configuration
+  getPublicConfig: async (): Promise<SiteConfig> => {
+    const response = await fetch(`${API_BASE_URL}/config/public`);
+    if (!response.ok) {
+      // Return defaults if fetch fails
+      return {
+        featuredCampaignsCount: 3,
+        itemsPerPage: 12
+      };
+    }
+    return response.json();
+  },
   // Get all active categories
   getCategories: async (): Promise<Category[]> => {
     const response = await fetch(`${API_BASE_URL}/categories`);
@@ -61,11 +78,13 @@ export const api = {
     categoryId?: string; 
     featured?: boolean; 
     urgent?: boolean;
+    limit?: number;
   }): Promise<Campaign[]> => {
     const params = new URLSearchParams();
     if (filters?.categoryId) params.append('categoryId', filters.categoryId);
     if (filters?.featured !== undefined) params.append('featured', String(filters.featured));
     if (filters?.urgent !== undefined) params.append('urgent', String(filters.urgent));
+    if (filters?.limit !== undefined) params.append('limit', String(filters.limit));
     
     const url = `${API_BASE_URL}/campaigns${params.toString() ? '?' + params.toString() : ''}`;
     const response = await fetch(url);

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { formatCurrency, calculateProgress } from '../utils/currency';
 import './AdminDashboard.css';
 
 interface Campaign {
@@ -160,47 +161,70 @@ export default function AdminDashboard() {
                   <th>Category</th>
                   <th>Goal</th>
                   <th>Raised</th>
+                  <th>Progress</th>
                   <th>Status</th>
                   <th>Featured</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {campaigns.map(campaign => (
-                  <tr key={campaign.id}>
-                    <td>
-                      {campaign.imageUrl && (
-                        <img src={campaign.imageUrl} alt={campaign.title} className="table-image" />
-                      )}
-                    </td>
-                    <td>{campaign.title}</td>
-                    <td>
-                      {campaign.category && (
-                        <span>{campaign.category.icon} {campaign.category.name}</span>
-                      )}
-                    </td>
-                    <td>${(campaign.targetAmount / 100).toLocaleString()}</td>
-                    <td>${(campaign.currentAmount / 100).toLocaleString()}</td>
-                    <td>
-                      <button 
-                        className={`status-badge ${campaign.active ? 'active' : 'inactive'}`}
-                        onClick={() => toggleCampaignStatus(campaign)}
-                      >
-                        {campaign.active ? '✓ Active' : '✗ Inactive'}
-                      </button>
-                    </td>
-                    <td>
-                      {campaign.featured && <span className="badge-featured">⭐ Featured</span>}
-                      {campaign.urgent && <span className="badge-urgent">🚨 Urgent</span>}
-                    </td>
-                    <td>
-                      <div className="action-buttons">
-                        <Link to={`/admin/campaigns/${campaign.id}`} className="btn-edit">Edit</Link>
-                        <button onClick={() => deleteCampaign(campaign.id)} className="btn-delete">Delete</button>
-                      </div>
+                {campaigns.length === 0 ? (
+                  <tr>
+                    <td colSpan={9} style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>
+                      No campaigns found. Create your first campaign to get started.
                     </td>
                   </tr>
-                ))}
+                ) : (
+                campaigns.map(campaign => {
+                  // currentAmount is derived from successful donations via backend
+                  const progress = calculateProgress(campaign.currentAmount || 0, campaign.targetAmount || 1);
+                  
+                  return (
+                    <tr key={campaign.id}>
+                      <td>
+                        {campaign.imageUrl ? (
+                          <img src={campaign.imageUrl} alt={campaign.title || 'Campaign'} className="table-image" />
+                        ) : (
+                          <div className="table-image-placeholder">No image</div>
+                        )}
+                      </td>
+                      <td>{campaign.title || 'Untitled Campaign'}</td>
+                      <td>
+                        {campaign.category ? (
+                          <span>{campaign.category.icon} {campaign.category.name}</span>
+                        ) : (
+                          <span style={{ color: '#94a3b8' }}>No category</span>
+                        )}
+                      </td>
+                      <td>{formatCurrency(campaign.targetAmount || 0, 'usd', { decimals: 0 })}</td>
+                      <td>{formatCurrency(campaign.currentAmount || 0, 'usd', { decimals: 0 })}</td>
+                      <td>
+                        <span style={{ fontWeight: 'bold', color: progress >= 100 ? '#10b981' : '#667eea' }}>
+                          {progress.toFixed(1)}%
+                        </span>
+                      </td>
+                      <td>
+                        <button 
+                          className={`status-badge ${campaign.active ? 'active' : 'inactive'}`}
+                          onClick={() => toggleCampaignStatus(campaign)}
+                        >
+                          {campaign.active ? '✓ Active' : '✗ Inactive'}
+                        </button>
+                      </td>
+                      <td>
+                        {campaign.featured && <span className="badge-featured">⭐ Featured</span>}
+                        {campaign.urgent && <span className="badge-urgent">🚨 Urgent</span>}
+                      </td>
+                      <td>
+                        <div className="action-buttons">
+                          <Link to={`/admin/campaigns/${campaign.id}`} className="btn-edit">Edit</Link>
+                          <button onClick={() => deleteCampaign(campaign.id)} className="btn-delete">Delete</button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+                )}
               </tbody>
             </table>
           </div>

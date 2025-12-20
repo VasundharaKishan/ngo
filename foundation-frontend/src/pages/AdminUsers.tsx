@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import './AdminUsers.css';
 
 interface AdminUser {
@@ -14,7 +13,6 @@ interface AdminUser {
 }
 
 export default function AdminUsers() {
-  const navigate = useNavigate();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -112,26 +110,12 @@ export default function AdminUsers() {
     });
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('adminToken');
-    localStorage.removeItem('adminUser');
-    navigate('/admin/login');
-  };
-
   if (loading) {
     return <div className="admin-users"><p>Loading...</p></div>;
   }
 
   return (
     <div className="admin-users">
-      <div className="users-header">
-        <h1>👥 User Management</h1>
-        <div className="header-actions">
-          <button onClick={handleLogout} className="btn-logout">🚪 Logout</button>
-          <button onClick={() => navigate('/admin')} className="btn-back">← Dashboard</button>
-        </div>
-      </div>
-
       <div className="users-container">
         <div className="users-actions">
           <button onClick={() => setShowForm(!showForm)} className="btn-add-user">
