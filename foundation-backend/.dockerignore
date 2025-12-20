@@ -1,0 +1,12 @@
+# Dockerfile Build Test
+# Use this to test the Docker build locally before deploying
+
+.dockerignore
+target/
+!target/*.jar
+.mvn/
+*.iml
+.idea/
+.env
+.env.local
+*.log
