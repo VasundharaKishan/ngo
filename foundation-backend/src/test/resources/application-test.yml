@@ -1,0 +1,21 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+  
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+  
+  h2:
+    console:
+      enabled: false
+
+stripe:
+  secret-key: sk_test_mock_key
+  webhook-secret: whsec_test_mock_secret
+  success-url: http://localhost:3000/success?session_id={CHECKOUT_SESSION_ID}
+  cancel-url: http://localhost:3000/cancel

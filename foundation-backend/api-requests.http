@@ -1,0 +1,74 @@
+### Campaign APIs ###
+
+### Get All Active Campaigns
+GET http://localhost:8080/api/campaigns
+Accept: application/json
+
+###
+
+### Get Campaign by ID
+GET http://localhost:8080/api/campaigns/550e8400-e29b-41d4-a716-446655440001
+Accept: application/json
+
+###
+
+### Donation APIs ###
+
+### Create Stripe Checkout Session
+POST http://localhost:8080/api/donations/stripe/create
+Content-Type: application/json
+
+{
+  "amount": 5000,
+  "currency": "USD",
+  "donorName": "John Doe",
+  "donorEmail": "john.doe@example.com",
+  "campaignId": "550e8400-e29b-41d4-a716-446655440001"
+}
+
+###
+
+### Create Anonymous Donation
+POST http://localhost:8080/api/donations/stripe/create
+Content-Type: application/json
+
+{
+  "amount": 10000,
+  "currency": "USD",
+  "campaignId": "550e8400-e29b-41d4-a716-446655440002"
+}
+
+###
+
+### Admin APIs ###
+
+### Get All Donations
+GET http://localhost:8080/api/admin/donations
+Accept: application/json
+
+###
+
+### Webhook Testing (This will be called by Stripe) ###
+
+### Stripe Webhook - Checkout Session Completed
+POST http://localhost:8080/api/donations/stripe/webhook
+Content-Type: application/json
+Stripe-Signature: test-signature
+
+{
+  "id": "evt_test_webhook",
+  "object": "event",
+  "type": "checkout.session.completed",
+  "data": {
+    "object": {
+      "id": "cs_test_123",
+      "payment_intent": "pi_test_123",
+      "metadata": {
+        "donationId": "650e8400-e29b-41d4-a716-446655440005",
+        "campaignId": "550e8400-e29b-41d4-a716-446655440001"
+      }
+    }
+  }
+}
+
+###
