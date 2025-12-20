@@ -1,469 +1,384 @@
-# 🚀 Deployment Guide
+# ============================================
+# DEPLOYMENT GUIDE
+# ============================================
+# Step-by-step deployment instructions for your NGO donation platform
 
-Complete deployment guide for the NGO Donation Platform.
+## 📋 Prerequisites Checklist
 
-## Table of Contents
-
-- [Local Development](#local-development)
-- [Staging Deployment](#staging-deployment)
-- [Production Deployment](#production-deployment)
-- [Stripe Webhook Setup](#stripe-webhook-setup)
-- [Environment Variables](#environment-variables)
+- [ ] GitHub repository created and code pushed
+- [ ] Stripe account created (get API keys from https://dashboard.stripe.com/test/apikeys)
+- [ ] Neon Postgres database running (you already have this)
+- [ ] Gmail App Password generated (for email notifications)
 
 ---
 
-## 📍 Local Development
+## 🚀 STEP 1: Deploy Backend to Railway
 
-### Backend
+### A. Initial Railway Setup
+
+1. **Sign up for Railway**
+   - Go to https://railway.app
+   - Sign up with GitHub (free $5/month credit)
+
+2. **Create New Project**
+   - Click "New Project"
+   - Select "Deploy from GitHub repo"
+   - Choose your repository
+   - Select `foundation-backend` directory
+
+3. **Configure Service**
+   - Railway auto-detects Dockerfile
+   - Click on service → Settings
+   - Root Directory: `foundation-backend`
+   - Build Command: (auto-detected from Dockerfile)
+
+4. **Add Environment Variables**
+   
+   Go to Variables tab and add these:
+
+   ```
+   DATABASE_URL=jdbc:postgresql://ep-mute-scene-abnd9qj2-pooler.eu-west-2.aws.neon.tech/neondb?sslmode=require
+   DATABASE_USERNAME=neondb_owner
+   DATABASE_PASSWORD=npg_zC7GDKo2JeUq
+   
+   SQL_INIT_MODE=never
+   
+   FRONTEND_URL=https://your-vercel-url.vercel.app
+   
+   STRIPE_SECRET_KEY=sk_test_your_key_here
+   STRIPE_WEBHOOK_SECRET=whsec_your_local_secret_here
+   
+   STRIPE_SUCCESS_URL=https://your-vercel-url.vercel.app/donate/success?session_id={CHECKOUT_SESSION_ID}
+   STRIPE_CANCEL_URL=https://your-vercel-url.vercel.app/donate/cancel
+   
+   MAIL_HOST=smtp.gmail.com
+   MAIL_PORT=465
+   MAIL_USERNAME=your-email@gmail.com
+   MAIL_PASSWORD=your-gmail-app-password
+   ```
+
+5. **Generate Domain**
+   - Go to Settings → Networking
+   - Click "Generate Domain"
+   - Copy the URL: `https://your-backend.up.railway.app`
+   - **Save this URL** - you'll need it for frontend and Stripe webhooks
+
+6. **Deploy**
+   - Railway automatically deploys
+   - Check logs for successful startup
+   - Test health endpoint: `https://your-backend.up.railway.app/actuator/health`
+
+---
+
+## 🎨 STEP 2: Deploy Frontend to Vercel
+
+### A. Initial Vercel Setup
+
+1. **Sign up for Vercel**
+   - Go to https://vercel.com
+   - Sign up with GitHub (free tier)
+
+2. **Import Project**
+   - Click "Add New" → "Project"
+   - Import your GitHub repository
+   - Root Directory: `foundation-frontend`
+   - Framework Preset: Vite (auto-detected)
+
+3. **Configure Build Settings**
+   - Build Command: `npm run build` (auto-detected)
+   - Output Directory: `dist` (auto-detected)
+   - Install Command: `npm install` (auto-detected)
+
+4. **Add Environment Variables**
+   
+   Go to Settings → Environment Variables:
+
+   ```
+   VITE_API_BASE_URL=https://your-backend.up.railway.app/api
+   ```
+
+   ⚠️ **IMPORTANT**: Use the Railway backend URL from Step 1.5
+
+5. **Deploy**
+   - Click "Deploy"
+   - Wait for build to complete
+   - Copy deployment URL: `https://your-project.vercel.app`
+
+6. **Update Backend CORS**
+   - Go back to Railway
+   - Update `FRONTEND_URL` env var to your Vercel URL
+   - Railway will auto-redeploy
+
+---
+
+## 💳 STEP 3: Configure Stripe Webhooks
+
+### A. Test Mode Setup (for testing)
+
+1. **Go to Stripe Dashboard (Test Mode)**
+   - https://dashboard.stripe.com/test/webhooks
+
+2. **Add Endpoint**
+   - Click "+ Add endpoint"
+   - **Endpoint URL**: `https://your-backend.up.railway.app/api/donations/stripe/webhook`
+   - **Events to send**:
+     - `checkout.session.completed`
+     - `checkout.session.async_payment_succeeded`
+     - `checkout.session.async_payment_failed`
+     - `checkout.session.expired`
+
+3. **Copy Webhook Secret**
+   - After creating endpoint, reveal signing secret (starts with `whsec_`)
+   - Go to Railway → Variables
+   - Update `STRIPE_WEBHOOK_SECRET` with this value
+   - Railway will auto-redeploy
+
+4. **Test Webhook**
+   - In Stripe Dashboard → Webhooks → Your endpoint
+   - Click "Send test webhook"
+   - Choose `checkout.session.completed`
+   - Check Railway logs for successful webhook processing
+
+### B. Production Mode Setup (when going live)
+
+1. **Switch Stripe to Live Mode**
+   - Toggle "Test mode" → "Live mode" in Stripe Dashboard
+
+2. **Get Live API Keys**
+   - https://dashboard.stripe.com/apikeys
+   - Copy **Live Secret Key** (starts with `sk_live_`)
+
+3. **Create Live Webhook Endpoint**
+   - https://dashboard.stripe.com/webhooks
+   - Same URL: `https://your-backend.up.railway.app/api/donations/stripe/webhook`
+   - Same events (listed above)
+   - Copy new webhook secret
+
+4. **Update Railway Environment Variables**
+   - `STRIPE_SECRET_KEY=sk_live_your_live_key`
+   - `STRIPE_WEBHOOK_SECRET=whsec_your_live_secret`
+   - Railway will auto-redeploy
+
+---
+
+## 🔄 STEP 4: Setup GitHub Actions (Optional - for CI/CD)
+
+### A. Get Required Secrets
+
+1. **Vercel Secrets**
+   - Token: https://vercel.com/account/tokens → Create new token
+   - Org ID: Vercel dashboard → Settings → General → Your org ID
+   - Project ID: Vercel project → Settings → General → Project ID
+
+2. **Railway Secrets**
+   - Token: https://railway.app/account/tokens → Create new token
+   - Service ID: Railway project → Service → Copy service ID from URL
+
+### B. Add GitHub Secrets
+
+1. Go to your GitHub repository
+2. Settings → Secrets and variables → Actions
+3. Add these secrets:
+
+   **For Frontend:**
+   ```
+   VERCEL_TOKEN=your_vercel_token
+   VERCEL_ORG_ID=your_org_id
+   VERCEL_PROJECT_ID=your_project_id
+   VITE_API_BASE_URL=https://your-backend.up.railway.app/api
+   ```
+
+   **For Backend:**
+   ```
+   RAILWAY_TOKEN=your_railway_token
+   RAILWAY_SERVICE_ID=your_service_id
+   ```
+
+### C. Enable Workflows
+
+The workflows are already in `.github/workflows/`:
+- `deploy-frontend.yml` - Deploys frontend on changes
+- `deploy-backend.yml` - Tests and deploys backend on changes
+
+They will run automatically on push to main.
+
+---
+
+## ✅ DEPLOYMENT CHECKLIST
+
+### Initial Deployment (Test Mode)
+
+- [ ] Backend deployed to Railway
+- [ ] Backend health check passes
+- [ ] Frontend deployed to Vercel
+- [ ] Frontend loads without errors
+- [ ] Test donation with Stripe test card: `4242 4242 4242 4242`
+- [ ] Verify webhook processes in Railway logs
+- [ ] Check donation appears in admin dashboard with SUCCESS status
+- [ ] Test email notification sent
+
+### Production Deployment (Live Mode)
+
+- [ ] Switch Stripe to Live mode
+- [ ] Update `STRIPE_SECRET_KEY` to live key in Railway
+- [ ] Create live webhook endpoint in Stripe
+- [ ] Update `STRIPE_WEBHOOK_SECRET` to live secret in Railway
+- [ ] Update `SQL_INIT_MODE=never` in Railway (important!)
+- [ ] Test with real card (small amount)
+- [ ] Verify webhook works
+- [ ] Verify email notification sent
+- [ ] Monitor Railway logs for errors
+
+---
+
+## 🚨 COMMON MISTAKES TO AVOID
+
+### 1. Webhook Configuration
+
+❌ **WRONG**: Using localhost URL in Stripe webhooks  
+✅ **CORRECT**: Use Railway public URL: `https://your-backend.up.railway.app/api/donations/stripe/webhook`
+
+❌ **WRONG**: Forgetting to update `STRIPE_WEBHOOK_SECRET` after creating endpoint  
+✅ **CORRECT**: Always copy and update webhook secret after creating endpoint
+
+❌ **WRONG**: Testing webhooks with wrong mode (test key + live webhook)  
+✅ **CORRECT**: Test mode keys → test webhooks, Live mode keys → live webhooks
+
+### 2. CORS Issues
+
+❌ **WRONG**: Forgetting to update `FRONTEND_URL` in Railway  
+✅ **CORRECT**: Set `FRONTEND_URL=https://your-vercel-url.vercel.app` in Railway
+
+### 3. Environment Variables
+
+❌ **WRONG**: Hardcoding secrets in code or committing .env files  
+✅ **CORRECT**: Use platform environment variables (Railway/Vercel dashboards)
+
+❌ **WRONG**: Using test Stripe keys in production  
+✅ **CORRECT**: Separate test and live keys, update when going live
+
+### 4. Database Issues
+
+❌ **WRONG**: Using `SQL_INIT_MODE=always` in production  
+✅ **CORRECT**: Set `SQL_INIT_MODE=never` in production (prevents sample data reload)
+
+### 5. Deployment Issues
+
+❌ **WRONG**: Not checking logs after deployment  
+✅ **CORRECT**: Always check Railway/Vercel logs for startup errors
+
+❌ **WRONG**: Deploying untested code  
+✅ **CORRECT**: Test locally with Stripe CLI before deploying
+
+---
+
+## 🧪 LOCAL → STAGING → PRODUCTION WORKFLOW
+
+### Local Development
 
 ```bash
-cd foundation-backend
-
-# 1. Setup PostgreSQL
-createdb ngo_donations
-
-# 2. Copy environment template
-cp .env.example .env
-
-# 3. Edit .env with local values:
-DATABASE_URL=jdbc:postgresql://localhost:5432/ngo_donations
-DATABASE_USERNAME=postgres
-DATABASE_PASSWORD=your_password
-STRIPE_SECRET_KEY=sk_test_xxx  # From Stripe Dashboard
-MAIL_USERNAME=your-email@gmail.com
-MAIL_PASSWORD=your_app_password
-
-# 4. Start Stripe CLI for webhooks
-stripe login
+# 1. Start local Stripe CLI
 stripe listen --forward-to http://localhost:8080/api/donations/stripe/webhook
-# Copy webhook secret (whsec_xxx) to .env
 
-# 5. Run backend
-mvn spring-boot:run
-```
+# 2. Copy webhook secret to backend .env
+STRIPE_WEBHOOK_SECRET=whsec_local_secret_from_cli
 
-### Frontend
-
-```bash
-cd foundation-frontend
-
-# 1. Install dependencies
-npm install
-
-# 2. Copy environment template
-cp .env.example .env
-
-# 3. Edit .env (default should work)
-VITE_API_BASE_URL=http://localhost:8080/api
+# 3. Run backend
+cd foundation-backend && mvn spring-boot:run
 
 # 4. Run frontend
-npm run dev
+cd foundation-frontend && npm run dev
+
+# 5. Test donation with test card: 4242 4242 4242 4242
 ```
 
-Visit `http://localhost:5173`
+### Staging (Railway + Vercel)
+
+1. Push to feature branch: `git push origin feature/new-feature`
+2. Create pull request
+3. GitHub Actions run tests
+4. Merge to main
+5. Auto-deploy to Railway + Vercel
+6. Test on staging URLs
+7. Verify webhooks work
+
+### Production (Go Live)
+
+1. Ensure all staging tests pass
+2. Switch Stripe to Live mode
+3. Update Railway environment variables (live keys)
+4. Create live webhook endpoint in Stripe
+5. Test with real card (small amount)
+6. Monitor for 24 hours
+7. Announce to users
 
 ---
 
-## 🌐 Staging Deployment
+## 📊 MONITORING
 
-### Backend (Render)
-
-1. **Create Web Service:**
-   - Go to [Render Dashboard](https://dashboard.render.com)
-   - New → Web Service
-   - Connect GitHub repository
-
-2. **Configure Service:**
-   ```
-   Name: ngo-backend-staging
-   Root Directory: foundation-backend
-   Environment: Docker OR:
-     - Build Command: mvn clean package -DskipTests
-     - Start Command: java -jar target/school-donation-backend-1.0.0-SNAPSHOT.jar
-   Instance Type: Free (or Starter)
-   ```
-
-3. **Add PostgreSQL Database:**
-   - Render Dashboard → New → PostgreSQL
-   - Name: `ngo-database-staging`
-   - Plan: Free
-   - Copy connection details
-
-4. **Environment Variables:**
-   ```
-   DATABASE_URL=<from Render PostgreSQL - Internal Database URL>
-   DATABASE_USERNAME=<from Render PostgreSQL>
-   DATABASE_PASSWORD=<from Render PostgreSQL>
-   SQL_INIT_MODE=never
-   FRONTEND_URL=https://ngo-staging.netlify.app
-   STRIPE_SECRET_KEY=sk_test_xxx
-   STRIPE_WEBHOOK_SECRET=whsec_staging_xxx
-   STRIPE_SUCCESS_URL=https://ngo-staging.netlify.app/donate/success?session_id={CHECKOUT_SESSION_ID}
-   STRIPE_CANCEL_URL=https://ngo-staging.netlify.app/donate/cancel
-   MAIL_HOST=smtp.gmail.com
-   MAIL_PORT=465
-   MAIL_USERNAME=your-email@gmail.com
-   MAIL_PASSWORD=your_app_password
-   ```
-
-5. **Deploy** - Render will auto-deploy from `main` branch
-
-6. **Get Backend URL:** `https://ngo-backend-staging.onrender.com`
-
-### Frontend (Netlify)
-
-1. **Import Project:**
-   - Go to [Netlify Dashboard](https://app.netlify.com)
-   - Add new site → Import from Git
-   - Connect GitHub repository
-
-2. **Build Settings:**
-   ```
-   Base directory: foundation-frontend
-   Build command: npm run build
-   Publish directory: foundation-frontend/dist
-   ```
-
-3. **Environment Variables:**
-   ```
-   VITE_API_BASE_URL=https://ngo-backend-staging.onrender.com/api
-   ```
-
-4. **Deploy Settings:**
-   - Branch: `main`
-   - Deploy previews: Enable for pull requests
-
-5. **Custom Domain** (optional):
-   - Domain settings → Add custom domain
-   - Example: `staging.yourngodomain.org`
-
-### Stripe Webhook (Staging)
-
-1. Go to [Stripe Dashboard](https://dashboard.stripe.com/test/webhooks)
-2. Add endpoint:
-   - URL: `https://ngo-backend-staging.onrender.com/api/donations/stripe/webhook`
-   - Events:
-     - `checkout.session.completed`
-     - `checkout.session.async_payment_succeeded`
-     - `checkout.session.async_payment_failed`
-     - `checkout.session.expired`
-3. Copy signing secret
-4. Add to Render backend env vars: `STRIPE_WEBHOOK_SECRET=whsec_xxx`
-5. Restart backend service
-
----
-
-## 🏢 Production Deployment
-
-### Backend (Railway)
-
-1. **Create Project:**
-   - Go to [Railway Dashboard](https://railway.app)
-   - New Project → Deploy from GitHub
-   - Select repository
-
-2. **Configure Service:**
-   ```
-   Root Directory: foundation-backend
-   Start Command: Auto-detected
-   ```
-
-3. **Add PostgreSQL:**
-   - Add Plugin → PostgreSQL
-   - Railway auto-injects `DATABASE_URL`
-
-4. **Environment Variables:**
-   ```
-   SQL_INIT_MODE=never
-   FRONTEND_URL=https://yourngodomain.org
-   STRIPE_SECRET_KEY=sk_live_xxx  # PRODUCTION KEY
-   STRIPE_WEBHOOK_SECRET=whsec_production_xxx
-   STRIPE_SUCCESS_URL=https://yourngodomain.org/donate/success?session_id={CHECKOUT_SESSION_ID}
-   STRIPE_CANCEL_URL=https://yourngodomain.org/donate/cancel
-   MAIL_HOST=smtp.gmail.com
-   MAIL_PORT=465
-   MAIL_USERNAME=your-email@gmail.com
-   MAIL_PASSWORD=your_app_password
-   ```
-
-5. **Custom Domain:**
-   - Settings → Domains → Add custom domain
-   - Example: `api.yourngodomain.org`
-   - Add CNAME record in your DNS
-
-### Frontend (Vercel)
-
-1. **Import Project:**
-   - Go to [Vercel Dashboard](https://vercel.com)
-   - Add New → Project
-   - Import GitHub repository
-
-2. **Project Settings:**
-   ```
-   Framework Preset: Vite
-   Root Directory: foundation-frontend
-   Build Command: npm run build
-   Output Directory: dist
-   ```
-
-3. **Environment Variables:**
-   ```
-   Production:
-   VITE_API_BASE_URL=https://api.yourngodomain.org/api
-   
-   Preview:
-   VITE_API_BASE_URL=https://ngo-backend-staging.onrender.com/api
-   ```
-
-4. **Custom Domain:**
-   - Project Settings → Domains
-   - Add: `yourngodomain.org`
-   - Follow DNS configuration steps
-
-5. **Deploy:**
-   - Vercel auto-deploys from `main` branch
-   - Preview deployments for PRs
-
-### Stripe Webhook (Production)
-
-⚠️ **CRITICAL: Use LIVE MODE in Stripe Dashboard**
-
-1. Switch to [Live Mode](https://dashboard.stripe.com/webhooks)
-2. Add endpoint:
-   - URL: `https://api.yourngodomain.org/api/donations/stripe/webhook`
-   - Events: (same as staging)
-     - `checkout.session.completed`
-     - `checkout.session.async_payment_succeeded`
-     - `checkout.session.async_payment_failed`
-     - `checkout.session.expired`
-3. Copy **LIVE** signing secret
-4. Update Railway env var: `STRIPE_WEBHOOK_SECRET=whsec_live_xxx`
-5. Redeploy backend
-
----
-
-## 🔌 Stripe Webhook Setup
-
-### Development (Stripe CLI)
+### Railway Logs
 
 ```bash
-# Install Stripe CLI
-brew install stripe/stripe-cli/stripe
+# View live logs
+railway logs --service backend
 
-# Login
-stripe login
-
-# Forward webhooks
-stripe listen --forward-to http://localhost:8080/api/donations/stripe/webhook
-
-# Output:
-# > Ready! Your webhook signing secret is whsec_xxxxx
-
-# Copy secret to backend .env
-STRIPE_WEBHOOK_SECRET=whsec_xxxxx
-
-# Test
-stripe trigger checkout.session.completed
+# Or in Railway dashboard: Service → Logs
 ```
 
-### Staging/Production (Dashboard)
+### Vercel Logs
 
-1. **Stripe Dashboard → Webhooks**
-2. **Add Endpoint:**
-   - Staging: `https://staging-backend-url/api/donations/stripe/webhook`
-   - Production: `https://production-backend-url/api/donations/stripe/webhook`
+Go to Vercel dashboard → Project → Logs
 
-3. **Select Events:**
-   ```
-   checkout.session.completed
-   checkout.session.async_payment_succeeded
-   checkout.session.async_payment_failed
-   checkout.session.expired
-   ```
+### Stripe Webhooks
 
-4. **Copy Signing Secret:**
-   - Format: `whsec_xxxxx`
-   - Add to backend environment variables
-
-5. **Test Webhook:**
-   - Send test webhook from Stripe Dashboard
-   - Check backend logs for webhook receipt
-   - Verify donation status updates in admin panel
+Stripe Dashboard → Webhooks → Your endpoint → View logs
 
 ---
 
-## 🔐 Environment Variables Reference
+## 🆘 TROUBLESHOOTING
 
-### Backend
+### Webhook Not Receiving Events
 
-| Variable | Local | Staging | Production | Notes |
-|----------|-------|---------|------------|-------|
-| `DATABASE_URL` | `jdbc:postgresql://localhost:5432/ngo_donations` | From Render | From Railway | PostgreSQL connection |
-| `DATABASE_USERNAME` | `postgres` | From Render | Auto (Railway) | Database user |
-| `DATABASE_PASSWORD` | Local password | From Render | Auto (Railway) | Database password |
-| `SQL_INIT_MODE` | `always` | `never` | `never` | Load sample data |
-| `FRONTEND_URL` | `http://localhost:5173` | Staging URL | Production URL | CORS origin |
-| `STRIPE_SECRET_KEY` | `sk_test_xxx` | `sk_test_xxx` | `sk_live_xxx` | Stripe API key |
-| `STRIPE_WEBHOOK_SECRET` | From CLI | From Dashboard (test) | From Dashboard (live) | Webhook signing |
-| `MAIL_USERNAME` | Gmail | Gmail | Gmail | SMTP username |
-| `MAIL_PASSWORD` | App password | App password | App password | Gmail app password |
-
-### Frontend
-
-| Variable | Local | Staging | Production |
-|----------|-------|---------|------------|
-| `VITE_API_BASE_URL` | `http://localhost:8080/api` | Staging backend URL | Production backend URL |
-
----
-
-## ✅ Deployment Checklist
-
-### Pre-Deployment
-
-- [ ] Remove all hardcoded secrets from code
-- [ ] Test locally with production-like config
-- [ ] Run all tests: `mvn test` and `npm run build`
-- [ ] Update CORS origins in backend
-- [ ] Generate Gmail app password
-- [ ] Get Stripe API keys (test for staging, live for production)
-
-### Backend Deployment
-
-- [ ] Create database (PostgreSQL)
-- [ ] Deploy backend service
-- [ ] Set all environment variables
-- [ ] Verify health check: `https://your-backend/actuator/health`
-- [ ] Check logs for startup errors
-- [ ] Test API endpoint: `https://your-backend/api/campaigns`
-
-### Frontend Deployment
-
-- [ ] Deploy frontend
-- [ ] Set `VITE_API_BASE_URL` environment variable
-- [ ] Verify build succeeds
-- [ ] Test frontend loads: `https://your-frontend`
-- [ ] Test API connection (check browser console)
-
-### Stripe Webhook
-
-- [ ] Add webhook endpoint in Stripe Dashboard
-- [ ] Copy signing secret
-- [ ] Add `STRIPE_WEBHOOK_SECRET` to backend
-- [ ] Restart backend service
-- [ ] Send test webhook from Stripe Dashboard
-- [ ] Verify webhook receipt in backend logs
-- [ ] Make test donation and verify status updates
-
-### Post-Deployment
-
-- [ ] Test complete donation flow
-- [ ] Test admin login
-- [ ] Verify emails are sent
-- [ ] Check database for donations
-- [ ] Monitor logs for errors
-- [ ] Set up uptime monitoring (UptimeRobot, etc.)
-
----
-
-## 🐛 Troubleshooting
-
-### Webhook Failures
-
-**Symptom:** Donations remain PENDING
-
-**Check:**
-1. Backend logs for webhook receipt
-2. Stripe Dashboard → Webhooks → Attempts
-3. Webhook signing secret is correct
-4. Backend is publicly accessible
-
-**Fix:**
-```bash
-# Test webhook endpoint
-curl -X POST https://your-backend/api/donations/stripe/webhook \
-  -H "Content-Type: application/json" \
-  -d '{}'
-# Should return 400 (signature invalid), not 404
-```
+1. Check webhook URL is correct (use Railway URL, not localhost)
+2. Verify webhook secret is updated in Railway
+3. Check Railway logs for incoming requests
+4. Test with "Send test webhook" in Stripe Dashboard
+5. Ensure Railway service is running (not sleeping)
 
 ### CORS Errors
 
-**Symptom:** Frontend can't reach backend
-
-**Check:**
-1. `FRONTEND_URL` in backend env vars
-2. Backend CORS configuration
-3. Browser console for exact error
-
-**Fix:**
-Update `application.yml` or backend env vars with correct frontend URL.
+1. Verify `FRONTEND_URL` matches your Vercel URL exactly
+2. Check Railway logs for CORS-related errors
+3. Ensure no trailing slash in URLs
 
 ### Database Connection Issues
 
-**Symptom:** Backend fails to start
+1. Verify `DATABASE_URL` is correct
+2. Check Neon database is running
+3. Ensure `sslmode=require` is in connection string
+4. Check Railway logs for connection errors
 
-**Check:**
-1. `DATABASE_URL` format is correct
-2. Database is running and accessible
-3. Username/password are correct
-4. SSL mode matches database requirements
+### Email Not Sending
 
-### Build Failures
-
-**Frontend:**
-```bash
-rm -rf node_modules dist
-npm install
-npm run build
-```
-
-**Backend:**
-```bash
-mvn clean install -U
-```
+1. Verify Gmail App Password is correct (not regular password)
+2. Check 2FA is enabled on Gmail account
+3. Check Railway logs for SMTP errors
+4. Test with a different email address
 
 ---
 
-## 📊 Monitoring
+## 💰 COST BREAKDOWN (Free Tier)
 
-### Logs
+| Service | Free Tier | Limits | Overage |
+|---------|-----------|--------|---------|
+| **Vercel** | Unlimited | 100GB bandwidth/month | $20/100GB |
+| **Railway** | $5 credit/month | ~500 hours runtime | $0.01/hour |
+| **Neon Postgres** | Free | 0.5GB storage | $15/month for 10GB |
+| **Stripe** | Free | 2.9% + 30¢ per transaction | Same |
+| **GitHub Actions** | 2000 min/month | Public repos unlimited | N/A |
 
-**Render:** View logs in dashboard or:
-```bash
-render logs <service-name>
-```
-
-**Railway:** View logs in dashboard
-
-**Netlify/Vercel:** Function logs and deploy logs in dashboard
-
-### Health Checks
-
-- Backend: `https://your-backend/actuator/health`
-- Frontend: Load homepage
-- Database: Check connection from backend logs
+**Estimated Monthly Cost**: $0 for low-traffic NGO site (under limits)
 
 ---
 
-## 🔄 CI/CD (Optional)
-
-Add GitHub Actions for automated deployment:
-
-```yaml
-# .github/workflows/deploy-staging.yml
-name: Deploy Staging
-on:
-  push:
-    branches: [main]
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Deploy to Render
-        run: curl https://api.render.com/deploy/your-hook-url
-```
-
----
-
-**Questions? Check main [README.md](../README.md) or open an issue.**
+**🎉 You're all set! Your donation platform is now live and production-ready.**
