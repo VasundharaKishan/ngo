@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { API_BASE_URL } from '../api';
 import './AdminSetupPassword.css';
 
 export default function AdminSetupPassword() {
@@ -34,7 +35,7 @@ export default function AdminSetupPassword() {
     }
 
     // Validate token
-    fetch(`http://localhost:8080/api/auth/validate-setup-token?token=${token}`)
+    fetch(`${API_BASE_URL}/auth/validate-setup-token?token=${token}`)
       .then(res => {
         if (res.ok) {
           return res.json();
@@ -80,7 +81,7 @@ export default function AdminSetupPassword() {
     setSubmitting(true);
 
     try {
-      const res = await fetch('http://localhost:8080/api/auth/setup-password', {
+      const res = await fetch(`${API_BASE_URL}/auth/setup-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

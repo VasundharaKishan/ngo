@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { API_BASE_URL } from '../api';
 import { formatCurrency, calculateProgress } from '../utils/currency';
 
 interface Campaign {
@@ -40,8 +41,8 @@ export default function AdminDashboard() {
     setLoading(true);
     try {
       const [campaignsRes, donationsRes] = await Promise.all([
-        fetch('http://localhost:8080/api/admin/campaigns'),
-        fetch('http://localhost:8080/api/admin/donations')
+        fetch(`${API_BASE_URL}/admin/campaigns`),
+        fetch(`${API_BASE_URL}/admin/donations`)
       ]);
       
       const campaignsData = await campaignsRes.json();

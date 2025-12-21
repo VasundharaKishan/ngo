@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { formatCurrency } from '../utils/currency';
+import { API_BASE_URL } from '../api';
 
 interface Donation {
   id: string;
@@ -23,7 +24,7 @@ export default function Donations() {
   const loadDonations = async () => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:8080/api/admin/donations');
+      const res = await fetch(`${API_BASE_URL}/admin/donations`);
       const data = await res.json();
       setDonations(data);
     } catch (error) {

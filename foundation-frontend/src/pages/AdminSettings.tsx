@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../api';
 import './AdminSettings.css';
 
 interface SiteConfig {
@@ -27,7 +28,7 @@ export default function AdminSettings() {
 
   const loadConfigs = async () => {
     try {
-      const res = await fetch('http://localhost:8080/api/admin/config');
+      const res = await fetch(`${API_BASE_URL}/admin/config`);
       const data = await res.json();
       setConfigs(data);
       setLoading(false);
@@ -35,7 +36,7 @@ export default function AdminSettings() {
       console.error('Error loading configs:', error);
       // Initialize if empty
       try {
-        await fetch('http://localhost:8080/api/admin/config/initialize', {
+        await fetch(`${API_BASE_URL}/admin/config/initialize`, {
           method: 'POST'
         });
         loadConfigs();
@@ -49,7 +50,7 @@ export default function AdminSettings() {
   const handleUpdate = async (configKey: string, newValue: string, description: string) => {
     setSaving(true);
     try {
-      await fetch('http://localhost:8080/api/admin/config', {
+      await fetch(`${API_BASE_URL}/admin/config`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ configKey, configValue: newValue, description })

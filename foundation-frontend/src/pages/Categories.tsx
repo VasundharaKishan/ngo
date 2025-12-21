@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { API_BASE_URL } from '../api';
 
 interface Category {
   id: string;
@@ -20,7 +21,7 @@ export default function Categories() {
   const loadCategories = async () => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:8080/api/admin/categories');
+      const res = await fetch(`${API_BASE_URL}/admin/categories`);
       const data = await res.json();
       setCategories(data);
     } catch (error) {
@@ -34,7 +35,7 @@ export default function Categories() {
     if (!confirm('Are you sure you want to delete this category?')) return;
     
     try {
-      await fetch(`http://localhost:8080/api/admin/categories/${id}`, {
+      await fetch(`${API_BASE_URL}/admin/categories/${id}`, {
         method: 'DELETE'
       });
       loadCategories();

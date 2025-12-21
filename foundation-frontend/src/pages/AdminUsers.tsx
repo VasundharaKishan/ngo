@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { API_BASE_URL } from '../api';
 import './AdminUsers.css';
 
 interface AdminUser {
@@ -32,7 +33,7 @@ export default function AdminUsers() {
 
   const loadUsers = async () => {
     try {
-      const res = await fetch('http://localhost:8080/api/auth/users');
+      const res = await fetch(`${API_BASE_URL}/auth/users`);
       const data = await res.json();
       setUsers(data);
       setLoading(false);
@@ -46,8 +47,8 @@ export default function AdminUsers() {
     e.preventDefault();
     
     const url = editingUser 
-      ? `http://localhost:8080/api/auth/users/${editingUser.id}`
-      : 'http://localhost:8080/api/auth/users';
+      ? `${API_BASE_URL}/auth/users/${editingUser.id}`
+      : `${API_BASE_URL}/auth/users`;
     
     const method = editingUser ? 'PUT' : 'POST';
 
@@ -88,7 +89,7 @@ export default function AdminUsers() {
     if (!confirm(`Are you sure you want to delete user: ${username}?`)) return;
 
     try {
-      await fetch(`http://localhost:8080/api/auth/users/${id}`, {
+      await fetch(`${API_BASE_URL}/auth/users/${id}`, {
         method: 'DELETE'
       });
       loadUsers();

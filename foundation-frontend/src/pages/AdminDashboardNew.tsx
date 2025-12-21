@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { formatCurrency, calculateProgress } from '../utils/currency';
-import './AdminDashboardNew.css';
+import { formatCurrency, calculateProgress } from '../utils/currency';import { API_BASE_URL } from '../api';import './AdminDashboardNew.css';
 
 interface Campaign {
   id: string;
@@ -185,7 +184,7 @@ export default function AdminDashboardNew() {
   const loadDonations = async () => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:8080/api/admin/donations');
+      const res = await fetch(`${API_BASE_URL}/admin/donations`);
       const data = await res.json();
       setDonations(data);
     } catch (error) {
@@ -198,7 +197,7 @@ export default function AdminDashboardNew() {
   const loadCampaigns = async () => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:8080/api/admin/campaigns');
+      const res = await fetch(`${API_BASE_URL}/admin/campaigns`);
       const data = await res.json();
       setCampaigns(data);
     } catch (error) {
@@ -211,7 +210,7 @@ export default function AdminDashboardNew() {
   const loadCategories = async () => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:8080/api/admin/categories');
+      const res = await fetch(`${API_BASE_URL}/admin/categories`);
       const data = await res.json();
       setCategories(data);
     } catch (error) {
@@ -229,7 +228,7 @@ export default function AdminDashboardNew() {
     if (!confirm('Are you sure you want to delete this campaign?')) return;
     
     try {
-      await fetch(`http://localhost:8080/api/admin/campaigns/${id}`, {
+      await fetch(`${API_BASE_URL}/admin/campaigns/${id}`, {
         method: 'DELETE'
       });
       loadCampaigns();
@@ -242,7 +241,7 @@ export default function AdminDashboardNew() {
     if (!confirm('Are you sure you want to delete this category?')) return;
     
     try {
-      await fetch(`http://localhost:8080/api/admin/categories/${id}`, {
+      await fetch(`${API_BASE_URL}/admin/categories/${id}`, {
         method: 'DELETE'
       });
       loadCategories();

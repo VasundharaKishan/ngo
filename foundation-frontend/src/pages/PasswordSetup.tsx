@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { API_BASE_URL } from '../api';
 import './PasswordSetup.css';
 
 interface SecurityQuestion {
@@ -38,7 +39,7 @@ export default function PasswordSetup() {
 
   const validateToken = async () => {
     try {
-      const res = await fetch(`http://localhost:8080/api/auth/validate-token/${token}`);
+      const res = await fetch(`${API_BASE_URL}/auth/validate-token/${token}`);
       const data = await res.json();
       
       if (data.valid) {
@@ -60,7 +61,7 @@ export default function PasswordSetup() {
 
   const loadSecurityQuestions = async () => {
     try {
-      const res = await fetch('http://localhost:8080/api/auth/security-questions');
+      const res = await fetch(`${API_BASE_URL}/auth/security-questions`);
       const data = await res.json();
       setQuestions(data);
     } catch (error) {
@@ -95,7 +96,7 @@ export default function PasswordSetup() {
     setSubmitting(true);
 
     try {
-      const res = await fetch(`http://localhost:8080/api/auth/setup-password/${token}`, {
+      const res = await fetch(`${API_BASE_URL}/auth/setup-password/${token}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

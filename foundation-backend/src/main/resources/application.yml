@@ -66,5 +66,8 @@ stripe:
 logging:
   level:
     com.myfoundation.school: INFO
+    com.myfoundation.school.security: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.web.cors: DEBUG
     org.hibernate.SQL: DEBUG
     org.springframework.web.servlet.resource: WARN

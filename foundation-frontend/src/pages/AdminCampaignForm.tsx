@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { amountToCents, formatAmountForInput } from '../utils/currency';
+import { API_BASE_URL } from '../api';
 import './AdminCampaignForm.css';
 
 interface Category {
@@ -46,7 +47,7 @@ export default function AdminCampaignForm() {
 
   const loadCategories = async () => {
     try {
-      const res = await fetch('http://localhost:8080/api/admin/categories');
+      const res = await fetch(`${API_BASE_URL}/admin/categories`);
       const data = await res.json();
       setCategories(data);
     } catch (error) {
@@ -56,7 +57,7 @@ export default function AdminCampaignForm() {
 
   const loadCampaign = async () => {
     try {
-      const res = await fetch(`http://localhost:8080/api/admin/campaigns/${id}`);
+      const res = await fetch(`${API_BASE_URL}/admin/campaigns/${id}`);
       if (!res.ok) {
         alert('Failed to load campaign');
         navigate('/admin');
@@ -101,12 +102,12 @@ export default function AdminCampaignForm() {
 
     setUploading(true);
     try {
-      const res = await fetch('http://localhost:8080/api/admin/upload/image', {
+      const res = await fetch(`${API_BASE_URL}/admin/upload/image`, {
         method: 'POST',
         body: formData
       });
       const data = await res.json();
-      setFormData(prev => ({ ...prev, imageUrl: `http://localhost:8080${data.url}` }));
+      setFormData(prev => ({ ...prev, imageUrl: data.url }));
     } catch (error) {
       console.error('Error uploading image:', error);
       alert('Failed to upload image');
@@ -141,8 +142,8 @@ export default function AdminCampaignForm() {
 
     try {
       const url = isEdit 
-        ? `http://localhost:8080/api/admin/campaigns/${id}`
-        : 'http://localhost:8080/api/admin/campaigns';
+        ? `${API_BASE_URL}/admin/campaigns/${id}`
+        : `${API_BASE_URL}/admin/campaigns`;
       
       const method = isEdit ? 'PUT' : 'POST';
 

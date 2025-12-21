@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { formatCurrency, calculateProgress } from '../utils/currency';
+import { API_BASE_URL } from '../api';
 import './AdminDashboard.css';
 
 interface Campaign {
@@ -55,8 +56,8 @@ export default function AdminDashboard() {
   const loadData = async () => {
     try {
       const [campaignsRes, categoriesRes] = await Promise.all([
-        fetch('http://localhost:8080/api/admin/campaigns'),
-        fetch('http://localhost:8080/api/admin/categories')
+        fetch(`${API_BASE_URL}/admin/campaigns`),
+        fetch(`${API_BASE_URL}/admin/categories`)
       ]);
       
       const campaignsData = await campaignsRes.json();
@@ -75,7 +76,7 @@ export default function AdminDashboard() {
     if (!confirm('Are you sure you want to delete this campaign?')) return;
     
     try {
-      await fetch(`http://localhost:8080/api/admin/campaigns/${id}`, {
+      await fetch(`${API_BASE_URL}/admin/campaigns/${id}`, {
         method: 'DELETE'
       });
       loadData();
@@ -88,7 +89,7 @@ export default function AdminDashboard() {
     if (!confirm('Are you sure you want to delete this category?')) return;
     
     try {
-      await fetch(`http://localhost:8080/api/admin/categories/${id}`, {
+      await fetch(`${API_BASE_URL}/admin/categories/${id}`, {
         method: 'DELETE'
       });
       loadData();
@@ -99,7 +100,7 @@ export default function AdminDashboard() {
 
   const toggleCampaignStatus = async (campaign: Campaign) => {
     try {
-      await fetch(`http://localhost:8080/api/admin/campaigns/${campaign.id}`, {
+      await fetch(`${API_BASE_URL}/admin/campaigns/${campaign.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

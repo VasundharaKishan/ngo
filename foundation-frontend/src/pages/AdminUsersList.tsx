@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../api';
 import './AdminUsersList.css';
 
 interface AdminUser {
@@ -50,7 +51,7 @@ export default function AdminUsersList() {
     setLoading(true);
     try {
       const token = localStorage.getItem('adminToken');
-      const res = await fetch('http://localhost:8080/api/admin/users', {
+      const res = await fetch(`${API_BASE_URL}/admin/users`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -77,7 +78,7 @@ export default function AdminUsersList() {
 
     try {
       const token = localStorage.getItem('adminToken');
-      const res = await fetch('http://localhost:8080/api/auth/users', {
+      const res = await fetch(`${API_BASE_URL}/auth/users`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -127,7 +128,7 @@ export default function AdminUsersList() {
   const handleToggleActive = async (userId: string, currentActive: boolean) => {
     try {
       const token = localStorage.getItem('adminToken');
-      const res = await fetch(`http://localhost:8080/api/admin/users/${userId}/status`, {
+      const res = await fetch(`${API_BASE_URL}/admin/users/${userId}/status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -148,7 +149,7 @@ export default function AdminUsersList() {
     if (!window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) return;
     try {
       const token = localStorage.getItem('adminToken');
-      const res = await fetch(`http://localhost:8080/api/auth/users/${userId}`, {
+      const res = await fetch(`${API_BASE_URL}/auth/users/${userId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
