@@ -1,5 +1,6 @@
 package com.myfoundation.school.security;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -17,6 +18,9 @@ import java.util.Arrays;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+    
+    @Value("${app.frontend.url}")
+    private String frontendUrl;
     
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -36,6 +40,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/donations/**").permitAll()
                 .requestMatchers("/api/webhook/**").permitAll()
                 .requestMatchers("/api/cms/**").permitAll()
+                .requestMatchers("/api/config/**").permitAll()
                 .requestMatchers("/api/auth/login").permitAll()
                 .requestMatchers("/api/auth/setup-password").permitAll()
                 .requestMatchers("/api/auth/users").permitAll()
@@ -60,7 +65,8 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(Arrays.asList(
             "http://localhost:5173", 
             "http://localhost:5174",
-            "http://localhost:3000"
+            "http://localhost:3000",
+            frontendUrl
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
