@@ -130,7 +130,8 @@ public class SecurityConfig {
             "http://localhost:5174",
             "http://localhost:3000",
             frontendUrl,
-            "https://frontend-three-psi-17.vercel.app"  // Your actual Vercel URL
+            "https://frontend-three-psi-17.vercel.app",  // Vercel URL 1
+            "https://foundation-frontend-three.vercel.app"  // Vercel URL 2
         );
         configuration.setAllowedOrigins(allowedOrigins);
         log.info("CORS allowed origins: {}", allowedOrigins);
@@ -150,9 +151,15 @@ public class SecurityConfig {
             "Stripe-Signature"
         ));
         
-        // Don't expose credentials in production (set to false for better security)
-        // Only set to true if you're using cookies for authentication
-        configuration.setAllowCredentials(false);
+        // Expose headers that frontend might need to read
+        configuration.setExposedHeaders(Arrays.asList(
+            "Authorization",
+            "Content-Type"
+        ));
+        
+        // Allow credentials for authentication (cookies/sessions)
+        // Set to true because we might use localStorage but browser still sends cookies
+        configuration.setAllowCredentials(true);
         
         // Cache preflight requests for 1 hour
         configuration.setMaxAge(3600L);
