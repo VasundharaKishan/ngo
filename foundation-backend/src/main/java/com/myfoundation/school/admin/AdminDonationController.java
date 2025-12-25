@@ -10,11 +10,16 @@ import com.myfoundation.school.config.SiteConfigRequest;
 import com.myfoundation.school.config.SiteConfigService;
 import com.myfoundation.school.donation.DonationRepository;
 import com.myfoundation.school.donation.DonationService;
+import com.myfoundation.school.donation.DonationStatus;
 import com.myfoundation.school.dto.CampaignResponse;
 import com.myfoundation.school.dto.DonationResponse;
+import com.myfoundation.school.dto.DonationPageResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -40,7 +45,55 @@ public class AdminDonationController {
     
     // Donation endpoints
     @GetMapping("/donations")
-    public ResponseEntity<List<DonationResponse>> getAllDonations() {
+    public ResponseEntity<?> getAllDonations(
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size,
+            @RequestParam(required = false) String sort,
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) String status) {
+        
+        // If page parameter is present, use paginated endpoint
+        if (page != null) {
+            log.info("GET /api/admin/donations (paginated) - page: {}, size: {}, sort: {}, q: {}, status: {}", 
+                    page, size, sort, q, status);
+            
+            // Parse pagination parameters
+            int pageNumber = Math.max(0, page);
+            int pageSize = (size != null && size > 0 && size <= 100) ? size : 25;
+            
+            // Parse sort parameter (format: "field,direction")
+            Sort sortObj = Sort.by(Sort.Direction.DESC, "createdAt"); // default
+            if (sort != null && !sort.isEmpty()) {
+                String[] sortParts = sort.split(",");
+                if (sortParts.length == 2) {
+                    String field = sortParts[0].trim();
+                    String direction = sortParts[1].trim();
+                    // Validate field
+                    if ("createdAt".equals(field) || "amount".equals(field)) {
+                        sortObj = "asc".equalsIgnoreCase(direction) 
+                                ? Sort.by(Sort.Direction.ASC, field)
+                                : Sort.by(Sort.Direction.DESC, field);
+                    }
+                }
+            }
+            
+            Pageable pageable = PageRequest.of(pageNumber, pageSize, sortObj);
+            
+            // Parse status filter
+            DonationStatus statusFilter = null;
+            if (status != null && !status.isEmpty() && !"ALL".equalsIgnoreCase(status)) {
+                try {
+                    statusFilter = DonationStatus.valueOf(status.toUpperCase());
+                } catch (IllegalArgumentException e) {
+                    log.warn("Invalid status filter: {}", status);
+                }
+            }
+            
+            DonationPageResponse response = donationService.getDonationsPaginated(q, statusFilter, pageable);
+            return ResponseEntity.ok(response);
+        }
+        
+        // Legacy non-paginated endpoint
         log.info("GET /api/admin/donations - Fetching all donations");
         List<DonationResponse> donations = donationService.getAllDonations();
         return ResponseEntity.ok(donations);

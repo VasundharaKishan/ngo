@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { API_BASE_URL } from '../api';
+import { useToast } from '../components/ToastProvider';
 import './PasswordSetup.css';
 
 interface SecurityQuestion {
@@ -12,6 +13,7 @@ export default function PasswordSetup() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const token = searchParams.get('token');
+  const showToast = useToast();
 
   const [loading, setLoading] = useState(true);
   const [validToken, setValidToken] = useState(false);
@@ -106,7 +108,7 @@ export default function PasswordSetup() {
       });
 
       if (res.ok) {
-        alert('✅ Account setup complete! You can now login.');
+        showToast('✅ Account setup complete! You can now login.', 'success');
         navigate('/admin/login');
       } else {
         const errorData = await res.json();

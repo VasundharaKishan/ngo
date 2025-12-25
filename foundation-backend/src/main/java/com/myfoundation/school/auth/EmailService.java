@@ -22,6 +22,31 @@ public class EmailService {
     @Value("${spring.mail.username}")
     private String fromEmail;
     
+    public void sendOtpEmail(String toEmail, String username, String code) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, false, "UTF-8");
+
+            helper.setFrom(fromEmail);
+            helper.setTo(toEmail);
+            helper.setSubject("Your verification code");
+
+            String htmlContent = """
+                <p>Hello %s,</p>
+                <p>Your verification code is:</p>
+                <h2 style="letter-spacing:4px;">%s</h2>
+                <p>This code will expire in a few minutes. If you did not request it, you can ignore this email.</p>
+                """.formatted(username, code);
+            helper.setText(htmlContent, true);
+
+            mailSender.send(message);
+            log.info("OTP email sent successfully to: {}", toEmail);
+        } catch (MessagingException e) {
+            log.error("Failed to send OTP email to: {}", toEmail, e);
+            throw new RuntimeException("Failed to send email", e);
+        }
+    }
+    
     public void sendPasswordSetupEmail(String toEmail, String username, String token) {
         try {
             MimeMessage message = mailSender.createMimeMessage();

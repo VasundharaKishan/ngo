@@ -20,6 +20,8 @@ public class StripeWebhookController {
     
     private final DonationService donationService;
     private final StripeConfig stripeConfig;
+    private final WebhookReplayGuard webhookReplayGuard;
+    private final StripeEventRecordService eventRecordService;
     
     @PostMapping("/webhook")
     public ResponseEntity<String> handleStripeWebhook(
@@ -40,7 +42,22 @@ public class StripeWebhookController {
             log.error("[Webhook] Invalid webhook signature - potential security issue", e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid signature");
         }
-        
+
+        if (!isTimestampFresh(event)) {
+            log.warn("[Webhook] Event timestamp too old/new for id {}", event.getId());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("stale event");
+        }
+
+        if (webhookReplayGuard.isReplay(event.getId())) {
+            log.warn("[Webhook] Replay detected for event id {}", event.getId());
+            return ResponseEntity.status(HttpStatus.OK).body("ignored");
+        }
+
+        if (eventRecordService.isReplayAndRecord(event.getId())) {
+            log.warn("[Webhook] Persistent replay detected for event id {}", event.getId());
+            return ResponseEntity.status(HttpStatus.OK).body("ignored");
+        }
+
         log.info("[Webhook] Processing event: {} (ID: {})", event.getType(), event.getId());
         
         // Handle the event
@@ -63,6 +80,16 @@ public class StripeWebhookController {
         
         log.info("[Webhook] Successfully processed event: {}", event.getId());
         return ResponseEntity.ok("ok");
+    }
+
+    private boolean isTimestampFresh(Event event) {
+        if (event == null || event.getCreated() == null) {
+            return true;
+        }
+        long created = event.getCreated();
+        long now = System.currentTimeMillis() / 1000;
+        long skew = Math.abs(now - created);
+        return skew <= 300;
     }
     
     private void handleCheckoutSessionCompleted(Event event) {

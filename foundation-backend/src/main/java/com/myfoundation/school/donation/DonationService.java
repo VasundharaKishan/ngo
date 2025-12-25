@@ -6,11 +6,15 @@ import com.myfoundation.school.config.StripeConfig;
 import com.myfoundation.school.dto.CheckoutSessionResponse;
 import com.myfoundation.school.dto.DonationRequest;
 import com.myfoundation.school.dto.DonationResponse;
+import com.myfoundation.school.dto.DonationPageResponse;
 import com.stripe.exception.StripeException;
 import com.stripe.model.checkout.Session;
 import com.stripe.param.checkout.SessionCreateParams;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -151,6 +155,30 @@ public class DonationService {
         return donationRepository.findAll().stream()
                 .map(this::toDonationResponse)
                 .collect(Collectors.toList());
+    }
+    
+    @Transactional(readOnly = true)
+    public DonationPageResponse getDonationsPaginated(
+            String searchQuery, 
+            DonationStatus status, 
+            Pageable pageable) {
+        log.info("Fetching donations with pagination - query: {}, status: {}, page: {}, size: {}", 
+                searchQuery, status, pageable.getPageNumber(), pageable.getPageSize());
+        
+        Specification<Donation> spec = DonationSpecification.filterDonations(searchQuery, status);
+        Page<Donation> donationPage = donationRepository.findAll(spec, pageable);
+        
+        List<DonationResponse> items = donationPage.getContent().stream()
+                .map(this::toDonationResponse)
+                .collect(Collectors.toList());
+        
+        return DonationPageResponse.builder()
+                .items(items)
+                .page(donationPage.getNumber())
+                .size(donationPage.getSize())
+                .totalItems(donationPage.getTotalElements())
+                .totalPages(donationPage.getTotalPages())
+                .build();
     }
     
     private DonationResponse toDonationResponse(Donation donation) {

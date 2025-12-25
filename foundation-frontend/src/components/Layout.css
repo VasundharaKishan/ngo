@@ -205,6 +205,55 @@
   border: 1px solid rgba(167, 139, 250, 0.3);
 }
 
+/* New footer styles */
+.footer-coming-soon {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-style: italic;
+  margin-top: 0.75rem;
+}
+
+.footer-location {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer-location:first-of-type {
+  border-top: none;
+  padding-top: 0.5rem;
+}
+
+.location-label {
+  margin-bottom: 0.25rem;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.location-line {
+  margin: 0.125rem 0;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.location-postal,
+.location-mobile {
+  margin-top: 0.25rem;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.footer-loading {
+  color: rgba(255, 255, 255, 0.6);
+  font-style: italic;
+}
+
+.footer-error-note {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-style: italic;
+  margin-top: 0.5rem;
+}
+
 .footer-bottom {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   padding-top: 2rem;

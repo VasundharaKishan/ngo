@@ -1,17 +1,16 @@
 spring:
   application:
-    name: school-foundation-donation-backend
-  
+    name: foundation-backend
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/ngo_donations?sslmode=prefer}
-    username: ${DATABASE_USERNAME:postgres}
-    password: ${DATABASE_PASSWORD:postgres}
-    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/ngo_donations?sslmode=prefer
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver  
   
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
@@ -38,8 +37,8 @@ spring:
   mail:
     host: ${MAIL_HOST:smtp.gmail.com}
     port: ${MAIL_PORT:465}
-    username: ${MAIL_USERNAME:your-email@gmail.com}
-    password: ${MAIL_PASSWORD:your-app-password}
+    username: ${MAIL_USERNAME:kishankumarnaukri@gmail.com}
+    password: ${MAIL_PASSWORD:bnahttalkuyagjzu}
     properties:
       mail:
         smtp:
@@ -56,12 +55,35 @@ server:
 app:
   frontend:
     url: ${FRONTEND_URL:http://localhost:5173}
+  jwt:
+    secret: ${JWT_SECRET:change-this-secret-to-a-long-random-value-please}
+    expiration-minutes: ${JWT_EXPIRATION_MINUTES:60}
+    # Keep cookie path disabled by default; set true only if you also enable CORS credentials + CSRF
+    cookie-enabled: ${JWT_COOKIE_ENABLED:false}
+    cookie-name: ${JWT_COOKIE_NAME:admin_jwt}
+    cookie-domain: ${JWT_COOKIE_DOMAIN:}
+  allow-admin-bootstrap: ${ALLOW_ADMIN_BOOTSTRAP:true}
+  auth:
+    otp-enabled: ${AUTH_OTP_ENABLED:false}
+    otp-expiration-minutes: ${AUTH_OTP_EXPIRATION_MINUTES:5}
+    otp-max-attempts: ${AUTH_OTP_MAX_ATTEMPTS:5}
+    otp-length: ${AUTH_OTP_LENGTH:6}
+
+storage:
+  r2:
+    endpoint: ${R2_ENDPOINT:https://example.r2.cloudflarestorage.com}
+    bucket: ${R2_BUCKET:ngo-images}
+    access-key: ${R2_ACCESS_KEY:dummy}
+    secret-key: ${R2_SECRET_KEY:dummy}
+    public-base-url: ${R2_PUBLIC_BASE_URL:}
+
 
 stripe:
   secret-key: ${STRIPE_SECRET_KEY:sk_test_your_key_here}
   webhook-secret: ${STRIPE_WEBHOOK_SECRET:whsec_your_webhook_secret_here}
   success-url: ${STRIPE_SUCCESS_URL:http://localhost:5173/donate/success?session_id={CHECKOUT_SESSION_ID}}
   cancel-url: ${STRIPE_CANCEL_URL:http://localhost:5173/donate/cancel}
+
 
 logging:
   level:
@@ -71,3 +93,7 @@ logging:
     org.springframework.web.cors: DEBUG
     org.hibernate.SQL: DEBUG
     org.springframework.web.servlet.resource: WARN
+
+data:
+  init:
+    enabled: true

@@ -13,6 +13,7 @@ import Campaigns from './pages/Campaigns';
 import Categories from './pages/Categories';
 import AdminCampaignForm from './pages/AdminCampaignForm';
 import AdminSettings from './pages/AdminSettings';
+import AdminContactSettings from './pages/AdminContactSettings';
 import AdminLogin from './pages/AdminLogin';
 import AdminUsers from './pages/AdminUsers';
 import PasswordSetup from './pages/PasswordSetup';
@@ -37,6 +38,7 @@ function App() {
           <Route path="categories" element={<Categories />} />
           <Route path="users" element={<AdminUsers />} />
           <Route path="settings" element={<AdminSettings />} />
+          <Route path="contact-settings" element={<AdminContactSettings />} />
         </Route>
         
         {/* Campaign Form Routes (No Sidebar - separate) */}

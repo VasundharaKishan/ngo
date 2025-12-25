@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { formatCurrency, calculateProgress } from '../utils/currency';
 import { API_BASE_URL } from '../api';
+import { authFetch } from '../utils/auth';
 import './AdminDashboard.css';
 
 interface Campaign {
@@ -56,8 +57,8 @@ export default function AdminDashboard() {
   const loadData = async () => {
     try {
       const [campaignsRes, categoriesRes] = await Promise.all([
-        fetch(`${API_BASE_URL}/admin/campaigns`),
-        fetch(`${API_BASE_URL}/admin/categories`)
+        authFetch(`${API_BASE_URL}/admin/campaigns`),
+        authFetch(`${API_BASE_URL}/admin/categories`)
       ]);
       
       const campaignsData = await campaignsRes.json();
@@ -76,7 +77,7 @@ export default function AdminDashboard() {
     if (!confirm('Are you sure you want to delete this campaign?')) return;
     
     try {
-      await fetch(`${API_BASE_URL}/admin/campaigns/${id}`, {
+      await authFetch(`${API_BASE_URL}/admin/campaigns/${id}`, {
         method: 'DELETE'
       });
       loadData();
@@ -89,7 +90,7 @@ export default function AdminDashboard() {
     if (!confirm('Are you sure you want to delete this category?')) return;
     
     try {
-      await fetch(`${API_BASE_URL}/admin/categories/${id}`, {
+      await authFetch(`${API_BASE_URL}/admin/categories/${id}`, {
         method: 'DELETE'
       });
       loadData();
@@ -100,7 +101,7 @@ export default function AdminDashboard() {
 
   const toggleCampaignStatus = async (campaign: Campaign) => {
     try {
-      await fetch(`${API_BASE_URL}/admin/campaigns/${campaign.id}`, {
+      await authFetch(`${API_BASE_URL}/admin/campaigns/${campaign.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

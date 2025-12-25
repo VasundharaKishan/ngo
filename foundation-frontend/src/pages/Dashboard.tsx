@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../api';
+import { authFetch } from '../utils/auth';
 import { formatCurrency, calculateProgress } from '../utils/currency';
 
 interface Campaign {
@@ -41,8 +42,8 @@ export default function AdminDashboard() {
     setLoading(true);
     try {
       const [campaignsRes, donationsRes] = await Promise.all([
-        fetch(`${API_BASE_URL}/admin/campaigns`),
-        fetch(`${API_BASE_URL}/admin/donations`)
+        authFetch(`${API_BASE_URL}/admin/campaigns`),
+        authFetch(`${API_BASE_URL}/admin/donations`)
       ]);
       
       const campaignsData = await campaignsRes.json();

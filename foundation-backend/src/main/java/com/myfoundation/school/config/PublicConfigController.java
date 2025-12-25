@@ -1,5 +1,7 @@
 package com.myfoundation.school.config;
 
+import com.myfoundation.school.contact.ContactInfoResponse;
+import com.myfoundation.school.contact.ContactSettingsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +31,7 @@ import java.util.Map;
 public class PublicConfigController {
     
     private final SiteConfigService siteConfigService;
+    private final ContactSettingsService contactSettingsService;
     
     /**
      * Get public-safe site configuration values.
@@ -49,5 +52,16 @@ public class PublicConfigController {
             siteConfigService.getIntConfigValue("campaigns_page.items_per_page"));
         
         return ResponseEntity.ok(config);
+    }
+    
+    /**
+     * Get public contact information.
+     * Returns email and location details for display on website.
+     */
+    @GetMapping("/public/contact")
+    public ResponseEntity<ContactInfoResponse> getPublicContactInfo() {
+        log.info("GET /api/config/public/contact - Fetching public contact information");
+        ContactInfoResponse contactInfo = contactSettingsService.getContactInfo();
+        return ResponseEntity.ok(contactInfo);
     }
 }

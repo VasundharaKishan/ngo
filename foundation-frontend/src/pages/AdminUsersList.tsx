@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../api';
+import { authFetch } from '../utils/auth';
 import './AdminUsersList.css';
 
 interface AdminUser {
@@ -28,6 +29,10 @@ export default function AdminUsersList() {
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordUserId, setPasswordUserId] = useState('');
+  const [passwordUsername, setPasswordUsername] = useState('');
+  const [newPassword, setNewPassword] = useState('');
 
   const currentUser = JSON.parse(localStorage.getItem('adminUser') || '{}');
 
@@ -50,12 +55,7 @@ export default function AdminUsersList() {
   const loadUsers = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('adminToken');
-      const res = await fetch(`${API_BASE_URL}/admin/users`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const res = await authFetch(`${API_BASE_URL}/admin/users`);
       
       if (res.ok) {
         const data = await res.json();
@@ -78,7 +78,7 @@ export default function AdminUsersList() {
 
     try {
       const token = localStorage.getItem('adminToken');
-      const res = await fetch(`${API_BASE_URL}/auth/users`, {
+      const res = await fetch(`${API_BASE_URL}/admin/users`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -127,13 +127,9 @@ export default function AdminUsersList() {
 
   const handleToggleActive = async (userId: string, currentActive: boolean) => {
     try {
-      const token = localStorage.getItem('adminToken');
-      const res = await fetch(`${API_BASE_URL}/admin/users/${userId}/status`, {
+      const res = await authFetch(`${API_BASE_URL}/auth/users/${userId}/status`, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ active: !currentActive })
       });
 
@@ -146,14 +142,26 @@ export default function AdminUsersList() {
   };
 
   const handleDeleteUser = async (userId: string) => {
+    const target = users.find(u => u.id === userId);
+    const currentUser = JSON.parse(localStorage.getItem('adminUser') || '{}');
+    const isSuperAdmin = currentUser?.username?.toLowerCase() === 'admin';
+
+    if (target?.username?.toLowerCase() === 'admin') {
+      setErrorMessage('Default admin cannot be deleted.');
+      setTimeout(() => setErrorMessage(''), 4000);
+      return;
+    }
+    if (target?.role === 'ADMIN' && !isSuperAdmin) {
+      setErrorMessage('Only the default admin can delete other admins.');
+      setTimeout(() => setErrorMessage(''), 4000);
+      return;
+    }
+
     if (!window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) return;
     try {
-      const token = localStorage.getItem('adminToken');
-      const res = await fetch(`${API_BASE_URL}/auth/users/${userId}`, {
+      const res = await authFetch(`${API_BASE_URL}/auth/users/${userId}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: {}
       });
       if (res.ok) {
         setSuccessMessage('User deleted successfully.');
@@ -162,6 +170,47 @@ export default function AdminUsersList() {
       } else {
         const errorData = await res.json();
         setErrorMessage(errorData.error || 'Failed to delete user.');
+        setTimeout(() => setErrorMessage(''), 4000);
+      }
+    } catch (error) {
+      setErrorMessage('Connection error. Please try again.');
+      setTimeout(() => setErrorMessage(''), 4000);
+    }
+  };
+
+  const handleOpenPasswordModal = (userId: string, username: string) => {
+    setPasswordUserId(userId);
+    setPasswordUsername(username);
+    setNewPassword('');
+    setShowPasswordModal(true);
+  };
+
+  const handleChangePassword = async () => {
+    if (newPassword.length < 8) {
+      setErrorMessage('Password must be at least 8 characters');
+      setTimeout(() => setErrorMessage(''), 4000);
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('adminToken');
+      const res = await fetch(`${API_BASE_URL}/admin/users/${passwordUserId}/password`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ newPassword })
+      });
+
+      if (res.ok) {
+        setSuccessMessage(`Password changed successfully for ${passwordUsername}`);
+        setShowPasswordModal(false);
+        setNewPassword('');
+        setTimeout(() => setSuccessMessage(''), 4000);
+      } else {
+        const errorData = await res.json();
+        setErrorMessage(errorData.error || 'Failed to change password');
         setTimeout(() => setErrorMessage(''), 4000);
       }
     } catch (error) {
@@ -188,6 +237,39 @@ export default function AdminUsersList() {
       {successMessage && (
         <div className="success-banner">
           {successMessage}
+        </div>
+      )}
+
+      {errorMessage && (
+        <div className="error-banner">
+          {errorMessage}
+        </div>
+      )}
+
+      {/* Password Change Modal */}
+      {showPasswordModal && (
+        <div className="modal-overlay" onClick={() => setShowPasswordModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h2>Change Password for {passwordUsername}</h2>
+            <div className="form-group">
+              <label>New Password</label>
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Enter new password (min 8 characters)"
+                minLength={8}
+              />
+            </div>
+            <div className="modal-actions">
+              <button className="btn-cancel" onClick={() => setShowPasswordModal(false)}>
+                Cancel
+              </button>
+              <button className="btn-submit" onClick={handleChangePassword}>
+                Change Password
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -346,13 +428,31 @@ export default function AdminUsersList() {
                     <td>
                       {/* Super user cannot be deactivated or deleted */}
                       {user.username === 'admin' ? (
-                        <span className="btn-disabled" title="Super user cannot be changed or deleted">
-                          🔒 Super User
-                        </span>
+                        <>
+                          <button
+                            className="btn-toggle-status"
+                            onClick={() => handleOpenPasswordModal(user.id, user.username)}
+                            title="Change password"
+                          >
+                            🔑 Change Password
+                          </button>
+                          <span className="btn-disabled" style={{ marginLeft: '0.5rem' }} title="Super user cannot be deleted">
+                            🔒 Super User
+                          </span>
+                        </>
                       ) : user.role === 'ADMIN' ? (
-                        <span className="btn-disabled" title="Admin users cannot be deactivated or deleted">
-                          🔒 Protected
-                        </span>
+                        <>
+                          <button
+                            className="btn-toggle-status"
+                            onClick={() => handleOpenPasswordModal(user.id, user.username)}
+                            title="Change password"
+                          >
+                            🔑 Change Password
+                          </button>
+                          <span className="btn-disabled" style={{ marginLeft: '0.5rem' }} title="Admin users cannot be deactivated or deleted">
+                            🔒 Protected
+                          </span>
+                        </>
                       ) : user.id === currentUser.id ? (
                         <span className="btn-disabled" title="You cannot change your own status">
                           👤 Current User
@@ -361,6 +461,14 @@ export default function AdminUsersList() {
                         <>
                           <button
                             className="btn-toggle-status"
+                            onClick={() => handleOpenPasswordModal(user.id, user.username)}
+                            title="Change password"
+                          >
+                            🔑 Password
+                          </button>
+                          <button
+                            className="btn-toggle-status"
+                            style={{ marginLeft: '0.5rem' }}
                             onClick={() => handleToggleActive(user.id, user.active)}
                           >
                             {user.active ? 'Deactivate' : 'Activate'}

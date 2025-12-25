@@ -2,6 +2,7 @@ package com.myfoundation.school.security;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -14,6 +15,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -39,10 +42,12 @@ import java.util.List;
 @Slf4j
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
     
     @Value("${app.frontend.url}")
     private String frontendUrl;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
     
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -63,18 +68,23 @@ public class SecurityConfig {
                     .requestMatchers("/api/campaigns/**").permitAll()
                     .requestMatchers("/api/categories/**").permitAll()
                     .requestMatchers("/api/cms/**").permitAll()
-                    .requestMatchers("/api/config/public").permitAll()
+                    .requestMatchers("/api/config/public/**").permitAll()
                     .requestMatchers("/api/donations/stripe/**").permitAll()
                     
                     // Auth endpoints
                     .requestMatchers("/api/auth/login").permitAll()
-                    .requestMatchers("/api/auth/setup-password").permitAll()
-                    .requestMatchers("/api/password-setup/**").permitAll()
-                    
-                    // Admin endpoints - temporarily permitAll until JWT is fully implemented
-                    .requestMatchers("/api/admin/**").permitAll()
-                    .requestMatchers("/api/auth/users").permitAll()
-                    .requestMatchers("/api/auth/users/**").permitAll()
+                    .requestMatchers("/api/auth/security-questions").permitAll()
+                    .requestMatchers("/api/auth/validate-token/**").permitAll()
+                    .requestMatchers("/api/auth/setup-password/**").permitAll()
+                    .requestMatchers("/api/auth/initialize").permitAll()
+                    .requestMatchers("/api/auth/otp/**").permitAll()
+
+                    // Admin + user management
+                    .requestMatchers("/api/admin/users/**").hasRole("ADMIN")
+                    .requestMatchers("/api/admin/config/**").hasRole("ADMIN")
+                    .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "OPERATOR")
+                    .requestMatchers("/api/auth/users/**").hasRole("ADMIN")
+                    .requestMatchers("/api/auth/admin/**").hasRole("ADMIN")
                     
                     // Health check
                     .requestMatchers("/actuator/health").permitAll()
@@ -90,7 +100,34 @@ public class SecurityConfig {
             )
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            );
+            )
+            .headers(headers -> {
+                headers.httpStrictTransportSecurity(hsts -> hsts
+                    .includeSubDomains(true)
+                    .preload(true)
+                    .maxAgeInSeconds(31536000)
+                );
+                headers.frameOptions(frame -> frame.deny());
+                headers.xssProtection(xss -> xss.disable());
+                headers.contentTypeOptions(contentType -> {});
+                headers.referrerPolicy(referrer -> referrer
+                    .policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER));
+                String cspPolicy =
+                        "default-src 'self'; " +
+                        "img-src 'self' data: https:; " +
+                        "script-src 'self'; " +
+                        "style-src 'self' 'unsafe-inline'; " +
+                        "connect-src 'self' https://api.stripe.com; " +
+                        "frame-ancestors 'none'; " +
+                        "font-src 'self' data:; " +
+                        "object-src 'none'; " +
+                        "base-uri 'self'; " +
+                        "form-action 'self'";
+                headers.contentSecurityPolicy(csp -> csp.policyDirectives(cspPolicy));
+                headers.permissionsPolicy(policy -> policy
+                    .policy("geolocation=(), microphone=(), camera=(), fullscreen=(self)"));
+            })
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         
         return http.build();
     }
@@ -129,10 +166,14 @@ public class SecurityConfig {
             "http://localhost:5173",
             "http://localhost:5174",
             "http://localhost:3000",
-            frontendUrl,
             "https://frontend-three-psi-17.vercel.app",  // Vercel URL 1
             "https://foundation-frontend-three.vercel.app"  // Vercel URL 2
         );
+
+        if (frontendUrl != null && !frontendUrl.isBlank()) {
+            allowedOrigins = new java.util.ArrayList<>(allowedOrigins);
+            allowedOrigins.add(frontendUrl);
+        }
         configuration.setAllowedOrigins(allowedOrigins);
         log.info("CORS allowed origins: {}", allowedOrigins);
         
@@ -157,9 +198,8 @@ public class SecurityConfig {
             "Content-Type"
         ));
         
-        // Allow credentials for authentication (cookies/sessions)
-        // Set to true because we might use localStorage but browser still sends cookies
-        configuration.setAllowCredentials(true);
+        // JWT is sent via Authorization header, no cookies needed
+        configuration.setAllowCredentials(false);
         
         // Cache preflight requests for 1 hour
         configuration.setMaxAge(3600L);

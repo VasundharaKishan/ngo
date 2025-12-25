@@ -25,7 +25,7 @@
 }
 
 .hero h1 {
-  font-size: 4rem;
+  font-size: clamp(2.5rem, 5vw, 4rem);
   margin-bottom: 1.5rem;
   font-weight: 800;
   letter-spacing: -1px;
@@ -46,7 +46,7 @@
 }
 
 .hero-text {
-  font-size: 1.375rem;
+  font-size: clamp(1.05rem, 3.2vw, 1.375rem);
   max-width: 700px;
   margin: 0 auto 2.5rem;
   line-height: 1.8;
@@ -180,8 +180,8 @@
 
 .campaign-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 2.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.75rem;
   margin-top: 3rem;
 }
 
@@ -278,6 +278,22 @@
   display: flex;
   justify-content: space-between;
   gap: 1rem;
+}
+
+@media (max-width: 640px) {
+  .hero {
+    padding: 3.5rem 0;
+  }
+  .campaign-content {
+    padding: 1.5rem;
+  }
+  .stats-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .stat {
+    width: 100%;
+  }
 }
 
 .stat {

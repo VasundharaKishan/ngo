@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../api';
+import { authFetch } from '../utils/auth';
+import { useToast } from '../components/ToastProvider';
 
 interface Category {
   id: string;
@@ -11,6 +13,7 @@ interface Category {
 }
 
 export default function Categories() {
+  const showToast = useToast();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -21,7 +24,7 @@ export default function Categories() {
   const loadCategories = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/admin/categories`);
+      const res = await authFetch(`${API_BASE_URL}/admin/categories`);
       const data = await res.json();
       setCategories(data);
     } catch (error) {
@@ -35,7 +38,7 @@ export default function Categories() {
     if (!confirm('Are you sure you want to delete this category?')) return;
     
     try {
-      await fetch(`${API_BASE_URL}/admin/categories/${id}`, {
+      await authFetch(`${API_BASE_URL}/admin/categories/${id}`, {
         method: 'DELETE'
       });
       loadCategories();
@@ -52,7 +55,7 @@ export default function Categories() {
       </div>
 
       <div className="content-body">
-        <button onClick={() => alert('Category creation coming soon')} className="btn-add-new">
+        <button onClick={() => showToast('Category creation coming soon', 'info')} className="btn-add-new">
           + Add New Category
         </button>
         
@@ -80,7 +83,7 @@ export default function Categories() {
                   <td>{category.active ? '✓ Active' : '✗ Inactive'}</td>
                   <td>
                     <div className="table-actions">
-                      <button onClick={() => alert('Edit coming soon')} className="btn-edit">Edit</button>
+                      <button onClick={() => showToast('Edit coming soon', 'info')} className="btn-edit">Edit</button>
                       <button onClick={() => deleteCategory(category.id)} className="btn-delete">Delete</button>
                     </div>
                   </td>
