@@ -107,7 +107,7 @@
 }
 
 .impact-stats {
-  padding: 4rem 0;
+  padding: 1rem 0;
   background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
 }
 
@@ -132,7 +132,7 @@
 }
 
 .stat-number {
-  font-size: 3rem;
+  font-size: 1rem;
   font-weight: 800;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   -webkit-background-clip: text;
@@ -149,14 +149,14 @@
 
 /* Campaigns Section */
 .campaigns {
-  padding: 5rem 0;
+  padding: 2rem 0;
   background: linear-gradient(to bottom, #ffffff 0%, #f8fafc 100%);
 }
 
 .featured h2 {
   text-align: center;
-  font-size: 2.75rem;
-  margin-bottom: 3.5rem;
+  font-size: 2.25rem;
+  margin-bottom: 1.5rem;
   color: #1e293b;
   font-weight: 800;
   letter-spacing: -0.5px;
@@ -217,8 +217,7 @@
 }
 
 .campaign-content {
-  padding: 2rem;
-  display: flex;
+  padding: 1rem;
   flex-direction: column;
   flex: 1;
   border-top: 5px solid transparent;
@@ -387,7 +386,7 @@
 /* Section Titles */
 .section-title {
   text-align: center;
-  font-size: 2.75rem;
+  font-size: 2.25rem;
   margin-bottom: 3rem;
   color: #1e293b;
   font-weight: 800;
@@ -412,7 +411,7 @@
 
 /* Why Donate Section */
 .why-donate {
-  padding: 5rem 0;
+  padding: 2rem 0;
   background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
 }
 
@@ -420,7 +419,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 2.5rem;
-  margin-top: 3rem;
+  margin-top: 0.5rem;
 }
 
 .why-card {
@@ -466,7 +465,7 @@
 
 /* Testimonials */
 .testimonials {
-  padding: 5rem 0;
+  padding: 2rem 0;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
 }
@@ -490,7 +489,7 @@
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(10px);
   border-radius: 20px;
-  padding: 2.5rem;
+  padding: 1rem;
   border: 1px solid rgba(255, 255, 255, 0.2);
   transition: all 0.3s ease;
 }
