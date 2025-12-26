@@ -3,8 +3,8 @@ spring:
     name: foundation-backend
   datasource:
     url: jdbc:postgresql://localhost:5432/ngo_donations?sslmode=prefer
-    username: postgres
-    password: postgres
+    username: e141057
+    password: 
     driver-class-name: org.postgresql.Driver  
   
   jpa:
@@ -19,7 +19,7 @@ spring:
   
   sql:
     init:
-      mode: ${SQL_INIT_MODE:always}
+      mode: never
       data-locations: classpath:sample-data.sql
       continue-on-error: false
   

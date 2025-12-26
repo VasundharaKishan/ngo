@@ -31,14 +31,16 @@ public class AuthController {
     @Value("${app.jwt.expiration-minutes:60}")
     private long jwtExpiryMinutes;
     
-    @PostMapping("/login")
+    @PostMapping(value = "/login", consumes = "application/json", produces = "application/json")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
         try {
             log.info("Login attempt for user: {}", request.getUsername());
             LoginResponse response = authService.login(request);
+            log.info("Login response received, token present: {}", response.getToken() != null);
             ResponseEntity.BodyBuilder builder = ResponseEntity.ok();
 
             if (cookieEnabled) {
+                log.info("Cookie enabled, building cookie...");
                 ResponseCookie cookie = ResponseCookie.from(cookieName, response.getToken())
                         .httpOnly(true)
                         .secure(true)
@@ -50,9 +52,10 @@ public class AuthController {
                 builder.header("Set-Cookie", cookie.toString());
             }
 
+            log.info("Returning login response for user: {}", request.getUsername());
             return builder.body(response);
         } catch (RuntimeException e) {
-            log.error("Login failed: {}", e.getMessage());
+            log.error("Login failed: {} - Exception type: {}", e.getMessage(), e.getClass().getName(), e);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("error", e.getMessage()));
         }

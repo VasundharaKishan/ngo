@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api, type Campaign } from '../api';
-import { formatCurrency, calculateProgress } from '../utils/currency';
+import { api, type CampaignPopupDto, type DonatePopupResponse } from '../api';
+import { formatCurrency } from '../utils/currency';
 import './FeaturedCampaignModal.css';
 
 interface FeaturedCampaignModalProps {
@@ -10,43 +10,46 @@ interface FeaturedCampaignModalProps {
 }
 
 export default function FeaturedCampaignModal({ isOpen, onClose }: FeaturedCampaignModalProps) {
-  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
-  const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
+  const [campaign, setCampaign] = useState<CampaignPopupDto | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     if (isOpen) {
-      fetchCampaigns();
+      fetchDonatePopup();
     }
   }, [isOpen]);
 
-  const fetchCampaigns = async () => {
+  const fetchDonatePopup = async () => {
     try {
       setLoading(true);
-      const data = await api.getCampaigns({ featured: true });
-      setCampaigns(data);
-      // Set first campaign as featured/selected by default
-      if (data.length > 0) {
-        setSelectedCampaign(data[0]);
+      setError(null);
+      const data: DonatePopupResponse = await api.getDonatePopup();
+      setCampaign(data.campaign);
+      
+      if (!data.campaign) {
+        setError('No active campaigns available at the moment. Please check back soon!');
       }
+      
       setLoading(false);
     } catch (error) {
-      console.error('Error fetching campaigns:', error);
+      console.error('Error fetching donate popup:', error);
+      setError('Failed to load campaign. Please try again later.');
       setLoading(false);
     }
   };
 
   const handleDonate = () => {
-    if (selectedCampaign) {
-      navigate(`/donate/${selectedCampaign.id}`);
+    if (campaign) {
+      navigate(`/donate/${campaign.id}`);
       onClose();
     }
   };
 
   const handleLearnMore = () => {
-    if (selectedCampaign) {
-      navigate(`/campaigns/${selectedCampaign.id}`);
+    if (campaign) {
+      navigate(`/campaigns/${campaign.id}`);
       onClose();
     }
   };
@@ -59,19 +62,27 @@ export default function FeaturedCampaignModal({ isOpen, onClose }: FeaturedCampa
         <button className="modal-close" onClick={onClose}>×</button>
         
         {loading ? (
-          <div className="modal-loading">Loading campaigns...</div>
-        ) : selectedCampaign ? (
+          <div className="modal-loading">Loading campaign...</div>
+        ) : error ? (
+          <div className="modal-error">
+            <div className="modal-error-icon">📢</div>
+            <p className="modal-error-text">{error}</p>
+            <button className="modal-btn-primary" onClick={() => { navigate('/campaigns'); onClose(); }}>
+              Browse All Campaigns
+            </button>
+          </div>
+        ) : campaign ? (
           <>
             <div className="modal-image-section">
               <img 
-                src={selectedCampaign.imageUrl || 'https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?w=800&auto=format&fit=crop&q=80'} 
-                alt={selectedCampaign.title}
+                src={campaign.imageUrl || 'https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?w=800&auto=format&fit=crop&q=80'} 
+                alt={campaign.title}
                 className="modal-image"
                 onError={(e) => {
                   e.currentTarget.src = 'https://placehold.co/800x600/667eea/ffffff?text=Campaign+Image';
                 }}
               />
-              <div className="modal-badge">Featured Campaign</div>
+              <div className="modal-badge">{campaign.badgeText}</div>
             </div>
 
             <div className="modal-content-section">
@@ -83,7 +94,7 @@ export default function FeaturedCampaignModal({ isOpen, onClose }: FeaturedCampa
                 </div>
               </div>
 
-              <h2 className="modal-title">{selectedCampaign.title}</h2>
+              <h2 className="modal-title">{campaign.title}</h2>
               
               <div className="modal-active-notice">
                 <div className="modal-notice-icon">🌟</div>
@@ -93,26 +104,26 @@ export default function FeaturedCampaignModal({ isOpen, onClose }: FeaturedCampa
                 </p>
               </div>
               
-              <p className="modal-description">{selectedCampaign.description}</p>
+              <p className="modal-description">{campaign.shortDescription}</p>
 
               <div className="modal-progress">
                 <div className="modal-progress-bar">
                   <div 
                     className="modal-progress-fill" 
-                    style={{ width: `${calculateProgress(selectedCampaign.currentAmount, selectedCampaign.targetAmount)}%` }}
+                    style={{ width: `${campaign.progressPercent}%` }}
                   />
                 </div>
                 <div className="modal-progress-stats">
                   <div className="modal-stat">
-                    <span className="modal-stat-value">{formatCurrency(selectedCampaign.currentAmount, 'eur', { decimals: 0 })}</span>
+                    <span className="modal-stat-value">{formatCurrency(campaign.currentAmount, campaign.currency.toLowerCase() as any, { decimals: 0 })}</span>
                     <span className="modal-stat-label">raised</span>
                   </div>
                   <div className="modal-stat">
-                    <span className="modal-stat-value">{formatCurrency(selectedCampaign.targetAmount, 'eur', { decimals: 0 })}</span>
+                    <span className="modal-stat-value">{formatCurrency(campaign.targetAmount, campaign.currency.toLowerCase() as any, { decimals: 0 })}</span>
                     <span className="modal-stat-label">goal</span>
                   </div>
                   <div className="modal-stat">
-                    <span className="modal-stat-value">{calculateProgress(selectedCampaign.currentAmount, selectedCampaign.targetAmount, 0)}%</span>
+                    <span className="modal-stat-value">{campaign.progressPercent}%</span>
                     <span className="modal-stat-label">funded</span>
                   </div>
                 </div>
@@ -132,22 +143,6 @@ export default function FeaturedCampaignModal({ isOpen, onClose }: FeaturedCampa
                 <p className="modal-explore-text">
                   Browse our <button className="modal-link-btn" onClick={() => { navigate('/campaigns'); onClose(); }}>campaign page</button> to discover all the ways you can make a difference.
                 </p>
-                <select 
-                  className="modal-campaign-select"
-                  value={selectedCampaign.id}
-                  onChange={(e) => {
-                    const campaign = campaigns.find(c => c.id === e.target.value);
-                    if (campaign) {
-                      setSelectedCampaign(campaign);
-                    }
-                  }}
-                >
-                  {campaigns.map(campaign => (
-                    <option key={campaign.id} value={campaign.id}>
-                      {campaign.title}
-                    </option>
-                  ))}
-                </select>
               </div>
 
               <div className="modal-footer-note">
@@ -156,12 +151,7 @@ export default function FeaturedCampaignModal({ isOpen, onClose }: FeaturedCampa
               </div>
             </div>
           </>
-        ) : (
-          <div className="modal-no-campaigns">
-            <p>No campaigns available at the moment.</p>
-            <button className="modal-btn-secondary" onClick={onClose}>Close</button>
-          </div>
-        )}
+        ) : null}
       </div>
     </div>
   );

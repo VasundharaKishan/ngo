@@ -40,8 +40,13 @@ export default function Home() {
   useEffect(() => {
     const loadFeatured = async () => {
       try {
-        const data = await api.getCampaigns({ featured: true, limit: 3 });
-        setFeaturedCampaigns(data.slice(0, 3));
+        // Get the configured limit from site config
+        const config = await api.getPublicConfig();
+        const limit = config.featuredCampaignsCount || 3;
+        
+        // Fetch campaigns with the configured limit
+        const data = await api.getCampaigns({ featured: true, limit });
+        setFeaturedCampaigns(data);
       } catch (error) {
         console.error('Error loading featured campaigns:', error);
       }

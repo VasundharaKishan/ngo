@@ -15,6 +15,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import com.myfoundation.school.security.JwtService;
@@ -240,21 +241,27 @@ public class AuthService {
     
     @Transactional
     public void initializeDefaultAdmin() {
-        if (adminUserRepository.count() == 0) {
-            AdminUser admin = AdminUser.builder()
-                    .username("admin")
-                    .email("admin@hopefoundation.org")
-                    .password(passwordEncoder.encode("admin123"))
-                    .fullName("System Administrator")
-                    .role(UserRole.ADMIN)
-                    .active(true)
-                    .createdAt(Instant.now())
-                    .updatedAt(Instant.now())
-                    .build();
-            
-            adminUserRepository.save(admin);
-            log.info("Created default admin user");
+        // Check if admin@hopefoundation.org already exists
+        Optional<AdminUser> existing = adminUserRepository.findByEmail("admin@hopefoundation.org");
+        if (existing.isPresent()) {
+            log.info("Admin user already exists");
+            return;
         }
+        
+        // Create default admin user
+        AdminUser admin = AdminUser.builder()
+                .username("admin")
+                .email("admin@hopefoundation.org")
+                .password(passwordEncoder.encode("admin123"))
+                .fullName("System Administrator")
+                .role(UserRole.ADMIN)
+                .active(true)
+                .createdAt(Instant.now())
+                .updatedAt(Instant.now())
+                .build();
+        
+        adminUserRepository.save(admin);
+        log.info("Created default admin user");
     }
 
     @Transactional

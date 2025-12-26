@@ -1,6 +1,8 @@
 package com.myfoundation.school.campaign;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -18,4 +20,7 @@ public interface CampaignRepository extends JpaRepository<Campaign, String> {
     List<Campaign> findByActiveTrueAndUrgentTrue();
     
     Optional<Campaign> findBySlug(String slug);
+    
+    @Query("SELECT c FROM Campaign c WHERE c.active = true ORDER BY c.featured DESC, c.urgent DESC, c.updatedAt DESC")
+    List<Campaign> findActiveCampaignsForPopup(Pageable pageable);
 }

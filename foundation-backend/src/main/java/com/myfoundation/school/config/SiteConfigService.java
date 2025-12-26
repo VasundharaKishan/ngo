@@ -21,6 +21,7 @@ public class SiteConfigService {
     static {
         DEFAULT_CONFIGS.put("homepage.featured_campaigns_count", "3");
         DEFAULT_CONFIGS.put("campaigns_page.items_per_page", "12");
+        DEFAULT_CONFIGS.put("donate_popup.spotlight_campaign_id", null);
     }
     
     public String getConfigValue(String key) {
@@ -78,6 +79,7 @@ public class SiteConfigService {
         return switch (key) {
             case "homepage.featured_campaigns_count" -> "Number of featured campaigns to show on homepage";
             case "campaigns_page.items_per_page" -> "Number of campaigns to show per page on campaigns list";
+            case "donate_popup.spotlight_campaign_id" -> "Campaign ID to feature in Donate Now popup (null for automatic selection)";
             default -> "";
         };
     }

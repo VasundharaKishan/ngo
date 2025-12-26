@@ -1,7 +1,10 @@
 package com.myfoundation.school.config;
 
+import com.myfoundation.school.campaign.CampaignService;
 import com.myfoundation.school.contact.ContactInfoResponse;
 import com.myfoundation.school.contact.ContactSettingsService;
+import com.myfoundation.school.dto.CampaignPopupDto;
+import com.myfoundation.school.dto.DonatePopupResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -9,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Public endpoint for retrieving site configuration values
@@ -32,6 +36,7 @@ public class PublicConfigController {
     
     private final SiteConfigService siteConfigService;
     private final ContactSettingsService contactSettingsService;
+    private final CampaignService campaignService;
     
     /**
      * Get public-safe site configuration values.
@@ -63,5 +68,53 @@ public class PublicConfigController {
         log.info("GET /api/config/public/contact - Fetching public contact information");
         ContactInfoResponse contactInfo = contactSettingsService.getContactInfo();
         return ResponseEntity.ok(contactInfo);
+    }
+    
+    /**
+     * Get campaign for donate popup.
+     * Returns spotlight campaign if set, otherwise returns fallback campaign.
+     * Fallback logic: newest active campaign prioritized by featured > urgent > updatedAt DESC.
+     */
+    @GetMapping("/public/donate-popup")
+    public ResponseEntity<DonatePopupResponse> getDonatePopup() {
+        log.info("GET /api/config/public/donate-popup - Fetching donate popup campaign");
+        
+        String spotlightCampaignId = siteConfigService.getConfigValue("donate_popup.spotlight_campaign_id");
+        
+        // Try to get spotlight campaign if configured
+        if (spotlightCampaignId != null && !spotlightCampaignId.isEmpty()) {
+            Optional<CampaignPopupDto> spotlightCampaign = campaignService.getCampaignForPopup(spotlightCampaignId);
+            
+            if (spotlightCampaign.isPresent()) {
+                log.info("Returning spotlight campaign: {}", spotlightCampaignId);
+                return ResponseEntity.ok(DonatePopupResponse.builder()
+                        .campaign(spotlightCampaign.get())
+                        .mode("SPOTLIGHT")
+                        .fallbackReason(null)
+                        .build());
+            } else {
+                log.warn("Spotlight campaign {} not found or inactive, falling back", spotlightCampaignId);
+            }
+        }
+        
+        // Fallback to newest active campaign
+        Optional<CampaignPopupDto> fallbackCampaign = campaignService.getFallbackCampaignForPopup();
+        
+        if (fallbackCampaign.isPresent()) {
+            log.info("Returning fallback campaign");
+            return ResponseEntity.ok(DonatePopupResponse.builder()
+                    .campaign(fallbackCampaign.get())
+                    .mode("FALLBACK")
+                    .fallbackReason(spotlightCampaignId == null ? "NO_SPOTLIGHT_SET" : "SPOTLIGHT_INACTIVE")
+                    .build());
+        }
+        
+        // No campaigns available
+        log.warn("No active campaigns available for donate popup");
+        return ResponseEntity.ok(DonatePopupResponse.builder()
+                .campaign(null)
+                .mode("FALLBACK")
+                .fallbackReason("NO_ACTIVE_CAMPAIGNS")
+                .build());
     }
 }
