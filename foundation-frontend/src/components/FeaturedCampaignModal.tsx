@@ -87,12 +87,12 @@ export default function FeaturedCampaignModal({ isOpen, onClose }: FeaturedCampa
 
             <div className="modal-content-section">
               <div className="modal-header">
-                <div className="modal-logos">
-                  <div className="modal-logo">🤝</div>
-                  <span className="modal-support-text">in support of</span>
-                  <div className="modal-org-logo">Hope Foundation</div>
+                  <div className="modal-logos">
+                    <div className="modal-logo">🤝</div>
+                    <span className="modal-support-text">in support of</span>
+                    <div className="modal-org-logo">Yugal Savitri Seva</div>
+                  </div>
                 </div>
-              </div>
 
               <h2 className="modal-title">{campaign.title}</h2>
               

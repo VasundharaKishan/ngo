@@ -167,7 +167,8 @@ public class SecurityConfig {
             "http://localhost:5174",
             "http://localhost:3000",
             "https://frontend-three-psi-17.vercel.app",  // Vercel URL 1
-            "https://foundation-frontend-three.vercel.app"  // Vercel URL 2
+            "https://www.yugalsavitriseva.org/",
+            "https://foundation-frontend-three.vercel.app"  // Vercel URL 2 (correct one)
         );
 
         if (frontendUrl != null && !frontendUrl.isBlank()) {

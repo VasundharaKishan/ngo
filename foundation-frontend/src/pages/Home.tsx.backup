@@ -129,7 +129,7 @@ export default function Home() {
             <div className="testimonial-card">
               <div className="quote-icon">“</div>
               <p className="testimonial-text">
-                "I love how transparent Hope Foundation is. Regular updates, real photos, 
+                "I love how transparent Yugal Savitri Seva is. Regular updates, real photos, 
                 and clear impact reports. I know my money is making a difference."
               </p>
               <div className="testimonial-author">

@@ -77,18 +77,18 @@ INSERT INTO cms_content (id, section, content_key, content_type, content_value, 
 ('cms-012', 'why_donate', 'card4_title', 'text', '🤝 Local Partners', 8, true),
 ('cms-013', 'why_donate', 'card4_text', 'text', 'Working with trusted community leaders who know the needs firsthand.', 9, true),
 ('cms-014', 'testimonials', 'title', 'text', 'Stories from Our Donors', 1, true),
-('cms-015', 'footer', 'foundation_name', 'text', 'Hope Foundation', 1, true),
+('cms-015', 'footer', 'foundation_name', 'text', 'Yugal Savitri Seva', 1, true),
 ('cms-016', 'footer', 'tagline', 'text', 'Empowering communities worldwide through compassion and action.', 2, true),
 ('cms-017', 'footer', 'contact_email', 'text', 'contact@hopefoundation.org', 3, true),
 ('cms-018', 'footer', 'contact_phone', 'text', '+1 (555) 123-4567', 4, true),
 ('cms-019', 'footer', 'contact_address', 'text', '123 Charity Lane, Global City', 5, true),
-('cms-020', 'footer', 'copyright', 'text', '© 2025 Hope Foundation. All rights reserved. Registered Charity #12-3456789', 6, true)
+('cms-020', 'footer', 'copyright', 'text', '© 2025 Yugal Savitri Seva. All rights reserved. Registered Charity #12-3456789', 6, true)
 ON CONFLICT (section, content_key) DO NOTHING;
 
 -- Insert default testimonials
 INSERT INTO testimonials (id, author_name, author_title, testimonial_text, display_order, active) VALUES
 ('test-001', 'Sarah Mitchell', 'Monthly Donor since 2023', 'Seeing the school we helped build brought tears to my eyes. The photos of smiling children made every dollar worth it. This is real change happening.', 1, true),
-('test-002', 'James Chen', 'Donor since 2022', 'I love how transparent Hope Foundation is. Regular updates, real photos, and clear impact reports. I know my money is making a difference.', 2, true),
+('test-002', 'James Chen', 'Donor since 2022', 'I love how transparent Yugal Savitri Seva is. Regular updates, real photos, and clear impact reports. I know my money is making a difference.', 2, true),
 ('test-003', 'Priya Sharma', 'Monthly Champion', 'Started with $25 and now I''m a monthly donor. The stories of transformation inspire me. Every campaign shows real people, real impact.', 3, true)
 ON CONFLICT (id) DO NOTHING;
 

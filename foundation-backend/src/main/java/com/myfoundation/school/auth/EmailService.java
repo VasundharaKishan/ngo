@@ -54,7 +54,7 @@ public class EmailService {
             
             helper.setFrom(fromEmail);
             helper.setTo(toEmail);
-            helper.setSubject("Complete Your Account Setup - Hope Foundation");
+            helper.setSubject("Complete Your Account Setup - Yugal Savitri Seva");
             
             String setupLink = frontendUrl + "/admin/setup-password?token=" + token;
             
@@ -125,12 +125,12 @@ public class EmailService {
             </head>
             <body>
                 <div class="header">
-                    <h1>🎉 Welcome to Hope Foundation!</h1>
+                    <h1>🎉 Welcome to Yugal Savitri Seva!</h1>
                 </div>
                 <div class="content">
                     <p>Hello <strong>%s</strong>,</p>
                     
-                    <p>An administrator has created an account for you at Hope Foundation Admin Portal. To complete your account setup, you need to:</p>
+                    <p>An administrator has created an account for you at Yugal Savitri Seva Admin Portal. To complete your account setup, you need to:</p>
                     
                     <div class="info-box">
                         <strong>📋 Setup Steps:</strong>
@@ -155,7 +155,7 @@ public class EmailService {
                     </p>
                     
                     <div class="footer">
-                        <p>Hope Foundation Admin Portal</p>
+                        <p>Yugal Savitri Seva Admin Portal</p>
                         <p>Making a difference, one campaign at a time 💙</p>
                     </div>
                 </div>
