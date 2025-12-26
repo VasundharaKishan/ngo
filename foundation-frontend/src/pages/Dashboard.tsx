@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { API_BASE_URL } from '../api';
+import { API_BASE_URL, getDonatePopupSettings, type DonatePopupSettingsResponse } from '../api';
+import { authFetch } from '../utils/auth';
 import { formatCurrency, calculateProgress } from '../utils/currency';
 
 interface Campaign {
@@ -31,6 +32,7 @@ interface Donation {
 export default function AdminDashboard() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [donations, setDonations] = useState<Donation[]>([]);
+  const [spotlightSettings, setSpotlightSettings] = useState<DonatePopupSettingsResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -40,9 +42,10 @@ export default function AdminDashboard() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [campaignsRes, donationsRes] = await Promise.all([
-        fetch(`${API_BASE_URL}/admin/campaigns`),
-        fetch(`${API_BASE_URL}/admin/donations`)
+      const [campaignsRes, donationsRes, spotlightData] = await Promise.all([
+        authFetch(`${API_BASE_URL}/admin/campaigns`),
+        authFetch(`${API_BASE_URL}/admin/donations`),
+        getDonatePopupSettings()
       ]);
       
       const campaignsData = await campaignsRes.json();
@@ -50,6 +53,7 @@ export default function AdminDashboard() {
       
       setCampaigns(campaignsData);
       setDonations(donationsData);
+      setSpotlightSettings(spotlightData);
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -68,6 +72,8 @@ export default function AdminDashboard() {
 
   const successfulDonations = donations.filter(d => d.status === 'SUCCESS').length;
   const pendingDonations = donations.filter(d => d.status === 'PENDING').length;
+  const featuredCampaignsCount = campaigns.filter(c => c.featured && c.active).length;
+  const spotlightCampaignTitle = spotlightSettings?.spotlightCampaign?.title || null;
 
   const successfulDonationsByCampaign = donations
     .filter(d => d.status === 'SUCCESS')
@@ -128,6 +134,22 @@ export default function AdminDashboard() {
                 <p className="card-value">{campaigns.filter(c => c.active).length}</p>
               </div>
             </div>
+            <div className="dashboard-card">
+              <div className="card-icon">⭐</div>
+              <div className="card-content">
+                <h3>Featured Active</h3>
+                <p className="card-value">{featuredCampaignsCount}</p>
+              </div>
+            </div>
+            {spotlightCampaignTitle && (
+              <div className="dashboard-card" style={{ gridColumn: 'span 2', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
+                <div className="card-icon">🎯</div>
+                <div className="card-content">
+                  <h3>Spotlight Campaign</h3>
+                  <p className="card-value" style={{ fontSize: '1rem', fontWeight: 'normal' }}>{spotlightCampaignTitle}</p>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Top Campaigns Chart */}
@@ -226,10 +248,13 @@ export default function AdminDashboard() {
                   const totalRaised = successfulCampaignDonations.reduce((sum, d) => sum + d.amount, 0);
                   const progress = calculateProgress(totalRaised, campaign.targetAmount);
 
+                  const isSpotlight = spotlightSettings?.spotlightCampaignId === campaign.id;
+                  
                   return (
                     <div key={campaign.id} className="campaign-performance-card">
                       <div className="campaign-card-header">
                         <h3>{campaign.title}</h3>
+                        {isSpotlight && <span className="badge-spotlight" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white', padding: '4px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold' }}>🎯 SPOTLIGHT</span>}
                         {campaign.featured && <span className="badge-featured">⭐ Featured</span>}
                         {campaign.urgent && <span className="badge-urgent">🔥 Urgent</span>}
                       </div>

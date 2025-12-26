@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../api';
+import { authFetch } from '../utils/auth';
+import { useToast } from '../components/ToastProvider';
 import './AdminUsers.css';
 
 interface AdminUser {
@@ -14,6 +16,7 @@ interface AdminUser {
 }
 
 export default function AdminUsers() {
+  const showToast = useToast();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -33,7 +36,7 @@ export default function AdminUsers() {
 
   const loadUsers = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/auth/users`);
+      const res = await authFetch(`${API_BASE_URL}/auth/users`);
       const data = await res.json();
       setUsers(data);
       setLoading(false);
@@ -53,7 +56,7 @@ export default function AdminUsers() {
     const method = editingUser ? 'PUT' : 'POST';
 
     try {
-      const res = await fetch(url, {
+      const res = await authFetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
@@ -64,11 +67,11 @@ export default function AdminUsers() {
         resetForm();
       } else {
         const errorData = await res.json();
-        alert(errorData.error || 'Operation failed');
+        showToast(errorData.error || 'Operation failed', 'error');
       }
     } catch (error) {
       console.error('Error saving user:', error);
-      alert('Failed to save user');
+      showToast('Failed to save user', 'error');
     }
   };
 
@@ -85,11 +88,20 @@ export default function AdminUsers() {
     setShowForm(true);
   };
 
-  const handleDelete = async (id: string, username: string) => {
+  const handleDelete = async (id: string, username: string, role: 'ADMIN' | 'OPERATOR') => {
+    if (username.toLowerCase() === 'admin') {
+      showToast('Default admin cannot be deleted', 'error');
+      return;
+    }
+    if (role === 'ADMIN' && !isSuperAdmin) {
+      showToast('Only the default admin can delete other admins', 'error');
+      return;
+    }
+
     if (!confirm(`Are you sure you want to delete user: ${username}?`)) return;
 
     try {
-      await fetch(`${API_BASE_URL}/auth/users/${id}`, {
+      await authFetch(`${API_BASE_URL}/auth/users/${id}`, {
         method: 'DELETE'
       });
       loadUsers();
@@ -240,7 +252,20 @@ export default function AdminUsers() {
                   <td>
                     <div className="action-buttons">
                       <button onClick={() => handleEdit(user)} className="btn-edit">Edit</button>
-                      <button onClick={() => handleDelete(user.id, user.username)} className="btn-delete">Delete</button>
+                      {(user.username.toLowerCase() !== 'admin') && (
+                        <button
+                          onClick={() => handleDelete(user.id, user.username, user.role)}
+                          className="btn-delete"
+                          disabled={user.role === 'ADMIN' && !isSuperAdmin}
+                          title={
+                            user.role === 'ADMIN' && !isSuperAdmin
+                              ? 'Only the default admin can delete admin users'
+                              : undefined
+                          }
+                        >
+                          Delete
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -252,3 +277,5 @@ export default function AdminUsers() {
     </div>
   );
 }
+  const currentUser = JSON.parse(localStorage.getItem('adminUser') || '{}');
+  const isSuperAdmin = currentUser?.username?.toLowerCase() === 'admin';

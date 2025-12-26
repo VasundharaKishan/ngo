@@ -40,6 +40,8 @@
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .card-image-container {
@@ -72,6 +74,10 @@
   padding-top: 1.5rem;
 }
 
+.campaign-card .card-actions {
+  padding-bottom: 1.5rem;
+}
+
 .campaign-card::before {
   content: '';
   position: absolute;
@@ -93,11 +99,16 @@
   box-shadow: 0 12px 40px rgba(102, 126, 234, 0.25);
 }
 
+.campaign-card .card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: start;
-  margin-bottom: 1.25rem;
 }
 
 .card-header h2 {
@@ -127,10 +138,16 @@
 
 .campaign-meta {
   border-top: none;
-  padding: 0.875rem 1rem;
+  padding: 0.875rem 1.25rem;
   margin-bottom: 1.25rem;
   background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
   border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 56px;
+  margin-left: 0.75rem;
+  margin-right: 0.75rem;
 }
 
 .meta-item {
@@ -155,6 +172,8 @@
   display: flex;
   gap: 0.75rem;
   margin-top: auto;
+  align-items: stretch;
+  padding-top: 0.75rem;
 }
 
 .inactive-label {
@@ -175,13 +194,19 @@
   background: white;
   color: #667eea;
   border: 2px solid #667eea;
-  padding: 0.75rem 0.875rem;
+  padding: 0.85rem 0.875rem;
   border-radius: 10px;
   text-decoration: none;
   font-weight: 700;
   text-align: center;
   transition: all 0.3s ease;
   font-size: 0.875rem;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
 .btn-secondary:hover {
@@ -196,7 +221,7 @@
   display: inline-block;
   background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
   color: #1e293b;
-  padding: 0.75rem 0.875rem;
+  padding: 0.85rem 0.875rem;
   border-radius: 10px;
   text-decoration: none;
   font-weight: 700;
@@ -207,6 +232,12 @@
   font-size: 0.875rem;
   position: relative;
   overflow: hidden;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
 .btn-primary::before {

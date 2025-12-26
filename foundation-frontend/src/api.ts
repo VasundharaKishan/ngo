@@ -42,6 +42,29 @@ export interface DonationRequest {
   campaignId: string;
 }
 
+export interface DonationResponse {
+  id: string;
+  amount: number;
+  currency: string;
+  donorName: string;
+  donorEmail: string;
+  status: 'PENDING' | 'SUCCESS' | 'FAILED';
+  stripePaymentIntentId?: string;
+  stripeSessionId?: string;
+  campaignId: string;
+  campaignTitle: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DonationPageResponse {
+  items: DonationResponse[];
+  page: number;
+  size: number;
+  totalItems: number;
+  totalPages: number;
+}
+
 export interface CheckoutSessionResponse {
   sessionId: string;
   url: string;
@@ -50,6 +73,45 @@ export interface CheckoutSessionResponse {
 export interface SiteConfig {
   featuredCampaignsCount: number;
   itemsPerPage: number;
+}
+
+export interface CampaignPopupDto {
+  id: string;
+  title: string;
+  shortDescription: string;
+  imageUrl?: string;
+  targetAmount: number;
+  currentAmount: number;
+  currency: string;
+  progressPercent: number;
+  badgeText: string;
+  activeNote?: string;
+  categoryName?: string;
+  categoryIcon?: string;
+}
+
+export interface DonatePopupResponse {
+  campaign: CampaignPopupDto | null;
+  mode: 'SPOTLIGHT' | 'FALLBACK';
+  fallbackReason?: 'NO_SPOTLIGHT_SET' | 'SPOTLIGHT_INACTIVE' | 'NO_ACTIVE_CAMPAIGNS' | null;
+}
+
+export interface CampaignSummaryDto {
+  id: string;
+  title: string;
+  active: boolean;
+  featured: boolean;
+  categoryName?: string;
+  updatedAt: string;
+}
+
+export interface DonatePopupSettingsResponse {
+  spotlightCampaignId?: string | null;
+  spotlightCampaign?: CampaignSummaryDto | null;
+}
+
+export interface DonatePopupSettingsRequest {
+  campaignId?: string | null;
 }
 
 // API Functions
@@ -111,4 +173,88 @@ export const api = {
     if (!response.ok) throw new Error('Failed to create checkout session');
     return response.json();
   },
+  
+  // Get donate popup campaign (spotlight or fallback)
+  getDonatePopup: async (): Promise<DonatePopupResponse> => {
+    const response = await fetch(`${API_BASE_URL}/config/public/donate-popup`);
+    if (!response.ok) throw new Error('Failed to fetch donate popup campaign');
+    return response.json();
+  },
+};
+
+// Admin API utilities (requires authentication)
+export const authFetch = async (url: string, options: RequestInit = {}) => {
+  const token = localStorage.getItem('adminToken');
+  if (!token) {
+    throw new Error('No authentication token found');
+  }
+
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      ...options.headers,
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (response.status === 401) {
+    localStorage.removeItem('adminToken');
+    window.location.href = '/admin/login';
+    throw new Error('Unauthorized');
+  }
+
+  return response;
+};
+
+export interface DonationFilters {
+  page?: number;
+  size?: number;
+  sort?: string;
+  q?: string;
+  status?: string;
+}
+
+export const fetchDonationsPaginated = async (filters: DonationFilters): Promise<DonationPageResponse> => {
+  const params = new URLSearchParams();
+  if (filters.page !== undefined) params.set('page', String(filters.page));
+  if (filters.size !== undefined) params.set('size', String(filters.size));
+  if (filters.sort) params.set('sort', filters.sort);
+  if (filters.q) params.set('q', filters.q);
+  if (filters.status && filters.status !== 'ALL') params.set('status', filters.status);
+
+  const url = `${API_BASE_URL}/admin/donations?${params.toString()}`;
+  const response = await authFetch(url);
+  
+  if (!response.ok) {
+    throw new Error('Failed to fetch donations');
+  }
+  
+  return response.json();
+};
+
+// Admin API for donate popup settings
+export const getDonatePopupSettings = async (): Promise<DonatePopupSettingsResponse> => {
+  const url = `${API_BASE_URL}/admin/config/donate-popup`;
+  const response = await authFetch(url);
+  
+  if (!response.ok) {
+    throw new Error('Failed to fetch donate popup settings');
+  }
+  
+  return response.json();
+};
+
+export const updateDonatePopupSettings = async (request: DonatePopupSettingsRequest): Promise<DonatePopupSettingsResponse> => {
+  const url = `${API_BASE_URL}/admin/config/donate-popup`;
+  const response = await authFetch(url, {
+    method: 'PUT',
+    body: JSON.stringify(request),
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to update donate popup settings');
+  }
+  
+  return response.json();
 };

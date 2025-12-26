@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../api';
 import { Link } from 'react-router-dom';
+import { authFetch } from '../utils/auth';
 import { formatCurrency, calculateProgress } from '../utils/currency';
 
 interface Campaign {
@@ -27,7 +28,7 @@ export default function Campaigns() {
   const loadCampaigns = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/admin/campaigns`);
+      const res = await authFetch(`${API_BASE_URL}/admin/campaigns`);
       const data = await res.json();
       setCampaigns(data);
     } catch (error) {
@@ -41,7 +42,7 @@ export default function Campaigns() {
     if (!confirm('Are you sure you want to delete this campaign?')) return;
     
     try {
-      await fetch(`${API_BASE_URL}/admin/campaigns/${id}`, {
+      await authFetch(`${API_BASE_URL}/admin/campaigns/${id}`, {
         method: 'DELETE'
       });
       loadCampaigns();

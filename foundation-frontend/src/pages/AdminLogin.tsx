@@ -99,10 +99,6 @@ export default function AdminLogin() {
             {loading ? 'Logging in...' : 'Login'}
           </button>
 
-          <div className="login-info">
-            <p>Default credentials:</p>
-            <code>Username: admin / Password: admin123</code>
-          </div>
         </form>
 
         <button onClick={() => navigate('/')} className="btn-home">

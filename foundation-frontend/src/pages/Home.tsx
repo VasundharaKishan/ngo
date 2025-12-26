@@ -1,36 +1,32 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import ImageCarousel from '../components/ImageCarousel';
-import { cmsApi, type Testimonial, type HomepageStat, type CarouselImage } from '../cmsApi';
+import { api, type Campaign } from '../api';
+import { formatCurrency, formatCurrencyCode } from '../utils/currency';
+import { cmsApi, type Testimonial, type HomepageStat } from '../cmsApi';
 import './Home.css';
 
 export default function Home() {
   const [heroContent, setHeroContent] = useState<Record<string, string>>({});
   const [whyDonateContent, setWhyDonateContent] = useState<Record<string, string>>({});
-  const [carouselContent, setCarouselContent] = useState<Record<string, string>>({});
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [stats, setStats] = useState<HomepageStat[]>([]);
-  const [carouselImages, setCarouselImages] = useState<CarouselImage[]>([]);
+  const [featuredCampaigns, setFeaturedCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadContent = async () => {
       try {
-        const [hero, whyDonate, carousel, testimonialsData, statsData, imagesData] = await Promise.all([
+        const [hero, whyDonate, testimonialsData, statsData] = await Promise.all([
           cmsApi.getContent('hero'),
           cmsApi.getContent('why_donate'),
-          cmsApi.getContent('carousel'),
           cmsApi.getTestimonials(),
-          cmsApi.getStats(),
-          cmsApi.getCarouselImages()
+          cmsApi.getStats()
         ]);
         
         setHeroContent(hero);
         setWhyDonateContent(whyDonate);
-        setCarouselContent(carousel);
         setTestimonials(testimonialsData);
         setStats(statsData);
-        setCarouselImages(imagesData);
       } catch (error) {
         console.error('Error loading CMS content:', error);
       } finally {
@@ -39,6 +35,24 @@ export default function Home() {
     };
     
     loadContent();
+  }, []);
+
+  useEffect(() => {
+    const loadFeatured = async () => {
+      try {
+        // Get the configured limit from site config
+        const config = await api.getPublicConfig();
+        const limit = config.featuredCampaignsCount || 3;
+        
+        // Fetch campaigns with the configured limit
+        const data = await api.getCampaigns({ featured: true, limit });
+        setFeaturedCampaigns(data);
+      } catch (error) {
+        console.error('Error loading featured campaigns:', error);
+      }
+    };
+
+    loadFeatured();
   }, []);
 
   if (loading) {
@@ -59,19 +73,55 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Impact Carousel */}
-      <section className="impact-showcase">
+      {/* Featured Campaigns */}
+      <section className="campaigns featured">
         <div className="container">
-          <h2 className="carousel-title">{carouselContent.title || 'See the Impact of Your Generosity'}</h2>
-          <ImageCarousel
-            images={carouselImages.length > 0 ? carouselImages.map(img => img.imageUrl) : [
-              'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=1400&q=90',
-              'https://images.unsplash.com/photo-1509099863731-ef4bff19e808?w=1400&q=90',
-              'https://images.unsplash.com/photo-1544913675-7f90df398a8f?w=1400&q=90'
-            ]}
-            autoPlay={true}
-            interval={4500}
-          />
+          <h2 className="section-title">Featured Campaigns</h2>
+          {featuredCampaigns.length === 0 ? (
+            <p className="no-campaigns">No featured campaigns at the moment.</p>
+          ) : (
+            <div className="campaign-grid">
+              {featuredCampaigns.map(campaign => (
+                <div key={campaign.id} className="campaign-card">
+                  <div className="campaign-content">
+                    <h3>{campaign.title}</h3>
+                    <p className="description">{campaign.shortDescription}</p>
+                    <div className="campaign-stats">
+                      <div className="progress-bar">
+                        <div
+                          className="progress-fill"
+                          style={{
+                            width: `${Math.min(
+                              100,
+                              (campaign.currentAmount || 0) / campaign.targetAmount * 100
+                            ).toFixed(0)}%`
+                          }}
+                        />
+                      </div>
+                      <div className="stats-row">
+                        <div className="stat">
+                          <strong>{formatCurrency(campaign.currentAmount || 0, campaign.currency)}</strong>
+                          <span>raised</span>
+                        </div>
+                        <div className="stat">
+                          <strong>{formatCurrency(campaign.targetAmount, campaign.currency)}</strong>
+                          <span>goal</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="campaign-meta">
+                      <span className="target">
+                        Target: {formatCurrency(campaign.targetAmount, campaign.currency)} {formatCurrencyCode(campaign.currency)}
+                      </span>
+                    </div>
+                    <Link to={`/campaigns/${campaign.id}`} className="btn-donate">
+                      Donate
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -115,19 +165,19 @@ export default function Home() {
           <div className="why-grid">
             <div className="why-card">
               <h3>{whyDonateContent.card1_title || '🎯 Direct Impact'}</h3>
-              <p>{whyDonateContent.card1_text || '92% of donations go directly to programs. See exactly where your money goes.'}</p>
+              <p>{whyDonateContent.card1_text || 'Every contribution directly supports our initial programs and on-ground efforts. We are committed to using funds responsibly and transparently as we grow.'}</p>
             </div>
             <div className="why-card">
               <h3>{whyDonateContent.card2_title || '🌍 Global Reach'}</h3>
-              <p>{whyDonateContent.card2_text || 'Supporting communities in 25+ countries across Asia, Africa, and South America.'}</p>
+              <p>{whyDonateContent.card2_text || 'We are starting with focused initiatives in India and Ireland, with a long-term vision to expand our reach responsibly.'}</p>
             </div>
             <div className="why-card">
               <h3>{whyDonateContent.card3_title || '✅ Proven Results'}</h3>
-              <p>{whyDonateContent.card3_text || 'Track record of sustainable change with measurable outcomes and transparency.'}</p>
+              <p>{whyDonateContent.card3_text || 'Our approach is guided by research, community needs, and measurable goals as we build our impact step by step.'}</p>
             </div>
             <div className="why-card">
               <h3>{whyDonateContent.card4_title || '🤝 Local Partners'}</h3>
-              <p>{whyDonateContent.card4_text || 'Working with trusted community leaders who know the needs firsthand.'}</p>
+              <p>{whyDonateContent.card4_text || 'We collaborate closely with local individuals and community groups to understand real needs and deliver meaningful support.'}</p>
             </div>
           </div>
         </div>

@@ -1,7 +1,8 @@
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './Layout.css';
 import FeaturedCampaignModal from './FeaturedCampaignModal';
+import { fetchContactInfo, type ContactInfo } from '../utils/contactApi';
 
 interface LayoutProps {
   children: ReactNode;
@@ -9,6 +10,25 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
+  const [contactLoading, setContactLoading] = useState(true);
+  const [contactError, setContactError] = useState(false);
+
+  useEffect(() => {
+    const loadContactInfo = async () => {
+      try {
+        const data = await fetchContactInfo();
+        setContactInfo(data);
+        setContactError(false);
+      } catch (error) {
+        console.error('Failed to load contact info:', error);
+        setContactError(true);
+      } finally {
+        setContactLoading(false);
+      }
+    };
+    loadContactInfo();
+  }, []);
 
   const handleDonateClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -63,21 +83,34 @@ export default function Layout({ children }: LayoutProps) {
               <h4>Get Involved</h4>
               <ul>
                 <li><a href="#" onClick={handleDonateClick}>Make a Donation</a></li>
-                <li><Link to="/volunteer">Volunteer</Link></li>
-                <li><Link to="/partner">Corporate Partners</Link></li>
-                <li><Link to="/fundraise">Start Fundraising</Link></li>
               </ul>
+              <p className="footer-coming-soon">More ways to get involved coming soon</p>
             </div>
 
             <div className="footer-section">
               <h4>Contact</h4>
-              <p>Email: contact@hopefoundation.org</p>
-              <p>Phone: +1 (555) 123-4567</p>
-              <p>Address: 123 Charity Lane, Global City</p>
-              <div className="certifications">
-                <span className="cert-badge">501(c)(3)</span>
-                <span className="cert-badge">4-Star Charity</span>
-              </div>
+              {contactLoading ? (
+                <p className="footer-loading">Loading contact info...</p>
+              ) : contactError || !contactInfo ? (
+                <>
+                  <p>Email: hopefoundationysv@gmail.com</p>
+                  <p className="footer-error-note">Unable to load full contact details</p>
+                </>
+              ) : (
+                <>
+                  <p>Email: {contactInfo.email}</p>
+                  {contactInfo.locations.map((location, index) => (
+                    <div key={index} className="footer-location">
+                      <p className="location-label"><strong>{location.label}</strong></p>
+                      {location.lines.map((line, lineIndex) => (
+                        <p key={lineIndex} className="location-line">{line}</p>
+                      ))}
+                      <p className="location-postal">{location.postalLabel}: {location.postalCode}</p>
+                      {location.mobile && <p className="location-mobile">Mobile: {location.mobile}</p>}
+                    </div>
+                  ))}
+                </>
+              )}
             </div>
           </div>
 
@@ -93,8 +126,8 @@ export default function Layout({ children }: LayoutProps) {
               <span>•</span>
               <button className="cookie-manage" onClick={() => alert('Cookie preferences panel would open here')}>Manage My Cookies</button>
             </div>
-            <p className="copyright">© 2025 Hope Foundation. All rights reserved. Registered Charity #12-3456789</p>
-            <p className="disclaimer">Hope Foundation is a registered 501(c)(3) nonprofit organization. Donations are tax-deductible to the extent permitted by law.</p>
+            <p className="copyright">© 2025 Hope Foundation. All rights reserved. Registered Charity</p>
+            <p className="disclaimer">Hope Foundation is a registered nonprofit organization. Donations are tax-deductible to the extent permitted by law.</p>
           </div>
         </div>
       </footer>

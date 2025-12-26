@@ -59,4 +59,8 @@ public class AdminUser {
     protected void onUpdate() {
         updatedAt = Instant.now();
     }
+
+    public boolean isActive() {
+        return Boolean.TRUE.equals(active);
+    }
 }

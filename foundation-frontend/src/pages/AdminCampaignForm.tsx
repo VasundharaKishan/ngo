@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { amountToCents, formatAmountForInput } from '../utils/currency';
 import { API_BASE_URL } from '../api';
+import { authFetch } from '../utils/auth';
+import { useToast } from '../components/ToastProvider';
 import './AdminCampaignForm.css';
 
 interface Category {
@@ -14,6 +16,7 @@ export default function AdminCampaignForm() {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEdit = !!id;
+  const showToast = useToast();
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -25,6 +28,7 @@ export default function AdminCampaignForm() {
     targetAmount: '',
     currentAmount: '0',
     imageUrl: '',
+    imageFilename: '',
     location: '',
     beneficiariesCount: '',
     featured: false,
@@ -47,7 +51,7 @@ export default function AdminCampaignForm() {
 
   const loadCategories = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/admin/categories`);
+      const res = await authFetch(`${API_BASE_URL}/admin/categories`);
       const data = await res.json();
       setCategories(data);
     } catch (error) {
@@ -55,11 +59,18 @@ export default function AdminCampaignForm() {
     }
   };
 
+  const extractFilename = (url: string): string => {
+    if (!url) return '';
+    const parts = url.split('/');
+    const name = parts[parts.length - 1];
+    return name?.includes('.') ? name : '';
+  };
+
   const loadCampaign = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/admin/campaigns/${id}`);
+      const res = await authFetch(`${API_BASE_URL}/admin/campaigns/${id}`);
       if (!res.ok) {
-        alert('Failed to load campaign');
+        showToast('Failed to load campaign', 'error');
         navigate('/admin');
         return;
       }
@@ -67,7 +78,7 @@ export default function AdminCampaignForm() {
       
       // Validate required fields
       if (!data || !data.title) {
-        alert('Invalid campaign data received');
+        showToast('Invalid campaign data received', 'error');
         navigate('/admin');
         return;
       }
@@ -80,6 +91,7 @@ export default function AdminCampaignForm() {
         targetAmount: formatAmountForInput(data.targetAmount || 0),
         currentAmount: formatAmountForInput(data.currentAmount || 0),
         imageUrl: data.imageUrl || '',
+        imageFilename: extractFilename(data.imageUrl || ''),
         location: data.location || '',
         beneficiariesCount: data.beneficiariesCount ? String(data.beneficiariesCount) : '',
         featured: data.featured ?? false,
@@ -88,7 +100,7 @@ export default function AdminCampaignForm() {
       });
     } catch (error) {
       console.error('Error loading campaign:', error);
-      alert('Failed to load campaign. Please try again.');
+      showToast('Failed to load campaign. Please try again.', 'error');
       navigate('/admin');
     }
   };
@@ -102,42 +114,70 @@ export default function AdminCampaignForm() {
 
     setUploading(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/admin/upload/image`, {
+      const res = await authFetch(`${API_BASE_URL}/admin/upload/image`, {
         method: 'POST',
         body: formData
       });
       const data = await res.json();
-      setFormData(prev => ({ ...prev, imageUrl: data.url }));
+      setFormData(prev => ({ ...prev, imageUrl: data.url, imageFilename: data.filename || '' }));
     } catch (error) {
       console.error('Error uploading image:', error);
-      alert('Failed to upload image');
+      showToast('Failed to upload image', 'error');
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleRemoveImage = async () => {
+    if (!formData.imageFilename) {
+      setFormData(prev => ({ ...prev, imageUrl: '', imageFilename: '' }));
+      return;
+    }
+
+    const confirmed = window.confirm('Remove this image from storage?');
+    if (!confirmed) return;
+
+    try {
+      const res = await authFetch(`${API_BASE_URL}/admin/upload/image/${encodeURIComponent(formData.imageFilename)}`, {
+        method: 'DELETE'
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        const msg = data.error || 'Failed to delete image';
+        showToast(msg, 'error');
+        return;
+      }
+      setFormData(prev => ({ ...prev, imageUrl: '', imageFilename: '' }));
+    } catch (error) {
+      console.error('Error deleting image:', error);
+      showToast('Failed to delete image', 'error');
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    const { imageFilename, ...cleanForm } = formData;
+
     // Validate required fields
-    if (!formData.title?.trim()) {
-      alert('Title is required');
+    if (!cleanForm.title?.trim()) {
+      showToast('Title is required', 'error');
       return;
     }
-    if (!formData.categoryId) {
-      alert('Please select a category');
+    if (!cleanForm.categoryId) {
+      showToast('Please select a category', 'error');
       return;
     }
-    if (!formData.targetAmount || parseFloat(formData.targetAmount) <= 0) {
-      alert('Please enter a valid target amount');
+    if (!cleanForm.targetAmount || parseFloat(cleanForm.targetAmount) <= 0) {
+      showToast('Please enter a valid target amount', 'error');
       return;
     }
 
     const payload = {
-      ...formData,
-      targetAmount: amountToCents(formData.targetAmount),
-      currentAmount: amountToCents(formData.currentAmount || '0'),
-      beneficiariesCount: formData.beneficiariesCount ? parseInt(formData.beneficiariesCount) : null
+      ...cleanForm,
+      targetAmount: amountToCents(cleanForm.targetAmount),
+      currentAmount: amountToCents(cleanForm.currentAmount || '0'),
+      beneficiariesCount: cleanForm.beneficiariesCount ? parseInt(cleanForm.beneficiariesCount) : null
     };
 
     try {
@@ -147,20 +187,21 @@ export default function AdminCampaignForm() {
       
       const method = isEdit ? 'PUT' : 'POST';
 
-      const res = await fetch(url, {
+      const res = await authFetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
 
       if (res.ok) {
+        showToast(isEdit ? 'Campaign updated' : 'Campaign created', 'success');
         navigate('/admin');
       } else {
-        alert('Failed to save campaign');
+        showToast('Failed to save campaign', 'error');
       }
     } catch (error) {
       console.error('Error saving campaign:', error);
-      alert('Failed to save campaign');
+      showToast('Failed to save campaign', 'error');
     }
   };
 
@@ -261,16 +302,19 @@ export default function AdminCampaignForm() {
           </div>
 
           <div className="form-group full-width">
-            <label>Campaign Image</label>
-            <div className="image-upload-area">
-              {formData.imageUrl && (
-                <div className="image-preview">
-                  <img src={formData.imageUrl} alt="Campaign" />
-                </div>
-              )}
-              <input
-                type="file"
-                accept="image/*"
+              <label>Campaign Image</label>
+              <div className="image-upload-area">
+                {formData.imageUrl && (
+                  <div className="image-preview">
+                    <img src={formData.imageUrl} alt="Campaign" />
+                    <button type="button" className="btn-cancel small" onClick={handleRemoveImage} disabled={uploading}>
+                      Remove image
+                    </button>
+                  </div>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
                 onChange={handleImageUpload}
                 disabled={uploading}
               />

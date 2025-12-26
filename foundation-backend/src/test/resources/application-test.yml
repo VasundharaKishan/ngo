@@ -9,13 +9,46 @@ spring:
     hibernate:
       ddl-auto: create-drop
     show-sql: false
+  sql:
+    init:
+      mode: never
   
   h2:
     console:
       enabled: false
+
+  mail:
+    username: test@example.com
+    password: dummy
+    host: localhost
+    port: 1025
+
+app:
+  frontend:
+    url: http://localhost:5173
+  jwt:
+    secret: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+    expiration-minutes: 60
+  auth:
+    otp-enabled: false
+    otp-expiration-minutes: 5
+    otp-max-attempts: 3
+    otp-length: 6
+
+storage:
+  r2:
+    endpoint: http://localhost:9000
+    bucket: test-bucket
+    access-key: dummy
+    secret-key: dummy
+    public-base-url: http://localhost:9000/test-bucket
 
 stripe:
   secret-key: sk_test_mock_key
   webhook-secret: whsec_test_mock_secret
   success-url: http://localhost:3000/success?session_id={CHECKOUT_SESSION_ID}
   cancel-url: http://localhost:3000/cancel
+
+data:
+  init:
+    enabled: false

@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { formatCurrency, calculateProgress } from '../utils/currency';import { API_BASE_URL } from '../api';import './AdminDashboardNew.css';
+import { formatCurrency, calculateProgress } from '../utils/currency';
+import { API_BASE_URL } from '../api';
+import { authFetch } from '../utils/auth';
+import { useToast } from '../components/ToastProvider';
+import './AdminDashboardNew.css';
 
 interface Campaign {
   id: string;
@@ -44,6 +48,7 @@ type MenuItem = 'dashboard' | 'donations' | 'users' | 'settings' | 'campaigns' |
 
 export default function AdminDashboardNew() {
   const navigate = useNavigate();
+  const showToast = useToast();
   const currentUser = JSON.parse(localStorage.getItem('adminUser') || '{}');
   const isAdmin = currentUser.role === 'ADMIN';
   
@@ -119,7 +124,7 @@ export default function AdminDashboardNew() {
     } else {
       // Check if this is a valid session
       if (!isSessionValid()) {
-        alert('Your session has expired or you are logged in elsewhere. Please login again.');
+        showToast('Your session has expired or you are logged in elsewhere. Please login again.', 'error');
         performLogout();
         return;
       }
@@ -133,7 +138,7 @@ export default function AdminDashboardNew() {
   useEffect(() => {
     const handleActivity = () => {
       if (!isSessionValid()) {
-        alert('Your session has expired. Please login again.');
+        showToast('Your session has expired. Please login again.', 'error');
         performLogout();
         return;
       }
@@ -149,7 +154,7 @@ export default function AdminDashboardNew() {
     // Check session validity every minute
     const intervalId = setInterval(() => {
       if (!isSessionValid()) {
-        alert('Your session has expired or you are logged in elsewhere.');
+        showToast('Your session has expired or you are logged in elsewhere.', 'error');
         performLogout();
       }
     }, 60000); // Check every minute
@@ -184,7 +189,7 @@ export default function AdminDashboardNew() {
   const loadDonations = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/admin/donations`);
+      const res = await authFetch(`${API_BASE_URL}/admin/donations`);
       const data = await res.json();
       setDonations(data);
     } catch (error) {
@@ -197,7 +202,7 @@ export default function AdminDashboardNew() {
   const loadCampaigns = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/admin/campaigns`);
+      const res = await authFetch(`${API_BASE_URL}/admin/campaigns`);
       const data = await res.json();
       setCampaigns(data);
     } catch (error) {
@@ -210,7 +215,7 @@ export default function AdminDashboardNew() {
   const loadCategories = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/admin/categories`);
+      const res = await authFetch(`${API_BASE_URL}/admin/categories`);
       const data = await res.json();
       setCategories(data);
     } catch (error) {
@@ -228,7 +233,7 @@ export default function AdminDashboardNew() {
     if (!confirm('Are you sure you want to delete this campaign?')) return;
     
     try {
-      await fetch(`${API_BASE_URL}/admin/campaigns/${id}`, {
+      await authFetch(`${API_BASE_URL}/admin/campaigns/${id}`, {
         method: 'DELETE'
       });
       loadCampaigns();
@@ -241,7 +246,7 @@ export default function AdminDashboardNew() {
     if (!confirm('Are you sure you want to delete this category?')) return;
     
     try {
-      await fetch(`${API_BASE_URL}/admin/categories/${id}`, {
+      await authFetch(`${API_BASE_URL}/admin/categories/${id}`, {
         method: 'DELETE'
       });
       loadCategories();
@@ -601,7 +606,7 @@ export default function AdminDashboardNew() {
       case 'categories':
         return (
           <div>
-            <button onClick={() => alert('Category creation coming soon')} className="btn-add-new">
+            <button onClick={() => showToast('Category creation coming soon', 'info')} className="btn-add-new">
               + Add New Category
             </button>
             
@@ -629,7 +634,7 @@ export default function AdminDashboardNew() {
                       <td>{category.active ? '✓ Active' : '✗ Inactive'}</td>
                       <td>
                         <div className="table-actions">
-                          <button onClick={() => alert('Edit coming soon')} className="btn-edit">Edit</button>
+                          <button onClick={() => showToast('Edit coming soon', 'info')} className="btn-edit">Edit</button>
                           <button onClick={() => deleteCategory(category.id)} className="btn-delete">Delete</button>
                         </div>
                       </td>

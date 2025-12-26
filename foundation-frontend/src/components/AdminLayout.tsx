@@ -247,6 +247,26 @@ export default function AdminLayout() {
                 <span>Settings</span>
               </NavLink>
             </li>
+            <li className="sidebar-menu-item">
+              <NavLink
+                to="/admin/contact-settings"
+                className={({ isActive }) => `sidebar-menu-button ${isActive ? 'active' : ''}`}
+                onClick={closeSidebar}
+              >
+                <span className="menu-icon">📞</span>
+                <span>Contact Info</span>
+              </NavLink>
+            </li>
+            <li className="sidebar-menu-item">
+              <NavLink
+                to="/admin/donate-popup-settings"
+                className={({ isActive }) => `sidebar-menu-button ${isActive ? 'active' : ''}`}
+                onClick={closeSidebar}
+              >
+                <span className="menu-icon">🌟</span>
+                <span>Donate Popup</span>
+              </NavLink>
+            </li>
           </ul>
         </nav>
 

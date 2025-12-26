@@ -219,3 +219,63 @@
     justify-content: space-between;
   }
 }
+
+/* Contact Settings Specific Styles */
+.config-input.full-width {
+  width: 100%;
+  max-width: 500px;
+}
+
+.config-textarea {
+  width: 100%;
+  max-width: 500px;
+  padding: 0.75rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  line-height: 1.5;
+  transition: all 0.3s ease;
+  resize: vertical;
+}
+
+.config-textarea:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.field-hint {
+  color: #94a3b8;
+  font-size: 0.85rem;
+  margin: 0.25rem 0 0 0;
+}
+
+.location-section {
+  background: #ffffff;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.location-section h4 {
+  margin: 0 0 1rem 0;
+  color: #667eea;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.location-section .config-item {
+  background: #f8fafc;
+  margin-bottom: 1rem;
+}
+
+.location-section .config-item:last-child {
+  margin-bottom: 0;
+}
+
+.btn-large {
+  padding: 1rem 3rem;
+  font-size: 1.1rem;
+}

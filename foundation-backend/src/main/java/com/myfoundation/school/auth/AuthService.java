@@ -2,17 +2,23 @@ package com.myfoundation.school.auth;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+
+import com.myfoundation.school.security.JwtService;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +30,19 @@ public class AuthService {
     private final PasswordSetupTokenRepository tokenRepository;
     private final UserSecurityAnswerRepository securityAnswerRepository;
     private final SecurityQuestionRepository securityQuestionRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
+    private final OtpTokenRepository otpTokenRepository;
+
+    @Value("${app.auth.otp-enabled:false}")
+    private boolean otpEnabled;
+    @Value("${app.auth.otp-expiration-minutes:5}")
+    private long otpExpirationMinutes;
+    @Value("${app.auth.otp-max-attempts:5}")
+    private int otpMaxAttempts;
+    @Value("${app.auth.otp-length:6}")
+    private int otpLength;
+    private final SecureRandom secureRandom = new SecureRandom();
     
     @Transactional
     public LoginResponse login(LoginRequest request) {
@@ -34,20 +53,25 @@ public class AuthService {
             throw new RuntimeException("User account is disabled");
         }
         
-        String hashedPassword = hashPassword(request.getPassword());
-        if (!user.getPassword().equals(hashedPassword)) {
+        if (!passwordMatches(user, request.getPassword())) {
             throw new RuntimeException("Invalid username or password");
         }
-        
+
+        if (otpEnabled) {
+            issueOtp(user);
+            log.info("OTP issued for user {}", user.getUsername());
+            return LoginResponse.otpRequired(user);
+        }
+
         // Update last login
         user.setLastLoginAt(Instant.now());
         adminUserRepository.save(user);
-        
-        // Generate simple token (in production, use JWT)
-        String token = generateToken(user);
-        
+
+        String token = jwtService.generateToken(user);
+        log.debug("Issued JWT for user {}", user.getUsername());
+
         log.info("User {} logged in successfully", user.getUsername());
-        return new LoginResponse(token, user.getUsername(), user.getEmail(), user.getFullName(), user.getRole());
+        return LoginResponse.withToken(user, token);
     }
     
     @Transactional
@@ -105,7 +129,7 @@ public class AuthService {
         AdminUser user = tokenEntity.getUser();
         
         // Set password
-        user.setPassword(hashPassword(password));
+        user.setPassword(passwordEncoder.encode(password));
         user.setActive(true);
         user.setUpdatedAt(Instant.now());
         adminUserRepository.save(user);
@@ -166,25 +190,49 @@ public class AuthService {
         
         // Only update password if provided
         if (request.getPassword() != null && !request.getPassword().isEmpty()) {
-            user.setPassword(hashPassword(request.getPassword()));
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
         }
         
         user.setUpdatedAt(Instant.now());
         return adminUserRepository.save(user);
     }
+
+    @Transactional
+    public AdminUser updateUserStatus(String id, boolean active) {
+        AdminUser user = adminUserRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        user.setActive(active);
+        user.setUpdatedAt(Instant.now());
+        return adminUserRepository.save(user);
+    }
     
     @Transactional
-    public void deleteUser(String id) {
-        AdminUser user = adminUserRepository.findById(id)
+    public void deleteUser(String id, String actingUsername) {
+        AdminUser target = adminUserRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("User not found"));
-        if (user.getUsername().equalsIgnoreCase("admin")) {
-            throw new RuntimeException("Super user cannot be deleted.");
+
+        AdminUser actor = adminUserRepository.findByUsernameIgnoreCase(actingUsername)
+            .orElseThrow(() -> new RuntimeException("Acting user not found"));
+
+        boolean actorIsSuperAdmin = actor.getUsername().equalsIgnoreCase("admin");
+
+        if (target.getUsername().equalsIgnoreCase("admin")) {
+            throw new RuntimeException("Cannot delete the default admin user.");
         }
-        if (user.getRole() == UserRole.ADMIN) {
-            throw new RuntimeException("Admin users cannot be deleted. Only operators can be deleted.");
+        if (actor.getId().equals(target.getId())) {
+            throw new RuntimeException("You cannot delete your own account.");
         }
-        adminUserRepository.delete(user);
-        log.info("Deleted user: {}", user.getUsername());
+        if (target.getRole() == UserRole.ADMIN && !actorIsSuperAdmin) {
+            throw new RuntimeException("Only the default admin can delete other admins.");
+        }
+
+        // Clean up dependent records to satisfy FK constraints
+        tokenRepository.deleteByUserId(target.getId());
+        otpTokenRepository.deleteByUserId(target.getId());
+        securityAnswerRepository.deleteByUserId(target.getId());
+
+        adminUserRepository.delete(target);
+        log.info("Deleted user: {} by {}", target.getUsername(), actor.getUsername());
     }
     
     public List<AdminUser> getAllUsers() {
@@ -193,21 +241,94 @@ public class AuthService {
     
     @Transactional
     public void initializeDefaultAdmin() {
-        if (adminUserRepository.count() == 0) {
-            AdminUser admin = AdminUser.builder()
-                    .username("admin")
-                    .email("admin@hopefoundation.org")
-                    .password(hashPassword("admin123"))
-                    .fullName("System Administrator")
-                    .role(UserRole.ADMIN)
-                    .active(true)
-                    .createdAt(Instant.now())
-                    .updatedAt(Instant.now())
-                    .build();
-            
-            adminUserRepository.save(admin);
-            log.info("Created default admin user");
+        // Check if admin@hopefoundation.org already exists
+        Optional<AdminUser> existing = adminUserRepository.findByEmail("admin@hopefoundation.org");
+        if (existing.isPresent()) {
+            log.info("Admin user already exists");
+            return;
         }
+        
+        // Create default admin user
+        AdminUser admin = AdminUser.builder()
+                .username("admin")
+                .email("admin@hopefoundation.org")
+                .password(passwordEncoder.encode("admin123"))
+                .fullName("System Administrator")
+                .role(UserRole.ADMIN)
+                .active(true)
+                .createdAt(Instant.now())
+                .updatedAt(Instant.now())
+                .build();
+        
+        adminUserRepository.save(admin);
+        log.info("Created default admin user");
+    }
+
+    @Transactional
+    public LoginResponse verifyOtp(OtpVerifyRequest request) {
+        AdminUser user = adminUserRepository.findByUsernameIgnoreCase(request.getUsername())
+                .orElseThrow(() -> new RuntimeException("Invalid username or code"));
+
+        if (!user.isActive()) {
+            throw new RuntimeException("User account is disabled");
+        }
+
+        OtpToken otpToken = otpTokenRepository
+                .findTopByUserIdAndUsedFalseAndExpiresAtAfterOrderByCreatedAtDesc(user.getId(), Instant.now())
+                .orElseThrow(() -> new RuntimeException("No valid code found. Please login again."));
+
+        if (otpToken.getAttempts() >= otpMaxAttempts) {
+            otpTokenRepository.delete(otpToken);
+            throw new RuntimeException("Too many invalid attempts. Please login again.");
+        }
+
+        String providedHash = hashOtp(request.getCode());
+        if (!providedHash.equals(otpToken.getCodeHash())) {
+            otpToken.setAttempts(otpToken.getAttempts() + 1);
+            otpTokenRepository.save(otpToken);
+
+            if (otpToken.getAttempts() >= otpMaxAttempts) {
+                otpTokenRepository.delete(otpToken);
+                throw new RuntimeException("Too many invalid attempts. Please login again.");
+            }
+
+            throw new RuntimeException("Invalid verification code");
+        }
+
+        otpToken.setUsed(true);
+        otpTokenRepository.save(otpToken);
+
+        user.setLastLoginAt(Instant.now());
+        adminUserRepository.save(user);
+
+        String token = jwtService.generateToken(user);
+        log.info("User {} completed OTP verification and logged in", user.getUsername());
+        return LoginResponse.withToken(user, token);
+    }
+
+    private void issueOtp(AdminUser user) {
+        // Remove any existing OTPs for this user
+        otpTokenRepository.deleteByUserId(user.getId());
+
+        String code = generateNumericCode(otpLength);
+        String codeHash = hashOtp(code);
+
+        OtpToken otpToken = OtpToken.builder()
+                .user(user)
+                .codeHash(codeHash)
+                .expiresAt(Instant.now().plus(otpExpirationMinutes, ChronoUnit.MINUTES))
+                .build();
+        otpTokenRepository.save(otpToken);
+
+        emailService.sendOtpEmail(user.getEmail(), user.getUsername(), code);
+    }
+
+    private String generateNumericCode(int length) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            sb.append(secureRandom.nextInt(10));
+        }
+        return sb.toString();
     }
     
     private String hashPassword(String password) {
@@ -219,10 +340,29 @@ public class AuthService {
             throw new RuntimeException("Error hashing password", e);
         }
     }
+
+    private String hashOtp(String otp) {
+        return hashPassword(otp);
+    }
     
-    private String generateToken(AdminUser user) {
-        // Simple token generation (in production, use JWT)
-        String data = user.getId() + ":" + user.getUsername() + ":" + System.currentTimeMillis();
-        return Base64.getEncoder().encodeToString(data.getBytes(StandardCharsets.UTF_8));
+    /**
+     * Support legacy SHA-256 hashes while migrating users to BCrypt.
+     */
+    private boolean passwordMatches(AdminUser user, String rawPassword) {
+        String stored = user.getPassword();
+
+        if (stored != null && stored.startsWith("$2")) {
+            return passwordEncoder.matches(rawPassword, stored);
+        }
+
+        String legacyHash = hashPassword(rawPassword);
+        if (legacyHash.equals(stored)) {
+            user.setPassword(passwordEncoder.encode(rawPassword));
+            adminUserRepository.save(user);
+            log.info("Upgraded password hash for user {}", user.getUsername());
+            return true;
+        }
+
+        return false;
     }
 }
