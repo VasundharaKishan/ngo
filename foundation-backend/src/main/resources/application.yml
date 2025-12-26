@@ -2,9 +2,9 @@ spring:
   application:
     name: foundation-backend
   datasource:
-    url: jdbc:postgresql://localhost:5432/ngo_donations?sslmode=prefer
-    username: e141057
-    password: 
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/ngo_donations?sslmode=prefer}
+    username: ${DATABASE_USERNAME:e141057}
+    password: ${DATABASE_PASSWORD:}
     driver-class-name: org.postgresql.Driver  
   
   jpa:
