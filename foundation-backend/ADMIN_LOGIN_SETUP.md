@@ -64,9 +64,9 @@ For production deployment, use Neon PostgreSQL:
 
 Or manually:
 ```bash
-export SPRING_DATASOURCE_URL="jdbc:postgresql://ep-mute-scene-abnd9qj2-pooler.eu-west-2.aws.neon.tech/neondb?sslmode=require"
-export SPRING_DATASOURCE_USERNAME=neondb_owner
-export SPRING_DATASOURCE_PASSWORD=npg_zC7GDKo2JeUq
+export SPRING_DATASOURCE_URL="jdbc:postgresql://localhost:5432/neondb?sslmode=require"
+export SPRING_DATASOURCE_USERNAME=username_xyz
+export SPRING_DATASOURCE_PASSWORD=password_xyz
 mvn spring-boot:run -DskipTests
 ```
 

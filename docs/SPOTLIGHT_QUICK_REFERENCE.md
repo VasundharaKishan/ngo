@@ -33,11 +33,7 @@
 ```bash
 cd foundation-backend
 
-export SPRING_DATASOURCE_URL='jdbc:postgresql://ep-mute-scene-abnd9qj2-pooler.eu-west-2.aws.neon.tech/neondb?sslmode=require'
-export SPRING_DATASOURCE_USERNAME='neondb_owner'
-export SPRING_DATASOURCE_PASSWORD='npg_zC7GDKo2JeUq'
-export STRIPE_SECRET_KEY='sk_test_51ScB6fHqvjNDXl7GRQgzrOcn56pIaGB2hHKCGsgDl9OtCzbah2HHaJvRzUhnSn0z4ZeWe3uR2d2IYG5jNiuJFQzT007wIt6KtW'
-export STRIPE_WEBHOOK_SECRET='whsec_3776fd7ebe8e1e6fd681768958a7012818d074866d7e79bb804b2a3f16838ff2'
+export request secrets and database configurations
 
 mvn spring-boot:run -DskipTests
 ```
