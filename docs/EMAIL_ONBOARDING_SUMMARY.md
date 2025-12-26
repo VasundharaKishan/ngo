@@ -190,7 +190,7 @@ Email contains:
 ```
 ┌──────────────────┬────────────────────────────────┐
 │                  │                                │
-│  Hope Foundation │     CREATE OPERATOR           │
+│  Yugal Savitri Seva │   CREATE OPERATOR           │
 │  Admin Dashboard │                                │
 │                  │  Username: [________]          │
 │  👤 John Doe     │  Email:    [________]          │
@@ -213,7 +213,7 @@ Email contains:
 ```
 ╔════════════════════════════════════════════╗
 ║                                            ║
-║   🎉 Welcome to Hope Foundation!          ║
+║   🎉 Welcome to Yugal Savitri Seva!       ║
 ║                                            ║
 ║   Hello John Doe,                          ║
 ║                                            ║
@@ -332,7 +332,7 @@ Email contains:
 
 ### Test Scenario 2: Check Email
 1. Open Gmail inbox for: kishankumarnaukri@gmail.com
-2. Should see email: "🎉 Welcome to Hope Foundation!"
+2. Should see email: "🎉 Welcome to Yugal Savitri Seva!"
 3. Email should contain:
    - Welcome message
    - Setup instructions

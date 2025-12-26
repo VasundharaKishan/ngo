@@ -1,6 +1,7 @@
 import { type ReactNode, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './Layout.css';
+import '../styles/ui-polish.css';
 import FeaturedCampaignModal from './FeaturedCampaignModal';
 import { fetchContactInfo, type ContactInfo } from '../utils/contactApi';
 
@@ -13,6 +14,7 @@ export default function Layout({ children }: LayoutProps) {
   const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
   const [contactLoading, setContactLoading] = useState(true);
   const [contactError, setContactError] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
     const loadContactInfo = async () => {
@@ -30,6 +32,15 @@ export default function Layout({ children }: LayoutProps) {
     loadContactInfo();
   }, []);
 
+  // Add scroll shadow effect to header
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);{`header ${isScrolled ? 'scrolled' : ''}`}
+
   const handleDonateClick = (e: React.MouseEvent) => {
     e.preventDefault();
     setIsModalOpen(true);
@@ -40,7 +51,7 @@ export default function Layout({ children }: LayoutProps) {
       <header className="header">
         <div className="container">
           <Link to="/" className="logo">
-            <h1>Hope Foundation</h1>
+            <h1>Yugal Savitri Seva</h1>
           </Link>
           <nav className="nav">
             <Link to="/" className="nav-link">Home</Link>
@@ -58,7 +69,7 @@ export default function Layout({ children }: LayoutProps) {
         <div className="container">
           <div className="footer-content">
             <div className="footer-section">
-              <h3>Hope Foundation</h3>
+              <h3>Yugal Savitri Seva</h3>
               <p className="footer-tagline">Empowering communities worldwide through compassion and action.</p>
               <div className="social-links">
                 <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook">f</a>
@@ -126,8 +137,8 @@ export default function Layout({ children }: LayoutProps) {
               <span>•</span>
               <button className="cookie-manage" onClick={() => alert('Cookie preferences panel would open here')}>Manage My Cookies</button>
             </div>
-            <p className="copyright">© 2025 Hope Foundation. All rights reserved. Registered Charity</p>
-            <p className="disclaimer">Hope Foundation is a registered nonprofit organization. Donations are tax-deductible to the extent permitted by law.</p>
+            <p className="copyright">© 2025 Yugal Savitri Seva. All rights reserved. Registered Charity</p>
+            <p className="disclaimer">Yugal Savitri Seva is a registered nonprofit organization. Donations are tax-deductible to the extent permitted by law.</p>
           </div>
         </div>
       </footer>

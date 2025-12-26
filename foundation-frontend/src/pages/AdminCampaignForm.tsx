@@ -71,7 +71,7 @@ export default function AdminCampaignForm() {
       const res = await authFetch(`${API_BASE_URL}/admin/campaigns/${id}`);
       if (!res.ok) {
         showToast('Failed to load campaign', 'error');
-        navigate('/admin');
+        navigate('/admin/campaigns');
         return;
       }
       const data = await res.json();
@@ -79,7 +79,7 @@ export default function AdminCampaignForm() {
       // Validate required fields
       if (!data || !data.title) {
         showToast('Invalid campaign data received', 'error');
-        navigate('/admin');
+        navigate('/admin/campaigns');
         return;
       }
       
@@ -101,7 +101,7 @@ export default function AdminCampaignForm() {
     } catch (error) {
       console.error('Error loading campaign:', error);
       showToast('Failed to load campaign. Please try again.', 'error');
-      navigate('/admin');
+      navigate('/admin/campaigns');
     }
   };
 
@@ -195,7 +195,7 @@ export default function AdminCampaignForm() {
 
       if (res.ok) {
         showToast(isEdit ? 'Campaign updated' : 'Campaign created', 'success');
-        navigate('/admin');
+        navigate('/admin/campaigns');
       } else {
         showToast('Failed to save campaign', 'error');
       }
@@ -209,7 +209,7 @@ export default function AdminCampaignForm() {
     <div className="admin-form-container">
       <div className="form-header">
         <h1>{isEdit ? 'Edit Campaign' : 'Create New Campaign'}</h1>
-        <button onClick={() => navigate('/admin')} className="btn-back">← Back</button>
+        <button onClick={() => navigate('/admin/campaigns')} className="btn-back">← Back</button>
       </div>
 
       <form onSubmit={handleSubmit} className="admin-form">
@@ -362,7 +362,7 @@ export default function AdminCampaignForm() {
         </div>
 
         <div className="form-actions">
-          <button type="button" onClick={() => navigate('/admin')} className="btn-cancel">
+          <button type="button" onClick={() => navigate('/admin/campaigns')} className="btn-cancel">
             Cancel
           </button>
           <button type="submit" className="btn-submit">

@@ -9,7 +9,7 @@
 - Consistent sizing across all cards
 
 ### 2. **Professional Footer** ✅
-- **4-Column Layout**: Hope Foundation | Quick Links | Get Involved | Contact
+- **4-Column Layout**: Yugal Savitri Seva | Quick Links | Get Involved | Contact
 - **Legal Compliance Links**: 
   - Terms and Conditions
   - Privacy Statement
@@ -182,7 +182,7 @@
     <div className="endorsement">
       <img src="celebrity-photo.jpg" className="photo" />
       <blockquote>
-        "Hope Foundation's work in rural education is transforming entire communities."
+        "Yugal Savitri Seva's work in rural education is transforming entire communities."
       </blockquote>
       <strong>— Celebrity Name</strong>
       <span>Humanitarian & Activist</span>

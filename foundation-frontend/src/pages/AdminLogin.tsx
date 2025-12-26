@@ -62,7 +62,7 @@ export default function AdminLogin() {
       <div className="login-container">
         <div className="login-header">
           <h1>🛠️ Admin Portal</h1>
-          <p>Hope Foundation</p>
+          <p>Yugal Savitri Seva</p>
         </div>
 
         <form onSubmit={handleLogin} className="login-form">
