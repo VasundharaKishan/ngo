@@ -57,9 +57,9 @@ export default function FeaturedCampaignModal({ isOpen, onClose }: FeaturedCampa
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay" onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="modal-title">
       <div className="featured-modal" onClick={(e) => e.stopPropagation()}>
-        <button className="modal-close" onClick={onClose}>×</button>
+        <button className="modal-close" onClick={onClose} aria-label="Close modal">×</button>
         
         {loading ? (
           <div className="modal-loading">Loading campaign...</div>
@@ -78,6 +78,7 @@ export default function FeaturedCampaignModal({ isOpen, onClose }: FeaturedCampa
                 src={campaign.imageUrl || 'https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?w=800&auto=format&fit=crop&q=80'} 
                 alt={campaign.title}
                 className="modal-image"
+                loading="lazy"
                 onError={(e) => {
                   e.currentTarget.src = 'https://placehold.co/800x600/667eea/ffffff?text=Campaign+Image';
                 }}
@@ -94,7 +95,7 @@ export default function FeaturedCampaignModal({ isOpen, onClose }: FeaturedCampa
                   </div>
                 </div>
 
-              <h2 className="modal-title">{campaign.title}</h2>
+              <h2 className="modal-title" id="modal-title">{campaign.title}</h2>
               
               <div className="modal-active-notice">
                 <div className="modal-notice-icon">🌟</div>
@@ -131,7 +132,8 @@ export default function FeaturedCampaignModal({ isOpen, onClose }: FeaturedCampa
 
               <div className="modal-actions">
                 <button className="modal-btn-primary" onClick={handleDonate}>
-                  Donate now
+                  <span className="heart-icon" aria-hidden="true">❤️</span>
+                  Donate
                 </button>
                 <button className="modal-btn-secondary" onClick={handleLearnMore}>
                   Learn more

@@ -16,6 +16,7 @@ interface ContactLocation {
 interface ContactInfo {
   email: string;
   locations: ContactLocation[];
+  showInFooter?: boolean;
 }
 
 export default function AdminContactSettings() {
@@ -25,7 +26,8 @@ export default function AdminContactSettings() {
   const [saving, setSaving] = useState(false);
   const [contactInfo, setContactInfo] = useState<ContactInfo>({
     email: '',
-    locations: []
+    locations: [],
+    showInFooter: true
   });
 
   useEffect(() => {
@@ -52,16 +54,16 @@ export default function AdminContactSettings() {
   };
 
   const handleSave = async () => {
-    // Validate email
-    if (!contactInfo.email || !contactInfo.email.includes('@')) {
+    // Validate email if provided
+    if (contactInfo.email && contactInfo.email.trim().length > 0 && !contactInfo.email.includes('@')) {
       showToast('Please enter a valid email address', 'error');
       return;
     }
 
-    // Validate locations
+    // Validate locations - each location must have a label if it exists
     for (const location of contactInfo.locations) {
-      if (!location.label || !location.mobile) {
-        showToast('All locations must have a label and mobile number', 'error');
+      if (!location.label || location.label.trim().length === 0) {
+        showToast('Each location must have a label', 'error');
         return;
       }
     }
@@ -98,6 +100,22 @@ export default function AdminContactSettings() {
     handleLocationChange(index, 'lines', lines);
   };
 
+  const addLocation = () => {
+    const newLocation: ContactLocation = {
+      label: '',
+      lines: [],
+      postalLabel: '',
+      postalCode: '',
+      mobile: ''
+    };
+    setContactInfo({ ...contactInfo, locations: [...contactInfo.locations, newLocation] });
+  };
+
+  const removeLocation = (index: number) => {
+    const updatedLocations = contactInfo.locations.filter((_, i) => i !== index);
+    setContactInfo({ ...contactInfo, locations: updatedLocations });
+  };
+
   if (loading) {
     return <div className="admin-settings"><p>Loading...</p></div>;
   }
@@ -111,10 +129,29 @@ export default function AdminContactSettings() {
             Manage the contact details displayed on the website footer
           </p>
 
+          {/* Show in Footer Toggle */}
+          <div className="config-item">
+            <div className="config-info">
+              <label>Show Contact Section in Footer</label>
+              <p className="field-hint">Display contact information in the website footer</p>
+            </div>
+            <div className="config-control">
+              <label className="toggle-switch">
+                <input
+                  type="checkbox"
+                  checked={contactInfo.showInFooter !== false}
+                  onChange={(e) => setContactInfo({ ...contactInfo, showInFooter: e.target.checked })}
+                />
+                <span className="toggle-slider"></span>
+              </label>
+              <span className="toggle-label">{contactInfo.showInFooter !== false ? 'Visible' : 'Hidden'}</span>
+            </div>
+          </div>
+
           {/* Email Section */}
           <div className="config-item">
             <div className="config-info">
-              <label>Email Address</label>
+              <label>Email Address (Optional)</label>
               <p className="field-hint">Main contact email for the foundation</p>
             </div>
             <div className="config-control">
@@ -130,10 +167,29 @@ export default function AdminContactSettings() {
 
           {/* Locations Section */}
           <div style={{ marginTop: '2rem' }}>
-            <h3>Office Locations</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h3 style={{ margin: 0 }}>Office Locations</h3>
+              <button onClick={addLocation} className="btn-add" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>
+                ➕ Add Location
+              </button>
+            </div>
+            {contactInfo.locations.length === 0 && (
+              <p style={{ color: '#64748b', fontStyle: 'italic', marginBottom: '1rem' }}>
+                No locations added. Click "Add Location" to add office addresses.
+              </p>
+            )}
             {contactInfo.locations.map((location, index) => (
-              <div key={index} className="location-section">
-                <h4>{location.label}</h4>
+              <div key={index} className="location-section" style={{ position: 'relative', border: '1px solid #e2e8f0', padding: '1.5rem', marginBottom: '1rem', borderRadius: '8px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                  <h4 style={{ margin: 0 }}>{location.label || `Location ${index + 1}`}</h4>
+                  <button 
+                    onClick={() => removeLocation(index)} 
+                    className="btn-delete"
+                    style={{ background: '#ef4444', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '4px', cursor: 'pointer' }}
+                  >
+                    🗑️ Remove
+                  </button>
+                </div>
                 
                 <div className="config-item">
                   <div className="config-info">

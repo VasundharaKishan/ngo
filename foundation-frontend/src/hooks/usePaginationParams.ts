@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { PAGINATION } from '../config/constants';
 
 interface PaginationState {
   page: number;
@@ -18,8 +19,8 @@ interface UsePaginationResult extends PaginationState {
   reset: () => void;
 }
 
-const DEFAULT_PAGE = 0;
-const DEFAULT_SIZE = 25;
+const DEFAULT_PAGE = PAGINATION.DEFAULT_PAGE;
+const DEFAULT_SIZE = PAGINATION.DEFAULT_SIZE;
 const DEFAULT_SORT = 'createdAt,desc';
 const DEFAULT_STATUS = 'ALL';
 

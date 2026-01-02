@@ -1,5 +1,12 @@
 package com.myfoundation.school.auth;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +24,7 @@ import java.util.Map;
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 @Slf4j
+@Tag(name = "Authentication", description = "Admin authentication and user management endpoints")
 public class AuthController {
     
     private final AuthService authService;
@@ -31,6 +39,22 @@ public class AuthController {
     @Value("${app.jwt.expiration-minutes:60}")
     private long jwtExpiryMinutes;
     
+    @Operation(
+        summary = "Admin login",
+        description = "Authenticates an admin user with username and password. Returns JWT token for API access. " +
+                      "May require OTP verification if enabled."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Login successful, JWT token returned",
+            content = @Content(schema = @Schema(implementation = LoginResponse.class))
+        ),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Invalid credentials"
+        )
+    })
     @PostMapping(value = "/login", consumes = "application/json", produces = "application/json")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
         try {
@@ -141,5 +165,26 @@ public class AuthController {
         log.info("User {} requested delete for user id: {}", currentUsername, id);
         authService.deleteUser(id, currentUsername);
         return ResponseEntity.noContent().build();
+    }
+    
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout() {
+        log.info("Logout requested");
+        ResponseEntity.BodyBuilder builder = ResponseEntity.ok();
+        
+        if (cookieEnabled) {
+            // Clear the JWT cookie
+            ResponseCookie cookie = ResponseCookie.from(cookieName, "")
+                    .httpOnly(true)
+                    .secure(true)
+                    .path("/")
+                    .sameSite("Lax")
+                    .maxAge(0)  // Expire immediately
+                    .domain(cookieDomain.isBlank() ? null : cookieDomain)
+                    .build();
+            builder.header("Set-Cookie", cookie.toString());
+        }
+        
+        return builder.body(Map.of("message", "Logged out successfully"));
     }
 }

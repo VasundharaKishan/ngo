@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../api';
+import { TIMING, STORAGE_KEYS } from '../config/constants';
 import './AdminLayout.css';
 
 export default function AdminLayout() {
@@ -9,9 +11,9 @@ export default function AdminLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Session management
-  const SESSION_KEY = 'admin_session_id';
-  const LAST_ACTIVITY_KEY = 'admin_last_activity';
-  const SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes
+  const SESSION_KEY = STORAGE_KEYS.SESSION_ID;
+  const LAST_ACTIVITY_KEY = STORAGE_KEYS.LAST_ACTIVITY;
+  const SESSION_TIMEOUT = TIMING.SESSION_TIMEOUT_ADMIN;
 
   const generateSessionId = () => {
     return `session_${Date.now()}_${Math.random().toString(36).substring(2)}`;
@@ -33,8 +35,18 @@ export default function AdminLayout() {
     return timeSinceActivity < SESSION_TIMEOUT;
   };
 
-  const performLogout = () => {
-    localStorage.removeItem('adminToken');
+  const performLogout = async () => {
+    try {
+      // Call logout endpoint to clear httpOnly cookie
+      await fetch(`${API_BASE_URL}/auth/logout`, {
+        method: 'POST',
+        credentials: 'include'
+      });
+    } catch (error) {
+      console.error('Logout API call failed:', error);
+    }
+    
+    // Clear client-side storage
     localStorage.removeItem('adminUser');
     localStorage.removeItem(SESSION_KEY);
     localStorage.removeItem(LAST_ACTIVITY_KEY);
@@ -239,6 +251,36 @@ export default function AdminLayout() {
             </li>
             <li className="sidebar-menu-item">
               <NavLink
+                to="/admin/hero-slides"
+                className={({ isActive }) => `sidebar-menu-button ${isActive ? 'active' : ''}`}
+                onClick={closeSidebar}
+              >
+                <span className="menu-icon">🎠</span>
+                <span>Hero Slides</span>
+              </NavLink>
+            </li>
+            <li className="sidebar-menu-item">
+              <NavLink
+                to="/admin/home-sections"
+                className={({ isActive }) => `sidebar-menu-button ${isActive ? 'active' : ''}`}
+                onClick={closeSidebar}
+              >
+                <span className="menu-icon">🏠</span>
+                <span>Home Sections</span>
+              </NavLink>
+            </li>
+            <li className="sidebar-menu-item">
+              <NavLink
+                to="/admin/cms"
+                className={({ isActive }) => `sidebar-menu-button ${isActive ? 'active' : ''}`}
+                onClick={closeSidebar}
+              >
+                <span className="menu-icon">📝</span>
+                <span>CMS Content</span>
+              </NavLink>
+            </li>
+            <li className="sidebar-menu-item">
+              <NavLink
                 to="/admin/settings"
                 className={({ isActive }) => `sidebar-menu-button ${isActive ? 'active' : ''}`}
                 onClick={closeSidebar}
@@ -255,6 +297,16 @@ export default function AdminLayout() {
               >
                 <span className="menu-icon">📞</span>
                 <span>Contact Info</span>
+              </NavLink>
+            </li>
+            <li className="sidebar-menu-item">
+              <NavLink
+                to="/admin/footer-settings"
+                className={({ isActive }) => `sidebar-menu-button ${isActive ? 'active' : ''}`}
+                onClick={closeSidebar}
+              >
+                <span className="menu-icon">🦶</span>
+                <span>Footer Settings</span>
               </NavLink>
             </li>
             <li className="sidebar-menu-item">

@@ -4,6 +4,7 @@ import { formatCurrency, calculateProgress } from '../utils/currency';
 import { API_BASE_URL } from '../api';
 import { authFetch } from '../utils/auth';
 import { useToast } from '../components/ToastProvider';
+import { TIMING } from '../config/constants';
 import './AdminDashboardNew.css';
 
 interface Campaign {
@@ -60,7 +61,7 @@ export default function AdminDashboardNew() {
   const [loading, setLoading] = useState(false);
   
   // Session management
-  const SESSION_TIMEOUT = 15 * 60 * 1000; // 15 minutes
+  const SESSION_TIMEOUT = TIMING.SESSION_TIMEOUT_DASHBOARD;
   const SESSION_KEY = 'admin_session_id';
   const LAST_ACTIVITY_KEY = 'admin_last_activity';
 

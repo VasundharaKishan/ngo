@@ -46,6 +46,7 @@ export default function CampaignDetail() {
               src={campaign.imageUrl} 
               alt={campaign.title}
               className="detail-image"
+              loading="eager"
               onError={(e) => {
                 e.currentTarget.style.display = 'none';
               }}
@@ -77,7 +78,8 @@ export default function CampaignDetail() {
               {campaign.active ? (
                 <>
                   <Link to={`/donate/${campaign.id}`} className="btn-donate-large">
-                    Donate Now
+                    <span className="heart-icon" aria-hidden="true">❤️</span>
+                    Donate
                   </Link>
                   <p className="secure-note">🔒 Secure payment via Stripe</p>
                 </>

@@ -3,6 +3,8 @@ import { formatCurrency } from '../utils/currency';
 import { fetchDonationsPaginated, type DonationPageResponse } from '../api';
 import { usePaginationParams } from '../hooks/usePaginationParams';
 import { useDebounce } from '../hooks/useDebounce';
+import { formatDateTime } from '../utils/dateUtils';
+import { TIMING } from '../config/constants';
 import './Donations.css';
 
 export default function Donations() {
@@ -12,7 +14,7 @@ export default function Donations() {
   const [searchInput, setSearchInput] = useState('');
 
   const { page, size, sort, q, status, setPage, setSize, setSort, setQuery, setStatus, reset } = usePaginationParams();
-  const debouncedSearch = useDebounce(searchInput, 300);
+  const debouncedSearch = useDebounce(searchInput, TIMING.DEBOUNCE_SEARCH);
 
   // Update query when debounced search changes
   useEffect(() => {
@@ -176,13 +178,7 @@ export default function Donations() {
                         </td>
                         <td>
                           {donation.createdAt
-                            ? new Date(donation.createdAt).toLocaleDateString('en-US', {
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })
+                            ? formatDateTime(donation.createdAt)
                             : 'N/A'}
                         </td>
                       </tr>

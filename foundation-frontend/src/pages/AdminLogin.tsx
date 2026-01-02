@@ -19,31 +19,28 @@ export default function AdminLogin() {
       const res = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ username, password }),
+        credentials: 'include' // Enable cookies for httpOnly JWT
       });
 
       if (res.ok) {
         const data = await res.json();
         
-        // Clear any existing sessions
-        localStorage.removeItem('admin_session_id');
-        localStorage.removeItem('admin_last_activity');
-        sessionStorage.clear();
-        
-        // Create new session
-        const sessionId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        localStorage.setItem('admin_session_id', sessionId);
-        localStorage.setItem('admin_last_activity', Date.now().toString());
-        sessionStorage.setItem('admin_session_id', sessionId);
-        
-        // Store auth data in localStorage
-        localStorage.setItem('adminToken', data.token);
+        // JWT is now in httpOnly cookie - no need to store token in localStorage
+        // Only store non-sensitive user info for UI display
         localStorage.setItem('adminUser', JSON.stringify({
           username: data.username,
           email: data.email,
           fullName: data.fullName,
           role: data.role
         }));
+        
+        // Create session tracking (for activity monitoring, not authentication)
+        const sessionId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        localStorage.setItem('admin_session_id', sessionId);
+        localStorage.setItem('admin_last_activity', Date.now().toString());
+        sessionStorage.setItem('admin_session_id', sessionId);
+        
         navigate('/admin');
       } else {
         const errorData = await res.json();

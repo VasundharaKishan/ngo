@@ -4,11 +4,14 @@ import './index.css'
 import './styles/ui-polish.css'
 import App from './App.tsx'
 import { ToastProvider } from './components/ToastProvider'
+import { ConfigProvider } from './contexts/ConfigContext'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ToastProvider>
-      <App />
-    </ToastProvider>
+    <ConfigProvider>
+      <ToastProvider>
+        <App />
+      </ToastProvider>
+    </ConfigProvider>
   </StrictMode>,
 )

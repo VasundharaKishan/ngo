@@ -21,6 +21,37 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Service layer for donation processing and Stripe payment integration.
+ * 
+ * This service handles:
+ * - Creating Stripe Checkout Sessions for donation payments
+ * - Processing Stripe webhook events (payment success, failure, expiration)
+ * - Managing donation lifecycle (PENDING → COMPLETED/FAILED)
+ * - Retrieving and filtering donations with pagination
+ * - Donation statistics and reporting
+ * 
+ * <p><strong>Payment Flow:</strong></p>
+ * <ol>
+ *   <li>Create donation record with PENDING status</li>
+ *   <li>Create Stripe Checkout Session with donation metadata</li>
+ *   <li>User completes payment on Stripe-hosted page</li>
+ *   <li>Stripe sends webhook event (success/failure)</li>
+ *   <li>Update donation status to COMPLETED or FAILED</li>
+ * </ol>
+ * 
+ * <p><strong>Webhook Events Handled:</strong></p>
+ * <ul>
+ *   <li>{@code checkout.session.completed} - Payment succeeded</li>
+ *   <li>{@code checkout.session.expired} - Session expired without payment</li>
+ *   <li>{@code checkout.session.async_payment_failed} - Payment failed</li>
+ * </ul>
+ * 
+ * @author Foundation Team
+ * @version 1.0
+ * @since 1.0
+ * @see <a href="https://stripe.com/docs/payments/checkout">Stripe Checkout Documentation</a>
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -30,6 +61,35 @@ public class DonationService {
     private final CampaignRepository campaignRepository;
     private final StripeConfig stripeConfig;
     
+    /**
+     * Create a Stripe Checkout Session for processing a donation.
+     * 
+     * <p>This method performs the following steps:</p>
+     * <ol>
+     *   <li>Validates that the campaign exists and is active</li>
+     *   <li>Creates a donation record with PENDING status</li>
+     *   <li>Creates a Stripe Checkout Session with donation details</li>
+     *   <li>Updates donation record with Stripe session ID</li>
+     *   <li>Returns session URL for redirect</li>
+     * </ol>
+     * 
+     * <p><strong>Business Rules:</strong></p>
+     * <ul>
+     *   <li>Campaign must exist and be active</li>
+     *   <li>Donation amount must be positive (validated by Stripe)</li>
+     *   <li>Currency must be supported by Stripe (usd, eur, gbp, inr, etc.)</li>
+     *   <li>Donor name and email are required</li>
+     * </ul>
+     * 
+     * <p><strong>Stripe Metadata:</strong></p>
+     * The Checkout Session includes metadata with donationId and campaignId,
+     * which are used by webhook handlers to update donation status.
+     * 
+     * @param request Donation request containing campaign ID, amount, currency, donor info
+     * @return CheckoutSessionResponse with Stripe session ID and redirect URL
+     * @throws RuntimeException if campaign not found or inactive
+     * @throws RuntimeException if Stripe API call fails
+     */
     @Transactional
     public CheckoutSessionResponse createStripeCheckoutSession(DonationRequest request) {
         log.info("Creating Stripe checkout session for campaign: {}, amount: {}", 

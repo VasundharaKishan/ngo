@@ -1,0 +1,347 @@
+/* ========================================
+   ACCESSIBILITY ENHANCEMENTS
+   WCAG 2.1 Level AA Compliance
+   ======================================== */
+
+/* ===== FOCUS INDICATORS ===== */
+
+/* Enhanced focus visible for keyboard navigation */
+*:focus-visible {
+  outline: 3px solid var(--color-primary-600);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Remove default focus for mouse users */
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Button focus states */
+button:focus-visible,
+a.btn-primary:focus-visible,
+a.btn-secondary:focus-visible,
+a.btn-hero:focus-visible {
+  outline: 3px solid var(--color-accent-500);
+  outline-offset: 3px;
+}
+
+/* Link focus states */
+a:focus-visible {
+  outline: 3px solid var(--color-primary-600);
+  outline-offset: 2px;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+}
+
+/* Form input focus states */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 3px solid var(--color-primary-600);
+  outline-offset: 0;
+  border-color: var(--color-primary-600);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+}
+
+/* ===== COLOR CONTRAST ENHANCEMENTS ===== */
+
+/* Ensure text has sufficient contrast (WCAG AA: 4.5:1 for normal text) */
+.text-muted,
+.text-secondary {
+  color: var(--color-gray-600); /* Enhanced from gray-500 for better contrast */
+}
+
+/* Footer text contrast */
+.footer {
+  color: var(--color-gray-100);
+}
+
+.footer a {
+  color: var(--color-gray-100);
+}
+
+.footer a:hover {
+  color: var(--color-white);
+}
+
+/* Button text contrast */
+.btn-primary,
+.modal-btn-primary {
+  background: var(--gradient-accent);
+  color: var(--color-white);
+  font-weight: var(--font-weight-semibold);
+}
+
+.btn-secondary {
+  background: var(--color-white);
+  color: var(--color-primary-700); /* Darker for better contrast */
+  border: 2px solid var(--color-primary-600);
+}
+
+/* ===== SCREEN READER ONLY CONTENT ===== */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.sr-only-focusable:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: inherit;
+  margin: inherit;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+/* ===== REDUCED MOTION ===== */
+
+/* Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .hero-section::before {
+    animation: none !important;
+  }
+}
+
+/* ===== HIGH CONTRAST MODE ===== */
+
+@media (prefers-contrast: high) {
+  /* Increase border thickness */
+  button,
+  input,
+  textarea,
+  select {
+    border-width: 2px;
+  }
+  
+  /* Enhance focus indicators */
+  *:focus-visible {
+    outline-width: 4px;
+  }
+  
+  /* Stronger shadows for elevation */
+  .campaign-card,
+  .modal-content,
+  .btn-primary {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  }
+}
+
+/* ===== TOUCH TARGET SIZES ===== */
+
+/* Ensure all interactive elements meet minimum 44x44px touch target (WCAG AAA) */
+button,
+a.btn-primary,
+a.btn-secondary,
+a.btn-hero,
+input[type="submit"],
+input[type="button"],
+input[type="reset"] {
+  min-height: 44px;
+  min-width: 44px;
+  padding: var(--space-3) var(--space-6);
+}
+
+/* Social media links */
+.social-links a {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Navigation links */
+.nav-link {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+}
+
+/* ===== KEYBOARD NAVIGATION ENHANCEMENTS ===== */
+
+/* Visible focus for skip links */
+.skip-to-content:focus {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: var(--z-modal);
+}
+
+/* Tab index for modals */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+}
+
+/* Ensure modal content is focusable */
+.featured-modal,
+.modal-content {
+  position: relative;
+}
+
+/* ===== ARIA LIVE REGIONS ===== */
+
+[aria-live="polite"],
+[aria-live="assertive"] {
+  position: relative;
+}
+
+/* Status messages */
+.status-message {
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  margin: var(--space-4) 0;
+}
+
+.status-message.success {
+  background: var(--color-success);
+  color: var(--color-white);
+}
+
+.status-message.error {
+  background: var(--color-error);
+  color: var(--color-white);
+}
+
+.status-message.warning {
+  background: var(--color-warning);
+  color: var(--color-gray-900);
+}
+
+/* ===== FORM ACCESSIBILITY ===== */
+
+/* Required field indicators */
+label abbr[title],
+label .required {
+  color: var(--color-error);
+  text-decoration: none;
+}
+
+/* Error messages */
+.error-message,
+.field-error {
+  color: var(--color-error);
+  font-size: var(--font-size-sm);
+  margin-top: var(--space-2);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Help text */
+.help-text,
+.field-description {
+  color: var(--color-gray-600);
+  font-size: var(--font-size-sm);
+  margin-top: var(--space-2);
+}
+
+/* ===== LOADING STATES ===== */
+
+/* Accessible loading spinner */
+.loading-spinner {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--color-gray-200);
+  border-top-color: var(--color-primary-600);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Loading state for buttons */
+button.loading,
+.btn-primary.loading,
+.btn-secondary.loading {
+  position: relative;
+  color: transparent;
+  pointer-events: none;
+}
+
+button.loading::after,
+.btn-primary.loading::after,
+.btn-secondary.loading::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 20px;
+  height: 20px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+/* ===== PRINT STYLES ===== */
+
+@media print {
+  /* Hide non-essential elements */
+  .skip-to-content,
+  .header,
+  .nav,
+  .social-links,
+  .modal-overlay,
+  .btn-donate-header,
+  button {
+    display: none !important;
+  }
+  
+  /* Ensure good contrast for printing */
+  body {
+    color: #000;
+    background: #fff;
+  }
+  
+  a {
+    text-decoration: underline;
+  }
+  
+  /* Show URLs for links */
+  a[href]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+  }
+}
+
+/* ===== DARK MODE CONSIDERATIONS ===== */
+
+@media (prefers-color-scheme: dark) {
+  /* Note: Full dark mode implementation would go here */
+  /* This is a placeholder for future dark mode support */
+  
+  /* Ensure sufficient contrast in dark mode */
+  :root {
+    --text-primary: #f9fafb;
+    --text-secondary: #d1d5db;
+    --bg-primary: #111827;
+    --bg-secondary: #1f2937;
+  }
+}

@@ -33,6 +33,8 @@ import java.util.List;
  * - /api/categories/** - Browse categories
  * - /api/cms/** - Public content (hero, testimonials, stats, etc.)
  * - /api/config/public - Public site configuration
+ * - /api/settings/public/** - Public site settings
+ * - /api/public/** - Public home sections and hero slides
  * - /api/donations/stripe/** - Stripe payment and webhooks
  * 
  * Protected Endpoints (require authentication):
@@ -60,7 +62,18 @@ public class SecurityConfig {
         
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .csrf(csrf -> csrf.disable())
+            .csrf(csrf -> csrf
+                .csrfTokenRepository(org.springframework.security.web.csrf.CookieCsrfTokenRepository.withHttpOnlyFalse())
+                .ignoringRequestMatchers(
+                    "/api/auth/login",
+                    "/api/auth/otp/**",
+                    "/api/auth/security-questions",
+                    "/api/auth/validate-token/**",
+                    "/api/auth/setup-password/**",
+                    "/api/auth/initialize",
+                    "/api/donations/stripe/webhook"  // Stripe webhooks can't send CSRF tokens
+                )
+            )
             .authorizeHttpRequests(auth -> {
                 log.info("Configuring authorization rules...");
                 auth
@@ -69,10 +82,13 @@ public class SecurityConfig {
                     .requestMatchers("/api/categories/**").permitAll()
                     .requestMatchers("/api/cms/**").permitAll()
                     .requestMatchers("/api/config/public/**").permitAll()
+                    .requestMatchers("/api/settings/public/**").permitAll()
+                    .requestMatchers("/api/public/**").permitAll()
                     .requestMatchers("/api/donations/stripe/**").permitAll()
                     
                     // Auth endpoints
                     .requestMatchers("/api/auth/login").permitAll()
+                    .requestMatchers("/api/auth/logout").permitAll()
                     .requestMatchers("/api/auth/security-questions").permitAll()
                     .requestMatchers("/api/auth/validate-token/**").permitAll()
                     .requestMatchers("/api/auth/setup-password/**").permitAll()
@@ -183,24 +199,26 @@ public class SecurityConfig {
             "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"
         ));
         
-        // Allow common headers + Stripe webhook signature
+        // Allow common headers + Stripe webhook signature + CSRF
         configuration.setAllowedHeaders(Arrays.asList(
             "Authorization",
             "Content-Type",
             "Accept",
             "Origin",
             "X-Requested-With",
-            "Stripe-Signature"
+            "Stripe-Signature",
+            "X-XSRF-TOKEN"
         ));
         
-        // Expose headers that frontend might need to read
+        // Expose headers that frontend might need to read + CSRF token
         configuration.setExposedHeaders(Arrays.asList(
             "Authorization",
-            "Content-Type"
+            "Content-Type",
+            "X-XSRF-TOKEN"
         ));
         
-        // JWT is sent via Authorization header, no cookies needed
-        configuration.setAllowCredentials(false);
+        // Enable credentials for cookie-based JWT authentication
+        configuration.setAllowCredentials(true);
         
         // Cache preflight requests for 1 hour
         configuration.setMaxAge(3600L);

@@ -13,6 +13,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -39,8 +40,8 @@ class ContactSettingsIntegrationTest {
         mockMvc.perform(get("/api/config/public/contact"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.email").exists())
-                .andExpect(jsonPath("$.locations").isArray());
+                .andExpect(jsonPath("$.locations").isArray())
+                .andExpect(jsonPath("$.showInFooter").exists());
     }
 
     /**
@@ -49,27 +50,27 @@ class ContactSettingsIntegrationTest {
     @Test
     void testAdminContactEndpoint_NoAuth_Unauthorized() throws Exception {
         mockMvc.perform(get("/api/admin/config/contact"))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isForbidden());  // Spring Security returns 403 for anonymous users
     }
 
     /**
      * Test admin GET endpoint with proper authentication
      */
     @Test
-    @WithMockUser(username = "admin", authorities = {"ADMIN"})
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
     void testAdminGetContact_WithAuth_Success() throws Exception {
         mockMvc.perform(get("/api/admin/config/contact"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.email").exists())
-                .andExpect(jsonPath("$.locations").isArray());
+                .andExpect(jsonPath("$.locations").isArray())
+                .andExpect(jsonPath("$.showInFooter").exists());
     }
 
     /**
      * Test admin PUT endpoint updates contact information
      */
     @Test
-    @WithMockUser(username = "admin", authorities = {"ADMIN"})
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
     void testAdminUpdateContact_WithAuth_Success() throws Exception {
         // Create request with valid data
         ContactLocation ireland = new ContactLocation();
@@ -84,6 +85,7 @@ class ContactSettingsIntegrationTest {
         request.setLocations(List.of(ireland));
 
         mockMvc.perform(put("/api/admin/config/contact")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -93,11 +95,11 @@ class ContactSettingsIntegrationTest {
     }
 
     /**
-     * Test validation - empty email should fail
+     * Test validation - empty email is now ALLOWED (optional field)
      */
     @Test
-    @WithMockUser(username = "admin", authorities = {"ADMIN"})
-    void testAdminUpdateContact_EmptyEmail_BadRequest() throws Exception {
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
+    void testAdminUpdateContact_EmptyEmail_Success() throws Exception {
         ContactLocation location = new ContactLocation();
         location.setLabel("Test");
         location.setLines(Arrays.asList("Test Address"));
@@ -106,20 +108,21 @@ class ContactSettingsIntegrationTest {
         location.setMobile("+1234567890");
 
         ContactInfoRequest request = new ContactInfoRequest();
-        request.setEmail("");  // Empty email
+        request.setEmail("");  // Empty email - now allowed
         request.setLocations(List.of(location));
 
         mockMvc.perform(put("/api/admin/config/contact")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isOk());
     }
 
     /**
      * Test validation - invalid email format should fail
      */
     @Test
-    @WithMockUser(username = "admin", authorities = {"ADMIN"})
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
     void testAdminUpdateContact_InvalidEmail_BadRequest() throws Exception {
         ContactLocation location = new ContactLocation();
         location.setLabel("Test");
@@ -133,24 +136,83 @@ class ContactSettingsIntegrationTest {
         request.setLocations(List.of(location));
 
         mockMvc.perform(put("/api/admin/config/contact")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
     }
 
     /**
-     * Test validation - empty locations should fail
+     * Test validation - empty locations are now ALLOWED (flexible contact info)
      */
     @Test
-    @WithMockUser(username = "admin", authorities = {"ADMIN"})
-    void testAdminUpdateContact_EmptyLocations_BadRequest() throws Exception {
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
+    void testAdminUpdateContact_EmptyLocations_Success() throws Exception {
         ContactInfoRequest request = new ContactInfoRequest();
         request.setEmail("test@example.com");
-        request.setLocations(List.of());  // Empty locations
+        request.setLocations(List.of());  // Empty locations - now allowed
 
         mockMvc.perform(put("/api/admin/config/contact")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isOk());
+    }
+
+    /**
+     * Test that null email is allowed
+     */
+    @Test
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
+    void testAdminUpdateContact_NullEmail_Success() throws Exception {
+        ContactLocation location = new ContactLocation();
+        location.setLabel("Test");
+        location.setLines(Arrays.asList("Test Address"));
+
+        ContactInfoRequest request = new ContactInfoRequest();
+        request.setEmail(null);  // Null email - allowed
+        request.setLocations(List.of(location));
+
+        mockMvc.perform(put("/api/admin/config/contact")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk());
+    }
+
+    /**
+     * Test that both email and locations can be empty/null
+     */
+    @Test
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
+    void testAdminUpdateContact_BothEmpty_Success() throws Exception {
+        ContactInfoRequest request = new ContactInfoRequest();
+        request.setEmail(null);
+        request.setLocations(List.of());
+
+        mockMvc.perform(put("/api/admin/config/contact")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk());
+    }
+
+    /**
+     * Test showInFooter field
+     */
+    @Test
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
+    void testAdminUpdateContact_ShowInFooter_Success() throws Exception {
+        ContactInfoRequest request = new ContactInfoRequest();
+        request.setEmail("test@example.com");
+        request.setLocations(List.of());
+        request.setShowInFooter(false);
+
+        mockMvc.perform(put("/api/admin/config/contact")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.showInFooter").value(false));
     }
 }

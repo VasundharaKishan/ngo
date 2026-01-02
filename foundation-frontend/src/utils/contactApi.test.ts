@@ -12,7 +12,7 @@ describe('contactApi', () => {
   describe('fetchContactInfo', () => {
     it('should fetch and return contact information successfully', async () => {
       const mockContactData = {
-        email: 'hopefoundationysv@gmail.com',
+        email: 'yugalsavitriseva@gmail.com',
         locations: [
           {
             label: 'Ireland',

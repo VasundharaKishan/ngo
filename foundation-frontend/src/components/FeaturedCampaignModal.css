@@ -250,14 +250,17 @@
 }
 
 .modal-btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #2a3da8;
   color: white;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 15px rgba(42, 61, 168, 0.4);
+  position: relative;
+  overflow: hidden;
 }
 
 .modal-btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5);
+  background: #f59e0b;
 }
 
 .modal-btn-secondary {
