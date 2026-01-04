@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { RiMegaphoneLine } from 'react-icons/ri';
 import { API_BASE_URL } from '../api';
 import { Link } from 'react-router-dom';
 import { authFetch } from '../utils/auth';
@@ -54,7 +55,7 @@ export default function Campaigns() {
   return (
     <>
       <div className="content-header">
-        <h2>📢 Campaigns</h2>
+        <h2><RiMegaphoneLine style={{verticalAlign: 'middle', marginRight: '0.5rem'}} /> Campaigns</h2>
         <p>Manage donation campaigns</p>
       </div>
 

@@ -25,6 +25,7 @@
   align-items: center;
   margin-bottom: 2rem;
   padding-bottom: 1.5rem;
+  padding-top: 1.5rem;
   border-bottom: 3px solid transparent;
   background: linear-gradient(white, white) padding-box,
               linear-gradient(to right, #667eea, #764ba2) border-box;

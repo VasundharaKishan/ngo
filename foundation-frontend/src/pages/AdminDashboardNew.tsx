@@ -1,5 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { 
+  RiAdminLine,
+  RiDashboardLine,
+  RiMoneyDollarCircleLine,
+  RiTeamLine,
+  RiSettings3Line,
+  RiMegaphoneLine,
+  RiFolderLine,
+  RiLogoutBoxLine
+} from 'react-icons/ri';
 import { formatCurrency, calculateProgress } from '../utils/currency';
 import { API_BASE_URL } from '../api';
 import { authFetch } from '../utils/auth';
@@ -296,7 +306,7 @@ export default function AdminDashboardNew() {
                 {/* Summary Cards */}
                 <div className="dashboard-cards">
                   <div className="dashboard-card">
-                    <div className="card-icon">💰</div>
+                    <div className="card-icon"><RiMoneyDollarCircleLine size={40} /></div>
                     <div className="card-content">
                       <h3>Total Donations</h3>
                       <p className="card-value">{donations.length}</p>
@@ -317,7 +327,7 @@ export default function AdminDashboardNew() {
                     </div>
                   </div>
                   <div className="dashboard-card">
-                    <div className="card-icon">📢</div>
+                    <div className="card-icon"><RiMegaphoneLine size={40} /></div>
                     <div className="card-content">
                       <h3>Active Campaigns</h3>
                       <p className="card-value">{campaigns.filter(c => c.active).length}</p>
@@ -407,7 +417,7 @@ export default function AdminDashboardNew() {
 
                 {/* Campaign Performance Grid */}
                 <div className="dashboard-section">
-                  <h2>📊 All Campaigns Performance</h2>
+                  <h2><RiDashboardLine style={{verticalAlign: 'middle', marginRight: '0.5rem'}} /> All Campaigns Performance</h2>
                   {campaigns.length === 0 ? (
                     <p style={{ textAlign: 'center', color: '#64748b', padding: '2rem' }}>
                       No campaigns created yet
@@ -527,7 +537,7 @@ export default function AdminDashboardNew() {
         return (
           <div>
             <div className="info-box">
-              <strong>⚙️ Site Configuration</strong>
+              <strong><RiSettings3Line style={{verticalAlign: 'middle', marginRight: '0.5rem'}} /> Site Configuration</strong>
               <p>Manage global site settings and preferences.</p>
             </div>
             <button onClick={() => navigate('/admin/settings')} className="btn-primary">
@@ -654,11 +664,11 @@ export default function AdminDashboardNew() {
 
   const getContentTitle = () => {
     switch (activeMenu) {
-      case 'dashboard': return { title: '📊 Dashboard', desc: 'Overview of donations and campaign performance' };
-      case 'donations': return { title: '💰 Donations', desc: 'View all donations made through the platform' };
-      case 'settings': return { title: '⚙️ Site Settings', desc: 'Configure global site preferences' };
-      case 'campaigns': return { title: '📢 Campaigns', desc: 'Manage donation campaigns' };
-      case 'categories': return { title: '📂 Categories', desc: 'Manage campaign categories' };
+      case 'dashboard': return { title: 'Dashboard', desc: 'Overview of donations and campaign performance' };
+      case 'donations': return { title: 'Donations', desc: 'View all donations made through the platform' };
+      case 'settings': return { title: 'Site Settings', desc: 'Configure global site preferences' };
+      case 'campaigns': return { title: 'Campaigns', desc: 'Manage donation campaigns' };
+      case 'categories': return { title: 'Categories', desc: 'Manage campaign categories' };
       default: return { title: '', desc: '' };
     }
   };
@@ -670,7 +680,7 @@ export default function AdminDashboardNew() {
       {/* Left Sidebar */}
       <aside className="admin-sidebar">
         <div className="sidebar-header">
-          <h1>🛠️ Admin Portal</h1>
+          <h1><RiAdminLine style={{verticalAlign: 'middle', marginRight: '0.5rem'}} /> Admin Portal</h1>
           <div className="user-info">
             <div><strong>{currentUser.fullName || 'Administrator'}</strong></div>
             <div style={{fontSize: '0.75rem', opacity: 0.8}}>{currentUser.role || 'ADMIN'}</div>
@@ -686,7 +696,7 @@ export default function AdminDashboardNew() {
                     className={`sidebar-menu-button ${activeMenu === 'dashboard' ? 'active' : ''}`}
                     onClick={() => setActiveMenu('dashboard')}
                   >
-                    <span className="menu-icon">📊</span>
+                    <RiDashboardLine className="menu-icon" />
                     <span>Dashboard</span>
                   </button>
                 </li>
@@ -695,7 +705,7 @@ export default function AdminDashboardNew() {
                     className={`sidebar-menu-button ${activeMenu === 'donations' ? 'active' : ''}`}
                     onClick={() => setActiveMenu('donations')}
                   >
-                    <span className="menu-icon">💰</span>
+                    <RiMoneyDollarCircleLine className="menu-icon" />
                     <span>Donations</span>
                   </button>
                 </li>
@@ -704,7 +714,7 @@ export default function AdminDashboardNew() {
                     className="sidebar-menu-button"
                     onClick={() => navigate('/admin/users')}
                   >
-                    <span className="menu-icon">👥</span>
+                    <RiTeamLine className="menu-icon" />
                     <span>Users</span>
                   </button>
                 </li>
@@ -715,7 +725,7 @@ export default function AdminDashboardNew() {
                 className={`sidebar-menu-button ${activeMenu === 'settings' ? 'active' : ''}`}
                 onClick={() => setActiveMenu('settings')}
               >
-                <span className="menu-icon">⚙️</span>
+                <RiSettings3Line className="menu-icon" />
                 <span>Settings</span>
               </button>
             </li>
@@ -724,7 +734,7 @@ export default function AdminDashboardNew() {
                 className={`sidebar-menu-button ${activeMenu === 'campaigns' ? 'active' : ''}`}
                 onClick={() => setActiveMenu('campaigns')}
               >
-                <span className="menu-icon">📢</span>
+                <RiMegaphoneLine className="menu-icon" />
                 <span>Campaigns</span>
               </button>
             </li>
@@ -733,7 +743,7 @@ export default function AdminDashboardNew() {
                 className={`sidebar-menu-button ${activeMenu === 'categories' ? 'active' : ''}`}
                 onClick={() => setActiveMenu('categories')}
               >
-                <span className="menu-icon">📂</span>
+                <RiFolderLine className="menu-icon" />
                 <span>Categories</span>
               </button>
             </li>
@@ -742,7 +752,7 @@ export default function AdminDashboardNew() {
 
         <div className="sidebar-footer">
           <button onClick={handleLogout} className="btn-logout-sidebar">
-            🚪 Logout
+            <RiLogoutBoxLine className="menu-icon" /> Logout
           </button>
         </div>
       </aside>

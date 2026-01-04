@@ -18,7 +18,7 @@
 .form-header h1 {
   margin: 0;
   color: #1e293b;
-  font-size: 1.25rem;
+  font-size: var(--font-size-xl);
   font-weight: 800;
 }
 
@@ -64,7 +64,7 @@
 .form-group label {
   font-weight: 700;
   color: #1e293b;
-  font-size: 0.95rem;
+  font-size: var(--font-size-sm);
 }
 
 .form-group input,
@@ -73,7 +73,7 @@
   padding: 0.875rem;
   border: 2px solid #e2e8f0;
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   transition: all 0.3s ease;
   font-family: inherit;
 }
@@ -82,7 +82,7 @@
 .form-group select:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #2a3da8;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
@@ -113,14 +113,14 @@
 }
 
 .upload-status {
-  color: #667eea;
+  color: #2a3da8;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm);
 }
 
 .help-text {
   color: #64748b;
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   margin: 0;
 }
 
@@ -146,7 +146,7 @@
   width: 20px;
   height: 20px;
   cursor: pointer;
-  accent-color: #667eea;
+  accent-color: #2a3da8;
 }
 
 .form-actions {
@@ -163,7 +163,7 @@
   border: none;
   border-radius: 12px;
   font-weight: 700;
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   cursor: pointer;
   transition: all 0.3s ease;
 }
@@ -178,7 +178,7 @@
 }
 
 .btn-submit {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #2a3da8 0%, #1e3a8a 100%);
   color: white;
   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }

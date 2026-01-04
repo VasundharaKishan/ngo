@@ -16,12 +16,9 @@ const Donations = lazy(() => import('./pages/Donations'));
 const Campaigns = lazy(() => import('./pages/Campaigns'));
 const Categories = lazy(() => import('./pages/Categories'));
 const AdminCampaignForm = lazy(() => import('./pages/AdminCampaignForm'));
-const AdminSettings = lazy(() => import('./pages/AdminSettings'));
-const AdminContactSettings = lazy(() => import('./pages/AdminContactSettings'));
-const AdminFooterSettings = lazy(() => import('./pages/AdminFooterSettings'));
+const AdminSettingsConsolidated = lazy(() => import('./pages/AdminSettingsConsolidated'));
 const AdminDonatePopupSettings = lazy(() => import('./pages/AdminDonatePopupSettings'));
-const AdminHeroSlides = lazy(() => import('./pages/AdminHeroSlides'));
-const AdminHomeSections = lazy(() => import('./pages/AdminHomeSections'));
+const AdminHomepage = lazy(() => import('./pages/AdminHomepage'));
 const AdminCMS = lazy(() => import('./pages/AdminCMS'));
 const AdminLogin = lazy(() => import('./pages/AdminLogin'));
 const AdminUsers = lazy(() => import('./pages/AdminUsers'));
@@ -55,12 +52,9 @@ function App() {
               <Route path="campaigns" element={<Campaigns />} />
               <Route path="categories" element={<Categories />} />
               <Route path="users" element={<AdminUsers />} />
-              <Route path="settings" element={<AdminSettings />} />
-              <Route path="contact-settings" element={<AdminContactSettings />} />
-              <Route path="footer-settings" element={<AdminFooterSettings />} />
+              <Route path="settings" element={<AdminSettingsConsolidated />} />
               <Route path="donate-popup-settings" element={<AdminDonatePopupSettings />} />
-              <Route path="hero-slides" element={<AdminHeroSlides />} />
-              <Route path="home-sections" element={<AdminHomeSections />} />
+              <Route path="homepage" element={<AdminHomepage />} />
               <Route path="cms" element={<AdminCMS />} />
             </Route>
             

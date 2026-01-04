@@ -4,6 +4,7 @@ import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -37,10 +38,15 @@ public class RateLimitingFilter implements Filter {
     private static final long CLEANUP_INTERVAL_MS = TimeUnit.MINUTES.toMillis(10);
     private long lastCleanup = System.currentTimeMillis();
     
-    // Rate limits by endpoint pattern
-    private static final int LOGIN_LIMIT = 5;           // 5 requests per minute
-    private static final int ADMIN_LIMIT = 60;          // 60 requests per minute
-    private static final int GENERAL_LIMIT = 100;       // 100 requests per minute
+    // Rate limits by endpoint pattern (configurable via properties)
+    @Value("${app.rate-limit.login:5}")
+    private int loginLimit;
+    
+    @Value("${app.rate-limit.admin:500}")
+    private int adminLimit;
+    
+    @Value("${app.rate-limit.general:500}")
+    private int generalLimit;
     
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -114,11 +120,11 @@ public class RateLimitingFilter implements Filter {
      */
     private int determineRateLimit(String uri) {
         if (uri.startsWith("/api/auth/login") || uri.startsWith("/api/auth/otp")) {
-            return LOGIN_LIMIT;  // Strict limit for auth endpoints
+            return loginLimit;  // Strict limit for auth endpoints
         } else if (uri.startsWith("/api/admin")) {
-            return ADMIN_LIMIT;  // Moderate limit for admin endpoints
+            return adminLimit;  // Moderate limit for admin endpoints
         } else {
-            return GENERAL_LIMIT;  // Generous limit for public endpoints
+            return generalLimit;  // Generous limit for public endpoints
         }
     }
     
@@ -158,7 +164,7 @@ public class RateLimitingFilter implements Filter {
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         log.info("Rate limiting filter initialized - Login: {}/min, Admin: {}/min, General: {}/min",
-            LOGIN_LIMIT, ADMIN_LIMIT, GENERAL_LIMIT);
+            loginLimit, adminLimit, generalLimit);
     }
     
     @Override

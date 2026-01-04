@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { authFetch } from '../utils/auth';
 import { API_BASE_URL } from '../config/constants';
 import '../styles/AdminCMS.css';
 
@@ -54,8 +55,8 @@ function AdminCMS() {
 
   // Check authentication
   useEffect(() => {
-    const token = sessionStorage.getItem('adminToken');
-    if (!token) {
+    const user = localStorage.getItem('adminUser');
+    if (!user) {
       navigate('/admin/login');
     }
   }, [navigate]);
@@ -69,12 +70,7 @@ function AdminCMS() {
     setError(null);
     
     try {
-      const token = sessionStorage.getItem('adminToken');
-      const response = await fetch(`${API_BASE_URL}/admin/cms/${activeTab}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
+      const response = await authFetch(`${API_BASE_URL}/admin/cms/${activeTab}`);
 
       if (!response.ok) throw new Error('Failed to load content');
 
@@ -105,12 +101,8 @@ function AdminCMS() {
     if (!confirm('Are you sure you want to delete this item?')) return;
 
     try {
-      const token = sessionStorage.getItem('adminToken');
-      const response = await fetch(`${API_BASE_URL}/admin/cms/${activeTab}/${id}`, {
+      const response = await authFetch(`${API_BASE_URL}/admin/cms/${activeTab}/${id}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
       });
 
       if (!response.ok) throw new Error('Failed to delete');
@@ -123,15 +115,13 @@ function AdminCMS() {
 
   const handleSave = async (data: any, id?: string) => {
     try {
-      const token = sessionStorage.getItem('adminToken');
       const url = id 
         ? `${API_BASE_URL}/admin/cms/${activeTab}/${id}` 
         : `${API_BASE_URL}/admin/cms/${activeTab}`;
       
-      const response = await fetch(url, {
+      const response = await authFetch(url, {
         method: id ? 'PUT' : 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(data),

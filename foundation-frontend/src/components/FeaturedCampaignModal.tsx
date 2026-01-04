@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { RiMegaphoneLine, RiStarLine } from 'react-icons/ri';
 import { api, type CampaignPopupDto, type DonatePopupResponse } from '../api';
 import { formatCurrency } from '../utils/currency';
 import './FeaturedCampaignModal.css';
@@ -65,7 +66,7 @@ export default function FeaturedCampaignModal({ isOpen, onClose }: FeaturedCampa
           <div className="modal-loading">Loading campaign...</div>
         ) : error ? (
           <div className="modal-error">
-            <div className="modal-error-icon">📢</div>
+            <div className="modal-error-icon"><RiMegaphoneLine size={48} style={{color: '#2a3da8'}} /></div>
             <p className="modal-error-text">{error}</p>
             <button className="modal-btn-primary" onClick={() => { navigate('/campaigns'); onClose(); }}>
               Browse All Campaigns
@@ -98,7 +99,7 @@ export default function FeaturedCampaignModal({ isOpen, onClose }: FeaturedCampa
               <h2 className="modal-title" id="modal-title">{campaign.title}</h2>
               
               <div className="modal-active-notice">
-                <div className="modal-notice-icon">🌟</div>
+                <div className="modal-notice-icon"><RiStarLine size={24} style={{color: '#f59e0b'}} /></div>
                 <p className="modal-notice-text">
                   <strong>We are actively working on this campaign!</strong><br/>
                   Your contribution will directly support our ongoing efforts and make an immediate impact in the lives of those we serve.

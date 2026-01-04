@@ -3,7 +3,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #1e3a8a 0%, #2a3da8 100%);
   padding: 2rem;
 }
 
@@ -24,14 +24,14 @@
 .login-header h1 {
   margin: 0 0 0.5rem 0;
   color: #1e293b;
-  font-size: 2rem;
+  font-size: var(--font-size-3xl);
   font-weight: 800;
 }
 
 .login-header p {
   margin: 0;
   color: #64748b;
-  font-size: 1.125rem;
+  font-size: var(--font-size-lg);
   font-weight: 600;
 }
 
@@ -59,30 +59,30 @@
 .form-group label {
   font-weight: 700;
   color: #1e293b;
-  font-size: 0.95rem;
+  font-size: var(--font-size-sm);
 }
 
 .form-group input {
   padding: 1rem;
   border: 2px solid #e2e8f0;
   border-radius: 12px;
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   transition: all 0.3s ease;
 }
 
 .form-group input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #2a3da8;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .btn-login {
   padding: 1.25rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #2a3da8 0%, #1e3a8a 100%);
   color: white;
   border: none;
   border-radius: 12px;
-  font-size: 1.125rem;
+  font-size: var(--font-size-lg);
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -111,7 +111,7 @@
 .login-info p {
   margin: 0 0 0.5rem 0;
   color: #64748b;
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   font-weight: 600;
 }
 
@@ -122,7 +122,7 @@
   border-radius: 6px;
   font-family: 'Courier New', monospace;
   color: #475569;
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
 }
 
 .btn-home {
@@ -130,8 +130,8 @@
   margin-top: 1.5rem;
   padding: 0.875rem;
   background: white;
-  color: #667eea;
-  border: 2px solid #667eea;
+  color: #2a3da8;
+  border: 2px solid #2a3da8;
   border-radius: 12px;
   font-weight: 600;
   cursor: pointer;
@@ -139,7 +139,7 @@
 }
 
 .btn-home:hover {
-  background: #667eea;
+  background: #2a3da8;
   color: white;
 }
 
@@ -153,6 +153,6 @@
   }
 
   .login-header h1 {
-    font-size: 1.5rem;
+    font-size: var(--font-size-2xl);
   }
 }

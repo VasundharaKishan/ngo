@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { RiMoneyDollarCircleLine } from 'react-icons/ri';
 import { formatCurrency } from '../utils/currency';
 import { fetchDonationsPaginated, type DonationPageResponse } from '../api';
 import { usePaginationParams } from '../hooks/usePaginationParams';
@@ -69,7 +70,7 @@ export default function Donations() {
   return (
     <>
       <div className="content-header">
-        <h2>💰 Donations</h2>
+        <h2><RiMoneyDollarCircleLine style={{verticalAlign: 'middle', marginRight: '0.5rem'}} /> Donations</h2>
         <p>View and manage all donations made through the platform</p>
       </div>
 

@@ -34,6 +34,10 @@ app:
     otp-expiration-minutes: 5
     otp-max-attempts: 3
     otp-length: 6
+  rate-limit:
+    login: 10000
+    admin: 10000
+    general: 10000
 
 storage:
   r2:

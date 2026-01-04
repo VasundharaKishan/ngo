@@ -62,12 +62,17 @@ app:
     cookie-enabled: ${JWT_COOKIE_ENABLED:true}
     cookie-name: ${JWT_COOKIE_NAME:admin_jwt}
     cookie-domain: ${JWT_COOKIE_DOMAIN:}
+    cookie-secure: ${JWT_COOKIE_SECURE:false}
   allow-admin-bootstrap: ${ALLOW_ADMIN_BOOTSTRAP:true}
   auth:
     otp-enabled: ${AUTH_OTP_ENABLED:false}
     otp-expiration-minutes: ${AUTH_OTP_EXPIRATION_MINUTES:5}
     otp-max-attempts: ${AUTH_OTP_MAX_ATTEMPTS:5}
     otp-length: ${AUTH_OTP_LENGTH:6}
+  rate-limit:
+    enabled: ${RATE_LIMIT_ENABLED:true}
+    requests-per-minute: ${RATE_LIMIT_REQUESTS_PER_MINUTE:60}
+    burst-size: ${RATE_LIMIT_BURST_SIZE:10}
 
 cors:
   allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}

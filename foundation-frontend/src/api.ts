@@ -185,22 +185,24 @@ export const api = {
 
 // Admin API utilities (requires authentication)
 export const authFetch = async (url: string, options: RequestInit = {}) => {
-  const token = localStorage.getItem('adminToken');
-  if (!token) {
+  // Check if user is logged in (using adminUser in localStorage as indicator)
+  const adminUser = localStorage.getItem('adminUser');
+  if (!adminUser) {
     throw new Error('No authentication token found');
   }
 
+  // Use cookies for authentication (httpOnly cookies are sent automatically)
   const response = await fetch(url, {
     ...options,
+    credentials: 'include', // Important: Include cookies in the request
     headers: {
       ...options.headers,
-      'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json',
     },
   });
 
   if (response.status === 401) {
-    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminUser');
     window.location.href = '/admin/login';
     throw new Error('Unauthorized');
   }

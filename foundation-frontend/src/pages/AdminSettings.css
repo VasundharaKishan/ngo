@@ -18,7 +18,7 @@
 .settings-header h1 {
   margin: 0;
   color: #1e293b;
-  font-size: 2rem;
+  font-size: var(--font-size-3xl);
   font-weight: 800;
 }
 
@@ -53,14 +53,14 @@
 .settings-section h2 {
   margin: 0 0 0.5rem 0;
   color: #1e293b;
-  font-size: 1.5rem;
+  font-size: var(--font-size-2xl);
   font-weight: 800;
 }
 
 .section-description {
   color: #64748b;
   margin-bottom: 2rem;
-  font-size: 0.95rem;
+  font-size: var(--font-size-sm);
 }
 
 .config-item {
@@ -76,7 +76,7 @@
 }
 
 .config-item:hover {
-  border-color: #667eea;
+  border-color: #2a3da8;
   background: #f0f4ff;
 }
 
@@ -89,7 +89,7 @@
   font-weight: 700;
   color: #1e293b;
   margin-bottom: 0.25rem;
-  font-size: 1rem;
+  font-size: var(--font-size-base);
 }
 
 .config-key {
@@ -98,7 +98,7 @@
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
   font-family: 'Courier New', monospace;
-  font-size: 0.8rem;
+  font-size: var(--font-size-xs);
   color: #64748b;
 }
 
@@ -113,7 +113,7 @@
   padding: 0.75rem;
   border: 2px solid #e2e8f0;
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   font-weight: 600;
   text-align: center;
   transition: all 0.3s ease;
@@ -121,13 +121,13 @@
 
 .config-input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #2a3da8;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .btn-save {
   padding: 0.75rem 1.5rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #2a3da8 0%, #1e3a8a 100%);
   color: white;
   border: none;
   border-radius: 8px;
@@ -164,7 +164,7 @@
 .info-box h3 {
   margin: 0 0 1rem 0;
   color: #1e293b;
-  font-size: 1.25rem;
+  font-size: var(--font-size-xl);
   font-weight: 800;
 }
 
@@ -177,7 +177,7 @@
 .info-box li {
   padding: 0.75rem 0;
   color: #475569;
-  font-size: 0.95rem;
+  font-size: var(--font-size-sm);
   line-height: 1.6;
   border-bottom: 1px solid #f1f5f9;
 }
@@ -187,7 +187,7 @@
 }
 
 .info-box strong {
-  color: #667eea;
+  color: #2a3da8;
   font-weight: 700;
 }
 
@@ -232,7 +232,7 @@
   padding: 0.75rem;
   border: 2px solid #e2e8f0;
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   font-family: inherit;
   line-height: 1.5;
   transition: all 0.3s ease;
@@ -241,13 +241,13 @@
 
 .config-textarea:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #2a3da8;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .field-hint {
   color: #94a3b8;
-  font-size: 0.85rem;
+  font-size: var(--font-size-sm);
   margin: 0.25rem 0 0 0;
 }
 
@@ -261,8 +261,8 @@
 
 .location-section h4 {
   margin: 0 0 1rem 0;
-  color: #667eea;
-  font-size: 1.1rem;
+  color: #2a3da8;
+  font-size: var(--font-size-lg);
   font-weight: 700;
 }
 
@@ -277,18 +277,18 @@
 
 .btn-large {
   padding: 1rem 3rem;
-  font-size: 1.1rem;
+  font-size: var(--font-size-lg);
 }
 
 /* New styles for Site Settings page */
 .btn-save-all {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #2a3da8 0%, #1e3a8a 100%);
   color: white;
   padding: 0.875rem 2rem;
   border: none;
   border-radius: 8px;
   font-weight: 700;
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
@@ -323,7 +323,7 @@
   padding: 0.75rem;
   border: 2px solid #e2e8f0;
   border-radius: 8px;
-  font-size: 0.95rem;
+  font-size: var(--font-size-sm);
   font-family: inherit;
   transition: all 0.3s ease;
 }
@@ -337,25 +337,25 @@
 .config-input input:focus,
 .config-input textarea:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #2a3da8;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .config-description {
   color: #64748b;
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   margin: 0.25rem 0 0 0;
 }
 
 .config-meta {
   color: #94a3b8;
-  font-size: 0.8rem;
+  font-size: var(--font-size-xs);
   display: block;
   margin-top: 0.5rem;
 }
 
 .settings-info-box {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #2a3da8 0%, #1e3a8a 100%);
   color: white;
   padding: 2rem;
   border-radius: 16px;
@@ -364,7 +364,7 @@
 
 .settings-info-box h3 {
   margin: 0 0 1rem 0;
-  font-size: 1.5rem;
+  font-size: var(--font-size-2xl);
   font-weight: 800;
 }
 

@@ -1,5 +1,6 @@
 package com.myfoundation.school.donation;
 
+import com.myfoundation.school.auth.EmailService;
 import com.myfoundation.school.campaign.Campaign;
 import com.myfoundation.school.campaign.CampaignRepository;
 import com.myfoundation.school.config.StripeConfig;
@@ -18,6 +19,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -60,6 +62,7 @@ public class DonationService {
     private final DonationRepository donationRepository;
     private final CampaignRepository campaignRepository;
     private final StripeConfig stripeConfig;
+    private final EmailService emailService;
     
     /**
      * Create a Stripe Checkout Session for processing a donation.
@@ -181,6 +184,43 @@ public class DonationService {
         donationRepository.save(donation);
         
         log.info("[Webhook] Donation {} successfully marked as SUCCESS. Campaign totals will be derived from this donation.", donationId);
+        
+        // Send donation acknowledgement emails
+        try {
+            String campaignTitle = donation.getCampaign() != null ? donation.getCampaign().getTitle() : "General Donation";
+            String donationDate = donation.getCreatedAt()
+                .atZone(java.time.ZoneId.systemDefault())
+                .format(DateTimeFormatter.ofPattern("MMMM dd, yyyy 'at' hh:mm a"));
+            
+            // Send thank you email to donor
+            log.info("[Webhook] Sending donation acknowledgement email to donor: {}", donation.getDonorEmail());
+            emailService.sendDonationAcknowledgement(
+                donation.getDonorEmail(),
+                donation.getDonorName(),
+                donation.getAmount(),
+                donation.getCurrency(),
+                campaignTitle,
+                donation.getId(),
+                donationDate
+            );
+            
+            // Send notification email to admin
+            log.info("[Webhook] Sending donation notification to admin");
+            emailService.sendDonationNotificationToAdmin(
+                donation.getDonorName(),
+                donation.getDonorEmail(),
+                donation.getAmount(),
+                donation.getCurrency(),
+                campaignTitle,
+                donation.getId(),
+                donationDate
+            );
+            
+            log.info("[Webhook] Donation emails sent successfully for donation {}", donationId);
+        } catch (Exception e) {
+            log.error("[Webhook] Failed to send donation emails for donation {}, but donation was still successful", donationId, e);
+            // Don't throw - email failure shouldn't affect donation status
+        }
     }
     
     @Transactional

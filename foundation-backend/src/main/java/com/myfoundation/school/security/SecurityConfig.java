@@ -60,10 +60,16 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         log.info("Configuring Security Filter Chain with FRONTEND_URL: {}", frontendUrl);
         
+        // Configure CSRF token repository with proper settings
+        org.springframework.security.web.csrf.CookieCsrfTokenRepository csrfTokenRepository = 
+            org.springframework.security.web.csrf.CookieCsrfTokenRepository.withHttpOnlyFalse();
+        csrfTokenRepository.setCookiePath("/");
+        csrfTokenRepository.setCookieName("XSRF-TOKEN");
+        
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf
-                .csrfTokenRepository(org.springframework.security.web.csrf.CookieCsrfTokenRepository.withHttpOnlyFalse())
+                .csrfTokenRepository(csrfTokenRepository)
                 .ignoringRequestMatchers(
                     "/api/auth/login",
                     "/api/auth/otp/**",
@@ -71,6 +77,7 @@ public class SecurityConfig {
                     "/api/auth/validate-token/**",
                     "/api/auth/setup-password/**",
                     "/api/auth/initialize",
+                    "/api/donations/stripe/create",  // Public donation endpoint
                     "/api/donations/stripe/webhook"  // Stripe webhooks can't send CSRF tokens
                 )
             )
@@ -94,6 +101,7 @@ public class SecurityConfig {
                     .requestMatchers("/api/auth/setup-password/**").permitAll()
                     .requestMatchers("/api/auth/initialize").permitAll()
                     .requestMatchers("/api/auth/otp/**").permitAll()
+                    .requestMatchers("/api/auth/csrf").authenticated() // Requires authentication, triggers CSRF token
 
                     // Admin + user management
                     .requestMatchers("/api/admin/users/**").hasRole("ADMIN")
@@ -106,7 +114,7 @@ public class SecurityConfig {
                     .requestMatchers("/actuator/health").permitAll()
                     
                     // Swagger/API docs
-                    .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                    .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                     
                     // All other requests require authentication
                     .anyRequest().authenticated();

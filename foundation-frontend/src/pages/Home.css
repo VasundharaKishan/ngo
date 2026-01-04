@@ -279,6 +279,7 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  height: 100%;
 }
 
 .featured .campaign-card .card-header,
@@ -291,10 +292,12 @@
 
 .featured .campaign-card .card-header {
   padding-top: 1.5rem;
+  min-height: 80px;
 }
 
 .featured .campaign-card .card-actions {
   padding-bottom: 1.5rem;
+  margin-top: auto;
 }
 
 .featured .campaign-card::before {
@@ -335,6 +338,12 @@
   line-height: var(--line-height-tight);
   padding-right: 0.5rem;
   flex: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-height: 2.4em;
 }
 
 .featured .description {
@@ -342,6 +351,12 @@
   line-height: var(--line-height-relaxed);
   margin-bottom: var(--space-5);
   font-size: var(--font-size-sm);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-height: 3em;
 }
 
 .featured .campaign-meta {

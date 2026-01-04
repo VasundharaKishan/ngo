@@ -19,9 +19,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.myfoundation.school.TestMailConfig;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 @SpringBootTest(classes = {FoundationApplication.class, TestMailConfig.class})
 @AutoConfigureMockMvc
@@ -91,5 +96,102 @@ class SecurityIntegrationTest {
                         .content("{}")
                         .header("Stripe-Signature", "bad-signature"))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void csrfEndpointRequiresAuthentication() throws Exception {
+        // Unauthenticated request should fail
+        mockMvc.perform(get("/api/auth/csrf"))
+                .andExpect(result -> {
+                    int status = result.getResponse().getStatus();
+                    assertTrue(status == 401 || status == 403,
+                            "Expected 401/403 when unauthenticated, got " + status);
+                });
+    }
+
+    @Test
+    void csrfEndpointReturnsSuccessWithValidToken() throws Exception {
+        // Create authenticated request
+        AdminUser admin = adminUserRepository.findByUsername("secure-admin").orElseThrow();
+        String token = jwtService.generateToken(admin);
+
+        // Authenticated request should succeed
+        mockMvc.perform(get("/api/auth/csrf")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void csrfEndpointSetsCsrfCookie() throws Exception {
+        // Create authenticated request
+        AdminUser admin = adminUserRepository.findByUsername("secure-admin").orElseThrow();
+        String token = jwtService.generateToken(admin);
+
+        // CSRF endpoint should set XSRF-TOKEN cookie
+        mockMvc.perform(get("/api/auth/csrf")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(cookie().exists("XSRF-TOKEN"));
+    }
+
+    @Test
+    void adminMutationEndpointsRequireCsrfToken() throws Exception {
+        // Create authenticated request
+        AdminUser admin = adminUserRepository.findByUsername("secure-admin").orElseThrow();
+        String token = jwtService.generateToken(admin);
+
+        // PUT request without CSRF token should fail (403 Forbidden)
+        mockMvc.perform(put("/api/admin/campaigns/test-id")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isForbidden());
+
+        // DELETE request without CSRF token should fail (403 Forbidden)
+        mockMvc.perform(delete("/api/admin/campaigns/test-id")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void adminMutationEndpointsSucceedWithCsrfToken() throws Exception {
+        // Create authenticated request
+        AdminUser admin = adminUserRepository.findByUsername("secure-admin").orElseThrow();
+        String token = jwtService.generateToken(admin);
+
+        // PUT request with CSRF token should succeed (may return 404 if resource doesn't exist, but not 403)
+        mockMvc.perform(put("/api/admin/campaigns/test-id")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}")
+                        .with(csrf()))
+                .andExpect(result -> {
+                    int status = result.getResponse().getStatus();
+                    assertTrue(status != 403,
+                            "Expected success or 404, not 403 Forbidden when CSRF token present, got " + status);
+                });
+    }
+
+    @Test
+    void publicEndpointsDoNotRequireCsrf() throws Exception {
+        // Public endpoints should work without CSRF
+        mockMvc.perform(get("/api/campaigns"))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/cms/testimonials"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void loginEndpointDoesNotRequireCsrf() throws Exception {
+        // Login endpoint should work without CSRF (it's explicitly excluded)
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"username\":\"secure-admin\",\"password\":\"Str0ngP@ss!\"}"))
+                .andExpect(result -> {
+                    int status = result.getResponse().getStatus();
+                    assertTrue(status == 200 || status == 401,
+                            "Expected 200 or 401, not CSRF error, got " + status);
+                });
     }
 }

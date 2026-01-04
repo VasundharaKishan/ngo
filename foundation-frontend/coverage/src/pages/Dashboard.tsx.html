@@ -361,7 +361,9 @@
 <a name='L296'></a><a href='#L296'>296</a>
 <a name='L297'></a><a href='#L297'>297</a>
 <a name='L298'></a><a href='#L298'>298</a>
-<a name='L299'></a><a href='#L299'>299</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L299'></a><a href='#L299'>299</a>
+<a name='L300'></a><a href='#L300'>300</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -660,6 +662,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >import { useState, useEffect } from 'react';</span></span></span>
+import { RiDashboardLine, RiMoneyDollarCircleLine, RiMegaphoneLine, RiStarLine } from 'react-icons/ri';
 import { API_BASE_URL, getDonatePopupSettings, type DonatePopupSettingsResponse } from '../api';
 import { authFetch } from '../utils/auth';
 import { formatCurrency, calculateProgress } from '../utils/currency';
@@ -725,7 +728,7 @@ interface Donation {
 <span class="cstat-no" title="statement not covered" >  if (loading) {</span>
 <span class="cstat-no" title="statement not covered" >    return (</span>
 <span class="cstat-no" title="statement not covered" >      &lt;div className="content-header"&gt;</span>
-<span class="cstat-no" title="statement not covered" >        &lt;h2&gt;📊 Dashboard&lt;/h2&gt;</span>
+<span class="cstat-no" title="statement not covered" >        &lt;h2&gt;&lt;RiDashboardLine style={{verticalAlign: 'middle', marginRight: '0.5rem'}} /&gt; Dashboard&lt;/h2&gt;</span>
 <span class="cstat-no" title="statement not covered" >        &lt;p&gt;Loading dashboard...&lt;/p&gt;</span>
 <span class="cstat-no" title="statement not covered" >      &lt;/div&gt;</span>
     );
@@ -759,7 +762,7 @@ interface Donation {
 <span class="cstat-no" title="statement not covered" >  return (</span>
 <span class="cstat-no" title="statement not covered" >    &lt;&gt;</span>
 <span class="cstat-no" title="statement not covered" >      &lt;div className="content-header"&gt;</span>
-<span class="cstat-no" title="statement not covered" >        &lt;h2&gt;📊 Dashboard&lt;/h2&gt;</span>
+<span class="cstat-no" title="statement not covered" >        &lt;h2&gt;&lt;RiDashboardLine style={{verticalAlign: 'middle', marginRight: '0.5rem'}} /&gt; Dashboard&lt;/h2&gt;</span>
 <span class="cstat-no" title="statement not covered" >        &lt;p&gt;Overview of donations and campaign performance&lt;/p&gt;</span>
 <span class="cstat-no" title="statement not covered" >      &lt;/div&gt;</span>
 &nbsp;
@@ -768,7 +771,7 @@ interface Donation {
           {/* Summary Cards */}
 <span class="cstat-no" title="statement not covered" >          &lt;div className="dashboard-cards"&gt;</span>
 <span class="cstat-no" title="statement not covered" >            &lt;div className="dashboard-card"&gt;</span>
-<span class="cstat-no" title="statement not covered" >              &lt;div className="card-icon"&gt;💰&lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;div className="card-icon"&gt;&lt;RiMoneyDollarCircleLine size={40} /&gt;&lt;/div&gt;</span>
 <span class="cstat-no" title="statement not covered" >              &lt;div className="card-content"&gt;</span>
 <span class="cstat-no" title="statement not covered" >                &lt;h3&gt;Total Donations&lt;/h3&gt;</span>
 <span class="cstat-no" title="statement not covered" >                &lt;p className="card-value"&gt;{donations.length}&lt;/p&gt;</span>
@@ -789,14 +792,14 @@ interface Donation {
 <span class="cstat-no" title="statement not covered" >              &lt;/div&gt;</span>
 <span class="cstat-no" title="statement not covered" >            &lt;/div&gt;</span>
 <span class="cstat-no" title="statement not covered" >            &lt;div className="dashboard-card"&gt;</span>
-<span class="cstat-no" title="statement not covered" >              &lt;div className="card-icon"&gt;📢&lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;div className="card-icon"&gt;&lt;RiMegaphoneLine size={40} /&gt;&lt;/div&gt;</span>
 <span class="cstat-no" title="statement not covered" >              &lt;div className="card-content"&gt;</span>
 <span class="cstat-no" title="statement not covered" >                &lt;h3&gt;Active Campaigns&lt;/h3&gt;</span>
 <span class="cstat-no" title="statement not covered" >                &lt;p className="card-value"&gt;{campaigns.filter(c =&gt; c.active).length}&lt;/p&gt;</span>
 <span class="cstat-no" title="statement not covered" >              &lt;/div&gt;</span>
 <span class="cstat-no" title="statement not covered" >            &lt;/div&gt;</span>
 <span class="cstat-no" title="statement not covered" >            &lt;div className="dashboard-card"&gt;</span>
-<span class="cstat-no" title="statement not covered" >              &lt;div className="card-icon"&gt;⭐&lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;div className="card-icon"&gt;&lt;RiStarLine size={40} /&gt;&lt;/div&gt;</span>
 <span class="cstat-no" title="statement not covered" >              &lt;div className="card-content"&gt;</span>
 <span class="cstat-no" title="statement not covered" >                &lt;h3&gt;Featured Active&lt;/h3&gt;</span>
 <span class="cstat-no" title="statement not covered" >                &lt;p className="card-value"&gt;{featuredCampaignsCount}&lt;/p&gt;</span>
@@ -964,7 +967,7 @@ interface Donation {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-01-02T14:26:02.286Z
+                at 2026-01-03T13:50:05.259Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

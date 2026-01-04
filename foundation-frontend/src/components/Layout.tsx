@@ -7,7 +7,6 @@ import ErrorBoundary from './ErrorBoundary';
 import { fetchContactInfo, type ContactInfo } from '../utils/contactApi';
 import { useSiteName, useSiteLogo } from '../contexts/ConfigContext';
 import { API_BASE_URL } from '../api';
-import { getCurrentYear } from '../utils/dateUtils';
 import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin, FaYoutube } from 'react-icons/fa';
 
 interface SocialMediaLink {
@@ -46,9 +45,11 @@ export default function Layout() {
   const [contactError, setContactError] = useState(false);
   const [socialLinks, setSocialLinks] = useState<SocialMediaLink[]>([]);
   const [footerTagline, setFooterTagline] = useState<string>('');
-  const [copyrightText, setCopyrightText] = useState<string>('');
-  const [disclaimerText, setDisclaimerText] = useState<string>('');
+  const [, setCopyrightText] = useState<string>('');
+  const [, setDisclaimerText] = useState<string>('');
   const [footerLoading, setFooterLoading] = useState(true);
+  const [showBanner, setShowBanner] = useState(false);
+  const [bannerMessage, setBannerMessage] = useState('This website is under development');
   
   // Get site name and logo from config context
   const siteName = useSiteName();
@@ -68,6 +69,27 @@ export default function Layout() {
       }
     };
     loadContactInfo();
+  }, []);
+
+  useEffect(() => {
+    const loadBannerSettings = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/cms/content/site-settings`);
+        if (response.ok) {
+          const data = await response.json();
+          const bannerSetting = data.find((item: CMSContent) => item.key === 'development_banner');
+          if (bannerSetting && bannerSetting.active) {
+            setShowBanner(true);
+            if (bannerSetting.value) {
+              setBannerMessage(bannerSetting.value);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load banner settings:', error);
+      }
+    };
+    loadBannerSettings();
   }, []);
 
   useEffect(() => {
@@ -120,15 +142,13 @@ export default function Layout() {
     setIsModalOpen(true);
   };
 
-  // Replace placeholders in text with actual values
-  const replacePlaceholders = (text: string): string => {
-    return text
-      .replace(/{year}/g, getCurrentYear())
-      .replace(/{siteName}/g, siteName);
-  };
-
   return (
     <div className="layout">
+      {showBanner && (
+        <div className="dev-banner">
+          <span>🚧 {bannerMessage}</span>
+        </div>
+      )}
       <a href="#main-content" className="skip-to-content">
         Skip to main content
       </a>
@@ -169,8 +189,8 @@ export default function Layout() {
               <h4>Quick Links</h4>
               <ul>
                 <li><Link to="/campaigns">All Campaigns</Link></li>
-                <li><Link to="/about">About Us</Link></li>
-                <li><Link to="/impact">Our Impact</Link></li>
+                <li><Link to="/terms">Terms & Conditions</Link></li>
+                <li><Link to="/accessibility">Accessibility</Link></li>
               </ul>
             </div>
 

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { RiAdminLine, RiAlertLine } from 'react-icons/ri';
 import { API_BASE_URL } from '../api';
 import './AdminLogin.css';
 
@@ -41,6 +42,17 @@ export default function AdminLogin() {
         localStorage.setItem('admin_last_activity', Date.now().toString());
         sessionStorage.setItem('admin_session_id', sessionId);
         
+        // Initialize CSRF token by calling dedicated authenticated endpoint
+        // This ensures the XSRF-TOKEN cookie is set for subsequent PUT/POST/DELETE requests
+        try {
+          await fetch(`${API_BASE_URL}/auth/csrf`, {
+            method: 'GET',
+            credentials: 'include'
+          });
+        } catch (csrfError) {
+          console.warn('Failed to initialize CSRF token:', csrfError);
+        }
+        
         navigate('/admin');
       } else {
         const errorData = await res.json();
@@ -58,14 +70,14 @@ export default function AdminLogin() {
     <div className="admin-login">
       <div className="login-container">
         <div className="login-header">
-          <h1>🛠️ Admin Portal</h1>
+          <h1><RiAdminLine className="header-icon" /> Admin Portal</h1>
           <p>Yugal Savitri Seva</p>
         </div>
 
         <form onSubmit={handleLogin} className="login-form">
           {error && (
             <div className="error-message">
-              ⚠️ {error}
+              <RiAlertLine style={{verticalAlign: 'middle', marginRight: '0.5rem'}} /> {error}
             </div>
           )}
 

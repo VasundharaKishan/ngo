@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/595</span>
+                <span class='fraction'>0/596</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/595</span>
+                <span class='fraction'>0/596</span>
             </div>
         
             
@@ -826,7 +826,17 @@
 <a name='L761'></a><a href='#L761'>761</a>
 <a name='L762'></a><a href='#L762'>762</a>
 <a name='L763'></a><a href='#L763'>763</a>
-<a name='L764'></a><a href='#L764'>764</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L764'></a><a href='#L764'>764</a>
+<a name='L765'></a><a href='#L765'>765</a>
+<a name='L766'></a><a href='#L766'>766</a>
+<a name='L767'></a><a href='#L767'>767</a>
+<a name='L768'></a><a href='#L768'>768</a>
+<a name='L769'></a><a href='#L769'>769</a>
+<a name='L770'></a><a href='#L770'>770</a>
+<a name='L771'></a><a href='#L771'>771</a>
+<a name='L772'></a><a href='#L772'>772</a>
+<a name='L773'></a><a href='#L773'>773</a>
+<a name='L774'></a><a href='#L774'>774</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -875,6 +885,16 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -1570,7 +1590,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -1591,6 +1611,16 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >import { useState, useEffect } from 'react';</span></span></span>
 import { useNavigate, Link } from 'react-router-dom';
+import { 
+  RiAdminLine,
+  RiDashboardLine,
+  RiMoneyDollarCircleLine,
+  RiTeamLine,
+  RiSettings3Line,
+  RiMegaphoneLine,
+  RiFolderLine,
+  RiLogoutBoxLine
+} from 'react-icons/ri';
 import { formatCurrency, calculateProgress } from '../utils/currency';
 import { API_BASE_URL } from '../api';
 import { authFetch } from '../utils/auth';
@@ -1887,7 +1917,7 @@ type MenuItem = 'dashboard' | 'donations' | 'users' | 'settings' | 'campaigns' |
                 {/* Summary Cards */}
 <span class="cstat-no" title="statement not covered" >                &lt;div className="dashboard-cards"&gt;</span>
 <span class="cstat-no" title="statement not covered" >                  &lt;div className="dashboard-card"&gt;</span>
-<span class="cstat-no" title="statement not covered" >                    &lt;div className="card-icon"&gt;💰&lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >                    &lt;div className="card-icon"&gt;&lt;RiMoneyDollarCircleLine size={40} /&gt;&lt;/div&gt;</span>
 <span class="cstat-no" title="statement not covered" >                    &lt;div className="card-content"&gt;</span>
 <span class="cstat-no" title="statement not covered" >                      &lt;h3&gt;Total Donations&lt;/h3&gt;</span>
 <span class="cstat-no" title="statement not covered" >                      &lt;p className="card-value"&gt;{donations.length}&lt;/p&gt;</span>
@@ -1908,7 +1938,7 @@ type MenuItem = 'dashboard' | 'donations' | 'users' | 'settings' | 'campaigns' |
 <span class="cstat-no" title="statement not covered" >                    &lt;/div&gt;</span>
 <span class="cstat-no" title="statement not covered" >                  &lt;/div&gt;</span>
 <span class="cstat-no" title="statement not covered" >                  &lt;div className="dashboard-card"&gt;</span>
-<span class="cstat-no" title="statement not covered" >                    &lt;div className="card-icon"&gt;📢&lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >                    &lt;div className="card-icon"&gt;&lt;RiMegaphoneLine size={40} /&gt;&lt;/div&gt;</span>
 <span class="cstat-no" title="statement not covered" >                    &lt;div className="card-content"&gt;</span>
 <span class="cstat-no" title="statement not covered" >                      &lt;h3&gt;Active Campaigns&lt;/h3&gt;</span>
 <span class="cstat-no" title="statement not covered" >                      &lt;p className="card-value"&gt;{campaigns.filter(c =&gt; c.active).length}&lt;/p&gt;</span>
@@ -1998,7 +2028,7 @@ type MenuItem = 'dashboard' | 'donations' | 'users' | 'settings' | 'campaigns' |
 &nbsp;
                 {/* Campaign Performance Grid */}
 <span class="cstat-no" title="statement not covered" >                &lt;div className="dashboard-section"&gt;</span>
-<span class="cstat-no" title="statement not covered" >                  &lt;h2&gt;📊 All Campaigns Performance&lt;/h2&gt;</span>
+<span class="cstat-no" title="statement not covered" >                  &lt;h2&gt;&lt;RiDashboardLine style={{verticalAlign: 'middle', marginRight: '0.5rem'}} /&gt; All Campaigns Performance&lt;/h2&gt;</span>
 <span class="cstat-no" title="statement not covered" >                  {campaigns.length === 0 ? (</span>
 <span class="cstat-no" title="statement not covered" >                    &lt;p style={{ textAlign: 'center', color: '#64748b', padding: '2rem' }}&gt;</span>
                       No campaigns created yet
@@ -2118,7 +2148,7 @@ type MenuItem = 'dashboard' | 'donations' | 'users' | 'settings' | 'campaigns' |
 <span class="cstat-no" title="statement not covered" >        return (</span>
 <span class="cstat-no" title="statement not covered" >          &lt;div&gt;</span>
 <span class="cstat-no" title="statement not covered" >            &lt;div className="info-box"&gt;</span>
-<span class="cstat-no" title="statement not covered" >              &lt;strong&gt;⚙️ Site Configuration&lt;/strong&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;strong&gt;&lt;RiSettings3Line style={{verticalAlign: 'middle', marginRight: '0.5rem'}} /&gt; Site Configuration&lt;/strong&gt;</span>
 <span class="cstat-no" title="statement not covered" >              &lt;p&gt;Manage global site settings and preferences.&lt;/p&gt;</span>
 <span class="cstat-no" title="statement not covered" >            &lt;/div&gt;</span>
 <span class="cstat-no" title="statement not covered" >            &lt;button onClick={() =&gt; navigate('/admin/settings')} className="btn-primary"&gt;</span>
@@ -2245,11 +2275,11 @@ type MenuItem = 'dashboard' | 'donations' | 'users' | 'settings' | 'campaigns' |
 &nbsp;
 <span class="cstat-no" title="statement not covered" >  const getContentTitle = () =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >    switch (activeMenu) {</span>
-<span class="cstat-no" title="statement not covered" >      case 'dashboard': return { title: '📊 Dashboard', desc: 'Overview of donations and campaign performance' };</span>
-<span class="cstat-no" title="statement not covered" >      case 'donations': return { title: '💰 Donations', desc: 'View all donations made through the platform' };</span>
-<span class="cstat-no" title="statement not covered" >      case 'settings': return { title: '⚙️ Site Settings', desc: 'Configure global site preferences' };</span>
-<span class="cstat-no" title="statement not covered" >      case 'campaigns': return { title: '📢 Campaigns', desc: 'Manage donation campaigns' };</span>
-<span class="cstat-no" title="statement not covered" >      case 'categories': return { title: '📂 Categories', desc: 'Manage campaign categories' };</span>
+<span class="cstat-no" title="statement not covered" >      case 'dashboard': return { title: 'Dashboard', desc: 'Overview of donations and campaign performance' };</span>
+<span class="cstat-no" title="statement not covered" >      case 'donations': return { title: 'Donations', desc: 'View all donations made through the platform' };</span>
+<span class="cstat-no" title="statement not covered" >      case 'settings': return { title: 'Site Settings', desc: 'Configure global site preferences' };</span>
+<span class="cstat-no" title="statement not covered" >      case 'campaigns': return { title: 'Campaigns', desc: 'Manage donation campaigns' };</span>
+<span class="cstat-no" title="statement not covered" >      case 'categories': return { title: 'Categories', desc: 'Manage campaign categories' };</span>
 <span class="cstat-no" title="statement not covered" >      default: return { title: '', desc: '' };</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
 <span class="cstat-no" title="statement not covered" >  };</span>
@@ -2261,7 +2291,7 @@ type MenuItem = 'dashboard' | 'donations' | 'users' | 'settings' | 'campaigns' |
       {/* Left Sidebar */}
 <span class="cstat-no" title="statement not covered" >      &lt;aside className="admin-sidebar"&gt;</span>
 <span class="cstat-no" title="statement not covered" >        &lt;div className="sidebar-header"&gt;</span>
-<span class="cstat-no" title="statement not covered" >          &lt;h1&gt;🛠️ Admin Portal&lt;/h1&gt;</span>
+<span class="cstat-no" title="statement not covered" >          &lt;h1&gt;&lt;RiAdminLine style={{verticalAlign: 'middle', marginRight: '0.5rem'}} /&gt; Admin Portal&lt;/h1&gt;</span>
 <span class="cstat-no" title="statement not covered" >          &lt;div className="user-info"&gt;</span>
 <span class="cstat-no" title="statement not covered" >            &lt;div&gt;&lt;strong&gt;{currentUser.fullName || 'Administrator'}&lt;/strong&gt;&lt;/div&gt;</span>
 <span class="cstat-no" title="statement not covered" >            &lt;div style={{fontSize: '0.75rem', opacity: 0.8}}&gt;{currentUser.role || 'ADMIN'}&lt;/div&gt;</span>
@@ -2277,7 +2307,7 @@ type MenuItem = 'dashboard' | 'donations' | 'users' | 'settings' | 'campaigns' |
 <span class="cstat-no" title="statement not covered" >                    className={`sidebar-menu-button ${activeMenu === 'dashboard' ? 'active' : ''}`}</span>
 <span class="cstat-no" title="statement not covered" >                    onClick={() =&gt; setActiveMenu('dashboard')}</span>
                   &gt;
-<span class="cstat-no" title="statement not covered" >                    &lt;span className="menu-icon"&gt;📊&lt;/span&gt;</span>
+<span class="cstat-no" title="statement not covered" >                    &lt;RiDashboardLine className="menu-icon" /&gt;</span>
 <span class="cstat-no" title="statement not covered" >                    &lt;span&gt;Dashboard&lt;/span&gt;</span>
 <span class="cstat-no" title="statement not covered" >                  &lt;/button&gt;</span>
 <span class="cstat-no" title="statement not covered" >                &lt;/li&gt;</span>
@@ -2286,7 +2316,7 @@ type MenuItem = 'dashboard' | 'donations' | 'users' | 'settings' | 'campaigns' |
 <span class="cstat-no" title="statement not covered" >                    className={`sidebar-menu-button ${activeMenu === 'donations' ? 'active' : ''}`}</span>
 <span class="cstat-no" title="statement not covered" >                    onClick={() =&gt; setActiveMenu('donations')}</span>
                   &gt;
-<span class="cstat-no" title="statement not covered" >                    &lt;span className="menu-icon"&gt;💰&lt;/span&gt;</span>
+<span class="cstat-no" title="statement not covered" >                    &lt;RiMoneyDollarCircleLine className="menu-icon" /&gt;</span>
 <span class="cstat-no" title="statement not covered" >                    &lt;span&gt;Donations&lt;/span&gt;</span>
 <span class="cstat-no" title="statement not covered" >                  &lt;/button&gt;</span>
 <span class="cstat-no" title="statement not covered" >                &lt;/li&gt;</span>
@@ -2295,7 +2325,7 @@ type MenuItem = 'dashboard' | 'donations' | 'users' | 'settings' | 'campaigns' |
 <span class="cstat-no" title="statement not covered" >                    className="sidebar-menu-button"</span>
 <span class="cstat-no" title="statement not covered" >                    onClick={() =&gt; navigate('/admin/users')}</span>
                   &gt;
-<span class="cstat-no" title="statement not covered" >                    &lt;span className="menu-icon"&gt;👥&lt;/span&gt;</span>
+<span class="cstat-no" title="statement not covered" >                    &lt;RiTeamLine className="menu-icon" /&gt;</span>
 <span class="cstat-no" title="statement not covered" >                    &lt;span&gt;Users&lt;/span&gt;</span>
 <span class="cstat-no" title="statement not covered" >                  &lt;/button&gt;</span>
 <span class="cstat-no" title="statement not covered" >                &lt;/li&gt;</span>
@@ -2306,7 +2336,7 @@ type MenuItem = 'dashboard' | 'donations' | 'users' | 'settings' | 'campaigns' |
 <span class="cstat-no" title="statement not covered" >                className={`sidebar-menu-button ${activeMenu === 'settings' ? 'active' : ''}`}</span>
 <span class="cstat-no" title="statement not covered" >                onClick={() =&gt; setActiveMenu('settings')}</span>
               &gt;
-<span class="cstat-no" title="statement not covered" >                &lt;span className="menu-icon"&gt;⚙️&lt;/span&gt;</span>
+<span class="cstat-no" title="statement not covered" >                &lt;RiSettings3Line className="menu-icon" /&gt;</span>
 <span class="cstat-no" title="statement not covered" >                &lt;span&gt;Settings&lt;/span&gt;</span>
 <span class="cstat-no" title="statement not covered" >              &lt;/button&gt;</span>
 <span class="cstat-no" title="statement not covered" >            &lt;/li&gt;</span>
@@ -2315,7 +2345,7 @@ type MenuItem = 'dashboard' | 'donations' | 'users' | 'settings' | 'campaigns' |
 <span class="cstat-no" title="statement not covered" >                className={`sidebar-menu-button ${activeMenu === 'campaigns' ? 'active' : ''}`}</span>
 <span class="cstat-no" title="statement not covered" >                onClick={() =&gt; setActiveMenu('campaigns')}</span>
               &gt;
-<span class="cstat-no" title="statement not covered" >                &lt;span className="menu-icon"&gt;📢&lt;/span&gt;</span>
+<span class="cstat-no" title="statement not covered" >                &lt;RiMegaphoneLine className="menu-icon" /&gt;</span>
 <span class="cstat-no" title="statement not covered" >                &lt;span&gt;Campaigns&lt;/span&gt;</span>
 <span class="cstat-no" title="statement not covered" >              &lt;/button&gt;</span>
 <span class="cstat-no" title="statement not covered" >            &lt;/li&gt;</span>
@@ -2324,7 +2354,7 @@ type MenuItem = 'dashboard' | 'donations' | 'users' | 'settings' | 'campaigns' |
 <span class="cstat-no" title="statement not covered" >                className={`sidebar-menu-button ${activeMenu === 'categories' ? 'active' : ''}`}</span>
 <span class="cstat-no" title="statement not covered" >                onClick={() =&gt; setActiveMenu('categories')}</span>
               &gt;
-<span class="cstat-no" title="statement not covered" >                &lt;span className="menu-icon"&gt;📂&lt;/span&gt;</span>
+<span class="cstat-no" title="statement not covered" >                &lt;RiFolderLine className="menu-icon" /&gt;</span>
 <span class="cstat-no" title="statement not covered" >                &lt;span&gt;Categories&lt;/span&gt;</span>
 <span class="cstat-no" title="statement not covered" >              &lt;/button&gt;</span>
 <span class="cstat-no" title="statement not covered" >            &lt;/li&gt;</span>
@@ -2333,7 +2363,7 @@ type MenuItem = 'dashboard' | 'donations' | 'users' | 'settings' | 'campaigns' |
 &nbsp;
 <span class="cstat-no" title="statement not covered" >        &lt;div className="sidebar-footer"&gt;</span>
 <span class="cstat-no" title="statement not covered" >          &lt;button onClick={handleLogout} className="btn-logout-sidebar"&gt;</span>
-            🚪 Logout
+<span class="cstat-no" title="statement not covered" >            &lt;RiLogoutBoxLine className="menu-icon" /&gt; Logout</span>
 <span class="cstat-no" title="statement not covered" >          &lt;/button&gt;</span>
 <span class="cstat-no" title="statement not covered" >        &lt;/div&gt;</span>
 <span class="cstat-no" title="statement not covered" >      &lt;/aside&gt;</span>
@@ -2359,7 +2389,7 @@ type MenuItem = 'dashboard' | 'donations' | 'users' | 'settings' | 'campaigns' |
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-01-02T14:26:02.286Z
+                at 2026-01-03T13:50:05.259Z
             </div>
         <script src="../../prettify.js"></script>
         <script>
