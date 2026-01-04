@@ -15,11 +15,11 @@ import java.util.List;
 @AllArgsConstructor
 public class ContactInfoRequest {
     
-    @NotBlank(message = "Email is required")
     @Email(message = "Email must be valid")
     private String email;
     
-    @NotEmpty(message = "At least one location is required")
     @Valid
     private List<ContactLocation> locations;
+    
+    private Boolean showInFooter;
 }

@@ -131,7 +131,7 @@ describe('FeaturedCampaignModal', () => {
     });
   });
 
-  it('navigates to donate page when Donate Now is clicked', async () => {
+  it('navigates to donate page when Donate is clicked', async () => {
     vi.mocked(api.api.getDonatePopup).mockResolvedValue(mockSpotlightResponse);
 
     render(
@@ -144,7 +144,7 @@ describe('FeaturedCampaignModal', () => {
       expect(screen.getByText('Education Campaign')).toBeInTheDocument();
     });
 
-    const donateButton = screen.getByText('Donate now');
+    const donateButton = screen.getByText('Donate');
     fireEvent.click(donateButton);
 
     expect(mockNavigate).toHaveBeenCalledWith('/donate/camp-001');

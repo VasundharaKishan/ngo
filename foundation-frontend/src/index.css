@@ -1,3 +1,16 @@
+/* Import Design System */
+@import './styles/design-system.css';
+@import './styles/accessibility.css';
+@import './styles/animations.css';
+
+:root {
+  /* Layout tokens - App-specific overrides */
+  --header-height: 76px;
+  --header-height-tablet: 72px;
+  --header-height-mobile: 68px;
+  --container-max: 1280px; /* Updated to match design system */
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -17,52 +30,50 @@ html {
 }
 
 @media (max-width: 768px) {
+  :root {
+    --header-height: var(--header-height-tablet);
+  }
+  
   html {
     font-size: 14px;
   }
 }
 
 @media (max-width: 480px) {
+  :root {
+    --header-height: var(--header-height-mobile);
+  }
+  
   html {
     font-size: 13px;
   }
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: var(--font-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: #f8fafc;
-  color: #1e293b;
-  line-height: 1.6;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  line-height: var(--line-height-normal);
+  font-size: var(--font-size-base);
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-weight: 700;
-  line-height: 1.2;
+  font-family: var(--font-heading);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  color: var(--text-primary);
 }
 
 .container {
-  max-width: 1200px;
+  max-width: var(--container-max-width);
   margin: 0 auto;
-  padding: 0 1rem;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  padding: 0 var(--container-padding);
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+button:focus,
+button:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
 }

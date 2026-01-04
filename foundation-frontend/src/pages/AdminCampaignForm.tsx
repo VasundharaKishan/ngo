@@ -4,6 +4,7 @@ import { amountToCents, formatAmountForInput } from '../utils/currency';
 import { API_BASE_URL } from '../api';
 import { authFetch } from '../utils/auth';
 import { useToast } from '../components/ToastProvider';
+import Spinner from '../components/Spinner';
 import './AdminCampaignForm.css';
 
 interface Category {
@@ -20,6 +21,7 @@ export default function AdminCampaignForm() {
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     shortDescription: '',
@@ -180,6 +182,7 @@ export default function AdminCampaignForm() {
       beneficiariesCount: cleanForm.beneficiariesCount ? parseInt(cleanForm.beneficiariesCount) : null
     };
 
+    setSaving(true);
     try {
       const url = isEdit 
         ? `${API_BASE_URL}/admin/campaigns/${id}`
@@ -202,6 +205,8 @@ export default function AdminCampaignForm() {
     } catch (error) {
       console.error('Error saving campaign:', error);
       showToast('Failed to save campaign', 'error');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -318,7 +323,12 @@ export default function AdminCampaignForm() {
                 onChange={handleImageUpload}
                 disabled={uploading}
               />
-              {uploading && <p className="upload-status">Uploading...</p>}
+              {uploading && (
+                <div className="upload-status">
+                  <Spinner size="sm" color="primary" className="spinner-inline" />
+                  Uploading...
+                </div>
+              )}
               <p className="help-text">Or enter image URL directly:</p>
               <input
                 type="url"
@@ -362,11 +372,15 @@ export default function AdminCampaignForm() {
         </div>
 
         <div className="form-actions">
-          <button type="button" onClick={() => navigate('/admin/campaigns')} className="btn-cancel">
+          <button type="button" onClick={() => navigate('/admin/campaigns')} className="btn-cancel" disabled={saving}>
             Cancel
           </button>
-          <button type="submit" className="btn-submit">
-            {isEdit ? 'Update Campaign' : 'Create Campaign'}
+          <button type="submit" className="btn-submit" disabled={saving || uploading}>
+            {saving ? (
+              <><Spinner size="sm" color="white" className="spinner-inline" /> Saving...</>
+            ) : (
+              isEdit ? 'Update Campaign' : 'Create Campaign'
+            )}
           </button>
         </div>
       </form>

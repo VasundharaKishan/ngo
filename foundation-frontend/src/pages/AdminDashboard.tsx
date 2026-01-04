@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { RiAdminLine, RiTeamLine, RiSettings3Line, RiLogoutBoxLine } from 'react-icons/ri';
 import { formatCurrency, calculateProgress } from '../utils/currency';
 import { API_BASE_URL } from '../api';
 import { authFetch } from '../utils/auth';
@@ -123,11 +124,11 @@ export default function AdminDashboard() {
   return (
     <div className="admin-dashboard">
       <div className="admin-header">
-        <h1>🛠️ Admin Dashboard</h1>
+        <h1><RiAdminLine style={{verticalAlign: 'middle', marginRight: '0.5rem'}} /> Admin Dashboard</h1>
         <div className="header-actions">
-          <Link to="/admin/users" className="btn-users">👥 Users</Link>
-          <Link to="/admin/settings" className="btn-settings">⚙️ Settings</Link>
-          <button onClick={handleLogout} className="btn-logout">🚪 Logout</button>
+          <Link to="/admin/users" className="btn-users"><RiTeamLine style={{verticalAlign: 'middle', marginRight: '0.35rem'}} /> Users</Link>
+          <Link to="/admin/settings" className="btn-settings"><RiSettings3Line style={{verticalAlign: 'middle', marginRight: '0.35rem'}} /> Settings</Link>
+          <button onClick={handleLogout} className="btn-logout"><RiLogoutBoxLine style={{verticalAlign: 'middle', marginRight: '0.35rem'}} /> Logout</button>
           <Link to="/" className="back-link">← Back to Website</Link>
         </div>
       </div>

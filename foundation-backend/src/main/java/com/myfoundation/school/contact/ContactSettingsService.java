@@ -35,6 +35,7 @@ public class ContactSettingsService {
         ContactInfoResponse response = new ContactInfoResponse();
         response.setEmail(settings.getEmail());
         response.setLocations(deserializeLocations(settings.getLocationsJson()));
+        response.setShowInFooter(settings.getShowInFooter());
         
         return response;
     }
@@ -48,6 +49,7 @@ public class ContactSettingsService {
         
         settings.setEmail(request.getEmail());
         settings.setLocationsJson(serializeLocations(request.getLocations()));
+        settings.setShowInFooter(request.getShowInFooter() != null ? request.getShowInFooter() : true);
         
         if (settings.getId() == null) {
             settings.setCreatedAt(Instant.now());
@@ -61,6 +63,7 @@ public class ContactSettingsService {
         ContactInfoResponse response = new ContactInfoResponse();
         response.setEmail(settings.getEmail());
         response.setLocations(request.getLocations());
+        response.setShowInFooter(settings.getShowInFooter());
         
         return response;
     }
@@ -121,6 +124,7 @@ public class ContactSettingsService {
         defaultLocations.add(india);
         
         response.setLocations(defaultLocations);
+        response.setShowInFooter(true);
         
         return response;
     }

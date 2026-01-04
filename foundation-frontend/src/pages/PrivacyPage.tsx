@@ -72,7 +72,7 @@ export default function PrivacyPage() {
         <h2>Contact Us</h2>
         <p>
           If you have questions about this Privacy Statement or want to exercise your privacy rights, please contact us at{' '}
-          <a href="mailto:privacy@myfoundation.org">privacy@myfoundation.org</a>.
+          <a href="mailto:privacy@yugalsavitriseva.org">privacy@yugalsavitriseva.org</a>.
         </p>
       </section>
     </div>

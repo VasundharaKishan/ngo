@@ -1,5 +1,6 @@
 package com.myfoundation.school.donation;
 
+import com.myfoundation.school.auth.EmailService;
 import com.myfoundation.school.campaign.Campaign;
 import com.myfoundation.school.campaign.CampaignRepository;
 import com.myfoundation.school.config.StripeConfig;
@@ -18,9 +19,41 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Service layer for donation processing and Stripe payment integration.
+ * 
+ * This service handles:
+ * - Creating Stripe Checkout Sessions for donation payments
+ * - Processing Stripe webhook events (payment success, failure, expiration)
+ * - Managing donation lifecycle (PENDING → COMPLETED/FAILED)
+ * - Retrieving and filtering donations with pagination
+ * - Donation statistics and reporting
+ * 
+ * <p><strong>Payment Flow:</strong></p>
+ * <ol>
+ *   <li>Create donation record with PENDING status</li>
+ *   <li>Create Stripe Checkout Session with donation metadata</li>
+ *   <li>User completes payment on Stripe-hosted page</li>
+ *   <li>Stripe sends webhook event (success/failure)</li>
+ *   <li>Update donation status to COMPLETED or FAILED</li>
+ * </ol>
+ * 
+ * <p><strong>Webhook Events Handled:</strong></p>
+ * <ul>
+ *   <li>{@code checkout.session.completed} - Payment succeeded</li>
+ *   <li>{@code checkout.session.expired} - Session expired without payment</li>
+ *   <li>{@code checkout.session.async_payment_failed} - Payment failed</li>
+ * </ul>
+ * 
+ * @author Foundation Team
+ * @version 1.0
+ * @since 1.0
+ * @see <a href="https://stripe.com/docs/payments/checkout">Stripe Checkout Documentation</a>
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -29,7 +62,37 @@ public class DonationService {
     private final DonationRepository donationRepository;
     private final CampaignRepository campaignRepository;
     private final StripeConfig stripeConfig;
+    private final EmailService emailService;
     
+    /**
+     * Create a Stripe Checkout Session for processing a donation.
+     * 
+     * <p>This method performs the following steps:</p>
+     * <ol>
+     *   <li>Validates that the campaign exists and is active</li>
+     *   <li>Creates a donation record with PENDING status</li>
+     *   <li>Creates a Stripe Checkout Session with donation details</li>
+     *   <li>Updates donation record with Stripe session ID</li>
+     *   <li>Returns session URL for redirect</li>
+     * </ol>
+     * 
+     * <p><strong>Business Rules:</strong></p>
+     * <ul>
+     *   <li>Campaign must exist and be active</li>
+     *   <li>Donation amount must be positive (validated by Stripe)</li>
+     *   <li>Currency must be supported by Stripe (usd, eur, gbp, inr, etc.)</li>
+     *   <li>Donor name and email are required</li>
+     * </ul>
+     * 
+     * <p><strong>Stripe Metadata:</strong></p>
+     * The Checkout Session includes metadata with donationId and campaignId,
+     * which are used by webhook handlers to update donation status.
+     * 
+     * @param request Donation request containing campaign ID, amount, currency, donor info
+     * @return CheckoutSessionResponse with Stripe session ID and redirect URL
+     * @throws RuntimeException if campaign not found or inactive
+     * @throws RuntimeException if Stripe API call fails
+     */
     @Transactional
     public CheckoutSessionResponse createStripeCheckoutSession(DonationRequest request) {
         log.info("Creating Stripe checkout session for campaign: {}, amount: {}", 
@@ -121,6 +184,43 @@ public class DonationService {
         donationRepository.save(donation);
         
         log.info("[Webhook] Donation {} successfully marked as SUCCESS. Campaign totals will be derived from this donation.", donationId);
+        
+        // Send donation acknowledgement emails
+        try {
+            String campaignTitle = donation.getCampaign() != null ? donation.getCampaign().getTitle() : "General Donation";
+            String donationDate = donation.getCreatedAt()
+                .atZone(java.time.ZoneId.systemDefault())
+                .format(DateTimeFormatter.ofPattern("MMMM dd, yyyy 'at' hh:mm a"));
+            
+            // Send thank you email to donor
+            log.info("[Webhook] Sending donation acknowledgement email to donor: {}", donation.getDonorEmail());
+            emailService.sendDonationAcknowledgement(
+                donation.getDonorEmail(),
+                donation.getDonorName(),
+                donation.getAmount(),
+                donation.getCurrency(),
+                campaignTitle,
+                donation.getId(),
+                donationDate
+            );
+            
+            // Send notification email to admin
+            log.info("[Webhook] Sending donation notification to admin");
+            emailService.sendDonationNotificationToAdmin(
+                donation.getDonorName(),
+                donation.getDonorEmail(),
+                donation.getAmount(),
+                donation.getCurrency(),
+                campaignTitle,
+                donation.getId(),
+                donationDate
+            );
+            
+            log.info("[Webhook] Donation emails sent successfully for donation {}", donationId);
+        } catch (Exception e) {
+            log.error("[Webhook] Failed to send donation emails for donation {}, but donation was still successful", donationId, e);
+            // Don't throw - email failure shouldn't affect donation status
+        }
     }
     
     @Transactional

@@ -21,6 +21,7 @@ import java.util.List;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -124,6 +125,7 @@ class AdminUserControllerTest {
         );
 
         mockMvc.perform(post("/api/admin/users")
+                        .with(csrf())
                         .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -152,6 +154,7 @@ class AdminUserControllerTest {
         request.setRole(UserRole.OPERATOR);
 
         mockMvc.perform(post("/api/admin/users")
+                        .with(csrf())
                         .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -172,6 +175,7 @@ class AdminUserControllerTest {
         request.setRole(UserRole.OPERATOR);
 
         mockMvc.perform(post("/api/admin/users")
+                        .with(csrf())
                         .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -189,6 +193,7 @@ class AdminUserControllerTest {
         request.setRole(UserRole.OPERATOR);
 
         mockMvc.perform(post("/api/admin/users")
+                        .with(csrf())
                         .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -212,6 +217,7 @@ class AdminUserControllerTest {
         operator = adminUserRepository.save(operator);
 
         mockMvc.perform(patch("/api/admin/users/" + operator.getId() + "/status")
+                        .with(csrf())
                         .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"active\": false}"))
@@ -236,6 +242,7 @@ class AdminUserControllerTest {
         operator = adminUserRepository.save(operator);
 
         mockMvc.perform(patch("/api/admin/users/" + operator.getId() + "/password")
+                        .with(csrf())
                         .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"newPassword\": \"newpassword123\"}"))
@@ -260,6 +267,7 @@ class AdminUserControllerTest {
         operator = adminUserRepository.save(operator);
 
         mockMvc.perform(delete("/api/admin/users/" + operator.getId())
+                        .with(csrf())
                         .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isNoContent());
     }
@@ -268,6 +276,7 @@ class AdminUserControllerTest {
     @WithMockUser(username = "testadmin", roles = {"ADMIN"})
     void testDeleteUser_CannotDeleteAdmin() throws Exception {
         mockMvc.perform(delete("/api/admin/users/" + adminUser.getId())
+                        .with(csrf())
                         .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error", containsString("cannot delete your own")));

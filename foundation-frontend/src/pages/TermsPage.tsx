@@ -9,7 +9,7 @@ export default function TermsPage() {
       <section>
         <h2>1. Acceptance of Terms</h2>
         <p>
-          By accessing and using the MyFoundation website, you accept and agree to be bound by the terms and provision of this agreement.
+          By accessing and using the Yugal Savitri Seva Foundation website, you accept and agree to be bound by the terms and provisions of this agreement.
         </p>
       </section>
 
@@ -24,7 +24,7 @@ export default function TermsPage() {
         <h2>3. Donation Policy</h2>
         <p>
           Donations are generally non-refundable. However, if you believe a mistake was made, please contact us within 30 days at{' '}
-          <a href="mailto:donate@myfoundation.org">donate@myfoundation.org</a>.
+          <a href="mailto:donate@yugalsavitriseva.org">donate@yugalsavitriseva.org</a>.
         </p>
       </section>
 
@@ -38,14 +38,14 @@ export default function TermsPage() {
       <section>
         <h2>5. Intellectual Property</h2>
         <p>
-          All content on this website, including text, graphics, logos, and images, is the property of MyFoundation and protected by copyright laws.
+          All content on this website, including text, graphics, logos, and images, is the property of Yugal Savitri Seva Foundation and protected by copyright laws.
         </p>
       </section>
 
       <section>
         <h2>6. Limitation of Liability</h2>
         <p>
-          MyFoundation shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of the website.
+          Yugal Savitri Seva Foundation shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of the website.
         </p>
       </section>
 
@@ -60,7 +60,7 @@ export default function TermsPage() {
         <h2>Contact Us</h2>
         <p>
           If you have questions about these Terms and Conditions, please contact us at{' '}
-          <a href="mailto:legal@myfoundation.org">legal@myfoundation.org</a>.
+          <a href="mailto:legal@yugalsavitriseva.org">legal@yugalsavitriseva.org</a>.
         </p>
       </section>
     </div>

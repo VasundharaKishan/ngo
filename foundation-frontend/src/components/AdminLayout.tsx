@@ -1,17 +1,36 @@
 import { useEffect, useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import { 
+  RiDashboardLine, 
+  RiMoneyDollarCircleLine, 
+  RiTeamLine, 
+  RiMegaphoneLine,
+  RiFolderLine,
+  RiHomeLine,
+  RiFileTextLine,
+  RiSettings3Line,
+  RiStarLine,
+  RiLogoutBoxLine,
+  RiAdminLine,
+  RiUserLine,
+  RiArrowDownSLine
+} from 'react-icons/ri';
+import { API_BASE_URL } from '../api';
+import { TIMING, STORAGE_KEYS } from '../config/constants';
 import './AdminLayout.css';
 
 export default function AdminLayout() {
   const navigate = useNavigate();
-  const [currentUser, setCurrentUser] = useState({ fullName: '', role: '' });
+  const [currentUser, setCurrentUser] = useState({ fullName: '', role: '', email: '', username: '' });
   const [isAdmin, setIsAdmin] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const [isAuthChecked, setIsAuthChecked] = useState(false);
 
   // Session management
-  const SESSION_KEY = 'admin_session_id';
-  const LAST_ACTIVITY_KEY = 'admin_last_activity';
-  const SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes
+  const SESSION_KEY = STORAGE_KEYS.SESSION_ID;
+  const LAST_ACTIVITY_KEY = STORAGE_KEYS.LAST_ACTIVITY;
+  const SESSION_TIMEOUT = TIMING.SESSION_TIMEOUT_ADMIN;
 
   const generateSessionId = () => {
     return `session_${Date.now()}_${Math.random().toString(36).substring(2)}`;
@@ -33,8 +52,18 @@ export default function AdminLayout() {
     return timeSinceActivity < SESSION_TIMEOUT;
   };
 
-  const performLogout = () => {
-    localStorage.removeItem('adminToken');
+  const performLogout = async () => {
+    try {
+      // Call logout endpoint to clear httpOnly cookie
+      await fetch(`${API_BASE_URL}/auth/logout`, {
+        method: 'POST',
+        credentials: 'include'
+      });
+    } catch (error) {
+      console.error('Logout API call failed:', error);
+    }
+    
+    // Clear client-side storage
     localStorage.removeItem('adminUser');
     localStorage.removeItem(SESSION_KEY);
     localStorage.removeItem(LAST_ACTIVITY_KEY);
@@ -60,27 +89,47 @@ export default function AdminLayout() {
 
   // Initialize session on component mount
   useEffect(() => {
-    const token = localStorage.getItem('adminToken');
-    if (!token) {
-      navigate('/admin/login');
-      return;
-    }
-
-    let currentSessionId = localStorage.getItem(SESSION_KEY);
-    if (!currentSessionId) {
-      currentSessionId = generateSessionId();
-      localStorage.setItem(SESSION_KEY, currentSessionId);
-      sessionStorage.setItem(SESSION_KEY, currentSessionId);
-      updateActivity();
-    } else {
-      if (!isSessionValid()) {
-        alert('Your session has expired or you are logged in elsewhere. Please login again.');
-        performLogout();
+    const initializeSession = async () => {
+      const user = localStorage.getItem('adminUser');
+      if (!user) {
+        navigate('/admin/login');
+        // Don't set isAuthChecked - keep showing loading while redirecting
         return;
       }
-      sessionStorage.setItem(SESSION_KEY, currentSessionId);
-      updateActivity();
-    }
+
+      let currentSessionId = localStorage.getItem(SESSION_KEY);
+      if (!currentSessionId) {
+        currentSessionId = generateSessionId();
+        localStorage.setItem(SESSION_KEY, currentSessionId);
+        sessionStorage.setItem(SESSION_KEY, currentSessionId);
+        updateActivity();
+      } else {
+        if (!isSessionValid()) {
+          alert('Your session has expired or you are logged in elsewhere. Please login again.');
+          performLogout();
+          // Don't set isAuthChecked - keep showing loading while redirecting
+          return;
+        }
+        sessionStorage.setItem(SESSION_KEY, currentSessionId);
+        updateActivity();
+      }
+
+      // Initialize CSRF token by making a GET request
+      // This ensures the XSRF-TOKEN cookie is set before any PUT/POST/DELETE requests
+      try {
+        await fetch(`${API_BASE_URL}/auth/csrf`, {
+          method: 'GET',
+          credentials: 'include'
+        });
+      } catch (error) {
+        console.warn('Failed to initialize CSRF token:', error);
+      }
+      
+      // Only set auth checked if authentication passed
+      setIsAuthChecked(true);
+    };
+
+    initializeSession();
   }, []);
 
   // Activity tracking
@@ -126,16 +175,25 @@ export default function AdminLayout() {
     setIsSidebarOpen(false);
   };
 
+  const toggleProfileDropdown = () => {
+    setIsProfileDropdownOpen(!isProfileDropdownOpen);
+  };
+
+  const closeProfileDropdown = () => {
+    setIsProfileDropdownOpen(false);
+  };
+
   // Close sidebar on Esc key
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isSidebarOpen) {
-        closeSidebar();
+      if (e.key === 'Escape') {
+        if (isSidebarOpen) closeSidebar();
+        if (isProfileDropdownOpen) closeProfileDropdown();
       }
     };
     window.addEventListener('keydown', handleEsc);
     return () => window.removeEventListener('keydown', handleEsc);
-  }, [isSidebarOpen]);
+  }, [isSidebarOpen, isProfileDropdownOpen]);
 
   // Prevent body scroll when sidebar is open on mobile
   useEffect(() => {
@@ -151,21 +209,34 @@ export default function AdminLayout() {
 
   return (
     <div className="admin-dashboard-new">
-      {/* Hamburger Button - Mobile Only */}
-      <button
-        className="hamburger-button"
-        onClick={toggleSidebar}
-        aria-label="Toggle navigation menu"
-        aria-expanded={isSidebarOpen}
-      >
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
+      {!isAuthChecked ? (
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          height: '100vh',
+          fontSize: '1.2rem',
+          color: '#666'
+        }}>
+          Loading...
+        </div>
+      ) : (
+        <>
+          {/* Hamburger Button - Mobile Only */}
+          <button
+            className="hamburger-button"
+            onClick={toggleSidebar}
+            aria-label="Toggle navigation menu"
+            aria-expanded={isSidebarOpen}
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
 
-      {/* Overlay - Mobile Only */}
-      {isSidebarOpen && (
-        <div 
+          {/* Overlay - Mobile Only */}
+          {isSidebarOpen && (
+            <div 
           className="sidebar-overlay"
           onClick={closeSidebar}
           aria-hidden="true"
@@ -175,7 +246,7 @@ export default function AdminLayout() {
       {/* Left Sidebar */}
       <aside className={`admin-sidebar ${isSidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
-          <h1>🛠️ Admin Portal</h1>
+          <h1><RiAdminLine className="header-icon" /> Admin Portal</h1>
           <div className="user-info">
             <div><strong>{currentUser.fullName || 'Administrator'}</strong></div>
             <div style={{fontSize: '0.75rem', opacity: 0.8}}>{currentUser.role || 'ADMIN'}</div>
@@ -191,7 +262,7 @@ export default function AdminLayout() {
                 className={({ isActive }) => `sidebar-menu-button ${isActive ? 'active' : ''}`}
                 onClick={closeSidebar}
               >
-                <span className="menu-icon">📊</span>
+                <RiDashboardLine className="menu-icon" />
                 <span>Dashboard</span>
               </NavLink>
             </li>
@@ -201,7 +272,7 @@ export default function AdminLayout() {
                 className={({ isActive }) => `sidebar-menu-button ${isActive ? 'active' : ''}`}
                 onClick={closeSidebar}
               >
-                <span className="menu-icon">💰</span>
+                <RiMoneyDollarCircleLine className="menu-icon" />
                 <span>Donations</span>
               </NavLink>
             </li>
@@ -212,7 +283,7 @@ export default function AdminLayout() {
                   className={({ isActive }) => `sidebar-menu-button ${isActive ? 'active' : ''}`}
                   onClick={closeSidebar}
                 >
-                  <span className="menu-icon">👥</span>
+                  <RiTeamLine className="menu-icon" />
                   <span>Users</span>
                 </NavLink>
               </li>
@@ -223,7 +294,7 @@ export default function AdminLayout() {
                 className={({ isActive }) => `sidebar-menu-button ${isActive ? 'active' : ''}`}
                 onClick={closeSidebar}
               >
-                <span className="menu-icon">📢</span>
+                <RiMegaphoneLine className="menu-icon" />
                 <span>Campaigns</span>
               </NavLink>
             </li>
@@ -233,8 +304,28 @@ export default function AdminLayout() {
                 className={({ isActive }) => `sidebar-menu-button ${isActive ? 'active' : ''}`}
                 onClick={closeSidebar}
               >
-                <span className="menu-icon">📂</span>
+                <RiFolderLine className="menu-icon" />
                 <span>Categories</span>
+              </NavLink>
+            </li>
+            <li className="sidebar-menu-item">
+              <NavLink
+                to="/admin/homepage"
+                className={({ isActive }) => `sidebar-menu-button ${isActive ? 'active' : ''}`}
+                onClick={closeSidebar}
+              >
+                <RiHomeLine className="menu-icon" />
+                <span>Homepage</span>
+              </NavLink>
+            </li>
+            <li className="sidebar-menu-item">
+              <NavLink
+                to="/admin/cms"
+                className={({ isActive }) => `sidebar-menu-button ${isActive ? 'active' : ''}`}
+                onClick={closeSidebar}
+              >
+                <RiFileTextLine className="menu-icon" />
+                <span>CMS Content</span>
               </NavLink>
             </li>
             <li className="sidebar-menu-item">
@@ -243,18 +334,8 @@ export default function AdminLayout() {
                 className={({ isActive }) => `sidebar-menu-button ${isActive ? 'active' : ''}`}
                 onClick={closeSidebar}
               >
-                <span className="menu-icon">⚙️</span>
+                <RiSettings3Line className="menu-icon" />
                 <span>Settings</span>
-              </NavLink>
-            </li>
-            <li className="sidebar-menu-item">
-              <NavLink
-                to="/admin/contact-settings"
-                className={({ isActive }) => `sidebar-menu-button ${isActive ? 'active' : ''}`}
-                onClick={closeSidebar}
-              >
-                <span className="menu-icon">📞</span>
-                <span>Contact Info</span>
               </NavLink>
             </li>
             <li className="sidebar-menu-item">
@@ -263,7 +344,7 @@ export default function AdminLayout() {
                 className={({ isActive }) => `sidebar-menu-button ${isActive ? 'active' : ''}`}
                 onClick={closeSidebar}
               >
-                <span className="menu-icon">🌟</span>
+                <RiStarLine className="menu-icon" />
                 <span>Donate Popup</span>
               </NavLink>
             </li>
@@ -272,15 +353,82 @@ export default function AdminLayout() {
 
         <div className="sidebar-footer">
           <button onClick={handleLogout} className="btn-logout-sidebar">
-            🚪 Logout
+            <RiLogoutBoxLine className="menu-icon" /> Logout
           </button>
         </div>
       </aside>
 
       {/* Main Content Area */}
       <main className="admin-main-content">
-        <Outlet />
+        {/* Top Header Bar */}
+        <div className="admin-top-header">
+          <div className="header-spacer"></div>
+          <div className="user-profile-dropdown">
+            <button
+              className="profile-trigger"
+              onClick={toggleProfileDropdown}
+              aria-expanded={isProfileDropdownOpen}
+              aria-haspopup="true"
+              aria-label="User profile menu"
+            >
+              <div className="profile-icon">
+                <RiUserLine />
+              </div>
+              <div className="profile-info">
+                <span className="profile-name">{currentUser.fullName || 'Administrator'}</span>
+                <span className="profile-role">{currentUser.role || 'ADMIN'}</span>
+              </div>
+              <RiArrowDownSLine className={`dropdown-arrow ${isProfileDropdownOpen ? 'open' : ''}`} />
+            </button>
+
+            {isProfileDropdownOpen && (
+              <>
+                <div 
+                  className="dropdown-overlay"
+                  onClick={closeProfileDropdown}
+                  aria-hidden="true"
+                />
+                <div className="profile-dropdown-menu" role="menu">
+                  <div className="dropdown-header">
+                    <div className="dropdown-user-icon">
+                      <RiUserLine />
+                    </div>
+                    <div className="dropdown-user-info">
+                      <strong>{currentUser.fullName || 'Administrator'}</strong>
+                      <small>{currentUser.email || currentUser.username || 'admin@example.org'}</small>
+                    </div>
+                  </div>
+                  <div className="dropdown-divider"></div>
+                  <div className="dropdown-item-group">
+                    <div className="dropdown-info-item">
+                      <span className="info-label">Role:</span>
+                      <span className={`role-badge ${currentUser.role?.toLowerCase()}`}>
+                        {currentUser.role || 'ADMIN'}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="dropdown-divider"></div>
+                  <button
+                    className="dropdown-item logout-item"
+                    onClick={handleLogout}
+                    role="menuitem"
+                  >
+                    <RiLogoutBoxLine />
+                    <span>Logout</span>
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Page Content */}
+        <div className="admin-content-wrapper">
+          <Outlet />
+        </div>
       </main>
+        </>
+      )}
     </div>
   );
 }

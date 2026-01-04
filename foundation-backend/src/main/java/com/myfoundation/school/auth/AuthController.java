@@ -1,5 +1,14 @@
 package com.myfoundation.school.auth;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,6 +17,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,6 +27,7 @@ import java.util.Map;
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 @Slf4j
+@Tag(name = "Authentication", description = "Admin authentication and user management endpoints")
 public class AuthController {
     
     private final AuthService authService;
@@ -28,9 +39,27 @@ public class AuthController {
     private String cookieName;
     @Value("${app.jwt.cookie-domain:}")
     private String cookieDomain;
+    @Value("${app.jwt.cookie-secure:false}")
+    private boolean cookieSecure;
     @Value("${app.jwt.expiration-minutes:60}")
     private long jwtExpiryMinutes;
     
+    @Operation(
+        summary = "Admin login",
+        description = "Authenticates an admin user with username and password. Returns JWT token for API access. " +
+                      "May require OTP verification if enabled."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Login successful, JWT token returned",
+            content = @Content(schema = @Schema(implementation = LoginResponse.class))
+        ),
+        @ApiResponse(
+            responseCode = "401",
+            description = "Invalid credentials"
+        )
+    })
     @PostMapping(value = "/login", consumes = "application/json", produces = "application/json")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
         try {
@@ -43,7 +72,7 @@ public class AuthController {
                 log.info("Cookie enabled, building cookie...");
                 ResponseCookie cookie = ResponseCookie.from(cookieName, response.getToken())
                         .httpOnly(true)
-                        .secure(true)
+                        .secure(cookieSecure)
                         .path("/")
                         .sameSite("Lax")
                         .maxAge(jwtExpiryMinutes * 60)
@@ -84,62 +113,45 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
     
-    @GetMapping("/users")
-    public ResponseEntity<List<AdminUser>> getAllUsers() {
-        log.info("Fetching all users");
-        List<AdminUser> users = authService.getAllUsers();
-        // Remove password from response
-        users.forEach(user -> user.setPassword(null));
-        return ResponseEntity.ok(users);
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout() {
+        log.info("Logout requested");
+        ResponseEntity.BodyBuilder builder = ResponseEntity.ok();
+        
+        if (cookieEnabled) {
+            // Clear the JWT cookie
+            ResponseCookie cookie = ResponseCookie.from(cookieName, "")
+                    .httpOnly(true)
+                    .secure(cookieSecure)
+                    .path("/")
+                    .sameSite("Lax")
+                    .maxAge(0)  // Expire immediately
+                    .domain(cookieDomain.isBlank() ? null : cookieDomain)
+                    .build();
+            builder.header("Set-Cookie", cookie.toString());
+        }
+        
+        return builder.body(Map.of("message", "Logged out successfully"));
     }
     
-    @PostMapping("/users")
-    public ResponseEntity<?> createUser(@Valid @RequestBody CreateUserRequest request) {
-        try {
-            log.info("Creating new user: {}", request.getUsername());
-            AdminUser user = authService.createUser(request);
-            user.setPassword(null); // Don't return password
-            return ResponseEntity.status(HttpStatus.CREATED).body(user);
-        } catch (RuntimeException e) {
-            log.error("User creation failed: {}", e.getMessage());
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+    @Operation(
+        summary = "Initialize CSRF token",
+        description = "GET endpoint that triggers CSRF token generation. The CSRF token is automatically set in XSRF-TOKEN cookie by Spring Security. Requires authentication.",
+        security = @SecurityRequirement(name = "Bearer Authentication")
+    )
+    @ApiResponse(
+        responseCode = "200",
+        description = "CSRF token initialized successfully"
+    )
+    @GetMapping("/csrf")
+    public ResponseEntity<?> getCsrfToken(HttpServletRequest request, HttpServletResponse response) {
+        log.debug("CSRF token endpoint accessed - token will be set in cookie by Spring Security");
+        // Access the CSRF token from the request to trigger cookie generation
+        CsrfToken csrfToken = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
+        if (csrfToken != null) {
+            // Token is now loaded and will be set as cookie by CookieCsrfTokenRepository
+            response.setHeader(csrfToken.getHeaderName(), csrfToken.getToken());
         }
-    }
-    
-    @PutMapping("/users/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable String id, @Valid @RequestBody CreateUserRequest request) {
-        try {
-            log.info("Updating user: {}", id);
-            AdminUser user = authService.updateUser(id, request);
-            user.setPassword(null); // Don't return password
-            return ResponseEntity.ok(user);
-        } catch (RuntimeException e) {
-            log.error("User update failed: {}", e.getMessage());
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        }
-    }
-
-    @PatchMapping("/users/{id}/status")
-    public ResponseEntity<?> updateUserStatus(@PathVariable String id, @RequestBody Map<String, Boolean> payload) {
-        try {
-            Boolean active = payload.get("active");
-            if (active == null) {
-                return ResponseEntity.badRequest().body(Map.of("error", "active flag is required"));
-            }
-            AdminUser user = authService.updateUserStatus(id, active);
-            user.setPassword(null);
-            return ResponseEntity.ok(user);
-        } catch (RuntimeException e) {
-            log.error("User status update failed: {}", e.getMessage());
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        }
-    }
-    
-    @DeleteMapping("/users/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable String id, Authentication authentication) {
-        String currentUsername = authentication != null ? authentication.getName() : "unknown";
-        log.info("User {} requested delete for user id: {}", currentUsername, id);
-        authService.deleteUser(id, currentUsername);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(Map.of("message", "CSRF token initialized"));
     }
 }

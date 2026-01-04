@@ -20,11 +20,15 @@ public class ContactSettings {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
     
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String email;
     
     @Column(columnDefinition = "TEXT")
     private String locationsJson;
+    
+    @Column(nullable = true, columnDefinition = "BOOLEAN DEFAULT true")
+    @Builder.Default
+    private Boolean showInFooter = true;
     
     @Column(nullable = false, updatable = false)
     private Instant createdAt;

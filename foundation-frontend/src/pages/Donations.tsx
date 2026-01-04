@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
+import { RiMoneyDollarCircleLine } from 'react-icons/ri';
 import { formatCurrency } from '../utils/currency';
 import { fetchDonationsPaginated, type DonationPageResponse } from '../api';
 import { usePaginationParams } from '../hooks/usePaginationParams';
 import { useDebounce } from '../hooks/useDebounce';
+import { formatDateTime } from '../utils/dateUtils';
+import { TIMING } from '../config/constants';
 import './Donations.css';
 
 export default function Donations() {
@@ -12,7 +15,7 @@ export default function Donations() {
   const [searchInput, setSearchInput] = useState('');
 
   const { page, size, sort, q, status, setPage, setSize, setSort, setQuery, setStatus, reset } = usePaginationParams();
-  const debouncedSearch = useDebounce(searchInput, 300);
+  const debouncedSearch = useDebounce(searchInput, TIMING.DEBOUNCE_SEARCH);
 
   // Update query when debounced search changes
   useEffect(() => {
@@ -67,7 +70,7 @@ export default function Donations() {
   return (
     <>
       <div className="content-header">
-        <h2>💰 Donations</h2>
+        <h2><RiMoneyDollarCircleLine style={{verticalAlign: 'middle', marginRight: '0.5rem'}} /> Donations</h2>
         <p>View and manage all donations made through the platform</p>
       </div>
 
@@ -176,13 +179,7 @@ export default function Donations() {
                         </td>
                         <td>
                           {donation.createdAt
-                            ? new Date(donation.createdAt).toLocaleDateString('en-US', {
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })
+                            ? formatDateTime(donation.createdAt)
                             : 'N/A'}
                         </td>
                       </tr>

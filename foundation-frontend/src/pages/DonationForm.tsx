@@ -2,9 +2,9 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { useParams } from 'react-router-dom';
 import { api, type Campaign } from '../api';
 import { getCurrencySymbol, amountToCents, centsToAmount } from '../utils/currency';
+import { isValidEmail, isEmpty } from '../utils/validators';
+import { DONATION } from '../config/constants';
 import './DonationForm.css';
-
-const PRESET_AMOUNTS = [500, 1000, 2500, 5000, 10000];
 
 type DonationStep = 'amount' | 'personal' | 'payment';
 
@@ -13,7 +13,7 @@ export default function DonationForm() {
   
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [currentStep, setCurrentStep] = useState<DonationStep>('amount');
-  const [amount, setAmount] = useState<number>(1000);
+  const [amount, setAmount] = useState<number>(DONATION.DEFAULT_AMOUNT);
   const [currency, setCurrency] = useState<string>('eur');
   const [customAmount, setCustomAmount] = useState('');
   const [donorName, setDonorName] = useState('');
@@ -40,11 +40,11 @@ export default function DonationForm() {
       setError('');
       setCurrentStep('personal');
     } else if (currentStep === 'personal') {
-      if (!anonymous && (!donorName || !donorEmail)) {
+      if (!anonymous && (isEmpty(donorName) || isEmpty(donorEmail))) {
         setError('Please provide your name and email, or choose to donate anonymously');
         return;
       }
-      if (!anonymous && donorEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(donorEmail)) {
+      if (!anonymous && donorEmail && !isValidEmail(donorEmail)) {
         setError('Please enter a valid email address');
         return;
       }
@@ -178,7 +178,7 @@ export default function DonationForm() {
               <div className="form-section">
                 <label className="form-label">Select Amount ({currency.toUpperCase()})</label>
                 <div className="amount-buttons">
-                  {PRESET_AMOUNTS.map(preset => (
+                  {DONATION.PRESET_AMOUNTS.map(preset => (
                     <button
                       key={preset}
                       type="button"

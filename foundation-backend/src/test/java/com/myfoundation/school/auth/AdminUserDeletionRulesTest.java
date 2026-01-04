@@ -34,10 +34,13 @@ class AdminUserDeletionRulesTest {
 
     @BeforeEach
     void setup() {
+        // Clear all existing admin users
         adminUserRepository.deleteAll();
+        adminUserRepository.flush();
 
+        // Note: The default admin MUST be named "admin" as per the service logic
         superAdmin = adminUserRepository.save(AdminUser.builder()
-                .username("admin")
+                .username("admin")  // Must be "admin" for service checks
                 .email("admin@test.org")
                 .password(passwordEncoder.encode("Passw0rd!"))
                 .fullName("Default Admin")
@@ -75,7 +78,8 @@ class AdminUserDeletionRulesTest {
 
     @Test
     void defaultAdminCannotBeDeleted() {
-        assertThatThrownBy(() -> authService.deleteUser(superAdmin.getId(), "admin"))
+        // Trying to delete the default admin should fail
+        assertThatThrownBy(() -> authService.deleteUser(superAdmin.getId(), "teamadmin"))
                 .hasMessageContaining("Cannot delete the default admin");
     }
 

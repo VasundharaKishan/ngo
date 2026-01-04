@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { RiFolderLine } from 'react-icons/ri';
 import { API_BASE_URL } from '../api';
 import { authFetch } from '../utils/auth';
 import { useToast } from '../components/ToastProvider';
@@ -50,7 +51,7 @@ export default function Categories() {
   return (
     <>
       <div className="content-header">
-        <h2>📂 Categories</h2>
+        <h2><RiFolderLine style={{verticalAlign: 'middle', marginRight: '0.5rem'}} /> Categories</h2>
         <p>Manage campaign categories</p>
       </div>
 

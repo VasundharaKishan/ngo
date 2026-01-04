@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { RiMegaphoneLine, RiStarLine } from 'react-icons/ri';
 import { api, type CampaignPopupDto, type DonatePopupResponse } from '../api';
 import { formatCurrency } from '../utils/currency';
 import './FeaturedCampaignModal.css';
@@ -57,15 +58,15 @@ export default function FeaturedCampaignModal({ isOpen, onClose }: FeaturedCampa
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay" onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="modal-title">
       <div className="featured-modal" onClick={(e) => e.stopPropagation()}>
-        <button className="modal-close" onClick={onClose}>×</button>
+        <button className="modal-close" onClick={onClose} aria-label="Close modal">×</button>
         
         {loading ? (
           <div className="modal-loading">Loading campaign...</div>
         ) : error ? (
           <div className="modal-error">
-            <div className="modal-error-icon">📢</div>
+            <div className="modal-error-icon"><RiMegaphoneLine size={48} style={{color: '#2a3da8'}} /></div>
             <p className="modal-error-text">{error}</p>
             <button className="modal-btn-primary" onClick={() => { navigate('/campaigns'); onClose(); }}>
               Browse All Campaigns
@@ -78,6 +79,7 @@ export default function FeaturedCampaignModal({ isOpen, onClose }: FeaturedCampa
                 src={campaign.imageUrl || 'https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?w=800&auto=format&fit=crop&q=80'} 
                 alt={campaign.title}
                 className="modal-image"
+                loading="lazy"
                 onError={(e) => {
                   e.currentTarget.src = 'https://placehold.co/800x600/667eea/ffffff?text=Campaign+Image';
                 }}
@@ -94,10 +96,10 @@ export default function FeaturedCampaignModal({ isOpen, onClose }: FeaturedCampa
                   </div>
                 </div>
 
-              <h2 className="modal-title">{campaign.title}</h2>
+              <h2 className="modal-title" id="modal-title">{campaign.title}</h2>
               
               <div className="modal-active-notice">
-                <div className="modal-notice-icon">🌟</div>
+                <div className="modal-notice-icon"><RiStarLine size={24} style={{color: '#f59e0b'}} /></div>
                 <p className="modal-notice-text">
                   <strong>We are actively working on this campaign!</strong><br/>
                   Your contribution will directly support our ongoing efforts and make an immediate impact in the lives of those we serve.
@@ -131,7 +133,8 @@ export default function FeaturedCampaignModal({ isOpen, onClose }: FeaturedCampa
 
               <div className="modal-actions">
                 <button className="modal-btn-primary" onClick={handleDonate}>
-                  Donate now
+                  <span className="heart-icon" aria-hidden="true">❤️</span>
+                  Donate
                 </button>
                 <button className="modal-btn-secondary" onClick={handleLearnMore}>
                   Learn more

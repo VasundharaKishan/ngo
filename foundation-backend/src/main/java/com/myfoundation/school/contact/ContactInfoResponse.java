@@ -12,4 +12,5 @@ import java.util.List;
 public class ContactInfoResponse {
     private String email;
     private List<ContactLocation> locations;
+    private Boolean showInFooter;
 }

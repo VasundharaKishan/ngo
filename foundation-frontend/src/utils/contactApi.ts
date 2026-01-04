@@ -11,6 +11,7 @@ export interface ContactLocation {
 export interface ContactInfo {
   email: string;
   locations: ContactLocation[];
+  showInFooter?: boolean;
 }
 
 /**

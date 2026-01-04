@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { RiDashboardLine, RiMoneyDollarCircleLine, RiMegaphoneLine, RiStarLine } from 'react-icons/ri';
 import { API_BASE_URL, getDonatePopupSettings, type DonatePopupSettingsResponse } from '../api';
 import { authFetch } from '../utils/auth';
 import { formatCurrency, calculateProgress } from '../utils/currency';
@@ -64,7 +65,7 @@ export default function AdminDashboard() {
   if (loading) {
     return (
       <div className="content-header">
-        <h2>📊 Dashboard</h2>
+        <h2><RiDashboardLine style={{verticalAlign: 'middle', marginRight: '0.5rem'}} /> Dashboard</h2>
         <p>Loading dashboard...</p>
       </div>
     );
@@ -98,7 +99,7 @@ export default function AdminDashboard() {
   return (
     <>
       <div className="content-header">
-        <h2>📊 Dashboard</h2>
+        <h2><RiDashboardLine style={{verticalAlign: 'middle', marginRight: '0.5rem'}} /> Dashboard</h2>
         <p>Overview of donations and campaign performance</p>
       </div>
 
@@ -107,7 +108,7 @@ export default function AdminDashboard() {
           {/* Summary Cards */}
           <div className="dashboard-cards">
             <div className="dashboard-card">
-              <div className="card-icon">💰</div>
+              <div className="card-icon"><RiMoneyDollarCircleLine size={40} /></div>
               <div className="card-content">
                 <h3>Total Donations</h3>
                 <p className="card-value">{donations.length}</p>
@@ -128,14 +129,14 @@ export default function AdminDashboard() {
               </div>
             </div>
             <div className="dashboard-card">
-              <div className="card-icon">📢</div>
+              <div className="card-icon"><RiMegaphoneLine size={40} /></div>
               <div className="card-content">
                 <h3>Active Campaigns</h3>
                 <p className="card-value">{campaigns.filter(c => c.active).length}</p>
               </div>
             </div>
             <div className="dashboard-card">
-              <div className="card-icon">⭐</div>
+              <div className="card-icon"><RiStarLine size={40} /></div>
               <div className="card-content">
                 <h3>Featured Active</h3>
                 <p className="card-value">{featuredCampaignsCount}</p>

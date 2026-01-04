@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { api, type Campaign } from '../api';
-import { formatCurrency, formatCurrencyCode } from '../utils/currency';
+import CampaignCard from '../components/CampaignCard';
+import { useCampaignsPerPage } from '../contexts/ConfigContext';
+import { refreshScrollAnimations } from '../utils/scrollAnimations';
+import SkeletonLoader from '../components/SkeletonLoader';
 import './CampaignList.css';
 
 export default function CampaignList() {
@@ -10,15 +12,13 @@ export default function CampaignList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(12);
+  
+  // Get items per page from config context
+  const itemsPerPage = useCampaignsPerPage();
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        // Fetch site config for items per page
-        const config = await api.getPublicConfig();
-        setItemsPerPage(config.itemsPerPage || 12);
-        
         // Fetch all campaigns
         const data = await api.getCampaigns();
         setCampaigns(data);
@@ -37,6 +37,9 @@ export default function CampaignList() {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     setDisplayedCampaigns(campaigns.slice(startIndex, endIndex));
+    
+    // Refresh scroll animations for new content
+    setTimeout(() => refreshScrollAnimations(), 100);
   }, [campaigns, currentPage, itemsPerPage]);
 
   const totalPages = Math.ceil(campaigns.length / itemsPerPage);
@@ -49,7 +52,17 @@ export default function CampaignList() {
   if (loading) {
     return (
       <div className="container">
-        <p className="loading">Loading campaigns...</p>
+        <div style={{ marginBottom: '2rem' }}>
+          <SkeletonLoader variant="text" lines={1} width="300px" height="48px" />
+          <div style={{ marginTop: '1rem' }}>
+            <SkeletonLoader variant="text" lines={1} width="400px" height="20px" />
+          </div>
+        </div>
+        <div className="campaign-grid">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <SkeletonLoader key={index} variant="card" />
+          ))}
+        </div>
       </div>
     );
   }
@@ -72,49 +85,12 @@ export default function CampaignList() {
       ) : (
         <>
           <div className="campaign-grid">
-            {displayedCampaigns.map(campaign => (
-          <div key={campaign.id} className="campaign-card">
-            {/* {campaign.imageUrl && (
-              <div className="card-image-container">
-                <img 
-                  src={campaign.imageUrl} 
-                  alt={campaign.title}
-                  className="card-image"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
+            {displayedCampaigns.map((campaign) => (
+              <div key={campaign.id} className="scroll-animate-stagger">
+                <CampaignCard campaign={campaign} />
               </div>
-            )} */}
-            <div className="card-header">
-              <h2>{campaign.title}</h2>
-              {campaign.active && <span className="badge-active">Active</span>}
-            </div>
-            <p className="description">{campaign.shortDescription}</p>
-            <div className="campaign-meta">
-              <div className="meta-item">
-                <span className="label">Goal:</span>
-                <span className="value">
-                  {formatCurrency(campaign.targetAmount, campaign.currency)} {formatCurrencyCode(campaign.currency)}
-                </span>
-              </div>
-            </div>
-            <div className="card-actions">
-              <Link to={`/campaigns/${campaign.id}`} className="btn-secondary">
-                View Details
-              </Link>
-              {campaign.active && (
-                <Link to={`/donate/${campaign.id}`} className="btn-primary">
-                  Donate Now
-                </Link>
-              )}
-              {!campaign.active && (
-                <span className="inactive-label">Not Accepting Donations</span>
-              )}
-            </div>
+            ))}
           </div>
-        ))}
-      </div>
 
       {/* Pagination Controls */}
       {totalPages > 1 && (

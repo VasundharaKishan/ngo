@@ -23,7 +23,17 @@ public class RateLimitingInterceptor implements HandlerInterceptor {
             // donation creation: moderate burst allowed
             "/api/donations/stripe/create", new LimitConfig(20, 60),
             // webhook: higher tolerance but still bounded
-            "/api/donations/stripe/webhook", new LimitConfig(120, 60)
+            "/api/donations/stripe/webhook", new LimitConfig(120, 60),
+            // public campaigns: prevent scraping/DDoS
+            "/api/campaigns", new LimitConfig(100, 60),
+            // public categories: prevent scraping
+            "/api/categories", new LimitConfig(50, 60),
+            // public CMS content
+            "/api/cms", new LimitConfig(50, 60),
+            // public config
+            "/api/config/public", new LimitConfig(50, 60),
+            "/api/settings/public", new LimitConfig(50, 60),
+            "/api/public", new LimitConfig(50, 60)
     );
 
     @Override
