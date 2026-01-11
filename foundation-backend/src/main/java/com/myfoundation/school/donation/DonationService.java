@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -65,6 +66,19 @@ public class DonationService {
     private final EmailService emailService;
     
     /**
+     * Minimum donation amounts by currency (aligned with Stripe minimums)
+     * Amounts are in cents/paise
+     */
+    private static final Map<String, Long> MINIMUM_AMOUNTS = Map.of(
+        "usd", 100L,  // $1.00
+        "eur", 100L,  // €1.00
+        "gbp", 100L,  // £1.00
+        "inr", 5000L, // ₹50.00
+        "cad", 100L,  // $1.00 CAD
+        "aud", 100L   // $1.00 AUD
+    );
+    
+    /**
      * Create a Stripe Checkout Session for processing a donation.
      * 
      * <p>This method performs the following steps:</p>
@@ -104,6 +118,18 @@ public class DonationService {
         
         if (!campaign.getActive()) {
             throw new RuntimeException("This campaign is not accepting donations at this time. Please choose another campaign.");
+        }
+        
+        // Validate minimum donation amount
+        String currencyLower = request.getCurrency().toLowerCase();
+        Long minimumAmount = MINIMUM_AMOUNTS.getOrDefault(currencyLower, 100L); // Default $1.00
+        long amountInCents = request.getAmount();
+        
+        if (amountInCents < minimumAmount) {
+            String formattedMin = String.format("%.2f", minimumAmount / 100.0);
+            throw new IllegalArgumentException(
+                String.format("Minimum donation amount is %s %s", formattedMin, request.getCurrency().toUpperCase())
+            );
         }
         
         // Create donation entity with PENDING status
@@ -185,41 +211,45 @@ public class DonationService {
         
         log.info("[Webhook] Donation {} successfully marked as SUCCESS. Campaign totals will be derived from this donation.", donationId);
         
-        // Send donation acknowledgement emails
-        try {
-            String campaignTitle = donation.getCampaign() != null ? donation.getCampaign().getTitle() : "General Donation";
-            String donationDate = donation.getCreatedAt()
-                .atZone(java.time.ZoneId.systemDefault())
-                .format(DateTimeFormatter.ofPattern("MMMM dd, yyyy 'at' hh:mm a"));
-            
-            // Send thank you email to donor
-            log.info("[Webhook] Sending donation acknowledgement email to donor: {}", donation.getDonorEmail());
-            emailService.sendDonationAcknowledgement(
-                donation.getDonorEmail(),
-                donation.getDonorName(),
-                donation.getAmount(),
-                donation.getCurrency(),
-                campaignTitle,
-                donation.getId(),
-                donationDate
-            );
-            
-            // Send notification email to admin
-            log.info("[Webhook] Sending donation notification to admin");
-            emailService.sendDonationNotificationToAdmin(
-                donation.getDonorName(),
-                donation.getDonorEmail(),
-                donation.getAmount(),
-                donation.getCurrency(),
-                campaignTitle,
-                donation.getId(),
-                donationDate
-            );
-            
-            log.info("[Webhook] Donation emails sent successfully for donation {}", donationId);
-        } catch (Exception e) {
-            log.error("[Webhook] Failed to send donation emails for donation {}, but donation was still successful", donationId, e);
-            // Don't throw - email failure shouldn't affect donation status
+        // Send donation acknowledgement emails (only if donor email was provided)
+        if (donation.getDonorEmail() != null && !donation.getDonorEmail().trim().isEmpty()) {
+            try {
+                String campaignTitle = donation.getCampaign() != null ? donation.getCampaign().getTitle() : "General Donation";
+                String donationDate = donation.getCreatedAt()
+                    .atZone(java.time.ZoneId.systemDefault())
+                    .format(DateTimeFormatter.ofPattern("MMMM dd, yyyy 'at' hh:mm a"));
+                
+                // Send thank you email to donor
+                log.info("[Webhook] Sending donation acknowledgement email to donor: {}", donation.getDonorEmail());
+                emailService.sendDonationAcknowledgement(
+                    donation.getDonorEmail(),
+                    donation.getDonorName() != null ? donation.getDonorName() : "Anonymous Donor",
+                    donation.getAmount(),
+                    donation.getCurrency(),
+                    campaignTitle,
+                    donation.getId(),
+                    donationDate
+                );
+                
+                // Send notification email to admin
+                log.info("[Webhook] Sending donation notification to admin");
+                emailService.sendDonationNotificationToAdmin(
+                    donation.getDonorName() != null ? donation.getDonorName() : "Anonymous Donor",
+                    donation.getDonorEmail(),
+                    donation.getAmount(),
+                    donation.getCurrency(),
+                    campaignTitle,
+                    donation.getId(),
+                    donationDate
+                );
+                
+                log.info("[Webhook] Donation emails sent successfully for donation {}", donationId);
+            } catch (Exception e) {
+                log.error("[Webhook] Failed to send donation emails for donation {}, but donation was still successful", donationId, e);
+                // Don't throw - email failure shouldn't affect donation status
+            }
+        } else {
+            log.info("[Webhook] Donor email not provided for donation {} - skipping email notifications", donationId);
         }
     }
     
@@ -282,6 +312,8 @@ public class DonationService {
     }
     
     private DonationResponse toDonationResponse(Donation donation) {
+        Campaign campaign = donation.getCampaign();
+        
         return DonationResponse.builder()
                 .id(donation.getId())
                 .donorName(donation.getDonorName())
@@ -289,8 +321,8 @@ public class DonationService {
                 .amount(donation.getAmount())
                 .currency(donation.getCurrency())
                 .status(donation.getStatus())
-                .campaignId(donation.getCampaign().getId())
-                .campaignTitle(donation.getCampaign().getTitle())
+                .campaignId(campaign != null ? campaign.getId() : null)
+                .campaignTitle(campaign != null ? campaign.getTitle() : "Unknown Campaign")
                 .createdAt(donation.getCreatedAt())
                 .build();
     }

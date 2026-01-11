@@ -153,7 +153,7 @@ export const cmsApi = {
 ```
 
 **Updated Components:**
-- Home.tsx - Fetch all dynamic content
+-Home.tsx  - Fetch all dynamic content
 - Layout.tsx - Fetch header/footer content
 - Legal pages - Fetch from CMS
 

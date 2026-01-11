@@ -1,7 +1,11 @@
 .admin-settings {
-  min-height: 100vh;
-  background: #f8fafc;
-  padding: 2rem;
+  /* AdminLayout already provides page padding and background.
+     Avoid double padding/background that squeezes content and looks distorted. */
+  min-height: auto;
+  background: transparent;
+  padding: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .settings-header {
@@ -199,7 +203,7 @@
 
 @media (max-width: 768px) {
   .admin-settings {
-    padding: 1rem;
+    padding: 0;
   }
 
   .settings-header {
@@ -310,15 +314,15 @@
   margin-bottom: 2rem;
 }
 
-.config-input {
+.settings-grid .config-input {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   min-width: 300px;
 }
 
-.config-input input,
-.config-input textarea {
+.settings-grid .config-input input,
+.settings-grid .config-input textarea {
   width: 100%;
   padding: 0.75rem;
   border: 2px solid #e2e8f0;
@@ -328,14 +332,14 @@
   transition: all 0.3s ease;
 }
 
-.config-input input[type="color"] {
+.settings-grid .config-input input[type="color"] {
   height: 50px;
   cursor: pointer;
   padding: 0.25rem;
 }
 
-.config-input input:focus,
-.config-input textarea:focus {
+.settings-grid .config-input input:focus,
+.settings-grid .config-input textarea:focus {
   outline: none;
   border-color: #2a3da8;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);

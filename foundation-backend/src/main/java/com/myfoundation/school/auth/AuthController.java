@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -16,11 +17,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -144,13 +143,14 @@ public class AuthController {
         description = "CSRF token initialized successfully"
     )
     @GetMapping("/csrf")
-    public ResponseEntity<?> getCsrfToken(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<?> getCsrfToken(HttpServletRequest request) {
         log.debug("CSRF token endpoint accessed - token will be set in cookie by Spring Security");
         // Access the CSRF token from the request to trigger cookie generation
         CsrfToken csrfToken = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
         if (csrfToken != null) {
-            // Token is now loaded and will be set as cookie by CookieCsrfTokenRepository
-            response.setHeader(csrfToken.getHeaderName(), csrfToken.getToken());
+            // Trigger token generation by calling getToken()
+            csrfToken.getToken();
+            log.debug("CSRF token loaded and will be set in cookie by CookieCsrfTokenRepository");
         }
         return ResponseEntity.ok(Map.of("message", "CSRF token initialized"));
     }

@@ -2,8 +2,8 @@ package com.myfoundation.school.security;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -44,12 +44,19 @@ import java.util.List;
 @Slf4j
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
 public class SecurityConfig {
     
     @Value("${app.frontend.url}")
     private String frontendUrl;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    
+    @Autowired(required = false)
+    private CsrfDebugFilter csrfDebugFilter;
+    
+    // Constructor for dependency injection
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    }
     
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -65,11 +72,18 @@ public class SecurityConfig {
             org.springframework.security.web.csrf.CookieCsrfTokenRepository.withHttpOnlyFalse();
         csrfTokenRepository.setCookiePath("/");
         csrfTokenRepository.setCookieName("XSRF-TOKEN");
+        csrfTokenRepository.setHeaderName("X-XSRF-TOKEN");
+        
+        // Use XorCsrfTokenRequestAttributeHandler for better compatibility with SPAs and tests
+        org.springframework.security.web.csrf.XorCsrfTokenRequestAttributeHandler requestHandler = 
+            new org.springframework.security.web.csrf.XorCsrfTokenRequestAttributeHandler();
+        requestHandler.setCsrfRequestAttributeName("_csrf");
         
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf
                 .csrfTokenRepository(csrfTokenRepository)
+                .csrfTokenRequestHandler(requestHandler)
                 .ignoringRequestMatchers(
                     "/api/auth/login",
                     "/api/auth/otp/**",
@@ -151,7 +165,13 @@ public class SecurityConfig {
                 headers.permissionsPolicy(policy -> policy
                     .policy("geolocation=(), microphone=(), camera=(), fullscreen=(self)"));
             })
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterAfter(new CsrfCookieFilter(), org.springframework.security.web.csrf.CsrfFilter.class);
+        
+        // Only add CSRF debug filter if it's available (dev/local profiles)
+        if (csrfDebugFilter != null) {
+            http.addFilterAfter(csrfDebugFilter, org.springframework.security.web.csrf.CsrfFilter.class);
+        }
         
         return http.build();
     }

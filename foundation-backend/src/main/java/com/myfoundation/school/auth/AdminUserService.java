@@ -17,6 +17,7 @@ public class AdminUserService {
     private final AdminUserRepository adminUserRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthService authService;
+    private final PasswordSetupTokenRepository tokenRepository;
     
     public List<AdminUser> getAllUsers() {
         return adminUserRepository.findAll();
@@ -73,6 +74,10 @@ public class AdminUserService {
         if (target.getRole() == UserRole.ADMIN && !actorIsSuperAdmin) {
             throw new RuntimeException("Only the super admin can delete other admins");
         }
+
+        // Delete associated password setup tokens first to avoid foreign key constraint violation
+        tokenRepository.deleteByUserId(target.getId());
+        log.info("Deleted password setup tokens for user: {}", target.getUsername());
 
         adminUserRepository.delete(target);
         log.info("Deleted user: {} by {}", target.getUsername(), actor.getUsername());

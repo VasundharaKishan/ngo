@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,7 +23,6 @@ public class AdminUserController {
     private final AdminUserService adminUserService;
     
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<AdminUser>> getAllUsers(Authentication authentication) {
         String currentUsername = authentication.getName();
         log.info("Admin {} fetching all users", currentUsername);
@@ -35,7 +33,6 @@ public class AdminUserController {
     }
     
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createUser(@Valid @RequestBody CreateUserRequest request, Authentication authentication) {
         try {
             String currentUsername = authentication.getName();
@@ -50,7 +47,6 @@ public class AdminUserController {
     }
     
     @PatchMapping("/{id}/status")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> toggleUserStatus(@PathVariable String id, @RequestBody Map<String, Boolean> request, Authentication authentication) {
         try {
             String currentUsername = authentication.getName();
@@ -69,7 +65,6 @@ public class AdminUserController {
     }
     
     @PatchMapping("/{id}/password")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> changeUserPassword(@PathVariable String id, @RequestBody Map<String, String> request, Authentication authentication) {
         try {
             String currentUsername = authentication.getName();
@@ -87,7 +82,6 @@ public class AdminUserController {
     }
     
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> deleteUser(@PathVariable String id, Authentication authentication) {
         try {
             String currentUsername = authentication.getName();

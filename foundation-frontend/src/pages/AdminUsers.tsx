@@ -24,7 +24,6 @@ export default function AdminUsers() {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
-    password: '',
     fullName: '',
     role: 'OPERATOR' as 'ADMIN' | 'OPERATOR',
     active: true
@@ -36,7 +35,7 @@ export default function AdminUsers() {
 
   const loadUsers = async () => {
     try {
-      const res = await authFetch(`${API_BASE_URL}/auth/users`);
+      const res = await authFetch(`${API_BASE_URL}/admin/users`);
       const data = await res.json();
       setUsers(data);
       setLoading(false);
@@ -50,8 +49,8 @@ export default function AdminUsers() {
     e.preventDefault();
     
     const url = editingUser 
-      ? `${API_BASE_URL}/auth/users/${editingUser.id}`
-      : `${API_BASE_URL}/auth/users`;
+      ? `${API_BASE_URL}/admin/users/${editingUser.id}`
+      : `${API_BASE_URL}/admin/users`;
     
     const method = editingUser ? 'PUT' : 'POST';
 
@@ -80,7 +79,6 @@ export default function AdminUsers() {
     setFormData({
       username: user.username,
       email: user.email,
-      password: '', // Don't populate password
       fullName: user.fullName,
       role: user.role,
       active: user.active
@@ -101,12 +99,20 @@ export default function AdminUsers() {
     if (!confirm(`Are you sure you want to delete user: ${username}?`)) return;
 
     try {
-      await authFetch(`${API_BASE_URL}/auth/users/${id}`, {
+      const res = await authFetch(`${API_BASE_URL}/admin/users/${id}`, {
         method: 'DELETE'
       });
-      loadUsers();
+      
+      if (res.ok) {
+        showToast(`User ${username} deleted successfully`, 'success');
+        loadUsers();
+      } else {
+        const errorData = await res.json();
+        showToast(errorData.error || 'Failed to delete user', 'error');
+      }
     } catch (error) {
       console.error('Error deleting user:', error);
+      showToast('Failed to delete user', 'error');
     }
   };
 
@@ -116,7 +122,6 @@ export default function AdminUsers() {
     setFormData({
       username: '',
       email: '',
-      password: '',
       fullName: '',
       role: 'OPERATOR',
       active: true
@@ -171,17 +176,14 @@ export default function AdminUsers() {
                     required
                   />
                 </div>
-                <div className="form-group">
-                  <label>Password {editingUser ? '(leave empty to keep current)' : '*'}</label>
-                  <input
-                    type="password"
-                    value={formData.password}
-                    onChange={(e) => setFormData({...formData, password: e.target.value})}
-                    required={!editingUser}
-                    minLength={6}
-                  />
-                </div>
               </div>
+
+              {!editingUser && (
+                <div className="info-box">
+                  <strong>📧 Email Setup Process</strong>
+                  <p>The user will receive an email with a secure link to set their password and security questions. The link expires in 24 hours.</p>
+                </div>
+              )}
 
               <div className="form-row">
                 <div className="form-group">

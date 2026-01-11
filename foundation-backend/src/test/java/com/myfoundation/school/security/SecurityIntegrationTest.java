@@ -17,9 +17,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import com.myfoundation.school.TestMailConfig;
+import org.springframework.test.annotation.DirtiesContext;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -71,7 +71,7 @@ class SecurityIntegrationTest {
 
     @Test
     void adminEndpointsRequireAuthentication() throws Exception {
-        mockMvc.perform(get("/api/admin/campaigns"))
+        mockMvc.perform(get("/api/admin/campaigns").with(csrf()))
                 .andExpect(result -> {
                     int status = result.getResponse().getStatus();
                     assertTrue(status == 401 || status == 403,
@@ -128,10 +128,21 @@ class SecurityIntegrationTest {
         String token = jwtService.generateToken(admin);
 
         // CSRF endpoint should set XSRF-TOKEN cookie
-        mockMvc.perform(get("/api/auth/csrf")
+        var result = mockMvc.perform(get("/api/auth/csrf")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
                 .andExpect(status().isOk())
-                .andExpect(cookie().exists("XSRF-TOKEN"));
+                .andReturn();
+        
+        // Debug: Print response cookies
+        var response = result.getResponse();
+        System.out.println("Response cookies: " + response.getCookies().length);
+        for (var cookie : response.getCookies()) {
+            System.out.println("Cookie: " + cookie.getName() + " = " + cookie.getValue());
+        }
+        
+        // Assert cookie exists
+        assertTrue(response.getCookie("XSRF-TOKEN") != null, 
+            "Expected XSRF-TOKEN cookie to be set");
     }
 
     @Test

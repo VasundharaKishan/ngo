@@ -137,7 +137,6 @@
   box-shadow: var(--shadow-sm);
   flex-shrink: 0;
   white-space: nowrap;
-  margin-left: 3rem;
 }
 
 .description {

@@ -1,5 +1,6 @@
 package com.myfoundation.school.auth;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
+import java.util.List;
 
 @Entity
 @Table(name = "admin_users")
@@ -48,6 +50,10 @@ public class AdminUser {
     
     @Column(nullable = false)
     private Instant updatedAt;
+    
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserSecurityAnswer> securityAnswers;
     
     @PrePersist
     protected void onCreate() {
