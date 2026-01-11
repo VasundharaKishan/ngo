@@ -1,7 +1,11 @@
 .admin-homepage {
-  padding: var(--spacing-6);
-  max-width: 1400px;
-  margin: 0 auto;
+  /* AdminLayout already provides page padding via .admin-content-wrapper.
+     Avoid double/triple padding that squeezes the layout and causes wrapping/distortion. */
+  padding: 0;
+  max-width: none;
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .homepage-header {
@@ -29,7 +33,7 @@
   margin-bottom: var(--spacing-6);
 }
 
-.tab-button {
+.admin-homepage .tab-button {
   display: flex;
   align-items: center;
   gap: var(--spacing-2);
@@ -45,21 +49,21 @@
   position: relative;
 }
 
-.tab-button:hover {
+.admin-homepage .tab-button:hover {
   color: var(--color-primary);
   background: var(--color-bg-secondary);
 }
 
-.tab-button.active {
+.admin-homepage .tab-button.active {
   color: var(--color-primary);
   border-bottom-color: var(--color-primary);
 }
 
-.tab-icon {
+.admin-homepage .tab-icon {
   font-size: var(--font-size-xl);
 }
 
-.tab-count {
+.admin-homepage .tab-count {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -73,7 +77,7 @@
   font-weight: 700;
 }
 
-.tab-button.active .tab-count {
+.admin-homepage .tab-button.active .tab-count {
   background: var(--color-primary);
   color: white;
 }
@@ -508,13 +512,13 @@
     gap: 0;
   }
 
-  .tab-button {
+  .admin-homepage .tab-button {
     flex: 1;
     justify-content: center;
     padding: var(--spacing-3);
   }
 
-  .tab-button span:not(.tab-count) {
+  .admin-homepage .tab-button span:not(.tab-count) {
     display: none;
   }
 

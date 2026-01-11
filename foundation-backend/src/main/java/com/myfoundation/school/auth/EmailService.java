@@ -9,6 +9,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import java.io.UnsupportedEncodingException;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -19,15 +21,34 @@ public class EmailService {
     @Value("${app.frontend.url:http://localhost:5173}")
     private String frontendUrl;
     
-    @Value("${spring.mail.username}")
-    private String fromEmail;
+    @Value("${app.mail.from-name}")
+    private String fromName;
+    
+    @Value("${app.mail.reply-to}")
+    private String replyTo;
+    
+    @Value("${app.mail.from.account-alerts}")
+    private String fromAccountAlerts;
+    
+    @Value("${app.mail.from.donations}")
+    private String fromDonations;
+    
+    @Value("${app.mail.from.support}")
+    private String fromSupport;
+    
+    @Value("${app.mail.from.contact}")
+    private String fromContact;
+    
+    @Value("${app.mail.from.system}")
+    private String fromSystem;
     
     public void sendOtpEmail(String toEmail, String username, String code) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, false, "UTF-8");
 
-            helper.setFrom(fromEmail);
+            helper.setFrom(fromAccountAlerts, fromName);
+            helper.setReplyTo(replyTo);
             helper.setTo(toEmail);
             helper.setSubject("Your verification code");
 
@@ -41,7 +62,7 @@ public class EmailService {
 
             mailSender.send(message);
             log.info("OTP email sent successfully to: {}", toEmail);
-        } catch (MessagingException e) {
+        } catch (MessagingException | UnsupportedEncodingException e) {
             log.error("Failed to send OTP email to: {}", toEmail, e);
             throw new RuntimeException("Failed to send email", e);
         }
@@ -52,7 +73,8 @@ public class EmailService {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
             
-            helper.setFrom(fromEmail);
+            helper.setFrom(fromAccountAlerts, fromName);
+            helper.setReplyTo(replyTo);
             helper.setTo(toEmail);
             helper.setSubject("Complete Your Account Setup - Yugal Savitri Seva");
             
@@ -64,7 +86,7 @@ public class EmailService {
             mailSender.send(message);
             log.info("Password setup email sent successfully to: {}", toEmail);
             
-        } catch (MessagingException e) {
+        } catch (MessagingException | UnsupportedEncodingException e) {
             log.error("Failed to send password setup email to: {}", toEmail, e);
             throw new RuntimeException("Failed to send email", e);
         }
@@ -182,8 +204,8 @@ public class EmailService {
             
             // Use donations@ or no-reply@ for outbound emails
             // Reply-To will be contact@yugalsavitriseva.org
-            helper.setFrom(fromEmail);
-            helper.setReplyTo("contact@yugalsavitriseva.org");
+            helper.setFrom(fromDonations, fromName);
+            helper.setReplyTo(replyTo);
             helper.setTo(toEmail);
             helper.setSubject("Thank You for Your Generous Donation - Yugal Savitri Seva");
             
@@ -195,7 +217,7 @@ public class EmailService {
             mailSender.send(message);
             log.info("Donation acknowledgement email sent successfully to: {}", toEmail);
             
-        } catch (MessagingException e) {
+        } catch (MessagingException | UnsupportedEncodingException e) {
             log.error("Failed to send donation acknowledgement email to: {}", toEmail, e);
             // Don't throw exception - we don't want email failure to break donation processing
         }
@@ -217,7 +239,7 @@ public class EmailService {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
             
-            helper.setFrom(fromEmail);
+            helper.setFrom(fromSystem, fromName);
             helper.setTo("contact@yugalsavitriseva.org"); // This forwards to yugalsavitriseva@gmail.com
             helper.setSubject("New Donation Received - " + formatCurrency(amount, currency));
             
@@ -229,7 +251,7 @@ public class EmailService {
             mailSender.send(message);
             log.info("Donation notification email sent successfully to admin");
             
-        } catch (MessagingException e) {
+        } catch (MessagingException | UnsupportedEncodingException e) {
             log.error("Failed to send donation notification email to admin", e);
             // Don't throw exception - we don't want email failure to break donation processing
         }

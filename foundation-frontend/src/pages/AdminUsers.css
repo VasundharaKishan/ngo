@@ -108,6 +108,26 @@
   gap: 1.5rem;
 }
 
+.info-box {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 0.5rem 0;
+}
+
+.info-box strong {
+  display: block;
+  color: #1e40af;
+  margin-bottom: 0.5rem;
+}
+
+.info-box p {
+  margin: 0.5rem 0;
+  color: #1e3a8a;
+  font-size: var(--font-size-sm);
+}
+
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;

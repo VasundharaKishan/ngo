@@ -35,19 +35,20 @@ spring:
       enabled: true
   
   mail:
-    host: ${MAIL_HOST:smtp.gmail.com}
-    port: ${MAIL_PORT:465}
-    username: ${MAIL_USERNAME:}
-    password: ${MAIL_PASSWORD:}
+    host: ${MAIL_HOST:smtp-relay.brevo.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:9f4df2001@smtp-brevo.com}
+    password: ${BREVO_SMTP_KEY:xsmtpsib-1a62eb462fcce89fa2fd779e356c040fe53bb74272c047eaa078cf9cad570316-ggVElV7D90W6vmFl}
     properties:
       mail:
         smtp:
           auth: true
-          ssl:
+          starttls:
             enable: true
-          socketFactory:
-            class: javax.net.ssl.SSLSocketFactory
-            port: 465
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
 
 server:
   port: 8080
@@ -55,6 +56,15 @@ server:
 app:
   frontend:
     url: ${FRONTEND_URL:http://localhost:5173}
+  mail:
+    from-name: ${MAIL_FROM_NAME:Yugal Savitri Seva}
+    reply-to: ${MAIL_REPLY_TO:yugalsavitriseva@gmail.com}
+    from:
+      account-alerts: ${MAIL_FROM_ACCOUNT_ALERTS:account-alerts@yugalsavitriseva.org}
+      donations: ${MAIL_FROM_DONATIONS:donations@yugalsavitriseva.org}
+      support: ${MAIL_FROM_SUPPORT:support@yugalsavitriseva.org}
+      contact: ${MAIL_FROM_CONTACT:contact@yugalsavitriseva.org}
+      system: ${MAIL_FROM_SYSTEM:noreply@yugalsavitriseva.org}
   jwt:
     secret: ${JWT_SECRET:change-this-secret-to-a-long-random-value-please}
     expiration-minutes: ${JWT_EXPIRATION_MINUTES:60}
@@ -73,6 +83,9 @@ app:
     enabled: ${RATE_LIMIT_ENABLED:true}
     requests-per-minute: ${RATE_LIMIT_REQUESTS_PER_MINUTE:60}
     burst-size: ${RATE_LIMIT_BURST_SIZE:10}
+    login: ${APP_RATE_LIMIT_LOGIN:100}
+    admin: ${APP_RATE_LIMIT_ADMIN:100}
+    general: ${APP_RATE_LIMIT_GENERAL:100}
 
 cors:
   allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}

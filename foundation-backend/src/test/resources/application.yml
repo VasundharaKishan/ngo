@@ -26,6 +26,15 @@ stripe:
 app:
   frontend:
     url: http://localhost:5173
+  mail:
+    from-name: Test Org
+    reply-to: test@example.com
+    from:
+      account-alerts: account-alerts@example.com
+      donations: donations@example.com
+      support: support@example.com
+      contact: contact@example.com
+      system: noreply@example.com
   jwt:
     secret: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
     expiration-minutes: 60

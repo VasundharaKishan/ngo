@@ -92,14 +92,14 @@
   /* Main content: no left margin on mobile */
   .admin-main-content {
     margin-left: 0;
-    padding: 5rem 1rem 1rem 1rem; /* Extra top padding for hamburger button */
+    padding: 5rem 0 0 0; /* Space for hamburger; wrapper handles side padding */
   }
 }
 
 /* Tablet adjustments */
 @media (min-width: 768px) and (max-width: 1023px) {
   .admin-main-content {
-    padding: 5rem 2rem 2rem 2rem;
+    padding: 5rem 0 0 0;
   }
 }
 
@@ -361,6 +361,12 @@
 }
 
 /* Content Wrapper */
+.admin-main-content {
+  /* AdminDashboardNew.css applies padding here, but AdminLayout also pads content
+     via .admin-content-wrapper. Avoid double padding that causes “distorted” spacing. */
+  padding: 0;
+}
+
 .admin-content-wrapper {
   padding: 1.5rem 2rem 2rem;
 }

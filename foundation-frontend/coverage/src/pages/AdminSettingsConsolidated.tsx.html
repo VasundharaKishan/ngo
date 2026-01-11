@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/634</span>
+                <span class='fraction'>0/627</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/634</span>
+                <span class='fraction'>0/627</span>
             </div>
         
             
@@ -879,15 +879,7 @@
 <a name='L814'></a><a href='#L814'>814</a>
 <a name='L815'></a><a href='#L815'>815</a>
 <a name='L816'></a><a href='#L816'>816</a>
-<a name='L817'></a><a href='#L817'>817</a>
-<a name='L818'></a><a href='#L818'>818</a>
-<a name='L819'></a><a href='#L819'>819</a>
-<a name='L820'></a><a href='#L820'>820</a>
-<a name='L821'></a><a href='#L821'>821</a>
-<a name='L822'></a><a href='#L822'>822</a>
-<a name='L823'></a><a href='#L823'>823</a>
-<a name='L824'></a><a href='#L824'>824</a>
-<a name='L825'></a><a href='#L825'>825</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L817'></a><a href='#L817'>817</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1240,11 +1232,6 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1262,11 +1249,8 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -2063,12 +2047,7 @@ interface SettingField {
   // BANNER SETTINGS FUNCTIONS
 <span class="cstat-no" title="statement not covered" >  const loadBannerSettings = async () =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >    try {</span>
-<span class="cstat-no" title="statement not covered" >      const token = sessionStorage.getItem('adminToken');</span>
-<span class="cstat-no" title="statement not covered" >      const response = await fetch(`${API_BASE_URL}/admin/cms/content/site-settings`, {</span>
-<span class="cstat-no" title="statement not covered" >        headers: {</span>
-<span class="cstat-no" title="statement not covered" >          'Authorization': `Bearer ${token}`,</span>
-<span class="cstat-no" title="statement not covered" >        },</span>
-<span class="cstat-no" title="statement not covered" >      });</span>
+<span class="cstat-no" title="statement not covered" >      const response = await authFetch(`${API_BASE_URL}/admin/cms/content/site-settings`);</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >      if (!response.ok) return;</span>
 &nbsp;
@@ -2089,12 +2068,9 @@ interface SettingField {
 <span class="cstat-no" title="statement not covered" >  const saveBannerSettings = async () =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >    setSaving(true);</span>
 <span class="cstat-no" title="statement not covered" >    try {</span>
-<span class="cstat-no" title="statement not covered" >      const token = sessionStorage.getItem('adminToken');</span>
-      
-<span class="cstat-no" title="statement not covered" >      await fetch(`${API_BASE_URL}/admin/cms/content`, {</span>
+<span class="cstat-no" title="statement not covered" >      await authFetch(`${API_BASE_URL}/admin/cms/content`, {</span>
 <span class="cstat-no" title="statement not covered" >        method: 'POST',</span>
 <span class="cstat-no" title="statement not covered" >        headers: {</span>
-<span class="cstat-no" title="statement not covered" >          'Authorization': `Bearer ${token}`,</span>
 <span class="cstat-no" title="statement not covered" >          'Content-Type': 'application/json',</span>
 <span class="cstat-no" title="statement not covered" >        },</span>
 <span class="cstat-no" title="statement not covered" >        body: JSON.stringify({</span>
@@ -2542,7 +2518,7 @@ interface SettingField {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-01-03T13:50:05.259Z
+                at 2026-01-08T20:08:32.137Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/548</span>
+                <span class='fraction'>0/538</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/548</span>
+                <span class='fraction'>0/538</span>
             </div>
         
             
@@ -739,17 +739,8 @@
 <a name='L674'></a><a href='#L674'>674</a>
 <a name='L675'></a><a href='#L675'>675</a>
 <a name='L676'></a><a href='#L676'>676</a>
-<a name='L677'></a><a href='#L677'>677</a>
-<a name='L678'></a><a href='#L678'>678</a>
-<a name='L679'></a><a href='#L679'>679</a>
-<a name='L680'></a><a href='#L680'>680</a>
-<a name='L681'></a><a href='#L681'>681</a>
-<a name='L682'></a><a href='#L682'>682</a>
-<a name='L683'></a><a href='#L683'>683</a>
-<a name='L684'></a><a href='#L684'>684</a>
-<a name='L685'></a><a href='#L685'>685</a>
-<a name='L686'></a><a href='#L686'>686</a>
-<a name='L687'></a><a href='#L687'>687</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L677'></a><a href='#L677'>677</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -821,11 +812,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -859,10 +845,6 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -877,9 +859,7 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -1437,6 +1417,7 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >import { useState, useEffect } from 'react';</span></span></span>
 <span class="cstat-no" title="statement not covered" >import { useNavigate } from 'react-router-dom';</span>
+<span class="cstat-no" title="statement not covered" >import { authFetch } from '../utils/auth';</span>
 <span class="cstat-no" title="statement not covered" >import { API_BASE_URL } from '../config/constants';</span>
 <span class="cstat-no" title="statement not covered" >import '../styles/AdminCMS.css';</span>
 &nbsp;
@@ -1491,8 +1472,8 @@ type ContentType = 'testimonials' | 'stats' | 'social-media' | 'carousel';
 &nbsp;
   // Check authentication
 <span class="cstat-no" title="statement not covered" >  useEffect(() =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >    const token = sessionStorage.getItem('adminToken');</span>
-<span class="cstat-no" title="statement not covered" >    if (!token) {</span>
+<span class="cstat-no" title="statement not covered" >    const user = localStorage.getItem('adminUser');</span>
+<span class="cstat-no" title="statement not covered" >    if (!user) {</span>
 <span class="cstat-no" title="statement not covered" >      navigate('/admin/login');</span>
 <span class="cstat-no" title="statement not covered" >    }</span>
 <span class="cstat-no" title="statement not covered" >  }, [navigate]);</span>
@@ -1506,12 +1487,7 @@ type ContentType = 'testimonials' | 'stats' | 'social-media' | 'carousel';
 <span class="cstat-no" title="statement not covered" >    setError(null);</span>
     
 <span class="cstat-no" title="statement not covered" >    try {</span>
-<span class="cstat-no" title="statement not covered" >      const token = sessionStorage.getItem('adminToken');</span>
-<span class="cstat-no" title="statement not covered" >      const response = await fetch(`${API_BASE_URL}/admin/cms/${activeTab}`, {</span>
-<span class="cstat-no" title="statement not covered" >        headers: {</span>
-<span class="cstat-no" title="statement not covered" >          'Authorization': `Bearer ${token}`,</span>
-<span class="cstat-no" title="statement not covered" >        },</span>
-<span class="cstat-no" title="statement not covered" >      });</span>
+<span class="cstat-no" title="statement not covered" >      const response = await authFetch(`${API_BASE_URL}/admin/cms/${activeTab}`);</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >      if (!response.ok) throw new Error('Failed to load content');</span>
 &nbsp;
@@ -1542,12 +1518,8 @@ type ContentType = 'testimonials' | 'stats' | 'social-media' | 'carousel';
 <span class="cstat-no" title="statement not covered" >    if (!confirm('Are you sure you want to delete this item?')) return;</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    try {</span>
-<span class="cstat-no" title="statement not covered" >      const token = sessionStorage.getItem('adminToken');</span>
-<span class="cstat-no" title="statement not covered" >      const response = await fetch(`${API_BASE_URL}/admin/cms/${activeTab}/${id}`, {</span>
+<span class="cstat-no" title="statement not covered" >      const response = await authFetch(`${API_BASE_URL}/admin/cms/${activeTab}/${id}`, {</span>
 <span class="cstat-no" title="statement not covered" >        method: 'DELETE',</span>
-<span class="cstat-no" title="statement not covered" >        headers: {</span>
-<span class="cstat-no" title="statement not covered" >          'Authorization': `Bearer ${token}`,</span>
-<span class="cstat-no" title="statement not covered" >        },</span>
 <span class="cstat-no" title="statement not covered" >      });</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >      if (!response.ok) throw new Error('Failed to delete');</span>
@@ -1560,15 +1532,13 @@ type ContentType = 'testimonials' | 'stats' | 'social-media' | 'carousel';
 &nbsp;
 <span class="cstat-no" title="statement not covered" >  const handleSave = async (data: any, id?: string) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >    try {</span>
-<span class="cstat-no" title="statement not covered" >      const token = sessionStorage.getItem('adminToken');</span>
 <span class="cstat-no" title="statement not covered" >      const url = id </span>
 <span class="cstat-no" title="statement not covered" >        ? `${API_BASE_URL}/admin/cms/${activeTab}/${id}` </span>
 <span class="cstat-no" title="statement not covered" >        : `${API_BASE_URL}/admin/cms/${activeTab}`;</span>
       
-<span class="cstat-no" title="statement not covered" >      const response = await fetch(url, {</span>
+<span class="cstat-no" title="statement not covered" >      const response = await authFetch(url, {</span>
 <span class="cstat-no" title="statement not covered" >        method: id ? 'PUT' : 'POST',</span>
 <span class="cstat-no" title="statement not covered" >        headers: {</span>
-<span class="cstat-no" title="statement not covered" >          'Authorization': `Bearer ${token}`,</span>
 <span class="cstat-no" title="statement not covered" >          'Content-Type': 'application/json',</span>
 <span class="cstat-no" title="statement not covered" >        },</span>
 <span class="cstat-no" title="statement not covered" >        body: JSON.stringify(data),</span>
@@ -2128,7 +2098,7 @@ type ContentType = 'testimonials' | 'stats' | 'social-media' | 'carousel';
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-01-03T13:50:05.259Z
+                at 2026-01-08T20:08:32.137Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

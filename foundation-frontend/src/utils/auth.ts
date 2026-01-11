@@ -8,6 +8,8 @@
  * @module utils/auth
  */
 
+import { API_BASE_URL } from '../config/constants';
+
 /**
  * Get the authentication token (deprecated - kept for backwards compatibility).
  * 
@@ -76,26 +78,79 @@ export const withAuthHeaders = (headers: HeadersInit = {}): HeadersInit => {
  *   body: formData
  * });
  */
-export const authFetch = (url: string, options: RequestInit = {}) => {
-  const headers = new Headers(options.headers || {});
+export const authFetch = async (url: string, options: RequestInit = {}) => {
+  const makeRequest = () => {
+    const headers = new Headers(options.headers || {});
 
-  // Only set Content-Type for non-FormData bodies
-  if (options.body && !(options.body instanceof FormData) && !headers.has('Content-Type')) {
-    headers.set('Content-Type', 'application/json');
+    // Only set Content-Type for non-FormData bodies
+    if (options.body && !(options.body instanceof FormData) && !headers.has('Content-Type')) {
+      headers.set('Content-Type', 'application/json');
+    }
+
+    // Get CSRF token from cookie and include in header for mutation requests
+    if (options.method && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(options.method.toUpperCase())) {
+      const csrfToken = getCsrfToken();
+      console.log('[authFetch] CSRF Token from cookie:', csrfToken);
+      console.log('[authFetch] All cookies:', document.cookie);
+      if (csrfToken) {
+        headers.set('X-XSRF-TOKEN', csrfToken);
+      } else {
+        console.warn('[authFetch] No CSRF token found in cookies for', options.method, 'request!');
+      }
+    }
+
+    // Include credentials to send httpOnly cookies
+    return fetch(url, { 
+      ...options, 
+      headers,
+      credentials: 'include' // Send cookies with every request
+    });
+  };
+
+  // Make the initial request
+  const response = await makeRequest();
+
+  // If we get a 403 and it's a CSRF error, refresh the token and retry once
+  if (response.status === 403 && (options.method === 'POST' || options.method === 'PUT' || options.method === 'DELETE')) {
+    try {
+      const errorBody = await response.clone().json();
+      if (errorBody.message && errorBody.message.includes('CSRF')) {
+        console.log('[authFetch] CSRF error detected, refreshing token and retrying...');
+        
+        // Refresh CSRF token
+        const csrfResponse = await fetch(`${API_BASE_URL}/auth/csrf`, {
+          method: 'GET',
+          credentials: 'include'
+        });
+        
+        if (!csrfResponse.ok) {
+          console.error('[authFetch] Failed to refresh CSRF token:', csrfResponse.status);
+          return response; // Return original error response
+        }
+        
+        // Wait a bit for cookie to be set
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
+        // Verify token was set
+        const newToken = getCsrfToken();
+        console.log('[authFetch] New CSRF token after refresh:', newToken);
+        
+        if (!newToken) {
+          console.error('[authFetch] CSRF token still not available after refresh');
+          return response; // Return original error response
+        }
+        
+        // Retry the original request
+        console.log('[authFetch] Retrying request with new CSRF token');
+        return makeRequest();
+      }
+    } catch (e) {
+      // If we can't parse the error or refresh fails, return original response
+      console.error('[authFetch] Failed to refresh CSRF token:', e);
+    }
   }
 
-  // Get CSRF token from cookie and include in header
-  const csrfToken = getCsrfToken();
-  if (csrfToken) {
-    headers.set('X-XSRF-TOKEN', csrfToken);
-  }
-
-  // Include credentials to send httpOnly cookies
-  return fetch(url, { 
-    ...options, 
-    headers,
-    credentials: 'include' // Send cookies with every request
-  });
+  return response;
 };
 
 /**
@@ -108,11 +163,15 @@ export const authFetch = (url: string, options: RequestInit = {}) => {
  * @internal This is a private helper function
  */
 function getCsrfToken(): string | null {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; XSRF-TOKEN=`);
-  if (parts.length === 2) {
-    const token = parts.pop()?.split(';').shift();
-    return token || null;
+  const name = 'XSRF-TOKEN=';
+  const decodedCookie = decodeURIComponent(document.cookie);
+  const cookieArray = decodedCookie.split(';');
+  
+  for (let i = 0; i < cookieArray.length; i++) {
+    let cookie = cookieArray[i].trim();
+    if (cookie.indexOf(name) === 0) {
+      return cookie.substring(name.length);
+    }
   }
   return null;
 }

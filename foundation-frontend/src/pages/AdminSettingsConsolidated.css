@@ -1,7 +1,10 @@
 .admin-settings-consolidated {
-  padding: var(--spacing-6);
-  max-width: 1200px;
-  margin: 0 auto;
+  /* AdminLayout already provides page padding; avoid double padding/max-width. */
+  padding: 0;
+  max-width: none;
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .settings-header {
@@ -22,7 +25,7 @@
 }
 
 /* Tab Navigation */
-.settings-tabs {
+.admin-settings-consolidated .settings-tabs {
   display: flex;
   gap: var(--spacing-2);
   border-bottom: 2px solid var(--color-border);
@@ -31,7 +34,7 @@
   -webkit-overflow-scrolling: touch;
 }
 
-.tab-button {
+.admin-settings-consolidated .tab-button {
   display: flex;
   align-items: center;
   gap: var(--spacing-2);
@@ -47,17 +50,17 @@
   white-space: nowrap;
 }
 
-.tab-button:hover {
+.admin-settings-consolidated .tab-button:hover {
   color: var(--color-primary);
   background: var(--color-bg-secondary);
 }
 
-.tab-button.active {
+.admin-settings-consolidated .tab-button.active {
   color: var(--color-primary);
   border-bottom-color: var(--color-primary);
 }
 
-.tab-icon {
+.admin-settings-consolidated .tab-icon {
   font-size: var(--font-size-lg);
 }
 
@@ -379,29 +382,29 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .admin-settings-consolidated {
-    padding: var(--spacing-4);
+    padding: 0; /* AdminLayout wrapper handles padding; don't re-add here */
   }
 
   .settings-content {
     padding: var(--spacing-4);
   }
 
-  .settings-tabs {
+  .admin-settings-consolidated .settings-tabs {
     gap: 0;
   }
 
-  .tab-button {
+  .admin-settings-consolidated .tab-button {
     flex: 1;
     justify-content: center;
     padding: var(--spacing-2) var(--spacing-3);
     font-size: var(--font-size-sm);
   }
 
-  .tab-button span {
+  .admin-settings-consolidated .tab-button span {
     display: none;
   }
 
-  .tab-icon {
+  .admin-settings-consolidated .tab-icon {
     margin: 0;
   }
 

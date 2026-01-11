@@ -76,6 +76,10 @@ public class AuthService {
     
     @Transactional
     public AdminUser createUser(CreateUserRequest request) {
+        // Normalize email to lowercase to prevent case-sensitive duplicates
+        String normalizedEmail = request.getEmail().toLowerCase().trim();
+        request.setEmail(normalizedEmail);
+        
         if (adminUserRepository.existsByUsername(request.getUsername())) {
             throw new RuntimeException("Username already exists");
         }
@@ -343,6 +347,34 @@ public class AuthService {
 
     private String hashOtp(String otp) {
         return hashPassword(otp);
+    }
+    
+    /**
+     * Validates password strength to ensure minimum security requirements.
+     * Requirements:
+     * - At least 8 characters
+     * - Contains uppercase letter
+     * - Contains lowercase letter
+     * - Contains digit
+     */
+    private void validatePasswordStrength(String password) {
+        if (password == null || password.trim().isEmpty()) {
+            throw new IllegalArgumentException("Password cannot be empty");
+        }
+        
+        if (password.length() < 8) {
+            throw new IllegalArgumentException("Password must be at least 8 characters long");
+        }
+        
+        boolean hasUpper = password.chars().anyMatch(Character::isUpperCase);
+        boolean hasLower = password.chars().anyMatch(Character::isLowerCase);
+        boolean hasDigit = password.chars().anyMatch(Character::isDigit);
+        
+        if (!hasUpper || !hasLower || !hasDigit) {
+            throw new IllegalArgumentException(
+                "Password must contain at least one uppercase letter, one lowercase letter, and one digit"
+            );
+        }
     }
     
     /**

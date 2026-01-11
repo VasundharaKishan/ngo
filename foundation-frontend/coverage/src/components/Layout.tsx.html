@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/203</span>
+                <span class='fraction'>0/198</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/203</span>
+                <span class='fraction'>0/198</span>
             </div>
         
             
@@ -321,16 +321,7 @@
 <a name='L256'></a><a href='#L256'>256</a>
 <a name='L257'></a><a href='#L257'>257</a>
 <a name='L258'></a><a href='#L258'>258</a>
-<a name='L259'></a><a href='#L259'>259</a>
-<a name='L260'></a><a href='#L260'>260</a>
-<a name='L261'></a><a href='#L261'>261</a>
-<a name='L262'></a><a href='#L262'>262</a>
-<a name='L263'></a><a href='#L263'>263</a>
-<a name='L264'></a><a href='#L264'>264</a>
-<a name='L265'></a><a href='#L265'>265</a>
-<a name='L266'></a><a href='#L266'>266</a>
-<a name='L267'></a><a href='#L267'>267</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L259'></a><a href='#L259'>259</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -469,13 +460,6 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -604,7 +588,6 @@ import ErrorBoundary from './ErrorBoundary';
 import { fetchContactInfo, type ContactInfo } from '../utils/contactApi';
 import { useSiteName, useSiteLogo } from '../contexts/ConfigContext';
 import { API_BASE_URL } from '../api';
-import { getCurrentYear } from '../utils/dateUtils';
 import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin, FaYoutube } from 'react-icons/fa';
 &nbsp;
 interface SocialMediaLink {
@@ -643,8 +626,8 @@ interface CMSContent {
 <span class="cstat-no" title="statement not covered" >  const [contactError, setContactError] = useState(false);</span>
 <span class="cstat-no" title="statement not covered" >  const [socialLinks, setSocialLinks] = useState&lt;SocialMediaLink[]&gt;([]);</span>
 <span class="cstat-no" title="statement not covered" >  const [footerTagline, setFooterTagline] = useState&lt;string&gt;('');</span>
-<span class="cstat-no" title="statement not covered" >  const [copyrightText, setCopyrightText] = useState&lt;string&gt;('');</span>
-<span class="cstat-no" title="statement not covered" >  const [disclaimerText, setDisclaimerText] = useState&lt;string&gt;('');</span>
+<span class="cstat-no" title="statement not covered" >  const [, setCopyrightText] = useState&lt;string&gt;('');</span>
+<span class="cstat-no" title="statement not covered" >  const [, setDisclaimerText] = useState&lt;string&gt;('');</span>
 <span class="cstat-no" title="statement not covered" >  const [footerLoading, setFooterLoading] = useState(true);</span>
 <span class="cstat-no" title="statement not covered" >  const [showBanner, setShowBanner] = useState(false);</span>
 <span class="cstat-no" title="statement not covered" >  const [bannerMessage, setBannerMessage] = useState('This website is under development');</span>
@@ -738,13 +721,6 @@ interface CMSContent {
 <span class="cstat-no" title="statement not covered" >  const handleDonateClick = (e: React.MouseEvent) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >    e.preventDefault();</span>
 <span class="cstat-no" title="statement not covered" >    setIsModalOpen(true);</span>
-<span class="cstat-no" title="statement not covered" >  };</span>
-&nbsp;
-  // Replace placeholders in text with actual values
-<span class="cstat-no" title="statement not covered" >  const replacePlaceholders = (text: string): string =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >    return text</span>
-<span class="cstat-no" title="statement not covered" >      .replace(/{year}/g, getCurrentYear())</span>
-<span class="cstat-no" title="statement not covered" >      .replace(/{siteName}/g, siteName);</span>
 <span class="cstat-no" title="statement not covered" >  };</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >  return (</span>
@@ -868,7 +844,7 @@ interface CMSContent {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-01-03T13:50:05.259Z
+                at 2026-01-08T20:08:32.137Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

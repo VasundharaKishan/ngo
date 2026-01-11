@@ -37,6 +37,12 @@ public class HeroSlide {
     @Column(name = "sort_order", nullable = false)
     private int sortOrder;
     
+    @Column(name = "deleted", nullable = false)
+    private boolean deleted = false;
+    
+    @Column(name = "deleted_at")
+    private Instant deletedAt;
+    
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
     
