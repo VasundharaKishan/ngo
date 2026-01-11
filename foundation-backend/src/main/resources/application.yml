@@ -38,7 +38,7 @@ spring:
     host: ${MAIL_HOST:example.brevo.com}
     port: ${MAIL_PORT:587}
     username: ${MAIL_USERNAME:example_username}
-    password: ${BREVO_SMTP_KEY:example_password}
+    password: ${BREVO_SMTP_KEY:example
     properties:
       mail:
         smtp:
