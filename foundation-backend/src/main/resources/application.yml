@@ -35,10 +35,10 @@ spring:
       enabled: true
   
   mail:
-    host: ${MAIL_HOST:smtp-relay.brevo.com}
+    host: ${MAIL_HOST:example.brevo.com}
     port: ${MAIL_PORT:587}
-    username: ${MAIL_USERNAME:9f4df2001@smtp-brevo.com}
-    password: ${BREVO_SMTP_KEY:xsmtpsib-1a62eb462fcce89fa2fd779e356c040fe53bb74272c047eaa078cf9cad570316-ggVElV7D90W6vmFl}
+    username: ${MAIL_USERNAME:example_username}
+    password: ${BREVO_SMTP_KEY:example_password}
     properties:
       mail:
         smtp:
