@@ -80,7 +80,7 @@ export default function DonationForm() {
         campaignId,
       });
 
-      const redirectUrl = response.checkoutUrl ?? response.url;
+      const redirectUrl = response.url;
       if (!redirectUrl) {
         throw new Error('Missing checkout URL');
       }
