@@ -194,11 +194,19 @@ cd foundation-backend
 mvn test
 ```
 
-### Frontend Tests (To Be Implemented)
+### Frontend Tests
 ```bash
 cd foundation-frontend
 npm test
 ```
+
+### End-to-end Tests (Playwright)
+```bash
+cd playwright-tests
+npm test
+```
+
+Playwright resides in `playwright-tests/` so the frontend/backend stay isolated. The suite spins up the Vite dev server (reusing one if already running) and mocks the public home/campaigns/stats endpoints to keep the flow deterministic. Backend services are not required for this stubbed scenario.
 
 ## 📦 Deployment
 

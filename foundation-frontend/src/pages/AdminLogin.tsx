@@ -67,16 +67,16 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="admin-login">
+    <div className="admin-login" data-testid="admin-login-page">
       <div className="login-container">
         <div className="login-header">
           <h1><RiAdminLine className="header-icon" /> Admin Portal</h1>
           <p>Yugal Savitri Seva</p>
         </div>
 
-        <form onSubmit={handleLogin} className="login-form">
+        <form onSubmit={handleLogin} className="login-form" data-testid="admin-login-form">
           {error && (
-            <div className="error-message">
+            <div className="error-message" data-testid="admin-login-error">
               <RiAlertLine style={{verticalAlign: 'middle', marginRight: '0.5rem'}} /> {error}
             </div>
           )}
@@ -86,6 +86,7 @@ export default function AdminLogin() {
             <input
               type="text"
               value={username}
+              data-testid="admin-login-username"
               onChange={(e) => setUsername(e.target.value)}
               placeholder="Enter your username"
               required
@@ -98,19 +99,20 @@ export default function AdminLogin() {
             <input
               type="password"
               value={password}
+              data-testid="admin-login-password"
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter your password"
               required
             />
           </div>
 
-          <button type="submit" className="btn-login" disabled={loading}>
+          <button type="submit" className="btn-login" disabled={loading} data-testid="admin-login-submit">
             {loading ? 'Logging in...' : 'Login'}
           </button>
 
         </form>
 
-        <button onClick={() => navigate('/')} className="btn-home">
+        <button onClick={() => navigate('/')} className="btn-home" data-testid="admin-login-back">
           ← Back to Website
         </button>
       </div>

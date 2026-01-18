@@ -1,0 +1,33 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Section components render > renders HeroSection 1`] = `
+<DocumentFragment>
+  <section
+    aria-label="Welcome hero section"
+    class="hero"
+  >
+    <div
+      class="container"
+    >
+      <h1
+        class="animate-fade-in-up"
+      >
+        Welcome
+      </h1>
+      <p
+        class="hero-text animate-fade-in-up animate-delay-200"
+      >
+        Help us
+      </p>
+      <a
+        aria-label="Donate - View our campaigns"
+        class="btn-hero btn-press hover-lift animate-fade-in-up animate-delay-400"
+        data-discover="true"
+        href="/donate"
+      >
+        Donate
+      </a>
+    </div>
+  </section>
+</DocumentFragment>
+`;

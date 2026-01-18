@@ -22,6 +22,7 @@ export default function DonationForm() {
   const [anonymous, setAnonymous] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [redirectingUrl, setRedirectingUrl] = useState<string>('');
 
   useEffect(() => {
     if (campaignId) {
@@ -69,7 +70,7 @@ export default function DonationForm() {
 
     setLoading(true);
     setError('');
-
+    
     try {
       const response = await api.createStripeSession({
         amount,
@@ -79,8 +80,12 @@ export default function DonationForm() {
         campaignId,
       });
 
-      // Redirect to Stripe Checkout
-      window.location.href = response.url;
+      const redirectUrl = response.checkoutUrl ?? response.url;
+      if (!redirectUrl) {
+        throw new Error('Missing checkout URL');
+      }
+      setRedirectingUrl(redirectUrl);
+      redirectToCheckout(redirectUrl);
     } catch (err) {
       setError('Failed to create checkout session. Please try again.');
       setLoading(false);
@@ -154,9 +159,13 @@ export default function DonationForm() {
           </div>
         </div>
 
-        {error && <div className="error-message">{error}</div>}
+        {error && (
+          <div className="error-message" data-testid="donation-error">
+            {error}
+          </div>
+        )}
 
-        <form onSubmit={handleSubmit} className="donation-form">
+        <form onSubmit={handleSubmit} className="donation-form" data-testid="donation-form">
           {/* Step 1: Amount Selection */}
           {currentStep === 'amount' && (
             <div className="form-step">
@@ -205,6 +214,7 @@ export default function DonationForm() {
                       onChange={(e) => handleCustomAmountChange(e.target.value)}
                       min="1"
                       step="0.01"
+                      data-testid="donation-amount"
                     />
                   </div>
                 </div>
@@ -214,7 +224,12 @@ export default function DonationForm() {
                 </div>
               </div>
 
-              <button type="button" className="submit-btn" onClick={handleNextStep}>
+              <button
+                type="button"
+                className="submit-btn"
+                onClick={handleNextStep}
+                data-testid="donation-next-amount"
+              >
                 Continue to Your Information →
               </button>
             </div>
@@ -247,6 +262,7 @@ export default function DonationForm() {
                       value={donorName}
                       onChange={(e) => setDonorName(e.target.value)}
                       required={!anonymous}
+                      data-testid="donation-name"
                     />
                   </div>
 
@@ -259,6 +275,7 @@ export default function DonationForm() {
                       value={donorEmail}
                       onChange={(e) => setDonorEmail(e.target.value)}
                       required={!anonymous}
+                      data-testid="donation-email"
                     />
                     <p className="form-hint">We'll send your donation receipt to this email</p>
                   </div>
@@ -280,7 +297,12 @@ export default function DonationForm() {
                 <button type="button" className="btn-secondary" onClick={handlePreviousStep}>
                   ← Back
                 </button>
-                <button type="button" className="submit-btn" onClick={handleNextStep}>
+                <button
+                  type="button"
+                  className="submit-btn"
+                  onClick={handleNextStep}
+                  data-testid="donation-next-personal"
+                >
                   Continue to Payment →
                 </button>
               </div>
@@ -327,8 +349,17 @@ export default function DonationForm() {
                 <button type="button" className="btn-secondary" onClick={handlePreviousStep}>
                   ← Back
                 </button>
-                <button type="submit" className="submit-btn" disabled={loading}>
-                  {loading ? 'Processing...' : 'Proceed to Secure Payment →'}
+                <button
+                  type="submit"
+                  className="submit-btn"
+                  disabled={loading}
+                  data-testid="donation-submit"
+                >
+                  {loading ? (
+                    <span data-testid="donation-loading">Processing...</span>
+                  ) : (
+                    'Proceed to Secure Payment →'
+                  )}
                 </button>
               </div>
 
@@ -338,7 +369,28 @@ export default function DonationForm() {
             </div>
           )}
         </form>
+        {redirectingUrl && (
+          <p className="redirecting-message" data-testid="donation-redirecting">
+            Redirecting you to secure checkout...
+          </p>
+        )}
       </div>
     </div>
   );
+}
+
+export function redirectToCheckout(url: string) {
+  if (typeof window === 'undefined') return;
+  if (window.__SKIP_REDIRECT_TO_CHECKOUT) {
+    window.__LAST_REDIRECT_URL = url;
+    return;
+  }
+  window.location.href = url;
+}
+
+declare global {
+  interface Window {
+    __SKIP_REDIRECT_TO_CHECKOUT?: boolean;
+    __LAST_REDIRECT_URL?: string;
+  }
 }

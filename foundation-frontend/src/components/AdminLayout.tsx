@@ -244,7 +244,7 @@ export default function AdminLayout() {
       )}
 
       {/* Left Sidebar */}
-      <aside className={`admin-sidebar ${isSidebarOpen ? 'open' : ''}`}>
+      <aside className={`admin-sidebar ${isSidebarOpen ? 'open' : ''}`} data-testid="admin-sidebar">
         <div className="sidebar-header">
           <h1><RiAdminLine className="header-icon" /> Admin Portal</h1>
           <div className="user-info">
@@ -253,7 +253,7 @@ export default function AdminLayout() {
           </div>
         </div>
 
-        <nav>
+        <nav data-testid="admin-nav">
           <ul className="sidebar-menu">
             <li className="sidebar-menu-item">
               <NavLink
@@ -261,6 +261,7 @@ export default function AdminLayout() {
                 end
                 className={({ isActive }) => `sidebar-menu-button ${isActive ? 'active' : ''}`}
                 onClick={closeSidebar}
+                data-testid="nav-dashboard"
               >
                 <RiDashboardLine className="menu-icon" />
                 <span>Dashboard</span>
@@ -271,6 +272,7 @@ export default function AdminLayout() {
                 to="/admin/donations"
                 className={({ isActive }) => `sidebar-menu-button ${isActive ? 'active' : ''}`}
                 onClick={closeSidebar}
+                data-testid="nav-donations"
               >
                 <RiMoneyDollarCircleLine className="menu-icon" />
                 <span>Donations</span>
@@ -281,18 +283,20 @@ export default function AdminLayout() {
                 <NavLink
                   to="/admin/users"
                   className={({ isActive }) => `sidebar-menu-button ${isActive ? 'active' : ''}`}
-                  onClick={closeSidebar}
-                >
-                  <RiTeamLine className="menu-icon" />
-                  <span>Users</span>
-                </NavLink>
-              </li>
+                onClick={closeSidebar}
+                data-testid="nav-users"
+              >
+                <RiTeamLine className="menu-icon" />
+                <span>Users</span>
+              </NavLink>
+            </li>
             )}
             <li className="sidebar-menu-item">
               <NavLink
                 to="/admin/campaigns"
                 className={({ isActive }) => `sidebar-menu-button ${isActive ? 'active' : ''}`}
                 onClick={closeSidebar}
+                data-testid="nav-campaigns"
               >
                 <RiMegaphoneLine className="menu-icon" />
                 <span>Campaigns</span>
@@ -303,6 +307,7 @@ export default function AdminLayout() {
                 to="/admin/categories"
                 className={({ isActive }) => `sidebar-menu-button ${isActive ? 'active' : ''}`}
                 onClick={closeSidebar}
+                data-testid="nav-categories"
               >
                 <RiFolderLine className="menu-icon" />
                 <span>Categories</span>
@@ -313,6 +318,7 @@ export default function AdminLayout() {
                 to="/admin/homepage"
                 className={({ isActive }) => `sidebar-menu-button ${isActive ? 'active' : ''}`}
                 onClick={closeSidebar}
+                data-testid="nav-homepage"
               >
                 <RiHomeLine className="menu-icon" />
                 <span>Homepage</span>
@@ -323,6 +329,7 @@ export default function AdminLayout() {
                 to="/admin/cms"
                 className={({ isActive }) => `sidebar-menu-button ${isActive ? 'active' : ''}`}
                 onClick={closeSidebar}
+                data-testid="nav-cms"
               >
                 <RiFileTextLine className="menu-icon" />
                 <span>CMS Content</span>
@@ -333,6 +340,7 @@ export default function AdminLayout() {
                 to="/admin/settings"
                 className={({ isActive }) => `sidebar-menu-button ${isActive ? 'active' : ''}`}
                 onClick={closeSidebar}
+                data-testid="nav-settings"
               >
                 <RiSettings3Line className="menu-icon" />
                 <span>Settings</span>
@@ -343,6 +351,7 @@ export default function AdminLayout() {
                 to="/admin/donate-popup-settings"
                 className={({ isActive }) => `sidebar-menu-button ${isActive ? 'active' : ''}`}
                 onClick={closeSidebar}
+                data-testid="nav-donate-popup"
               >
                 <RiStarLine className="menu-icon" />
                 <span>Donate Popup</span>
@@ -352,7 +361,7 @@ export default function AdminLayout() {
         </nav>
 
         <div className="sidebar-footer">
-          <button onClick={handleLogout} className="btn-logout-sidebar">
+          <button onClick={handleLogout} className="btn-logout-sidebar" data-testid="admin-logout">
             <RiLogoutBoxLine className="menu-icon" /> Logout
           </button>
         </div>

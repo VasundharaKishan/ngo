@@ -54,13 +54,13 @@ export default function Campaigns() {
 
   return (
     <>
-      <div className="content-header">
+      <div className="content-header" data-testid="campaigns-header">
         <h2><RiMegaphoneLine style={{verticalAlign: 'middle', marginRight: '0.5rem'}} /> Campaigns</h2>
         <p>Manage donation campaigns</p>
       </div>
 
-      <div className="content-body">
-        <Link to="/admin/campaigns/new" className="btn-add-new">
+      <div className="content-body" data-testid="campaigns-list">
+        <Link to="/admin/campaigns/new" className="btn-add-new" data-testid="campaigns-add-new">
           + Add New Campaign
         </Link>
         
@@ -71,7 +71,7 @@ export default function Campaigns() {
             <p>No campaigns found. Create your first campaign!</p>
           </div>
         ) : (
-          <table className="data-table">
+          <table className="data-table" data-testid="campaigns-table">
             <thead>
               <tr>
                 <th>Title</th>
@@ -90,7 +90,7 @@ export default function Campaigns() {
                 const progress = calculateProgress(currentCents, targetCents);
                 
                 return (
-                  <tr key={campaign.id}>
+                  <tr key={campaign.id} data-testid={`campaign-row-${campaign.id}`}>
                     <td><strong>{campaign.title}</strong></td>
                     <td>
                       {campaign.category ? (
@@ -113,8 +113,20 @@ export default function Campaigns() {
                     </td>
                     <td>
                       <div className="table-actions">
-                        <Link to={`/admin/campaigns/${campaign.id}`} className="btn-edit">Edit</Link>
-                        <button onClick={() => deleteCampaign(campaign.id)} className="btn-delete">Delete</button>
+                        <Link
+                          to={`/admin/campaigns/${campaign.id}`}
+                          className="btn-edit"
+                          data-testid={`campaign-edit-${campaign.id}`}
+                        >
+                          Edit
+                        </Link>
+                        <button
+                          onClick={() => deleteCampaign(campaign.id)}
+                          className="btn-delete"
+                          data-testid={`campaign-delete-${campaign.id}`}
+                        >
+                          Delete
+                        </button>
                       </div>
                     </td>
                   </tr>

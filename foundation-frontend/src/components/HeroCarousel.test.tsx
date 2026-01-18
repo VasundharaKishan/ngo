@@ -42,6 +42,9 @@ describe('HeroCarousel', () => {
   });
 
   it('displays loading state initially', () => {
+    // Keep fetch pending so loading state persists
+    global.fetch = vi.fn(() => new Promise(() => {})) as any;
+
     render(<HeroCarousel />);
     expect(screen.getByText('Loading...')).toBeInTheDocument();
   });

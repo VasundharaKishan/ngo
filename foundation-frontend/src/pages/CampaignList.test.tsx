@@ -7,6 +7,7 @@ import type { Campaign, Category } from '../api';
 import { ConfigProvider } from '../contexts/ConfigContext';
 
 vi.mock('../api', () => ({
+  API_BASE_URL: 'http://localhost:8080/api',
   api: {
     getCampaigns: vi.fn(),
     getCategories: vi.fn(),
@@ -75,6 +76,16 @@ describe('CampaignList', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    global.fetch = vi.fn(() =>
+      Promise.resolve({
+        ok: true,
+        json: async () => ({
+          primaryColor: '#2563eb',
+          secondaryColor: '#7c3aed',
+          headerHeight: 76
+        })
+      } as Response)
+    );
     vi.mocked(api.getCampaigns).mockResolvedValue(mockCampaigns);
     vi.mocked(api.getCategories).mockResolvedValue(mockCategories);
     vi.mocked(api.getPublicConfig).mockResolvedValue({ featuredCampaignsCount: 3, itemsPerPage: 12 });
@@ -90,15 +101,17 @@ describe('CampaignList', () => {
     });
   });
 
-  it('displays loading state initially', () => {
+  it('displays loading state initially', async () => {
     vi.mocked(api.getCampaigns).mockImplementation(
       () => new Promise(() => {})
     );
 
     renderWithProviders(<CampaignList />);
 
-    // CampaignList shows skeleton loaders, not "loading" text
-    expect(document.querySelector('.skeleton-card')).toBeInTheDocument();
+    await waitFor(() => {
+      // CampaignList shows skeleton loaders, not "loading" text
+      expect(document.querySelector('.skeleton-card')).toBeInTheDocument();
+    });
   });
 
   it('fetches campaigns on mount', async () => {
@@ -163,9 +176,11 @@ describe('CampaignList', () => {
     });
   });
 
-  it('calls getCampaigns on mount', () => {
+  it('calls getCampaigns on mount', async () => {
     renderWithProviders(<CampaignList />);
 
-    expect(api.getCampaigns).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(api.getCampaigns).toHaveBeenCalled();
+    });
   });
 });
