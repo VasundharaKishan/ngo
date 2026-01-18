@@ -8,9 +8,9 @@ interface CampaignCardProps {
 
 export default function CampaignCard({ campaign }: CampaignCardProps) {
   return (
-    <div className="campaign-card">
+    <div className="campaign-card" data-testid="campaign-card">
       <div className="card-header">
-        <h2>{campaign.title}</h2>
+        <h2 data-testid="campaign-title">{campaign.title}</h2>
         {campaign.active && <span className="badge-active">Active</span>}
       </div>
       <p className="description">{campaign.shortDescription}</p>

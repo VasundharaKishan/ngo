@@ -133,16 +133,17 @@ export default function AdminUsers() {
   }
 
   return (
-    <div className="admin-users">
+    <div className="admin-users" data-testid="admin-users-page">
       <div className="users-container">
         <div className="users-actions">
-          <button onClick={() => setShowForm(!showForm)} className="btn-add-user">
+          <button onClick={() => setShowForm(!showForm)} className="btn-add-user" data-testid="admin-users-toggle-form">
             {showForm ? '✕ Cancel' : '+ Add New User'}
           </button>
         </div>
 
         {showForm && (
           <div className="user-form-container">
+            <div data-testid="admin-users-form">
             <h2>{editingUser ? 'Edit User' : 'Create New User'}</h2>
             <form onSubmit={handleSubmit} className="user-form">
               <div className="form-row">
@@ -153,6 +154,7 @@ export default function AdminUsers() {
                     value={formData.username}
                     onChange={(e) => setFormData({...formData, username: e.target.value})}
                     required
+                    data-testid="admin-users-input-username"
                   />
                 </div>
                 <div className="form-group">
@@ -162,6 +164,7 @@ export default function AdminUsers() {
                     value={formData.email}
                     onChange={(e) => setFormData({...formData, email: e.target.value})}
                     required
+                    data-testid="admin-users-input-email"
                   />
                 </div>
               </div>
@@ -174,6 +177,7 @@ export default function AdminUsers() {
                     value={formData.fullName}
                     onChange={(e) => setFormData({...formData, fullName: e.target.value})}
                     required
+                    data-testid="admin-users-input-fullname"
                   />
                 </div>
               </div>
@@ -192,6 +196,7 @@ export default function AdminUsers() {
                     value={formData.role}
                     onChange={(e) => setFormData({...formData, role: e.target.value as 'ADMIN' | 'OPERATOR'})}
                     required
+                    data-testid="admin-users-input-role"
                   >
                     <option value="OPERATOR">Operator (Limited Access)</option>
                     <option value="ADMIN">Admin (Full Access)</option>
@@ -203,6 +208,7 @@ export default function AdminUsers() {
                       type="checkbox"
                       checked={formData.active}
                       onChange={(e) => setFormData({...formData, active: e.target.checked})}
+                      data-testid="admin-users-input-active"
                     />
                     Active Account
                   </label>
@@ -210,15 +216,20 @@ export default function AdminUsers() {
               </div>
 
               <div className="form-actions">
-                <button type="button" onClick={resetForm} className="btn-cancel">Cancel</button>
-                <button type="submit" className="btn-save">{editingUser ? 'Update User' : 'Create User'}</button>
+                <button type="button" onClick={resetForm} className="btn-cancel" data-testid="admin-users-cancel">
+                  Cancel
+                </button>
+                <button type="submit" className="btn-save" data-testid="admin-users-submit">
+                  {editingUser ? 'Update User' : 'Create User'}
+                </button>
               </div>
             </form>
+            </div>
           </div>
         )}
 
         <div className="users-table">
-          <table>
+          <table data-testid="admin-users-table">
             <thead>
               <tr>
                 <th>Username</th>
@@ -232,7 +243,7 @@ export default function AdminUsers() {
             </thead>
             <tbody>
               {users.map(user => (
-                <tr key={user.id}>
+                <tr key={user.id} data-testid={`admin-user-row-${user.id}`}>
                   <td><strong>{user.username}</strong></td>
                   <td>{user.fullName}</td>
                   <td>{user.email}</td>
@@ -253,7 +264,9 @@ export default function AdminUsers() {
                   </td>
                   <td>
                     <div className="action-buttons">
-                      <button onClick={() => handleEdit(user)} className="btn-edit">Edit</button>
+                      <button onClick={() => handleEdit(user)} className="btn-edit" data-testid={`admin-users-edit-${user.id}`}>
+                        Edit
+                      </button>
                       {(user.username.toLowerCase() !== 'admin') && (
                         <button
                           onClick={() => handleDelete(user.id, user.username, user.role)}
@@ -264,6 +277,7 @@ export default function AdminUsers() {
                               ? 'Only the default admin can delete admin users'
                               : undefined
                           }
+                          data-testid={`admin-users-delete-${user.id}`}
                         >
                           Delete
                         </button>

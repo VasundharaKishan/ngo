@@ -69,7 +69,7 @@ export default function Donations() {
 
   return (
     <>
-      <div className="content-header">
+      <div className="content-header" data-testid="donations-header">
         <h2><RiMoneyDollarCircleLine style={{verticalAlign: 'middle', marginRight: '0.5rem'}} /> Donations</h2>
         <p>View and manage all donations made through the platform</p>
       </div>
@@ -78,11 +78,12 @@ export default function Donations() {
         <div className="donations-section">
           {/* Toolbar */}
           <div className="donations-toolbar">
-            <div className="toolbar-left">
+            <div className="toolbar-left" data-testid="donations-toolbar">
               <input
                 type="text"
                 placeholder="Search by name, email, campaign, or ID..."
                 className="search-input"
+                data-testid="donations-search"
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
               />
@@ -91,6 +92,7 @@ export default function Donations() {
                 className="filter-select"
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
+                data-testid="donations-status-filter"
               >
                 <option value="ALL">All Status</option>
                 <option value="SUCCESS">Success</option>
@@ -102,6 +104,7 @@ export default function Donations() {
                 className="filter-select"
                 value={size}
                 onChange={(e) => setSize(Number(e.target.value))}
+                data-testid="donations-size-select"
               >
                 <option value="10">10 per page</option>
                 <option value="25">25 per page</option>
@@ -115,20 +118,20 @@ export default function Donations() {
             </div>
 
             {data && (
-              <div className="toolbar-right">
-                <span className="results-info">
-                  Showing {startItem}-{endItem} of {data.totalItems}
-                </span>
+                <div className="toolbar-right">
+                <span className="results-info" data-testid="donations-results-info">
+                    Showing {startItem}-{endItem} of {data.totalItems}
+                  </span>
               </div>
             )}
           </div>
 
           {/* Error Banner */}
-          {error && (
-            <div className="error-banner">
-              {error}
-            </div>
-          )}
+            {error && (
+              <div className="error-banner" data-testid="donations-error">
+                {error}
+              </div>
+            )}
 
           {/* Loading State */}
           {loading ? (
@@ -140,7 +143,7 @@ export default function Donations() {
             <>
               {/* Table */}
               <div className="table-container">
-                <table className="data-table">
+                <table className="data-table" data-testid="donations-table">
                   <thead>
                     <tr>
                       <th>Donor Name</th>
@@ -149,6 +152,7 @@ export default function Donations() {
                         className="sortable" 
                         onClick={() => handleSortChange('amount')}
                         title="Click to sort"
+                        data-testid="donations-sort-amount"
                       >
                         Amount {getSortIcon('amount')}
                       </th>
@@ -158,6 +162,7 @@ export default function Donations() {
                         className="sortable" 
                         onClick={() => handleSortChange('createdAt')}
                         title="Click to sort"
+                        data-testid="donations-sort-date"
                       >
                         Date {getSortIcon('createdAt')}
                       </th>
@@ -165,7 +170,7 @@ export default function Donations() {
                   </thead>
                   <tbody>
                     {data.items.map((donation) => (
-                      <tr key={donation.id}>
+                      <tr key={donation.id} data-testid={`donation-row-${donation.id}`}>
                         <td>{donation.donorName || 'Anonymous'}</td>
                         <td>{donation.donorEmail || 'N/A'}</td>
                         <td style={{ fontWeight: 'bold' }}>
@@ -174,7 +179,9 @@ export default function Donations() {
                         <td>{donation.campaignTitle || 'Unknown Campaign'}</td>
                         <td>
                           <span className={`status-badge ${(donation.status || 'pending').toLowerCase()}`}>
-                            {donation.status || 'PENDING'}
+                            <span data-testid={`donation-status-${donation.id}`}>
+                              {donation.status || 'PENDING'}
+                            </span>
                           </span>
                         </td>
                         <td>
@@ -194,6 +201,7 @@ export default function Donations() {
                   className="btn-pagination"
                   onClick={() => setPage(page - 1)}
                   disabled={page === 0}
+                  data-testid="donations-prev"
                 >
                   ← Previous
                 </button>
@@ -206,6 +214,7 @@ export default function Donations() {
                   className="btn-pagination"
                   onClick={() => setPage(page + 1)}
                   disabled={page >= data.totalPages - 1}
+                  data-testid="donations-next"
                 >
                   Next →
                 </button>
@@ -226,4 +235,3 @@ export default function Donations() {
     </>
   );
 }
-

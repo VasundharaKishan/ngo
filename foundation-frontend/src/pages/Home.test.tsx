@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import Home from './Home';
 import { API_BASE_URL } from '../api';
@@ -27,7 +27,7 @@ describe('Home', () => {
     vi.clearAllMocks();
   });
 
-  it('displays loading state initially', () => {
+  it('displays loading state initially', async () => {
     (global.fetch as any).mockImplementation(() => new Promise(() => {})); // Never resolves
 
     render(
@@ -37,7 +37,8 @@ describe('Home', () => {
     );
 
     // Should show skeleton loaders
-    expect(screen.getByTestId || document.body.textContent).toBeTruthy();
+    const skeleton = document.querySelector('.skeleton-hero');
+    expect(skeleton).toBeInTheDocument();
   });
 
   it('fetches home sections on mount', async () => {
@@ -52,7 +53,9 @@ describe('Home', () => {
       </BrowserRouter>
     );
 
-    expect(global.fetch).toHaveBeenCalledWith(`${API_BASE_URL}/public/home`);
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(`${API_BASE_URL}/public/home`);
+    });
   });
 
   it('handles API error gracefully', async () => {
@@ -99,7 +102,7 @@ describe('Home', () => {
     );
 
     // Wait for loading to complete
-    await vi.waitFor(() => {
+    await waitFor(() => {
       expect(document.querySelector('.skeleton-loader')).not.toBeInTheDocument();
     });
   });

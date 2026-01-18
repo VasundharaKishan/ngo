@@ -49,82 +49,80 @@ export default function CampaignList() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  if (loading) {
-    return (
-      <div className="container">
-        <div style={{ marginBottom: '2rem' }}>
-          <SkeletonLoader variant="text" lines={1} width="300px" height="48px" />
-          <div style={{ marginTop: '1rem' }}>
-            <SkeletonLoader variant="text" lines={1} width="400px" height="20px" />
-          </div>
-        </div>
-        <div className="campaign-grid">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <SkeletonLoader key={index} variant="card" />
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="container">
-        <p className="error">{error}</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="container">
-      <h1>All Campaigns</h1>
-      <p className="subtitle">Choose a campaign to support our mission</p>
-      
-      {campaigns.length === 0 ? (
-        <p className="no-campaigns">No active campaigns at the moment. Check back soon!</p>
-      ) : (
-        <>
+    <div data-testid="campaign-list">
+      {loading && (
+        <div className="container">
+          <div style={{ marginBottom: '2rem' }}>
+            <SkeletonLoader variant="text" lines={1} width="300px" height="48px" />
+            <div style={{ marginTop: '1rem' }}>
+              <SkeletonLoader variant="text" lines={1} width="400px" height="20px" />
+            </div>
+          </div>
           <div className="campaign-grid">
-            {displayedCampaigns.map((campaign) => (
-              <div key={campaign.id} className="scroll-animate-stagger">
-                <CampaignCard campaign={campaign} />
-              </div>
+            {Array.from({ length: 6 }).map((_, index) => (
+              <SkeletonLoader key={index} variant="card" />
             ))}
           </div>
-
-      {/* Pagination Controls */}
-      {totalPages > 1 && (
-        <div className="pagination">
-          <button 
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-            className="pagination-btn"
-          >
-            ← Previous
-          </button>
-          
-          <div className="pagination-numbers">
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-              <button
-                key={page}
-                onClick={() => handlePageChange(page)}
-                className={`pagination-number ${currentPage === page ? 'active' : ''}`}
-              >
-                {page}
-              </button>
-            ))}
-          </div>
-          
-          <button 
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className="pagination-btn"
-          >
-            Next →
-          </button>
         </div>
       )}
-    </>
+      {!loading && error && (
+        <div className="container">
+          <p className="error">{error}</p>
+        </div>
+      )}
+      {!loading && !error && (
+        <div className="container">
+          <h1>All Campaigns</h1>
+          <p className="subtitle">Choose a campaign to support our mission</p>
+          {campaigns.length === 0 ? (
+            <p className="no-campaigns">No active campaigns at the moment. Check back soon!</p>
+          ) : (
+            <>
+              <div className="campaign-grid">
+                {displayedCampaigns.map((campaign) => (
+                  <div key={campaign.id} className="scroll-animate-stagger">
+                    <CampaignCard campaign={campaign} />
+                  </div>
+                ))}
+              </div>
+              {totalPages > 1 && (
+                <div className="pagination">
+                  <button 
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="pagination-btn"
+                    data-testid="campaigns-prev"
+                  >
+                    ← Previous
+                  </button>
+                  
+                  <div className="pagination-numbers">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                      <button
+                        key={page}
+                        onClick={() => handlePageChange(page)}
+                        className={`pagination-number ${currentPage === page ? 'active' : ''}`}
+                        data-testid={`campaigns-page-${page}`}
+                      >
+                        {page}
+                      </button>
+                    ))}
+                  </div>
+                  
+                  <button 
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="pagination-btn"
+                    data-testid="campaigns-next"
+                  >
+                    Next →
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       )}
     </div>
   );

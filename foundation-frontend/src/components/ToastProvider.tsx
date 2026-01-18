@@ -42,6 +42,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           <div
             key={toast.id}
             className={`toast toast-${toast.type}`}
+            data-testid={`toast-${toast.type}`}
             onClick={() => removeToast(toast.id)}
             role="alert"
           >

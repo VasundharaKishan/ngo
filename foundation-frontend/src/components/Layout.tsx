@@ -152,7 +152,7 @@ export default function Layout() {
       <a href="#main-content" className="skip-to-content">
         Skip to main content
       </a>
-      <header className="header" role="banner">
+      <header data-testid="site-header" className="header" role="banner">
         <div className="header-inner">
           <Link to="/" className="site-logo" aria-label="Home">
             <img src={logoUrl} alt={`${siteName} logo`} className="logo-img" />
@@ -160,7 +160,7 @@ export default function Layout() {
           </Link>
           <nav className="nav" role="navigation" aria-label="Main navigation">
             <Link to="/" className="nav-link">Home</Link>
-            <Link to="/campaigns" className="nav-link">Campaigns</Link>
+            <Link data-testid="nav-campaigns" to="/campaigns" className="nav-link">Campaigns</Link>
             <a href="#" className="btn-donate-header btn-hero" onClick={handleDonateClick} aria-label="Open donation form">
               <span className="heart-icon" aria-hidden="true">❤️</span>
               Donate

@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">5.26% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>1/19</span>
+                <span class='fraction'>19/19</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/0</span>
+                <span class='fraction'>1/1</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/1</span>
+                <span class='fraction'>1/1</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">5.26% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>1/19</span>
+                <span class='fraction'>19/19</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -107,26 +107,26 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { Link } from 'react-router-dom';
 import '../../pages/Home.css';
 &nbsp;
@@ -139,26 +139,26 @@ interface HeroSectionProps {
   };
 }
 &nbsp;
-<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >export default function HeroSection({ config }: HeroSectionProps) {</span></span>
-<span class="cstat-no" title="statement not covered" >  const {</span>
-<span class="cstat-no" title="statement not covered" >    title = 'Every Act of Kindness Changes Lives',</span>
-<span class="cstat-no" title="statement not covered" >    subtitle = 'From feeding the hungry to empowering women, from educating children to providing clean water - your generosity creates ripples of hope across communities. Join thousands of donors making a real difference today.',</span>
-<span class="cstat-no" title="statement not covered" >    ctaText = 'Explore All Campaigns →',</span>
-<span class="cstat-no" title="statement not covered" >    ctaLink = '/campaigns'</span>
-<span class="cstat-no" title="statement not covered" >  } = config;</span>
+export default function HeroSection({ config }: HeroSectionProps) {
+  const {
+    title = 'Every Act of Kindness Changes Lives',
+    subtitle = 'From feeding the hungry to empowering women, from educating children to providing clean water - your generosity creates ripples of hope across communities. Join thousands of donors making a real difference today.',
+    ctaText = 'Explore All Campaigns →',
+    ctaLink = '/campaigns'
+  } = config;
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  return (</span>
-<span class="cstat-no" title="statement not covered" >    &lt;section className="hero" aria-label="Welcome hero section"&gt;</span>
-<span class="cstat-no" title="statement not covered" >      &lt;div className="container"&gt;</span>
-<span class="cstat-no" title="statement not covered" >        &lt;h1 className="animate-fade-in-up"&gt;{title}&lt;/h1&gt;</span>
-<span class="cstat-no" title="statement not covered" >        &lt;p className="hero-text animate-fade-in-up animate-delay-200"&gt;{subtitle}&lt;/p&gt;</span>
-<span class="cstat-no" title="statement not covered" >        &lt;Link to={ctaLink} className="btn-hero btn-press hover-lift animate-fade-in-up animate-delay-400" aria-label={`${ctaText} - View our campaigns`}&gt;</span>
-<span class="cstat-no" title="statement not covered" >          {ctaText}</span>
-<span class="cstat-no" title="statement not covered" >        &lt;/Link&gt;</span>
-<span class="cstat-no" title="statement not covered" >      &lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >    &lt;/section&gt;</span>
+  return (
+    &lt;section className="hero" aria-label="Welcome hero section"&gt;
+      &lt;div className="container"&gt;
+        &lt;h1 className="animate-fade-in-up"&gt;{title}&lt;/h1&gt;
+        &lt;p className="hero-text animate-fade-in-up animate-delay-200"&gt;{subtitle}&lt;/p&gt;
+        &lt;Link to={ctaLink} className="btn-hero btn-press hover-lift animate-fade-in-up animate-delay-400" aria-label={`${ctaText} - View our campaigns`}&gt;
+          {ctaText}
+        &lt;/Link&gt;
+      &lt;/div&gt;
+    &lt;/section&gt;
   );
-<span class="cstat-no" title="statement not covered" >}</span>
+}
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
@@ -166,7 +166,7 @@ interface HeroSectionProps {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-01-08T20:08:32.137Z
+                at 2026-01-17T09:22:25.160Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

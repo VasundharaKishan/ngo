@@ -211,19 +211,20 @@ export default function AdminCampaignForm() {
   };
 
   return (
-    <div className="admin-form-container">
+    <div className="admin-form-container" data-testid="campaign-form-page">
       <div className="form-header">
         <h1>{isEdit ? 'Edit Campaign' : 'Create New Campaign'}</h1>
         <button onClick={() => navigate('/admin/campaigns')} className="btn-back">← Back</button>
       </div>
 
-      <form onSubmit={handleSubmit} className="admin-form">
+      <form onSubmit={handleSubmit} className="admin-form" data-testid="campaign-form">
         <div className="form-grid">
           <div className="form-group full-width">
             <label>Title *</label>
             <input
               type="text"
               value={formData.title}
+              data-testid="campaign-title"
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               required
             />
@@ -231,28 +232,31 @@ export default function AdminCampaignForm() {
 
           <div className="form-group full-width">
             <label>Short Description *</label>
-            <textarea
-              value={formData.shortDescription}
-              onChange={(e) => setFormData({ ...formData, shortDescription: e.target.value })}
-              rows={2}
-              required
-            />
+              <textarea
+                value={formData.shortDescription}
+                data-testid="campaign-short-description"
+                onChange={(e) => setFormData({ ...formData, shortDescription: e.target.value })}
+                rows={2}
+                required
+              />
           </div>
 
           <div className="form-group full-width">
             <label>Full Description *</label>
-            <textarea
-              value={formData.fullDescription}
-              onChange={(e) => setFormData({ ...formData, fullDescription: e.target.value })}
-              rows={5}
-              required
-            />
+              <textarea
+                value={formData.fullDescription}
+                data-testid="campaign-full-description"
+                onChange={(e) => setFormData({ ...formData, fullDescription: e.target.value })}
+                rows={5}
+                required
+              />
           </div>
 
           <div className="form-group">
             <label>Category *</label>
             <select
               value={formData.categoryId}
+              data-testid="campaign-category"
               onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
               required
             >
@@ -268,6 +272,7 @@ export default function AdminCampaignForm() {
             <input
               type="text"
               value={formData.location}
+              data-testid="campaign-location"
               onChange={(e) => setFormData({ ...formData, location: e.target.value })}
               placeholder="City, Country"
             />
@@ -278,6 +283,7 @@ export default function AdminCampaignForm() {
             <input
               type="number"
               value={formData.targetAmount}
+              data-testid="campaign-target-amount"
               onChange={(e) => setFormData({ ...formData, targetAmount: e.target.value })}
               required
               min="0"
@@ -290,6 +296,7 @@ export default function AdminCampaignForm() {
             <input
               type="number"
               value={formData.currentAmount}
+              data-testid="campaign-current-amount"
               onChange={(e) => setFormData({ ...formData, currentAmount: e.target.value })}
               min="0"
               step="0.01"
@@ -301,6 +308,7 @@ export default function AdminCampaignForm() {
             <input
               type="number"
               value={formData.beneficiariesCount}
+              data-testid="campaign-beneficiaries-count"
               onChange={(e) => setFormData({ ...formData, beneficiariesCount: e.target.value })}
               min="0"
             />
@@ -317,12 +325,13 @@ export default function AdminCampaignForm() {
                     </button>
                   </div>
                 )}
-                <input
-                  type="file"
-                  accept="image/*"
-                onChange={handleImageUpload}
-                disabled={uploading}
-              />
+            <input
+              type="file"
+              accept="image/*"
+              data-testid="campaign-image-upload"
+              onChange={handleImageUpload}
+              disabled={uploading}
+            />
               {uploading && (
                 <div className="upload-status">
                   <Spinner size="sm" color="primary" className="spinner-inline" />
@@ -333,6 +342,7 @@ export default function AdminCampaignForm() {
               <input
                 type="url"
                 value={formData.imageUrl}
+                data-testid="campaign-image-url"
                 onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
                 placeholder="https://example.com/image.jpg"
               />
@@ -345,6 +355,7 @@ export default function AdminCampaignForm() {
                 <input
                   type="checkbox"
                   checked={formData.featured}
+                  data-testid="campaign-featured-toggle"
                   onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
                 />
                 ⭐ Featured Campaign
@@ -354,6 +365,7 @@ export default function AdminCampaignForm() {
                 <input
                   type="checkbox"
                   checked={formData.urgent}
+                  data-testid="campaign-urgent-toggle"
                   onChange={(e) => setFormData({ ...formData, urgent: e.target.checked })}
                 />
                 🚨 Urgent Campaign
@@ -363,6 +375,7 @@ export default function AdminCampaignForm() {
                 <input
                   type="checkbox"
                   checked={formData.active}
+                  data-testid="campaign-active-toggle"
                   onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
                 />
                 ✓ Active
@@ -373,14 +386,16 @@ export default function AdminCampaignForm() {
 
         <div className="form-actions">
           <button type="button" onClick={() => navigate('/admin/campaigns')} className="btn-cancel" disabled={saving}>
-            Cancel
+            <span data-testid="campaign-cancel">Cancel</span>
           </button>
           <button type="submit" className="btn-submit" disabled={saving || uploading}>
+            <span data-testid="campaign-submit">
             {saving ? (
               <><Spinner size="sm" color="white" className="spinner-inline" /> Saving...</>
             ) : (
               isEdit ? 'Update Campaign' : 'Create Campaign'
             )}
+            </span>
           </button>
         </div>
       </form>

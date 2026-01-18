@@ -85,6 +85,8 @@ const GENERAL_SETTINGS: SettingField[] = [
   { key: 'campaigns_page.items_per_page', label: 'Items Per Page', type: 'number', placeholder: '12', description: 'Number of campaigns per page', category: 'pagination' },
 ];
 
+const buildGeneralSettingTestId = (key: string) => `settings-input-${key.replace(/\./g, '-')}`;
+
 export default function AdminSettingsConsolidated() {
   const navigate = useNavigate();
   const showToast = useToast();
@@ -431,6 +433,7 @@ export default function AdminSettingsConsolidated() {
         <button
           className={`tab-button ${activeTab === 'general' ? 'active' : ''}`}
           onClick={() => setActiveTab('general')}
+          data-testid="settings-tab-general"
         >
           <RiSettings3Line className="tab-icon" />
           <span>General</span>
@@ -438,6 +441,7 @@ export default function AdminSettingsConsolidated() {
         <button
           className={`tab-button ${activeTab === 'contact' ? 'active' : ''}`}
           onClick={() => setActiveTab('contact')}
+          data-testid="settings-tab-contact"
         >
           <RiPhoneLine className="tab-icon" />
           <span>Contact</span>
@@ -445,6 +449,7 @@ export default function AdminSettingsConsolidated() {
         <button
           className={`tab-button ${activeTab === 'footer' ? 'active' : ''}`}
           onClick={() => setActiveTab('footer')}
+          data-testid="settings-tab-footer"
         >
           <RiLayoutBottomLine className="tab-icon" />
           <span>Footer</span>
@@ -452,6 +457,7 @@ export default function AdminSettingsConsolidated() {
         <button
           className={`tab-button ${activeTab === 'banner' ? 'active' : ''}`}
           onClick={() => setActiveTab('banner')}
+          data-testid="settings-tab-banner"
         >
           <RiGlobalLine className="tab-icon" />
           <span>Banner</span>
@@ -476,6 +482,7 @@ export default function AdminSettingsConsolidated() {
                     value={formValues[setting.key] || ''}
                     onChange={(e) => handleGeneralChange(setting.key, e.target.value)}
                     placeholder={setting.placeholder}
+                    data-testid={buildGeneralSettingTestId(setting.key)}
                   />
                   {setting.description && (
                     <small className="field-description">{setting.description}</small>
@@ -495,6 +502,7 @@ export default function AdminSettingsConsolidated() {
                     value={formValues[setting.key] || ''}
                     onChange={(e) => handleGeneralChange(setting.key, e.target.value)}
                     placeholder={setting.placeholder}
+                    data-testid={buildGeneralSettingTestId(setting.key)}
                   />
                   {setting.description && (
                     <small className="field-description">{setting.description}</small>
@@ -514,6 +522,7 @@ export default function AdminSettingsConsolidated() {
                     value={formValues[setting.key] || ''}
                     onChange={(e) => handleGeneralChange(setting.key, e.target.value)}
                     placeholder={setting.placeholder}
+                    data-testid={buildGeneralSettingTestId(setting.key)}
                   />
                   {setting.description && (
                     <small className="field-description">{setting.description}</small>
@@ -807,6 +816,7 @@ export default function AdminSettingsConsolidated() {
           className="btn-primary"
           onClick={handleSave}
           disabled={saving}
+          data-testid="settings-save-button"
         >
           {saving ? 'Saving...' : 'Save Settings'}
         </button>
