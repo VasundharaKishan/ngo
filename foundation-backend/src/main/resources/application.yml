@@ -7,6 +7,12 @@ spring:
     password: ${DATABASE_PASSWORD:}
     driver-class-name: org.postgresql.Driver  
   
+  flyway:
+    enabled: true
+    baseline-on-migrate: true   # treats existing schema as already at baseline version
+    baseline-version: 14        # V1–V14 are already applied; Flyway tracks from V15 onward
+    locations: classpath:db/migration
+
   jpa:
     hibernate:
       ddl-auto: validate
@@ -16,7 +22,7 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
     defer-datasource-initialization: true
-  
+
   sql:
     init:
       mode: never
