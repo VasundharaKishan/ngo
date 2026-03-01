@@ -1,9 +1,8 @@
 .admin-users {
-  padding: 2rem;
-  max-width: 1400px;
-  margin: 0 auto;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  min-height: 100vh;
+  /* AdminLayout already provides padding via .admin-content-wrapper and sets the
+     page background. Avoid double padding and a conflicting gradient background. */
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .users-header {

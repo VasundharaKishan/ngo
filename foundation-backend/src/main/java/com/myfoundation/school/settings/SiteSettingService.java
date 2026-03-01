@@ -1,5 +1,7 @@
 package com.myfoundation.school.settings;
 
+import com.myfoundation.school.audit.AuditAction;
+import com.myfoundation.school.audit.AuditLogService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,7 +20,8 @@ import java.util.stream.Collectors;
 public class SiteSettingService {
     
     private final SiteSettingRepository repository;
-    
+    private final AuditLogService auditLogService;
+
     // Whitelisted keys that can be exposed publicly
     private static final List<String> PUBLIC_KEYS = List.of(
             "homepage.featured_campaigns_count",
@@ -102,7 +105,9 @@ public class SiteSettingService {
                 results.put(key, "ERROR: " + e.getMessage());
             }
         }
-        
+
+        auditLogService.log(AuditAction.SETTINGS_UPDATED, "SiteSetting", null, null, updates.size() + " settings updated");
+
         return results;
     }
     

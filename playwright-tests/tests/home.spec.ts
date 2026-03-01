@@ -45,9 +45,24 @@ test('homepage hero and navigation to campaigns works', async ({ page }) => {
   await page.route('**/api/public/home', route =>
     route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(homeSections) })
   );
-  await page.route('**/api/campaigns**', route =>
-    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(campaigns) })
-  );
+  await page.route('**/api/campaigns**', route => {
+    const url = route.request().url();
+    // getCampaignsPaginated uses ?page=N&size=N — needs { items, totalPages, ... }
+    // getCampaigns (home featured) uses ?featured=true or no page param — needs flat array
+    if (url.includes('page=')) {
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ items: campaigns, page: 0, size: 100, totalItems: campaigns.length, totalPages: 1 }),
+      });
+    } else {
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(campaigns),
+      });
+    }
+  });
   await page.route('**/api/public/stats', route =>
     route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(stats) })
   );

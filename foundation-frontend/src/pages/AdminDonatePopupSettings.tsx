@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api, getDonatePopupSettings, updateDonatePopupSettings, type Campaign, type DonatePopupSettingsResponse } from '../api';
 import { useToast } from '../components/ToastProvider';
+import logger from '../utils/logger';
 import './AdminSettings.css';
 
 export default function AdminDonatePopupSettings() {
@@ -16,8 +17,8 @@ export default function AdminDonatePopupSettings() {
 
   useEffect(() => {
     // Check if user is logged in
-    const token = localStorage.getItem('adminToken');
-    if (!token) {
+    const user = localStorage.getItem('adminUser');
+    if (!user) {
       navigate('/admin/login');
       return;
     }
@@ -40,7 +41,7 @@ export default function AdminDonatePopupSettings() {
       
       setLoading(false);
     } catch (error) {
-      console.error('Error loading data:', error);
+      logger.error('AdminDonatePopupSettings', 'Error loading data:', error);
       showToast('Failed to load settings', 'error');
       setLoading(false);
     }
@@ -65,7 +66,7 @@ export default function AdminDonatePopupSettings() {
       // Reload to show updated info
       await loadData();
     } catch (error) {
-      console.error('Error updating settings:', error);
+      logger.error('AdminDonatePopupSettings', 'Error updating settings:', error);
       showToast('Failed to update spotlight campaign', 'error');
     } finally {
       setSaving(false);
@@ -80,7 +81,7 @@ export default function AdminDonatePopupSettings() {
       showToast('Spotlight campaign cleared - automatic selection enabled', 'success');
       await loadData();
     } catch (error) {
-      console.error('Error clearing spotlight:', error);
+      logger.error('AdminDonatePopupSettings', 'Error clearing spotlight:', error);
       showToast('Failed to clear spotlight campaign', 'error');
     } finally {
       setSaving(false);
@@ -93,8 +94,7 @@ export default function AdminDonatePopupSettings() {
 
   return (
     <div className="admin-settings">
-      <div className="settings-container">
-        <div className="settings-section">
+      <div className="settings-section">
           <h2>Donate Popup Settings</h2>
           <p className="section-description">
             Choose which campaign appears when users click the "Donate Now" button. 
@@ -219,7 +219,6 @@ export default function AdminDonatePopupSettings() {
               <li>Changes take effect immediately for all users</li>
             </ul>
           </div>
-        </div>
       </div>
     </div>
   );

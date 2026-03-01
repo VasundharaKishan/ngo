@@ -57,7 +57,7 @@ VALUES
     ('camp-food-003', 'Food Bank', 'food-bank-families',
      'Support 200 families with monthly groceries',
      'Stock food bank with essential groceries to support 200 low-income families every month.',
-     60000, 22000, 'usd', 'cat-002', 'https://images.unsplash.com/photo-1593113648728-998ad9a89cd0?w=800',
+     60000, 22000, 'usd', 'cat-002', '/food_bank.png',
      'Delhi', 200, true, false, true, NOW(), NOW()),
 
 -- Agriculture Campaigns
@@ -102,7 +102,7 @@ VALUES
     ('camp-skill-002', 'Tailoring Training', 'tailoring-training-women',
      'Enable 80 women to become tailors',
      'Professional tailoring training with sewing machines to help women start their own business.',
-     45000, 15000, 'usd', 'cat-005', 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800',
+     45000, 15000, 'usd', 'cat-005', '/tailoring_training.png',
      'Jaipur', 80, true, false, false, NOW(), NOW()),
 
 -- Women Empowerment Campaigns
@@ -129,13 +129,13 @@ VALUES
     ('camp-water-001', 'Village Water Wells', 'village-water-wells',
      'Construct 10 wells in drought areas',
      'Bring clean water to 10 villages. Each well will serve 150-200 people.',
-     120000, 55000, 'usd', 'cat-008', 'https://images.unsplash.com/photo-1541844053589-346841d0b34c?w=800',
+     120000, 55000, 'usd', 'cat-008', '/village_water_wells.png',
      'Maharashtra', 1500, true, true, false, NOW(), NOW()),
     
     ('camp-water-002', 'Water Purifiers', 'water-purification-schools',
      'Install purifiers in 20 schools',
      'Ensure safe drinking water for 3000 children by installing RO systems in 20 schools.',
-     50000, 18000, 'usd', 'cat-008', 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=800',
+     50000, 18000, 'usd', 'cat-008', '/water_purifiers.png',
      'West Bengal', 3000, true, false, false, NOW(), NOW())
 ON CONFLICT (id) DO NOTHING;
 

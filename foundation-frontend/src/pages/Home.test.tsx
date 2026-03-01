@@ -4,6 +4,13 @@ import { BrowserRouter } from 'react-router-dom';
 import Home from './Home';
 import { API_BASE_URL } from '../api';
 
+vi.mock('../contexts/ConfigContext', () => ({
+  useSiteName: () => 'Test Foundation',
+  useSiteLogo: () => 'https://example.com/logo.png',
+  useSiteTagline: () => 'Test tagline',
+  useConfig: () => ({ config: {}, loading: false, refetch: vi.fn() }),
+}));
+
 // Mock fetch globally
 global.fetch = vi.fn();
 

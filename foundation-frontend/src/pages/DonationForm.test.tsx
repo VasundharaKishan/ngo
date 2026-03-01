@@ -3,6 +3,11 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import DonationForm from './DonationForm';
 
+vi.mock('../contexts/ConfigContext', () => ({
+  useSiteName: () => 'Test Foundation',
+  useConfig: () => ({ config: {}, loading: false, refetch: vi.fn() }),
+}));
+
 const mockGetCampaign = vi.fn();
 const mockCreateStripeSession = vi.fn();
 
@@ -51,8 +56,8 @@ describe('DonationForm', () => {
     fireEvent.click(screen.getByRole('button', { name: /Continue to Your Information/ }));
 
     // Fill personal info
-    fireEvent.change(screen.getByPlaceholderText(/John Doe/i), { target: { value: 'Alice' } });
-    fireEvent.change(screen.getByPlaceholderText(/john@example.com/i), { target: { value: 'alice@example.com' } });
+    fireEvent.change(screen.getByPlaceholderText(/Full name/i), { target: { value: 'Alice' } });
+    fireEvent.change(screen.getByPlaceholderText(/you@example.com/i), { target: { value: 'alice@example.com' } });
     fireEvent.click(screen.getByRole('button', { name: /Continue to Payment/ }));
 
     // Submit payment

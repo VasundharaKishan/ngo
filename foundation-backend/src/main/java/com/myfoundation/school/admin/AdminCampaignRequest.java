@@ -41,4 +41,10 @@ public class AdminCampaignRequest {
     private Boolean urgent = false;
     
     private Boolean active = true;
+
+    /**
+     * Currency code for the campaign (e.g., USD, EUR, GBP, INR).
+     * Defaults to USD if not specified.
+     */
+    private String currency = "USD";
 }

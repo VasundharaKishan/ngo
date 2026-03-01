@@ -2,6 +2,8 @@
  * Date formatting utilities for consistent date/time display across the application.
  */
 
+import logger from './logger';
+
 /**
  * Format options for date display
  */
@@ -49,7 +51,7 @@ const DEFAULT_DATETIME_FORMAT: DateFormatOptions = {
  */
 export function formatDate(
   date: string | Date | null | undefined,
-  locale: string = 'en-US',
+  locale: string = typeof navigator !== 'undefined' ? navigator.language : 'en-US',
   options: DateFormatOptions = DEFAULT_DATE_FORMAT
 ): string {
   if (!date) return '';
@@ -58,13 +60,13 @@ export function formatDate(
     const dateObj = typeof date === 'string' ? new Date(date) : date;
     
     if (isNaN(dateObj.getTime())) {
-      console.warn('Invalid date provided to formatDate:', date);
+      logger.warn('dateUtils', 'Invalid date provided to formatDate:', date);
       return '';
     }
 
     return dateObj.toLocaleDateString(locale, options);
   } catch (error) {
-    console.error('Error formatting date:', error);
+    logger.error('dateUtils', 'Error formatting date:', error);
     return '';
   }
 }
@@ -83,7 +85,7 @@ export function formatDate(
  */
 export function formatDateTime(
   date: string | Date | null | undefined,
-  locale: string = 'en-US',
+  locale: string = typeof navigator !== 'undefined' ? navigator.language : 'en-US',
   options: DateFormatOptions = DEFAULT_DATETIME_FORMAT
 ): string {
   if (!date) return '';
@@ -92,13 +94,13 @@ export function formatDateTime(
     const dateObj = typeof date === 'string' ? new Date(date) : date;
     
     if (isNaN(dateObj.getTime())) {
-      console.warn('Invalid date provided to formatDateTime:', date);
+      logger.warn('dateUtils', 'Invalid date provided to formatDateTime:', date);
       return '';
     }
 
     return dateObj.toLocaleString(locale, options);
   } catch (error) {
-    console.error('Error formatting date-time:', error);
+    logger.error('dateUtils', 'Error formatting date-time:', error);
     return '';
   }
 }
@@ -107,7 +109,7 @@ export function formatDateTime(
  * Formats a date to a short date string (e.g., "1/15/2025")
  *
  * @param date - The date to format
- * @param locale - The locale to use (defaults to 'en-US')
+ * @param locale - The locale to use (defaults to browser language)
  * @returns Short date string
  *
  * @example
@@ -115,7 +117,7 @@ export function formatDateTime(
  */
 export function formatShortDate(
   date: string | Date | null | undefined,
-  locale: string = 'en-US'
+  locale: string = typeof navigator !== 'undefined' ? navigator.language : 'en-US',
 ): string {
   return formatDate(date, locale, {
     year: 'numeric',
@@ -128,7 +130,7 @@ export function formatShortDate(
  * Formats a date to a long date string (e.g., "January 15, 2025")
  *
  * @param date - The date to format
- * @param locale - The locale to use (defaults to 'en-US')
+ * @param locale - The locale to use (defaults to browser language)
  * @returns Long date string
  *
  * @example
@@ -136,7 +138,7 @@ export function formatShortDate(
  */
 export function formatLongDate(
   date: string | Date | null | undefined,
-  locale: string = 'en-US'
+  locale: string = typeof navigator !== 'undefined' ? navigator.language : 'en-US',
 ): string {
   return formatDate(date, locale, {
     year: 'numeric',

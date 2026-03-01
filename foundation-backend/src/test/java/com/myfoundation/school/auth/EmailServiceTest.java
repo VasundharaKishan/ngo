@@ -1,11 +1,11 @@
 package com.myfoundation.school.auth;
 
+import com.myfoundation.school.config.SiteConfigService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -13,7 +13,6 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.io.UnsupportedEncodingException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -40,10 +39,13 @@ class EmailServiceTest {
 
     @Mock
     private JavaMailSender mailSender;
-    
+
+    @Mock
+    private SiteConfigService siteConfigService;
+
     @Mock
     private MimeMessage mimeMessage;
-    
+
     @InjectMocks
     private EmailService emailService;
 
@@ -60,6 +62,8 @@ class EmailServiceTest {
         ReflectionTestUtils.setField(emailService, "fromSystem", "system@yugalsavitriseva.org");
         
         lenient().when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
+        lenient().when(siteConfigService.getConfigValue("admin.notification.email"))
+                .thenReturn("admin@example.com");
     }
 
     // ==================== OTP EMAIL TESTS ====================
@@ -345,7 +349,7 @@ class EmailServiceTest {
     @Test
     void emails_HandlesNullMailSender() {
         // Edge case: if mailSender is null (misconfiguration)
-        EmailService serviceWithNullSender = new EmailService(null);
+        EmailService serviceWithNullSender = new EmailService(null, null);
         ReflectionTestUtils.setField(serviceWithNullSender, "frontendUrl", "http://localhost:5173");
         ReflectionTestUtils.setField(serviceWithNullSender, "fromAccountAlerts", "test@example.com");
         ReflectionTestUtils.setField(serviceWithNullSender, "fromName", "Test");

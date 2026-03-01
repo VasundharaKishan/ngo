@@ -7,11 +7,13 @@ import java.util.regex.Pattern;
  */
 public class ValidationUtils {
     
-    // URL validation pattern - matches http, https URLs
+    // URL validation pattern - matches http/https URLs and absolute local paths (e.g. /images/foo.png)
     private static final Pattern URL_PATTERN = Pattern.compile(
-        "^(https?://)" + // Protocol
-        "([\\w-]+\\.)+[\\w-]+" + // Domain
-        "(/[\\w-./?%&=]*)?$" // Path (optional)
+        "^(" +
+        "(https?://([\\w-]+\\.)+[\\w-]+(/[\\w-./?%&=]*)?)" + // http(s) URL
+        "|" +
+        "(/[\\w-./?%&=]*)" + // absolute local path starting with /
+        ")$"
     );
     
     // Email validation pattern - RFC 5322 simplified

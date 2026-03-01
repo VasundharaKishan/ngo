@@ -1,7 +1,7 @@
 .hero-carousel {
   position: relative;
   width: 100%;
-  height: 480px;
+  height: 650px;
   overflow: hidden;
   background: #1e293b;
 }
@@ -33,10 +33,12 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
   display: block;
   background: #0b1220;
 }
 
+/* Stronger gradient for text legibility */
 .carousel-overlay {
   position: absolute;
   top: 0;
@@ -45,12 +47,82 @@
   height: 100%;
   background: linear-gradient(
     to bottom,
-    rgba(0, 0, 0, 0.1) 0%,
-    rgba(0, 0, 0, 0.15) 100%
+    rgba(0, 0, 0, 0.05) 0%,
+    rgba(0, 0, 0, 0.10) 40%,
+    rgba(0, 0, 0, 0.60) 72%,
+    rgba(0, 0, 0, 0.80) 100%
   );
   pointer-events: none;
 }
 
+/* ---- Caption / Text Overlay ---- */
+.carousel-caption {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  /* 5.5rem bottom clears the progress bar (4px bar at bottom:20px + gap) */
+  padding: 2rem 3rem 5.5rem;
+  z-index: 5; /* below arrows (z:10), above overlay (z:auto) */
+  color: #ffffff;
+  max-width: 820px;
+  text-align: left;
+  pointer-events: none; /* so arrows behind caption area are still clickable */
+}
+
+.carousel-caption-title {
+  font-family: var(--font-heading);
+  font-size: clamp(1.5rem, 3.5vw, 2.5rem);
+  font-weight: 800;
+  line-height: 1.2;
+  margin: 0 0 0.6rem;
+  color: var(--text-inverse); /* override global h2 { color: var(--text-primary) } */
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.6);
+  letter-spacing: -0.02em;
+}
+
+.carousel-caption-subtitle {
+  font-family: var(--font-primary);
+  font-size: clamp(0.9rem, 1.8vw, 1.1rem);
+  font-weight: 400;
+  line-height: 1.6;
+  margin: 0;
+  color: var(--text-inverse);
+  opacity: 0.93;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  max-width: 660px;
+}
+
+/* ---- CTA Button ---- */
+.carousel-cta-btn {
+  display: inline-block;
+  margin-top: 1.25rem;
+  padding: 0.75rem 1.75rem;
+  background: var(--color-primary, #2a3da8);
+  color: #ffffff;
+  font-family: var(--font-primary);
+  font-size: 1rem;
+  font-weight: 700;
+  text-decoration: none;
+  border-radius: 6px;
+  letter-spacing: 0.02em;
+  pointer-events: auto; /* override parent pointer-events: none */
+  transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.carousel-cta-btn:hover {
+  background: var(--color-primary-dark, #1e2e8a);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  color: #ffffff;
+}
+
+/* ---- Navigation Arrows ---- */
 .carousel-arrow {
   position: absolute;
   top: 50%;
@@ -70,7 +142,6 @@
   color: #1e293b;
   font-weight: 300;
   line-height: 1;
-  display: none;  /* Add this line */
 }
 
 .carousel-arrow:hover {
@@ -87,74 +158,53 @@
   right: 20px;
 }
 
-.carousel-progress {
+/* ---- Slide Counter ---- */
+.carousel-counter {
   position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 4px;
+  bottom: 18px;
+  right: 24px;
   z-index: 10;
-  max-width: 600px;
-  width: 90%;
-  display: none;  /* Add this line */
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(4px);
+  border-radius: 20px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+  letter-spacing: 0.03em;
+  pointer-events: none;
 }
 
-.progress-segment {
-  flex: 1;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.3);
-  border: none;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  padding: 0;
-  position: relative;
-  border-radius: 2px;
-  overflow: hidden;
+.carousel-counter-current {
+  color: #fff;
+  font-weight: 700;
 }
 
-.progress-segment:hover {
-  background: rgba(255, 255, 255, 0.5);
-  transform: scaleY(1.5);
+.carousel-counter-sep {
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0 0.1rem;
 }
 
-.progress-segment.completed {
-  background: rgba(255, 255, 255, 0.7);
+.carousel-counter-total {
+  color: rgba(255, 255, 255, 0.7);
 }
 
-.progress-segment.active {
-  background: white;
-}
-
-.progress-segment.active .progress-fill {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  background: rgba(255, 255, 255, 0.5);
-  animation: progressFill 5s linear;
-}
-
-@keyframes progressFill {
-  from {
-    width: 0%;
-  }
-  to {
-    width: 100%;
-  }
-}
-
+/* ---- Responsive: Tablet ---- */
 @media (max-width: 768px) {
   .hero-carousel {
-    height: 320px;
+    height: 380px;
   }
 
-  .carousel-overlay {
-    background: linear-gradient(
-      to bottom,
-      rgba(0, 0, 0, 0.2) 0%,
-      rgba(0, 0, 0, 0.3) 100%
-    );
+  .carousel-caption {
+    padding: 1.5rem 1.5rem 4.5rem;
+    max-width: 100%;
+  }
+
+  .carousel-caption-subtitle {
+    font-size: 0.9rem;
   }
 
   .carousel-arrow {
@@ -171,28 +221,42 @@
     right: 10px;
   }
 
-  .carousel-progress {
-    bottom: 15px;
-    gap: 3px;
-    width: 85%;
+  .carousel-counter {
+    bottom: 14px;
+    right: 14px;
+    font-size: 0.75rem;
+    padding: 0.2rem 0.6rem;
   }
 
-  .progress-segment {
-    height: 3px;
+  .carousel-cta-btn {
+    font-size: 0.9rem;
+    padding: 0.6rem 1.4rem;
+    margin-top: 1rem;
   }
 }
 
+/* ---- Responsive: Mobile ---- */
 @media (max-width: 480px) {
   .hero-carousel {
-    height: 240px;
+    height: 280px;
   }
 
-  .carousel-overlay {
-    background: linear-gradient(
-      to bottom,
-      rgba(0, 0, 0, 0.25) 0%,
-      rgba(0, 0, 0, 0.35) 100%
-    );
+  .carousel-caption {
+    padding: 1rem 1rem 4rem;
+  }
+
+  .carousel-caption-title {
+    font-size: 1.15rem;
+  }
+
+  .carousel-caption-subtitle {
+    display: none;
+  }
+
+  .carousel-cta-btn {
+    font-size: 0.85rem;
+    padding: 0.55rem 1.2rem;
+    margin-top: 0.75rem;
   }
 
   .carousel-arrow {

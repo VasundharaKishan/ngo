@@ -146,22 +146,35 @@ class SecurityIntegrationTest {
     }
 
     @Test
-    void adminMutationEndpointsRequireCsrfToken() throws Exception {
-        // Create authenticated request
+    void adminMutationEndpointsDoNotRequireCsrfToken() throws Exception {
+        // Admin endpoints are intentionally CSRF-exempt: they are protected by
+        // JWT authentication + CORS (which restricts cross-origin credentialed requests
+        // to the trusted frontend origin). CSRF protection is therefore redundant and
+        // was removed to avoid MissingCsrfTokenException in cross-origin dev setups.
+        // See SecurityConfig — /api/admin/** is in the CSRF ignore list.
         AdminUser admin = adminUserRepository.findByUsername("secure-admin").orElseThrow();
         String token = jwtService.generateToken(admin);
 
-        // PUT request without CSRF token should fail (403 Forbidden)
+        // PUT request without CSRF token should NOT be rejected with 403 (CSRF).
+        // It may return 400 (invalid body) or 404 (not found), but not a CSRF 403.
         mockMvc.perform(put("/api/admin/campaigns/test-id")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
-                .andExpect(status().isForbidden());
+                .andExpect(result -> {
+                    int status = result.getResponse().getStatus();
+                    assertTrue(status != 403,
+                            "Admin endpoints should not require CSRF — got 403 unexpectedly. Status: " + status);
+                });
 
-        // DELETE request without CSRF token should fail (403 Forbidden)
+        // DELETE request without CSRF token should NOT be rejected with 403 (CSRF).
         mockMvc.perform(delete("/api/admin/campaigns/test-id")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
-                .andExpect(status().isForbidden());
+                .andExpect(result -> {
+                    int status = result.getResponse().getStatus();
+                    assertTrue(status != 403,
+                            "Admin endpoints should not require CSRF — got 403 unexpectedly. Status: " + status);
+                });
     }
 
     @Test

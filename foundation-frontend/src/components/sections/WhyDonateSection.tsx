@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { cmsApi } from '../../cmsApi';
+import logger from '../../utils/logger';
 import '../../pages/Home.css';
 
 interface WhyDonateSectionProps {
@@ -24,7 +25,7 @@ export default function WhyDonateSection({ config }: WhyDonateSectionProps) {
         setContent(data);
         setLoading(false);
       } catch (error) {
-        console.error('Error loading why donate content:', error);
+        logger.error('WhyDonateSection', 'Error loading why donate content:', error);
         setLoading(false);
       }
     };

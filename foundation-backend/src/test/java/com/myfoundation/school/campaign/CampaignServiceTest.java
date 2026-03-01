@@ -16,6 +16,7 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -90,7 +91,8 @@ class CampaignServiceTest {
     void getCampaigns_NoFilters_ReturnsAllActive() {
         List<Campaign> campaigns = Arrays.asList(testCampaign);
         when(campaignRepository.findByActiveTrue()).thenReturn(campaigns);
-        when(donationRepository.sumSuccessfulDonationsByCampaignId("campaign-123")).thenReturn(50000L);
+        when(donationRepository.sumSuccessfulDonationsByCampaignIds(anyList()))
+                .thenReturn(Collections.singletonList(new Object[]{"campaign-123", 50000L}));
 
         List<CampaignResponse> result = campaignService.getCampaigns(null, null, null);
 
@@ -100,16 +102,16 @@ class CampaignServiceTest {
         assertEquals("Build a School", response.getTitle());
         assertEquals(50000L, response.getCurrentAmount());
         assertEquals(100000L, response.getTargetAmount());
-        
+
         verify(campaignRepository).findByActiveTrue();
-        verify(donationRepository).sumSuccessfulDonationsByCampaignId("campaign-123");
+        verify(donationRepository).sumSuccessfulDonationsByCampaignIds(List.of("campaign-123"));
     }
 
     @Test
     void getCampaigns_FeaturedFilter_ReturnsFeaturedOnly() {
         testCampaign.setFeatured(true);
         when(campaignRepository.findByActiveTrueAndFeaturedTrue()).thenReturn(Arrays.asList(testCampaign));
-        when(donationRepository.sumSuccessfulDonationsByCampaignId("campaign-123")).thenReturn(50000L);
+        when(donationRepository.sumSuccessfulDonationsByCampaignIds(anyList())).thenReturn(Collections.emptyList());
 
         List<CampaignResponse> result = campaignService.getCampaigns(null, true, null);
 
@@ -123,7 +125,7 @@ class CampaignServiceTest {
     void getCampaigns_UrgentFilter_ReturnsUrgentOnly() {
         testCampaign.setUrgent(true);
         when(campaignRepository.findByActiveTrueAndUrgentTrue()).thenReturn(Arrays.asList(testCampaign));
-        when(donationRepository.sumSuccessfulDonationsByCampaignId("campaign-123")).thenReturn(50000L);
+        when(donationRepository.sumSuccessfulDonationsByCampaignIds(anyList())).thenReturn(Collections.emptyList());
 
         List<CampaignResponse> result = campaignService.getCampaigns(null, null, true);
 
@@ -135,7 +137,7 @@ class CampaignServiceTest {
     @Test
     void getCampaigns_CategoryFilter_ReturnsCategoryOnly() {
         when(campaignRepository.findByActiveTrueAndCategoryId("cat-123")).thenReturn(Arrays.asList(testCampaign));
-        when(donationRepository.sumSuccessfulDonationsByCampaignId("campaign-123")).thenReturn(50000L);
+        when(donationRepository.sumSuccessfulDonationsByCampaignIds(anyList())).thenReturn(Collections.emptyList());
 
         List<CampaignResponse> result = campaignService.getCampaigns("cat-123", null, null);
 
@@ -148,7 +150,7 @@ class CampaignServiceTest {
     void getCampaigns_FilterPriority_FeaturedTakesPrecedence() {
         // Featured=true should take precedence over urgent and category
         when(campaignRepository.findByActiveTrueAndFeaturedTrue()).thenReturn(Arrays.asList(testCampaign));
-        when(donationRepository.sumSuccessfulDonationsByCampaignId("campaign-123")).thenReturn(50000L);
+        when(donationRepository.sumSuccessfulDonationsByCampaignIds(anyList())).thenReturn(Collections.emptyList());
 
         campaignService.getCampaigns("cat-123", true, true);
 
@@ -160,7 +162,7 @@ class CampaignServiceTest {
     @Test
     void getCampaigns_FilterPriority_UrgentTakesPrecedenceOverCategory() {
         when(campaignRepository.findByActiveTrueAndUrgentTrue()).thenReturn(Arrays.asList(testCampaign));
-        when(donationRepository.sumSuccessfulDonationsByCampaignId("campaign-123")).thenReturn(50000L);
+        when(donationRepository.sumSuccessfulDonationsByCampaignIds(anyList())).thenReturn(Collections.emptyList());
 
         campaignService.getCampaigns("cat-123", null, true);
 
@@ -171,7 +173,7 @@ class CampaignServiceTest {
     @Test
     void getCampaigns_EmptyCategoryId_TreatedAsNoFilter() {
         when(campaignRepository.findByActiveTrue()).thenReturn(Arrays.asList(testCampaign));
-        when(donationRepository.sumSuccessfulDonationsByCampaignId("campaign-123")).thenReturn(50000L);
+        when(donationRepository.sumSuccessfulDonationsByCampaignIds(anyList())).thenReturn(Collections.emptyList());
 
         campaignService.getCampaigns("", null, null);
 
@@ -186,13 +188,13 @@ class CampaignServiceTest {
         List<CampaignResponse> result = campaignService.getCampaigns(null, null, null);
 
         assertTrue(result.isEmpty());
-        verify(donationRepository, never()).sumSuccessfulDonationsByCampaignId(any());
+        verify(donationRepository, never()).sumSuccessfulDonationsByCampaignIds(any());
     }
 
     @Test
     void getAllActiveCampaigns_DelegatesToGetCampaigns() {
         when(campaignRepository.findByActiveTrue()).thenReturn(Arrays.asList(testCampaign));
-        when(donationRepository.sumSuccessfulDonationsByCampaignId("campaign-123")).thenReturn(50000L);
+        when(donationRepository.sumSuccessfulDonationsByCampaignIds(anyList())).thenReturn(Collections.emptyList());
 
         List<CampaignResponse> result = campaignService.getAllActiveCampaigns();
 
@@ -505,7 +507,7 @@ class CampaignServiceTest {
         // Large organizations with 1000+ campaigns would cause memory/performance issues
         // Recommendation: Add Pageable parameter
         when(campaignRepository.findByActiveTrue()).thenReturn(Arrays.asList(testCampaign));
-        when(donationRepository.sumSuccessfulDonationsByCampaignId("campaign-123")).thenReturn(50000L);
+        when(donationRepository.sumSuccessfulDonationsByCampaignIds(anyList())).thenReturn(Collections.emptyList());
 
         campaignService.getCampaigns(null, null, null);
 
@@ -514,10 +516,9 @@ class CampaignServiceTest {
     }
 
     @Test
-    void getCampaigns_Issue_NPlusOneProblem() {
-        // ISSUE: N+1 query problem - donations fetched separately for each campaign
-        // With 100 campaigns, makes 101 queries (1 for campaigns + 100 for donations)
-        // Recommendation: Use JOIN FETCH or batch query
+    void getCampaigns_BatchDonationQuery_AvoidNPlusOne() {
+        // FIXED: N+1 query problem resolved — donation sums are now fetched in a single batch query
+        // With 100 campaigns: 1 query for campaigns + 1 batch query for all donations = 2 total
         Campaign campaign2 = new Campaign();
         campaign2.setId("campaign-456");
         campaign2.setTitle("Second Campaign");
@@ -526,14 +527,19 @@ class CampaignServiceTest {
         campaign2.setActive(true);
 
         when(campaignRepository.findByActiveTrue()).thenReturn(Arrays.asList(testCampaign, campaign2));
-        when(donationRepository.sumSuccessfulDonationsByCampaignId("campaign-123")).thenReturn(50000L);
-        when(donationRepository.sumSuccessfulDonationsByCampaignId("campaign-456")).thenReturn(25000L);
+        when(donationRepository.sumSuccessfulDonationsByCampaignIds(anyList()))
+                .thenReturn(Arrays.asList(
+                        new Object[]{"campaign-123", 50000L},
+                        new Object[]{"campaign-456", 25000L}
+                ));
 
-        campaignService.getCampaigns(null, null, null);
+        List<CampaignResponse> result = campaignService.getCampaigns(null, null, null);
 
-        // 1 query for campaigns + 2 queries for donations = 3 queries
-        verify(donationRepository, times(2)).sumSuccessfulDonationsByCampaignId(any());
-        assertTrue(true, "Documented: N+1 query problem");
+        // Single batch query, not one per campaign
+        verify(donationRepository, times(1)).sumSuccessfulDonationsByCampaignIds(anyList());
+        verify(donationRepository, never()).sumSuccessfulDonationsByCampaignId(any());
+        assertEquals(50000L, result.get(0).getCurrentAmount());
+        assertEquals(25000L, result.get(1).getCurrentAmount());
     }
 
     @Test

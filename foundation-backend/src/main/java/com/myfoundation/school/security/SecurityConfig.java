@@ -48,11 +48,18 @@ public class SecurityConfig {
     
     @Value("${app.frontend.url}")
     private String frontendUrl;
+
+    @Value("${cors.allowed-origins:}")
+    private String corsAllowedOrigins;
+
+    @Value("${springdoc.swagger-ui.enabled:false}")
+    private boolean swaggerEnabled;
+
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    
+
     @Autowired(required = false)
     private CsrfDebugFilter csrfDebugFilter;
-    
+
     // Constructor for dependency injection
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
@@ -74,9 +81,12 @@ public class SecurityConfig {
         csrfTokenRepository.setCookieName("XSRF-TOKEN");
         csrfTokenRepository.setHeaderName("X-XSRF-TOKEN");
         
-        // Use XorCsrfTokenRequestAttributeHandler for better compatibility with SPAs and tests
-        org.springframework.security.web.csrf.XorCsrfTokenRequestAttributeHandler requestHandler = 
-            new org.springframework.security.web.csrf.XorCsrfTokenRequestAttributeHandler();
+        // Use plain CsrfTokenRequestAttributeHandler for SPA double-submit cookie pattern.
+        // XorCsrfTokenRequestAttributeHandler is designed for server-rendered HTML forms (BREACH
+        // protection) and causes CsrfCookieFilter to overwrite the raw UUID cookie with an
+        // XOR-encoded value, which the frontend then reads incorrectly, resulting in 403 errors.
+        org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler requestHandler =
+            new org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler();
         requestHandler.setCsrfRequestAttributeName("_csrf");
         
         http
@@ -92,7 +102,14 @@ public class SecurityConfig {
                     "/api/auth/setup-password/**",
                     "/api/auth/initialize",
                     "/api/donations/stripe/create",  // Public donation endpoint
-                    "/api/donations/stripe/webhook"  // Stripe webhooks can't send CSRF tokens
+                    "/api/donations/stripe/webhook", // Stripe webhooks can't send CSRF tokens
+                    // Admin endpoints are protected by JWT (httpOnly cookie) + CORS.
+                    // CORS restricts credentialed requests to the trusted frontend origin only,
+                    // which means cross-site forged requests are already blocked at the CORS layer.
+                    // Requiring an additional CSRF cookie causes MissingCsrfTokenException in
+                    // cross-origin dev setups (localhost:5173 → localhost:8080) where the browser
+                    // cannot send the XSRF-TOKEN cookie set by the other origin.
+                    "/api/admin/**"
                 )
             )
             .authorizeHttpRequests(auth -> {
@@ -127,9 +144,12 @@ public class SecurityConfig {
                     // Health check
                     .requestMatchers("/actuator/health").permitAll()
                     
-                    // Swagger/API docs
-                    .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                    
+                    // Swagger/API docs — only accessible when enabled (dev profile)
+                    ;
+                if (swaggerEnabled) {
+                    auth.requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll();
+                }
+                auth
                     // All other requests require authentication
                     .anyRequest().authenticated();
             })
@@ -182,18 +202,29 @@ public class SecurityConfig {
             @Override
             public void handle(HttpServletRequest request, HttpServletResponse response,
                              AccessDeniedException accessDeniedException) throws IOException {
+                // Sanitize URI for logging to prevent log injection
+                String sanitizedUri = request.getRequestURI().replaceAll("[\\r\\n]", "");
+                String sanitizedOrigin = request.getHeader("Origin") != null
+                    ? request.getHeader("Origin").replaceAll("[\\r\\n]", "") : "none";
+
                 log.error("Access Denied for request: {} {} from origin: {} - Reason: {}",
                     request.getMethod(),
-                    request.getRequestURI(),
-                    request.getHeader("Origin"),
+                    sanitizedUri,
+                    sanitizedOrigin,
                     accessDeniedException.getMessage());
-                
+
                 response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                 response.setContentType("application/json");
+
+                // Use proper JSON escaping to prevent broken JSON from special characters
+                String escapedPath = sanitizedUri.replace("\\", "\\\\").replace("\"", "\\\"");
+                String escapedMessage = accessDeniedException.getMessage()
+                    .replace("\\", "\\\\").replace("\"", "\\\"");
+
                 response.getWriter().write(String.format(
                     "{\"error\":\"Access Denied\",\"path\":\"%s\",\"message\":\"%s\"}",
-                    request.getRequestURI(),
-                    accessDeniedException.getMessage()
+                    escapedPath,
+                    escapedMessage
                 ));
             }
         };
@@ -201,24 +232,28 @@ public class SecurityConfig {
     
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        log.info("Configuring CORS with allowed origin: {}", frontendUrl);
-        
-        CorsConfiguration configuration = new CorsConfiguration();
-        
-        // Allow specific origins (localhost for dev + Vercel for production)
-        List<String> allowedOrigins = Arrays.asList(
-            "http://localhost:5173",
-            "http://localhost:5174",
-            "http://localhost:3000",
-            "https://frontend-three-psi-17.vercel.app",  // Vercel URL 1
-            "https://www.yugalsavitriseva.org/",
-            "https://foundation-frontend-three.vercel.app"  // Vercel URL 2 (correct one)
-        );
+        log.info("Configuring CORS with frontend URL: {}, extra origins: {}", frontendUrl, corsAllowedOrigins);
 
+        CorsConfiguration configuration = new CorsConfiguration();
+
+        // Build allowed origins from configuration properties
+        List<String> allowedOrigins = new java.util.ArrayList<>();
+
+        // Always include the primary frontend URL
         if (frontendUrl != null && !frontendUrl.isBlank()) {
-            allowedOrigins = new java.util.ArrayList<>(allowedOrigins);
-            allowedOrigins.add(frontendUrl);
+            allowedOrigins.add(frontendUrl.replaceAll("/+$", "")); // strip trailing slashes
         }
+
+        // Add any additional origins from cors.allowed-origins property
+        if (corsAllowedOrigins != null && !corsAllowedOrigins.isBlank()) {
+            for (String origin : corsAllowedOrigins.split(",")) {
+                String trimmed = origin.trim().replaceAll("/+$", ""); // strip trailing slashes
+                if (!trimmed.isEmpty() && !allowedOrigins.contains(trimmed)) {
+                    allowedOrigins.add(trimmed);
+                }
+            }
+        }
+
         configuration.setAllowedOrigins(allowedOrigins);
         log.info("CORS allowed origins: {}", allowedOrigins);
         

@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import ErrorBoundary from './ErrorBoundary';
+import logger from '../utils/logger';
+import '../styles/AdminCommon.css';
 import { 
   RiDashboardLine, 
   RiMoneyDollarCircleLine, 
@@ -60,7 +63,7 @@ export default function AdminLayout() {
         credentials: 'include'
       });
     } catch (error) {
-      console.error('Logout API call failed:', error);
+      logger.error('AdminLayout', 'Logout API call failed:', error);
     }
     
     // Clear client-side storage
@@ -122,7 +125,7 @@ export default function AdminLayout() {
           credentials: 'include'
         });
       } catch (error) {
-        console.warn('Failed to initialize CSRF token:', error);
+        logger.warn('AdminLayout', 'Failed to initialize CSRF token:', error);
       }
       
       // Only set auth checked if authentication passed
@@ -433,7 +436,9 @@ export default function AdminLayout() {
 
         {/* Page Content */}
         <div className="admin-content-wrapper">
-          <Outlet />
+          <ErrorBoundary>
+            <Outlet />
+          </ErrorBoundary>
         </div>
       </main>
         </>

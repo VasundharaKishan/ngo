@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { api, type Campaign } from '../../api';
 import CampaignCard from '../CampaignCard';
+import logger from '../../utils/logger';
 import '../../pages/Home.css';
 import '../../pages/CampaignList.css';
 
@@ -13,9 +15,10 @@ interface FeaturedCampaignsSectionProps {
 }
 
 export default function FeaturedCampaignsSection({ config }: FeaturedCampaignsSectionProps) {
+  const { t } = useTranslation();
   const {
     limit = 3,
-    title = 'Featured Campaigns'
+    title = t('home.featuredCampaigns')
   } = config;
 
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
@@ -28,7 +31,7 @@ export default function FeaturedCampaignsSection({ config }: FeaturedCampaignsSe
         setCampaigns(data);
         setLoading(false);
       } catch (error) {
-        console.error('Error loading featured campaigns:', error);
+        logger.error('FeaturedCampaignsSection', 'Error loading featured campaigns:', error);
         setLoading(false);
       }
     };
@@ -41,7 +44,7 @@ export default function FeaturedCampaignsSection({ config }: FeaturedCampaignsSe
       <section className="campaigns featured">
         <div className="container">
           <h2 className="section-title">{title}</h2>
-          <p>Loading campaigns...</p>
+          <p>{t('campaign.loadingCampaigns')}</p>
         </div>
       </section>
     );
@@ -52,7 +55,7 @@ export default function FeaturedCampaignsSection({ config }: FeaturedCampaignsSe
       <div className="container">
         <h2 className="section-title">{title}</h2>
         {campaigns.length === 0 ? (
-          <p className="no-campaigns">No featured campaigns at the moment.</p>
+          <p className="no-campaigns">{t('campaign.noFeaturedCampaigns')}</p>
         ) : (
           <div className="campaign-grid">
             {campaigns.map(campaign => (

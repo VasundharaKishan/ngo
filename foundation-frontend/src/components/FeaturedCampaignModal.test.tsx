@@ -4,6 +4,11 @@ import { BrowserRouter } from 'react-router-dom';
 import FeaturedCampaignModal from './FeaturedCampaignModal';
 import * as api from '../api';
 
+vi.mock('../contexts/ConfigContext', () => ({
+  useSiteName: () => 'Test Foundation',
+  useConfig: () => ({ config: {}, loading: false, refetch: vi.fn() }),
+}));
+
 // Mock the API
 vi.mock('../api', () => ({
   api: {
@@ -163,7 +168,7 @@ describe('FeaturedCampaignModal', () => {
       expect(screen.getByText('Education Campaign')).toBeInTheDocument();
     });
 
-    const learnMoreButton = screen.getByText('Learn more');
+    const learnMoreButton = screen.getByText('Learn More');
     fireEvent.click(learnMoreButton);
 
     expect(mockNavigate).toHaveBeenCalledWith('/campaigns/camp-001');
@@ -241,5 +246,116 @@ describe('FeaturedCampaignModal', () => {
     await waitFor(() => {
       expect(api.api.getDonatePopup).toHaveBeenCalledTimes(1);
     });
+  });
+
+  it('closes modal when Escape key is pressed on inner modal', async () => {
+    const mockClose = vi.fn();
+    vi.mocked(api.api.getDonatePopup).mockResolvedValue(mockSpotlightResponse);
+
+    const { container } = render(
+      <BrowserRouter>
+        <FeaturedCampaignModal isOpen={true} onClose={mockClose} />
+      </BrowserRouter>
+    );
+
+    await waitFor(() => expect(screen.getByText('Education Campaign')).toBeInTheDocument());
+    const innerModal = container.querySelector('.featured-modal') as HTMLElement;
+    fireEvent.keyDown(innerModal, { key: 'Escape' });
+    expect(mockClose).toHaveBeenCalled();
+  });
+
+  it('does not close on other key presses', async () => {
+    const mockClose = vi.fn();
+    vi.mocked(api.api.getDonatePopup).mockResolvedValue(mockSpotlightResponse);
+
+    const { container } = render(
+      <BrowserRouter>
+        <FeaturedCampaignModal isOpen={true} onClose={mockClose} />
+      </BrowserRouter>
+    );
+
+    await waitFor(() => expect(screen.getByText('Education Campaign')).toBeInTheDocument());
+    const innerModal = container.querySelector('.featured-modal') as HTMLElement;
+    fireEvent.keyDown(innerModal, { key: 'Enter' });
+    expect(mockClose).not.toHaveBeenCalled();
+  });
+
+  it('Tab key on inner modal triggers focus trap logic (handleKeyDown Tab branch)', async () => {
+    const mockClose = vi.fn();
+    vi.mocked(api.api.getDonatePopup).mockResolvedValue(mockSpotlightResponse);
+
+    const { container } = render(
+      <BrowserRouter>
+        <FeaturedCampaignModal isOpen={true} onClose={mockClose} />
+      </BrowserRouter>
+    );
+
+    await waitFor(() => expect(screen.getByText('Education Campaign')).toBeInTheDocument());
+    const innerModal = container.querySelector('.featured-modal') as HTMLElement;
+    // Fire Tab key — covers the Tab branch in handleKeyDown (lines 44-57)
+    fireEvent.keyDown(innerModal, { key: 'Tab' });
+    // Shift+Tab also covers the e.shiftKey branch
+    fireEvent.keyDown(innerModal, { key: 'Tab', shiftKey: true });
+    // onClose should not have been called (Tab doesn't close)
+    expect(mockClose).not.toHaveBeenCalled();
+  });
+
+  it('clicking inner modal div stops propagation (does not trigger overlay onClose)', async () => {
+    const mockClose = vi.fn();
+    vi.mocked(api.api.getDonatePopup).mockResolvedValue(mockSpotlightResponse);
+
+    const { container } = render(
+      <BrowserRouter>
+        <FeaturedCampaignModal isOpen={true} onClose={mockClose} />
+      </BrowserRouter>
+    );
+
+    await waitFor(() => expect(screen.getByText('Education Campaign')).toBeInTheDocument());
+    const innerModal = container.querySelector('.featured-modal') as HTMLElement;
+    // Click the inner modal div — covers onClick={(e) => e.stopPropagation()} (line 107)
+    fireEvent.click(innerModal);
+    // The stopPropagation prevents overlay close from firing, so onClose should NOT be called
+    expect(mockClose).not.toHaveBeenCalled();
+  });
+
+  it('clicking Browse All Campaigns in error state navigates and closes', async () => {
+    const mockClose = vi.fn();
+    const errorResponse = {
+      campaign: null,
+      mode: 'FALLBACK' as const,
+      fallbackReason: 'NO_ACTIVE_CAMPAIGNS' as const,
+    };
+    vi.mocked(api.api.getDonatePopup).mockResolvedValue(errorResponse);
+
+    render(
+      <BrowserRouter>
+        <FeaturedCampaignModal isOpen={true} onClose={mockClose} />
+      </BrowserRouter>
+    );
+
+    await waitFor(() => expect(screen.getByText('Browse All Campaigns')).toBeInTheDocument());
+    fireEvent.click(screen.getByText('Browse All Campaigns'));
+
+    expect(mockNavigate).toHaveBeenCalledWith('/campaigns');
+    expect(mockClose).toHaveBeenCalled();
+  });
+
+  it('clicking campaign page link navigates to /campaigns and closes', async () => {
+    const mockClose = vi.fn();
+    vi.mocked(api.api.getDonatePopup).mockResolvedValue(mockSpotlightResponse);
+
+    render(
+      <BrowserRouter>
+        <FeaturedCampaignModal isOpen={true} onClose={mockClose} />
+      </BrowserRouter>
+    );
+
+    await waitFor(() => expect(screen.getByText('Education Campaign')).toBeInTheDocument());
+    // The "campaign page" link button at the bottom
+    const campaignPageBtn = screen.getByText('campaign page');
+    fireEvent.click(campaignPageBtn);
+
+    expect(mockNavigate).toHaveBeenCalledWith('/campaigns');
+    expect(mockClose).toHaveBeenCalled();
   });
 });

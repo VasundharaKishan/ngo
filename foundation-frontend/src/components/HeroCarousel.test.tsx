@@ -1,6 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { BrowserRouter } from 'react-router-dom';
 import HeroCarousel from './HeroCarousel';
+
+const renderCarousel = () => render(
+  <BrowserRouter>
+    <HeroCarousel />
+  </BrowserRouter>
+);
 
 // Mock fetch
 const mockSlides = [
@@ -10,7 +17,9 @@ const mockSlides = [
     altText: 'Slide 1',
     focus: 'CENTER' as const,
     enabled: true,
-    sortOrder: 1
+    sortOrder: 1,
+    title: 'Support Education',
+    subtitle: 'Help children access quality education'
   },
   {
     id: '2',
@@ -18,7 +27,9 @@ const mockSlides = [
     altText: 'Slide 2',
     focus: 'RIGHT' as const,
     enabled: true,
-    sortOrder: 2
+    sortOrder: 2,
+    title: 'Community Health',
+    subtitle: undefined
   },
   {
     id: '3',
@@ -27,6 +38,7 @@ const mockSlides = [
     focus: 'LEFT' as const,
     enabled: true,
     sortOrder: 3
+    // no title or subtitle — tests backward compatibility
   }
 ];
 
@@ -45,12 +57,12 @@ describe('HeroCarousel', () => {
     // Keep fetch pending so loading state persists
     global.fetch = vi.fn(() => new Promise(() => {})) as any;
 
-    render(<HeroCarousel />);
-    expect(screen.getByText('Loading...')).toBeInTheDocument();
+    renderCarousel();
+    expect(screen.getByText('Loading…')).toBeInTheDocument();
   });
 
   it('loads and displays slides', async () => {
-    render(<HeroCarousel />);
+    renderCarousel();
 
     await waitFor(() => {
       expect(screen.getByAltText('Slide 1')).toBeInTheDocument();
@@ -61,7 +73,7 @@ describe('HeroCarousel', () => {
   });
 
   it('fetches slides from API on mount', async () => {
-    render(<HeroCarousel />);
+    renderCarousel();
 
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith(
@@ -78,7 +90,7 @@ describe('HeroCarousel', () => {
       } as Response)
     );
 
-    const { container } = render(<HeroCarousel />);
+    const { container } = renderCarousel();
 
     await waitFor(() => {
       expect(container.firstChild).toBeNull();
@@ -93,7 +105,7 @@ describe('HeroCarousel', () => {
       } as Response)
     );
 
-    const { container } = render(<HeroCarousel />);
+    const { container } = renderCarousel();
 
     await waitFor(() => {
       expect(container.querySelector('.carousel-loading')).not.toBeInTheDocument();
@@ -103,7 +115,7 @@ describe('HeroCarousel', () => {
   });
 
   it('applies correct object position based on focus', async () => {
-    render(<HeroCarousel />);
+    renderCarousel();
 
     await waitFor(() => {
       const slide1 = screen.getByAltText('Slide 1');
@@ -118,7 +130,7 @@ describe('HeroCarousel', () => {
   });
 
   it('sets first slide to eager loading', async () => {
-    render(<HeroCarousel />);
+    renderCarousel();
 
     await waitFor(() => {
       const slide1 = screen.getByAltText('Slide 1');
@@ -127,7 +139,7 @@ describe('HeroCarousel', () => {
   });
 
   it('sets subsequent slides to lazy loading', async () => {
-    render(<HeroCarousel />);
+    renderCarousel();
 
     await waitFor(() => {
       const slide2 = screen.getByAltText('Slide 2');
@@ -139,7 +151,7 @@ describe('HeroCarousel', () => {
   });
 
   it('displays carousel controls after loading', async () => {
-    render(<HeroCarousel />);
+    renderCarousel();
 
     await waitFor(() => {
       expect(screen.getByAltText('Slide 1')).toBeInTheDocument();
@@ -150,11 +162,113 @@ describe('HeroCarousel', () => {
   });
 
   it('renders all slides in DOM', async () => {
-    render(<HeroCarousel />);
+    renderCarousel();
 
     await waitFor(() => {
       const slides = screen.getAllByRole('img');
       expect(slides).toHaveLength(3);
     });
+  });
+
+  it('clicking Next slide button advances to next slide', async () => {
+    const { container } = renderCarousel();
+
+    await waitFor(() => {
+      expect(screen.getByAltText('Slide 1')).toBeInTheDocument();
+    });
+
+    // Verify slide 1 is active initially
+    const slide1Parent = screen.getByAltText('Slide 1').closest('.carousel-slide');
+    expect(slide1Parent).toHaveClass('active');
+
+    // Click next
+    const nextBtn = screen.getByRole('button', { name: /Next slide/i });
+    fireEvent.click(nextBtn);
+
+    await waitFor(() => {
+      const slide2Parent = screen.getByAltText('Slide 2').closest('.carousel-slide');
+      expect(slide2Parent).toHaveClass('active');
+    });
+
+    void container;
+  });
+
+  it('clicking Previous slide button goes to previous slide (wraps to last)', async () => {
+    renderCarousel();
+
+    await waitFor(() => {
+      expect(screen.getByAltText('Slide 1')).toBeInTheDocument();
+    });
+
+    // First slide is active, click prev → wraps to slide 3
+    const prevBtn = screen.getByRole('button', { name: /Previous slide/i });
+    fireEvent.click(prevBtn);
+
+    await waitFor(() => {
+      const slide3Parent = screen.getByAltText('Slide 3').closest('.carousel-slide');
+      expect(slide3Parent).toHaveClass('active');
+    });
+  });
+
+  it('displays slide counter showing current and total slides', async () => {
+    renderCarousel();
+
+    await waitFor(() => {
+      expect(screen.getByAltText('Slide 1')).toBeInTheDocument();
+    });
+
+    // Counter should show "1 / 3" initially
+    expect(screen.getByText('1')).toBeInTheDocument();
+    expect(screen.getByText('3')).toBeInTheDocument();
+
+    // After clicking next, counter current updates to 2
+    const nextBtn = screen.getByRole('button', { name: /Next slide/i });
+    fireEvent.click(nextBtn);
+
+    await waitFor(() => {
+      expect(screen.getByText('2')).toBeInTheDocument();
+    });
+  });
+
+  it('pauses autoplay on mouse enter and resumes on mouse leave', async () => {
+    const { container } = renderCarousel();
+
+    await waitFor(() => {
+      expect(screen.getByAltText('Slide 1')).toBeInTheDocument();
+    });
+
+    const carousel = container.querySelector('.hero-carousel')!;
+    fireEvent.mouseEnter(carousel);
+    fireEvent.mouseLeave(carousel);
+
+    // No assertions needed — just confirms handlers run without error
+    expect(carousel).toBeInTheDocument();
+  });
+
+  it('renders title overlay when slide has title', async () => {
+    renderCarousel();
+
+    await waitFor(() => {
+      expect(screen.getByText('Support Education')).toBeInTheDocument();
+    });
+  });
+
+  it('renders subtitle text when slide has subtitle', async () => {
+    renderCarousel();
+
+    await waitFor(() => {
+      expect(screen.getByText('Help children access quality education')).toBeInTheDocument();
+    });
+  });
+
+  it('does not render caption when slide has no title or subtitle', async () => {
+    renderCarousel();
+
+    await waitFor(() => {
+      expect(screen.getByAltText('Slide 3')).toBeInTheDocument();
+    });
+
+    const slide3 = screen.getByAltText('Slide 3').closest('.carousel-slide');
+    expect(slide3?.querySelector('.carousel-caption')).toBeNull();
   });
 });

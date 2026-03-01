@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Helmet } from 'react-helmet-async';
 import { API_BASE_URL } from '../api';
+import { useSiteName, useSiteLogo } from '../contexts/ConfigContext';
 import HeroCarousel from '../components/HeroCarousel';
+import CampaignCarousel from '../components/CampaignCarousel';
 import FeaturedCampaignsSection from '../components/sections/FeaturedCampaignsSection';
 import StatsSection from '../components/sections/StatsSection';
 import HeroSection from '../components/sections/HeroSection';
@@ -16,26 +20,25 @@ interface HomeSection {
 }
 
 export default function Home() {
+  const { t } = useTranslation();
   const [sections, setSections] = useState<HomeSection[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const siteName = useSiteName();
+  const logoUrl = useSiteLogo();
 
   useEffect(() => {
     const loadSections = async () => {
       try {
-        console.log('🔄 Fetching home sections from:', `${API_BASE_URL}/public/home`);
         const response = await fetch(`${API_BASE_URL}/public/home`);
-        console.log('📡 Response status:', response.status, response.statusText);
-        
+
         if (!response.ok) {
           throw new Error(`Failed to load home sections (${response.status})`);
         }
         const data: HomeSection[] = await response.json();
-        console.log('✅ Loaded sections:', data);
         setSections(data);
         setLoading(false);
       } catch (err) {
-        console.error('❌ Error loading home sections:', err);
         setError(err instanceof Error ? err.message : 'Unknown error');
         setLoading(false);
       }
@@ -50,7 +53,7 @@ export default function Home() {
         <SkeletonLoader variant="hero" height="600px" />
         <div style={{ padding: '4rem 2rem', maxWidth: '1200px', margin: '0 auto' }}>
           <SkeletonLoader variant="stats" />
-          <div style={{ marginTop: '4rem', display: 'grid', gap: '2rem', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
+          <div style={{ marginTop: '4rem', display: 'grid', gap: '2rem', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))' }}>
             <SkeletonLoader variant="card" />
             <SkeletonLoader variant="card" />
             <SkeletonLoader variant="card" />
@@ -72,10 +75,10 @@ export default function Home() {
           margin: '2rem',
           color: '#dc2626'
         }}>
-          <h2>⚠️ Failed to Load Home Page</h2>
-          <p>Error: {error}</p>
+          <h2>{t('home.loadError')}</h2>
+          <p>{t('home.errorPrefix', { error })}</p>
           <p style={{ marginTop: '1rem', fontSize: '0.9rem', color: '#666' }}>
-            The server may be down or the home sections are not configured.
+            {t('home.serverDown')}
           </p>
         </div>
       </div>
@@ -94,10 +97,10 @@ export default function Home() {
           borderRadius: '8px',
           margin: '2rem'
         }}>
-          <h2>⚠️ No Home Sections Configured</h2>
-          <p>The home page loaded successfully, but no sections are configured yet.</p>
+          <h2>{t('home.noSections')}</h2>
+          <p>{t('home.noSectionsDesc')}</p>
           <p style={{ marginTop: '1rem', fontSize: '0.9rem', color: '#666' }}>
-            Admin: Go to <a href="/admin/home-sections" style={{ color: '#667eea', fontWeight: 'bold' }}>Admin → Home Sections</a> to configure the home page.
+            {t('home.adminHint')}
           </p>
         </div>
       </div>
@@ -106,6 +109,14 @@ export default function Home() {
 
   return (
     <div className="home">
+      <Helmet>
+        <title>{t('home.pageTitle', { siteName })}</title>
+        <meta name="description" content="Join us in making a difference through transparent donations to education, healthcare, and community development campaigns in India." />
+        <meta property="og:title" content={siteName} />
+        <meta property="og:description" content="Support meaningful causes through transparent donations." />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content={logoUrl} />
+      </Helmet>
       {sections.map((section) => (
         <SectionRenderer key={section.id} section={section} />
       ))}
@@ -117,6 +128,7 @@ export default function Home() {
  * SectionRenderer - Maps section type to component
  */
 function SectionRenderer({ section }: { section: HomeSection }) {
+  const { t } = useTranslation();
   // Parse config JSON
   const config = section.configJson ? JSON.parse(section.configJson) : {};
   
@@ -135,9 +147,17 @@ function SectionRenderer({ section }: { section: HomeSection }) {
     
     case 'why_donate':
       return <WhyDonateSection config={config} />;
-    
+
+    case 'campaign_carousel':
+      return (
+        <CampaignCarousel
+          title={config.title || t('home.defaultCarouselTitle')}
+          limit={config.limit || 18}
+          featured={config.featured || false}
+        />
+      );
+
     default:
-      console.warn(`Unknown section type: ${section.type}`);
       return null;
   }
 }

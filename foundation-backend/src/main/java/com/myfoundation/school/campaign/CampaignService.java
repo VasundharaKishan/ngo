@@ -1,16 +1,20 @@
 package com.myfoundation.school.campaign;
 
 import com.myfoundation.school.donation.DonationRepository;
+import com.myfoundation.school.dto.CampaignPageResponse;
 import com.myfoundation.school.dto.CampaignPopupDto;
 import com.myfoundation.school.dto.CampaignResponse;
 import com.myfoundation.school.dto.CampaignSummaryDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -53,11 +57,11 @@ public class CampaignService {
      * @return List of campaigns matching filters, transformed to CampaignResponse DTOs
      */
     public List<CampaignResponse> getCampaigns(String categoryId, Boolean featured, Boolean urgent) {
-        log.info("Fetching campaigns with filters: categoryId={}, featured={}, urgent={}", 
+        log.info("Fetching campaigns with filters: categoryId={}, featured={}, urgent={}",
                 categoryId, featured, urgent);
-        
+
         List<Campaign> campaigns;
-        
+
         if (featured != null && featured) {
             campaigns = campaignRepository.findByActiveTrueAndFeaturedTrue();
         } else if (urgent != null && urgent) {
@@ -67,16 +71,50 @@ public class CampaignService {
         } else {
             campaigns = campaignRepository.findByActiveTrue();
         }
-        
+
+        // Batch-load all donation sums in a single query to avoid N+1
+        Map<String, Long> donationSums = loadDonationSums(campaigns);
+
         return campaigns.stream()
-                .map(this::toCampaignResponse)
+                .map(c -> toCampaignResponse(c, donationSums.getOrDefault(c.getId(), 0L)))
                 .collect(Collectors.toList());
     }
     
     public List<CampaignResponse> getAllActiveCampaigns() {
         return getCampaigns(null, null, null);
     }
-    
+
+    /**
+     * Get a paginated page of active campaigns with optional filters.
+     */
+    public CampaignPageResponse getCampaignsPaginated(String categoryId, Boolean featured, Boolean urgent, Pageable pageable) {
+        Page<Campaign> campaignPage;
+        if (Boolean.TRUE.equals(featured)) {
+            campaignPage = campaignRepository.findByActiveTrueAndFeaturedTrue(pageable);
+        } else if (Boolean.TRUE.equals(urgent)) {
+            campaignPage = campaignRepository.findByActiveTrueAndUrgentTrue(pageable);
+        } else if (categoryId != null && !categoryId.isEmpty()) {
+            campaignPage = campaignRepository.findByActiveTrueAndCategoryId(categoryId, pageable);
+        } else {
+            campaignPage = campaignRepository.findByActiveTrue(pageable);
+        }
+
+        // Batch-load donation sums for this page in one query
+        List<Campaign> pageContent = campaignPage.getContent();
+        Map<String, Long> donationSums = loadDonationSums(pageContent);
+
+        List<CampaignResponse> items = pageContent.stream()
+                .map(c -> toCampaignResponse(c, donationSums.getOrDefault(c.getId(), 0L)))
+                .collect(Collectors.toList());
+        return CampaignPageResponse.builder()
+                .items(items)
+                .page(campaignPage.getNumber())
+                .size(campaignPage.getSize())
+                .totalItems(campaignPage.getTotalElements())
+                .totalPages(campaignPage.getTotalPages())
+                .build();
+    }
+
     /**
      * Get a single campaign by its unique identifier.
      * 
@@ -170,10 +208,29 @@ public class CampaignService {
         return (int) Math.min(100, (current * 100) / target);
     }
     
+    /**
+     * Batch-load donation sums for a list of campaigns in a single DB query.
+     * Campaigns with no successful donations will be absent from the map; callers default to 0.
+     */
+    private Map<String, Long> loadDonationSums(List<Campaign> campaigns) {
+        if (campaigns == null || campaigns.isEmpty()) {
+            return Map.of();
+        }
+        List<String> ids = campaigns.stream().map(Campaign::getId).collect(Collectors.toList());
+        return donationRepository.sumSuccessfulDonationsByCampaignIds(ids).stream()
+                .collect(Collectors.toMap(row -> (String) row[0], row -> (Long) row[1]));
+    }
+
+    /**
+     * For single-campaign lookups (e.g. getCampaignById), still fetches individually —
+     * N+1 is not a concern when loading exactly one campaign.
+     */
     private CampaignResponse toCampaignResponse(Campaign campaign) {
-        // Calculate current amount from successful donations only
         Long currentAmount = donationRepository.sumSuccessfulDonationsByCampaignId(campaign.getId());
-        
+        return toCampaignResponse(campaign, currentAmount);
+    }
+
+    private CampaignResponse toCampaignResponse(Campaign campaign, Long currentAmount) {
         return CampaignResponse.builder()
                 .id(campaign.getId())
                 .title(campaign.getTitle())

@@ -10,6 +10,7 @@ export interface Category {
   description: string;
   icon: string;
   color: string;
+  imageUrl?: string;
   active: boolean;
   displayOrder: number;
 }
@@ -60,6 +61,14 @@ export interface DonationResponse {
 
 export interface DonationPageResponse {
   items: DonationResponse[];
+  page: number;
+  size: number;
+  totalItems: number;
+  totalPages: number;
+}
+
+export interface CampaignPageResponse {
+  items: Campaign[];
   page: number;
   size: number;
   totalItems: number;
@@ -150,6 +159,26 @@ export const api = {
     if (filters?.limit !== undefined) params.append('limit', String(filters.limit));
     
     const url = `${API_BASE_URL}/campaigns${params.toString() ? '?' + params.toString() : ''}`;
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Failed to fetch campaigns');
+    return response.json();
+  },
+
+  // Get paginated campaigns (server-side pagination)
+  getCampaignsPaginated: async (params: {
+    page: number;
+    size: number;
+    categoryId?: string;
+    featured?: boolean;
+    urgent?: boolean;
+  }): Promise<CampaignPageResponse> => {
+    const searchParams = new URLSearchParams();
+    searchParams.append('page', String(params.page));
+    searchParams.append('size', String(params.size));
+    if (params.categoryId) searchParams.append('categoryId', params.categoryId);
+    if (params.featured !== undefined) searchParams.append('featured', String(params.featured));
+    if (params.urgent !== undefined) searchParams.append('urgent', String(params.urgent));
+    const url = `${API_BASE_URL}/campaigns?${searchParams.toString()}`;
     const response = await fetch(url);
     if (!response.ok) throw new Error('Failed to fetch campaigns');
     return response.json();

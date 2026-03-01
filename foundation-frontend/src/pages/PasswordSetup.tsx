@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { API_BASE_URL } from '../api';
 import { useToast } from '../components/ToastProvider';
+import logger from '../utils/logger';
 import './PasswordSetup.css';
 
 interface SecurityQuestion {
@@ -67,7 +68,7 @@ export default function PasswordSetup() {
       const data = await res.json();
       setQuestions(data);
     } catch (error) {
-      console.error('Failed to load security questions:', error);
+      logger.error('PasswordSetup', 'Failed to load security questions:', error);
     }
   };
 

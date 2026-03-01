@@ -80,7 +80,7 @@ test.describe('Admin site settings', () => {
       })
     );
 
-    await page.route('**/admin/cms/content/site-settings', route =>
+    await page.route('**/admin/cms/content/section/site-settings', route =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -97,6 +97,12 @@ test.describe('Admin site settings', () => {
 
     await expect(page.getByTestId('settings-input-site-name')).toHaveValue('Hope Foundation');
     await expect(page.getByTestId('settings-input-site-tagline')).toHaveValue('Spreading hope globally');
+
+    // Dismiss cookie consent banner if visible — it can cover the Save button
+    const cookieDeclineBtn = page.getByRole('button', { name: 'Decline' });
+    if (await cookieDeclineBtn.isVisible()) {
+      await cookieDeclineBtn.click();
+    }
 
     await page.getByTestId('settings-input-site-name').fill('Yugal Savitri Seva');
     await page.getByTestId('settings-input-site-tagline').fill('Service beyond borders');

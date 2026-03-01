@@ -1,48 +1,141 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Helmet } from 'react-helmet-async';
 import { api, type Campaign } from '../api';
 import CampaignCard from '../components/CampaignCard';
-import { useCampaignsPerPage } from '../contexts/ConfigContext';
+import { useCampaignsPerPage, useSiteName } from '../contexts/ConfigContext';
 import { refreshScrollAnimations } from '../utils/scrollAnimations';
 import SkeletonLoader from '../components/SkeletonLoader';
 import './CampaignList.css';
 
+/** Strip HTML tags so full-description search works even with WYSIWYG markup */
+const stripHtml = (s: string) => s.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+
 export default function CampaignList() {
-  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
-  const [displayedCampaigns, setDisplayedCampaigns] = useState<Campaign[]>([]);
+  const { t } = useTranslation();
+  const [allCampaigns, setAllCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  
-  // Get items per page from config context
-  const itemsPerPage = useCampaignsPerPage();
+  const [currentPage, setCurrentPage] = useState(0); // 0-indexed for pagination
+  const [_totalServerPages, setTotalServerPages] = useState(0);
 
+  // Filter state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedBadge, setSelectedBadge] = useState('');
+
+  const itemsPerPage = useCampaignsPerPage();
+  const siteName = useSiteName();
+
+  // Load all campaigns (fetch all pages to allow client-side search/filter)
   useEffect(() => {
     const loadData = async () => {
+      setLoading(true);
       try {
-        // Fetch all campaigns
-        const data = await api.getCampaigns();
-        setCampaigns(data);
+        // Fetch first page to discover total page count
+        const firstPage = await api.getCampaignsPaginated({ page: 0, size: 100 });
+        let items = firstPage.items;
+
+        // If there are more pages, fetch them all in parallel so none are missed in search
+        if (firstPage.totalPages > 1) {
+          const pageNums = Array.from({ length: firstPage.totalPages - 1 }, (_, i) => i + 1);
+          const rest = await Promise.all(
+            pageNums.map(p => api.getCampaignsPaginated({ page: p, size: 100 }))
+          );
+          items = [...items, ...rest.flatMap(r => r.items)];
+        }
+
+        setAllCampaigns(items);
+        setTotalServerPages(firstPage.totalPages);
         setLoading(false);
+        setTimeout(() => refreshScrollAnimations(), 100);
       } catch (err) {
-        setError('Failed to load campaigns. Please try again.');
+        setError(t('campaign.loadListError'));
         setLoading(false);
       }
     };
-    
     loadData();
   }, []);
 
-  // Update displayed campaigns when page or campaigns change
+  // Re-observe new campaign cards whenever the page changes
   useEffect(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    setDisplayedCampaigns(campaigns.slice(startIndex, endIndex));
-    
-    // Refresh scroll animations for new content
-    setTimeout(() => refreshScrollAnimations(), 100);
-  }, [campaigns, currentPage, itemsPerPage]);
+    if (loading) return;
+    const timer = setTimeout(() => refreshScrollAnimations(), 50);
+    return () => clearTimeout(timer);
+  }, [currentPage, loading]);
 
-  const totalPages = Math.ceil(campaigns.length / itemsPerPage);
+  // Extract unique categories from loaded campaigns
+  const categories = useMemo(() => {
+    const seen = new Set<string>();
+    return allCampaigns
+      .filter(c => c.categoryName)
+      .reduce<{ id: string; name: string; icon?: string }[]>((acc, c) => {
+        if (c.categoryId && !seen.has(c.categoryId)) {
+          seen.add(c.categoryId);
+          acc.push({ id: c.categoryId, name: c.categoryName!, icon: c.categoryIcon });
+        }
+        return acc;
+      }, []);
+  }, [allCampaigns]);
+
+  // Client-side filtering
+  const filteredCampaigns = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
+    return allCampaigns.filter(c => {
+      // Multi-word search: split on whitespace and require ALL words to appear
+      // somewhere across all searchable fields (so "clean water" and "water clean" both work)
+      const matchSearch = (() => {
+        if (!q) return true;
+        const words = q.split(/\s+/).filter(Boolean);
+        const haystack = [
+          c.title,
+          c.shortDescription || '',
+          c.categoryName || '',
+          stripHtml(c.description || ''),
+          c.location || '',
+        ].join(' ').toLowerCase();
+        return words.every(word => haystack.includes(word));
+      })();
+      const matchCategory = !selectedCategory || c.categoryId === selectedCategory;
+      const matchBadge =
+        !selectedBadge ||
+        (selectedBadge === 'urgent' && c.urgent) ||
+        (selectedBadge === 'featured' && c.featured);
+      return matchSearch && matchCategory && matchBadge;
+    });
+  }, [allCampaigns, searchQuery, selectedCategory, selectedBadge]);
+
+  // Client-side pagination of filtered results
+  const totalFilteredPages = Math.max(1, Math.ceil(filteredCampaigns.length / itemsPerPage));
+  const safeCurrentPage = Math.min(currentPage, totalFilteredPages - 1);
+  const pagedCampaigns = filteredCampaigns.slice(
+    safeCurrentPage * itemsPerPage,
+    safeCurrentPage * itemsPerPage + itemsPerPage
+  );
+
+  const hasFilters = searchQuery || selectedCategory || selectedBadge;
+
+  const handleSearch = (q: string) => {
+    setSearchQuery(q);
+    setCurrentPage(0);
+  };
+
+  const handleCategory = (cat: string) => {
+    setSelectedCategory(cat);
+    setCurrentPage(0);
+  };
+
+  const handleBadge = (badge: string) => {
+    setSelectedBadge(badge === selectedBadge ? '' : badge);
+    setCurrentPage(0);
+  };
+
+  const handleClearFilters = () => {
+    setSearchQuery('');
+    setSelectedCategory('');
+    setSelectedBadge('');
+    setCurrentPage(0);
+  };
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -51,6 +144,13 @@ export default function CampaignList() {
 
   return (
     <div data-testid="campaign-list">
+      <Helmet>
+        <title>All Campaigns | {siteName}</title>
+        <meta name="description" content="Browse all active donation campaigns supporting education, healthcare, and community development." />
+        <meta property="og:title" content={`All Campaigns | ${siteName}`} />
+        <meta property="og:description" content="Choose a campaign to support our mission." />
+      </Helmet>
+
       {loading && (
         <div className="container">
           <div style={{ marginBottom: '2rem' }}>
@@ -66,57 +166,149 @@ export default function CampaignList() {
           </div>
         </div>
       )}
+
       {!loading && error && (
         <div className="container">
           <p className="error">{error}</p>
         </div>
       )}
+
       {!loading && !error && (
         <div className="container">
-          <h1>All Campaigns</h1>
-          <p className="subtitle">Choose a campaign to support our mission</p>
-          {campaigns.length === 0 ? (
-            <p className="no-campaigns">No active campaigns at the moment. Check back soon!</p>
+          {/* Page heading */}
+          <div className="campaigns-page-header">
+            <h1>{t('campaign.supportACause')}</h1>
+            <p className="subtitle">
+              {t('campaign.activeCampaignsSubtitle', { count: allCampaigns.length })}
+            </p>
+          </div>
+
+          {/* Search + Filters */}
+          <div className="campaigns-filters">
+            {/* Search */}
+            <div className="campaigns-search-wrap">
+              <span className="search-icon" aria-hidden="true">🔍</span>
+              <input
+                type="text"
+                className="campaigns-search"
+                placeholder={t('campaign.searchPlaceholder')}
+                value={searchQuery}
+                onChange={e => handleSearch(e.target.value)}
+                aria-label="Search campaigns"
+                data-testid="campaigns-search"
+              />
+              {searchQuery && (
+                <button
+                  className="search-clear"
+                  onClick={() => handleSearch('')}
+                  aria-label="Clear search"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+
+            {/* Category pills */}
+            {categories.length > 0 && (
+              <div className="campaigns-filter-row" role="group" aria-label="Filter by category">
+                <button
+                  className={`filter-pill ${!selectedCategory ? 'active' : ''}`}
+                  onClick={() => handleCategory('')}
+                >
+                  {t('campaign.all')}
+                </button>
+                {categories.map(cat => (
+                  <button
+                    key={cat.id}
+                    className={`filter-pill ${selectedCategory === cat.id ? 'active' : ''}`}
+                    onClick={() => handleCategory(cat.id)}
+                  >
+                    {cat.icon && <span aria-hidden="true">{cat.icon}</span>} {cat.name}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Badge quick-filters */}
+            <div className="campaigns-filter-row">
+              <button
+                className={`filter-pill filter-pill-urgent ${selectedBadge === 'urgent' ? 'active' : ''}`}
+                onClick={() => handleBadge('urgent')}
+              >
+                {t('campaign.filterUrgent')}
+              </button>
+              <button
+                className={`filter-pill filter-pill-featured ${selectedBadge === 'featured' ? 'active' : ''}`}
+                onClick={() => handleBadge('featured')}
+              >
+                {t('campaign.filterFeatured')}
+              </button>
+
+              {hasFilters && (
+                <button className="filter-clear" onClick={handleClearFilters}>
+                  {t('campaign.clearFilters')}
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Results */}
+          {allCampaigns.length === 0 ? (
+            <p className="no-campaigns">{t('campaign.noCampaignsYet')}</p>
+          ) : filteredCampaigns.length === 0 ? (
+            <div className="campaigns-empty">
+              <span aria-hidden="true" style={{ fontSize: '3rem' }}>🔍</span>
+              <p>{t('campaign.noMatchFilters')}</p>
+              <button className="filter-clear" onClick={handleClearFilters}>
+                {t('campaign.clearFilters')}
+              </button>
+            </div>
           ) : (
             <>
+              {hasFilters && (
+                <p className="campaigns-results-count">
+                  {t('campaign.resultsCount', { count: filteredCampaigns.length })}
+                </p>
+              )}
               <div className="campaign-grid">
-                {displayedCampaigns.map((campaign) => (
+                {pagedCampaigns.map((campaign) => (
                   <div key={campaign.id} className="scroll-animate-stagger">
                     <CampaignCard campaign={campaign} />
                   </div>
                 ))}
               </div>
-              {totalPages > 1 && (
+
+              {totalFilteredPages > 1 && (
                 <div className="pagination">
-                  <button 
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
+                  <button
+                    onClick={() => handlePageChange(safeCurrentPage - 1)}
+                    disabled={safeCurrentPage === 0}
                     className="pagination-btn"
                     data-testid="campaigns-prev"
                   >
-                    ← Previous
+                    {t('campaign.previous')}
                   </button>
-                  
+
                   <div className="pagination-numbers">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                    {Array.from({ length: totalFilteredPages }, (_, i) => i).map(page => (
                       <button
                         key={page}
                         onClick={() => handlePageChange(page)}
-                        className={`pagination-number ${currentPage === page ? 'active' : ''}`}
-                        data-testid={`campaigns-page-${page}`}
+                        className={`pagination-number ${safeCurrentPage === page ? 'active' : ''}`}
+                        data-testid={`campaigns-page-${page + 1}`}
                       >
-                        {page}
+                        {page + 1}
                       </button>
                     ))}
                   </div>
-                  
-                  <button 
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage === totalPages}
+
+                  <button
+                    onClick={() => handlePageChange(safeCurrentPage + 1)}
+                    disabled={safeCurrentPage === totalFilteredPages - 1}
                     className="pagination-btn"
                     data-testid="campaigns-next"
                   >
-                    Next →
+                    {t('campaign.next')}
                   </button>
                 </div>
               )}

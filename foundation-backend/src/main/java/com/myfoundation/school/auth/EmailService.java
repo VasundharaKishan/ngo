@@ -1,5 +1,6 @@
 package com.myfoundation.school.auth;
 
+import com.myfoundation.school.config.SiteConfigService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import java.io.UnsupportedEncodingException;
 public class EmailService {
     
     private final JavaMailSender mailSender;
+    private final SiteConfigService siteConfigService;
     
     @Value("${app.frontend.url:http://localhost:5173}")
     private String frontendUrl;
@@ -240,7 +242,11 @@ public class EmailService {
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
             
             helper.setFrom(fromSystem, fromName);
-            helper.setTo("contact@yugalsavitriseva.org"); // This forwards to yugalsavitriseva@gmail.com
+            String adminEmail = siteConfigService.getConfigValue("admin.notification.email");
+            if (adminEmail == null || adminEmail.isBlank()) {
+                adminEmail = "contact@yugalsavitriseva.org";
+            }
+            helper.setTo(adminEmail);
             helper.setSubject("New Donation Received - " + formatCurrency(amount, currency));
             
             String htmlContent = buildAdminNotificationHtml(
@@ -278,7 +284,7 @@ public class EmailService {
             String donationDate) {
         
         String formattedAmount = formatCurrency(amount, currency);
-        String logoUrl = "https://yugalsavitriseva.org/logo.png"; // TODO: Update with actual logo URL
+        String logoUrl = frontendUrl + "/logo.png";
         
         return """
             <!DOCTYPE html>

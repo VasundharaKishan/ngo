@@ -1,5 +1,6 @@
 package com.myfoundation.school.settings;
 
+import com.myfoundation.school.audit.AuditLogService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -60,6 +61,9 @@ class SiteSettingServiceTest {
 
     @Mock
     private SiteSettingRepository repository;
+
+    @Mock
+    private AuditLogService auditLogService;
 
     @Mock
     private SecurityContext securityContext;

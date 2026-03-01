@@ -63,7 +63,7 @@ public class PasswordSetupController {
     
     @PostMapping("/admin/security-questions")
     public ResponseEntity<SecurityQuestion> createSecurityQuestion(
-            @RequestBody SecurityQuestion question) {
+            @Valid @RequestBody SecurityQuestion question) {
         try {
             if (securityQuestionRepository.existsByQuestion(question.getQuestion())) {
                 Map<String, String> error = new HashMap<>();
@@ -82,7 +82,7 @@ public class PasswordSetupController {
     @PutMapping("/admin/security-questions/{id}")
     public ResponseEntity<SecurityQuestion> updateSecurityQuestion(
             @PathVariable String id,
-            @RequestBody SecurityQuestion question) {
+            @Valid @RequestBody SecurityQuestion question) {
         try {
             SecurityQuestion existing = securityQuestionRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("Question not found"));

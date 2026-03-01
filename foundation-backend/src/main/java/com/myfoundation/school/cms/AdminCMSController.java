@@ -1,5 +1,6 @@
 package com.myfoundation.school.cms;
 
+import com.myfoundation.school.util.XssSanitizer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -47,9 +48,9 @@ public class AdminCMSController {
         log.info("POST /api/admin/cms/testimonials - Creating testimonial for {}", request.authorName());
         
         Testimonial testimonial = Testimonial.builder()
-                .authorName(request.authorName())
-                .authorTitle(request.authorTitle())
-                .testimonialText(request.testimonialText())
+                .authorName(XssSanitizer.sanitize(request.authorName()))
+                .authorTitle(XssSanitizer.sanitize(request.authorTitle()))
+                .testimonialText(XssSanitizer.sanitize(request.testimonialText()))
                 .displayOrder(request.displayOrder() != null ? request.displayOrder() : 0)
                 .active(request.active() != null ? request.active() : true)
                 .build();
@@ -66,9 +67,9 @@ public class AdminCMSController {
         
         return testimonialRepository.findById(id)
                 .map(testimonial -> {
-                    testimonial.setAuthorName(request.authorName());
-                    testimonial.setAuthorTitle(request.authorTitle());
-                    testimonial.setTestimonialText(request.testimonialText());
+                    testimonial.setAuthorName(XssSanitizer.sanitize(request.authorName()));
+                    testimonial.setAuthorTitle(XssSanitizer.sanitize(request.authorTitle()));
+                    testimonial.setTestimonialText(XssSanitizer.sanitize(request.testimonialText()));
                     if (request.displayOrder() != null) {
                         testimonial.setDisplayOrder(request.displayOrder());
                     }
@@ -115,8 +116,8 @@ public class AdminCMSController {
         log.info("POST /api/admin/cms/stats - Creating stat {}", request.statLabel());
         
         HomepageStat stat = HomepageStat.builder()
-                .statLabel(request.statLabel())
-                .statValue(request.statValue())
+                .statLabel(XssSanitizer.sanitize(request.statLabel()))
+                .statValue(XssSanitizer.sanitize(request.statValue()))
                 .icon(request.icon())
                 .displayOrder(request.displayOrder() != null ? request.displayOrder() : 0)
                 .active(request.active() != null ? request.active() : true)
@@ -134,8 +135,8 @@ public class AdminCMSController {
         
         return homepageStatRepository.findById(id)
                 .map(stat -> {
-                    stat.setStatLabel(request.statLabel());
-                    stat.setStatValue(request.statValue());
+                    stat.setStatLabel(XssSanitizer.sanitize(request.statLabel()));
+                    stat.setStatValue(XssSanitizer.sanitize(request.statValue()));
                     stat.setIcon(request.icon());
                     if (request.displayOrder() != null) {
                         stat.setDisplayOrder(request.displayOrder());
@@ -183,8 +184,8 @@ public class AdminCMSController {
         log.info("POST /api/admin/cms/social-media - Creating social media link for {}", request.platform());
         
         SocialMedia socialMedia = SocialMedia.builder()
-                .platform(request.platform())
-                .url(request.url())
+                .platform(XssSanitizer.sanitize(request.platform()))
+                .url(XssSanitizer.sanitize(request.url()))
                 .icon(request.icon())
                 .displayOrder(request.displayOrder() != null ? request.displayOrder() : 0)
                 .active(request.active() != null ? request.active() : true)

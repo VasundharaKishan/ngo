@@ -17,6 +17,7 @@ import com.myfoundation.school.dto.DonationPageResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -24,7 +25,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -101,11 +104,35 @@ public class AdminDonationController {
     
     // Campaign CRUD endpoints
     @GetMapping("/campaigns")
-    public ResponseEntity<List<AdminCampaignResponse>> getAllCampaigns() {
+    public ResponseEntity<?> getAllCampaigns(
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size) {
+        if (page != null) {
+            log.info("GET /api/admin/campaigns (paginated) - page={}, size={}", page, size);
+            int pageNum = Math.max(0, page);
+            int pageSize = (size != null && size > 0 && size <= 100) ? size : 25;
+            Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
+            Page<Campaign> campaignPage = campaignRepository.findAll(pageable);
+            List<Campaign> pageContent = campaignPage.getContent();
+            // Batch-load donation sums to avoid N+1
+            java.util.Map<String, Long> donationSums = batchLoadDonationSums(pageContent);
+            List<AdminCampaignResponse> items = pageContent.stream()
+                    .map(c -> toAdminCampaignResponse(c, donationSums.getOrDefault(c.getId(), 0L)))
+                    .collect(Collectors.toList());
+            Map<String, Object> response = new HashMap<>();
+            response.put("items", items);
+            response.put("page", campaignPage.getNumber());
+            response.put("size", campaignPage.getSize());
+            response.put("totalItems", campaignPage.getTotalElements());
+            response.put("totalPages", campaignPage.getTotalPages());
+            return ResponseEntity.ok(response);
+        }
         log.info("GET /api/admin/campaigns - Fetching all campaigns");
         List<Campaign> campaigns = campaignRepository.findAll();
+        // Batch-load donation sums to avoid N+1
+        java.util.Map<String, Long> donationSums = batchLoadDonationSums(campaigns);
         List<AdminCampaignResponse> responses = campaigns.stream()
-                .map(this::toAdminCampaignResponse)
+                .map(c -> toAdminCampaignResponse(c, donationSums.getOrDefault(c.getId(), 0L)))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(responses);
     }
@@ -169,7 +196,14 @@ public class AdminDonationController {
         Category category = adminCategoryService.updateCategory(id, request);
         return ResponseEntity.ok(category);
     }
-    
+
+    @PatchMapping("/categories/{id}")
+    public ResponseEntity<Category> patchCategory(@PathVariable String id, @Valid @RequestBody AdminCategoryRequest request) {
+        log.info("PATCH /api/admin/categories/{} - Patching category", id);
+        Category category = adminCategoryService.updateCategory(id, request);
+        return ResponseEntity.ok(category);
+    }
+
     @DeleteMapping("/categories/{id}")
     public ResponseEntity<Void> deleteCategory(@PathVariable String id) {
         log.info("DELETE /api/admin/categories/{} - Deleting category", id);
@@ -204,12 +238,31 @@ public class AdminDonationController {
     }
     
     /**
-     * Helper method to convert Campaign entity to AdminCampaignResponse with calculated currentAmount.
-     * The currentAmount is dynamically calculated from successful donations.
+     * Batch-load donation sums for a list of campaigns in one query.
+     * Returns a map of campaignId → total donated amount (in lowest currency unit).
+     */
+    private java.util.Map<String, Long> batchLoadDonationSums(List<Campaign> campaigns) {
+        if (campaigns == null || campaigns.isEmpty()) {
+            return java.util.Map.of();
+        }
+        List<String> ids = campaigns.stream().map(Campaign::getId).collect(Collectors.toList());
+        return donationRepository.sumSuccessfulDonationsByCampaignIds(ids).stream()
+                .collect(Collectors.toMap(row -> (String) row[0], row -> (Long) row[1]));
+    }
+
+    /**
+     * Single-campaign lookup — donation sum fetched individually (no N+1 concern for 1 row).
      */
     private AdminCampaignResponse toAdminCampaignResponse(Campaign campaign) {
         Long currentAmount = donationRepository.sumSuccessfulDonationsByCampaignId(campaign.getId());
-        
+        return toAdminCampaignResponse(campaign, currentAmount);
+    }
+
+    /**
+     * Convert Campaign entity to AdminCampaignResponse with a pre-loaded currentAmount.
+     * Use this variant when building list responses to avoid N+1 queries.
+     */
+    private AdminCampaignResponse toAdminCampaignResponse(Campaign campaign, Long currentAmount) {
         AdminCampaignResponse response = new AdminCampaignResponse();
         response.setId(campaign.getId());
         response.setTitle(campaign.getTitle());
@@ -227,11 +280,11 @@ public class AdminDonationController {
         response.setUrgent(campaign.getUrgent());
         response.setCreatedAt(campaign.getCreatedAt());
         response.setUpdatedAt(campaign.getUpdatedAt());
-        
+
         if (campaign.getCategory() != null) {
             response.setCategory(campaign.getCategory());
         }
-        
+
         return response;
     }
 }

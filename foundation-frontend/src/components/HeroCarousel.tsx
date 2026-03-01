@@ -1,6 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { API_BASE_URL } from '../api';
 import { TIMING } from '../config/constants';
+import logger from '../utils/logger';
 import './HeroCarousel.css';
 
 type FocusPosition = 'CENTER' | 'RIGHT' | 'LEFT' | 'TOP' | 'BOTTOM';
@@ -12,6 +15,8 @@ interface HeroSlide {
   focus: FocusPosition;
   enabled: boolean;
   sortOrder: number;
+  title?: string;
+  subtitle?: string;
 }
 
 const focusMap: Record<FocusPosition, string> = {
@@ -23,6 +28,7 @@ const focusMap: Record<FocusPosition, string> = {
 };
 
 export default function HeroCarousel() {
+  const { t } = useTranslation();
   const [slides, setSlides] = useState<HeroSlide[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -40,7 +46,7 @@ export default function HeroCarousel() {
         setSlides(data);
         setLoading(false);
       } catch (error) {
-        console.error('Error loading hero slides:', error);
+        logger.error('HeroCarousel', 'Error loading hero slides:', error);
         setLoading(false);
       }
     };
@@ -56,9 +62,6 @@ export default function HeroCarousel() {
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
   }, [slides.length]);
 
-  const goToSlide = (index: number) => {
-    setCurrentSlide(index);
-  };
 
   useEffect(() => {
     if (!isPaused && slides.length > 0) {
@@ -70,7 +73,7 @@ export default function HeroCarousel() {
   if (loading) {
     return (
       <div className="hero-carousel">
-        <div className="carousel-loading">Loading...</div>
+        <div className="carousel-loading">{t('common.loading')}</div>
       </div>
     );
   }
@@ -91,13 +94,26 @@ export default function HeroCarousel() {
             key={slide.id}
             className={`carousel-slide ${index === currentSlide ? 'active' : ''}`}
           >
-            <img 
-              src={slide.imageUrl} 
-              alt={slide.altText} 
+            <img
+              src={slide.imageUrl}
+              alt={slide.altText}
               style={{ objectPosition: focusMap[slide.focus] }}
               loading={index === 0 ? 'eager' : 'lazy'}
             />
             <div className="carousel-overlay"></div>
+            {(slide.title || slide.subtitle) && (
+              <div className="carousel-caption">
+                {slide.title && (
+                  <h2 className="carousel-caption-title">{slide.title}</h2>
+                )}
+                {slide.subtitle && (
+                  <p className="carousel-caption-subtitle">{slide.subtitle}</p>
+                )}
+                <Link to="/campaigns" className="carousel-cta-btn">
+                  {t('campaign.donateNow')} →
+                </Link>
+              </div>
+            )}
           </div>
         ))}
       </div>
@@ -118,17 +134,10 @@ export default function HeroCarousel() {
         ›
       </button>
 
-      <div className="carousel-progress">
-        {slides.map((_, index) => (
-          <button
-            key={index}
-            className={`progress-segment ${index === currentSlide ? 'active' : ''} ${index < currentSlide ? 'completed' : ''}`}
-            onClick={() => goToSlide(index)}
-            aria-label={`Go to slide ${index + 1}`}
-          >
-            <span className="progress-fill"></span>
-          </button>
-        ))}
+      <div className="carousel-counter" aria-live="polite" aria-atomic="true">
+        <span className="carousel-counter-current">{currentSlide + 1}</span>
+        <span className="carousel-counter-sep">/</span>
+        <span className="carousel-counter-total">{slides.length}</span>
       </div>
     </div>
   );

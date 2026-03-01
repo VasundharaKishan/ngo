@@ -1,13 +1,28 @@
+import { Helmet } from 'react-helmet-async';
+import { useCMSContent } from '../hooks/useCMSContent';
+import { useSiteName, useConfig } from '../contexts/ConfigContext';
 import './LegalPage.css';
 
 export default function CookiesPage() {
+  const { content, hasCMSContent } = useCMSContent('legal_cookies');
+  const siteName = useSiteName();
+  const { config } = useConfig();
+
   return (
     <div className="legal-page">
-      <h1>Cookie Policy</h1>
-      <p className="last-updated">Last Updated: December 2024</p>
+      <Helmet>
+        <title>Cookie Policy | {siteName}</title>
+        <meta name="description" content="How we use cookies on our website." />
+      </Helmet>
+      <h1>{content.title || 'Cookie Policy'}</h1>
+      <p className="last-updated">Last Updated: {content.lastUpdated || 'December 2024'}</p>
 
-      <section>
-        <h2>What Are Cookies</h2>
+      {hasCMSContent && content.body ? (
+        <div dangerouslySetInnerHTML={{ __html: content.body }} />
+      ) : (
+        <>
+          <section>
+          <h2>What Are Cookies</h2>
         <p>
           Cookies are small text files that are placed on your computer or mobile device when you visit a website. They are widely used to make websites work more efficiently and provide information to the owners of the site.
         </p>
@@ -100,9 +115,11 @@ export default function CookiesPage() {
         <h2>Contact Us</h2>
         <p>
           If you have questions about our use of cookies, please contact us at{' '}
-          <a href="mailto:privacy@myfoundation.org">privacy@myfoundation.org</a>.
+          <a href={`mailto:${config['contact.email'] || 'contact@example.org'}`}>{config['contact.email'] || 'contact@example.org'}</a>.
         </p>
       </section>
+        </>
+      )}
     </div>
   );
 }

@@ -1,11 +1,15 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { RiAdminLine, RiAlertLine } from 'react-icons/ri';
 import { API_BASE_URL } from '../api';
+import { useSiteName } from '../contexts/ConfigContext';
+import logger from '../utils/logger';
 import './AdminLogin.css';
 
 export default function AdminLogin() {
   const navigate = useNavigate();
+  const siteName = useSiteName();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -50,7 +54,7 @@ export default function AdminLogin() {
             credentials: 'include'
           });
         } catch (csrfError) {
-          console.warn('Failed to initialize CSRF token:', csrfError);
+          logger.warn('AdminLogin', 'Failed to initialize CSRF token:', csrfError);
         }
         
         navigate('/admin');
@@ -59,7 +63,7 @@ export default function AdminLogin() {
         setError(errorData.error || 'Login failed');
       }
     } catch (error) {
-      console.error('Login error:', error);
+      logger.error('AdminLogin', 'Login error:', error);
       setError('Connection error. Please try again.');
     } finally {
       setLoading(false);
@@ -68,10 +72,14 @@ export default function AdminLogin() {
 
   return (
     <div className="admin-login" data-testid="admin-login-page">
+      <Helmet>
+        <title>Admin Login | {siteName}</title>
+        <meta name="robots" content="noindex" />
+      </Helmet>
       <div className="login-container">
         <div className="login-header">
           <h1><RiAdminLine className="header-icon" /> Admin Portal</h1>
-          <p>Yugal Savitri Seva</p>
+          <p>{siteName}</p>
         </div>
 
         <form onSubmit={handleLogin} className="login-form" data-testid="admin-login-form">

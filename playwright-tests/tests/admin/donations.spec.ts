@@ -70,11 +70,17 @@ test.describe('Admin donations table', () => {
     const searchRequests = requests.filter((req) => req.searchParams.get('q') === 'Alice');
     expect(searchRequests.length).toBeGreaterThan(0);
 
-    // Sorting controls
-    await page.getByTestId('donations-sort-amount').click();
+    // Sorting controls — wait for each sort request so the assertion is deterministic
+    await Promise.all([
+      page.waitForResponse(response => response.url().includes('/admin/donations') && response.url().includes('sort')),
+      page.getByTestId('donations-sort-amount').click(),
+    ]);
     const sortReq = requests[requests.length - 1];
     expect(sortReq.searchParams.get('sort')).toContain('amount');
-    await page.getByTestId('donations-sort-date').click();
+    await Promise.all([
+      page.waitForResponse(response => response.url().includes('/admin/donations') && response.url().includes('sort')),
+      page.getByTestId('donations-sort-date').click(),
+    ]);
     const dateReq = requests[requests.length - 1];
     expect(dateReq.searchParams.get('sort')).toContain('createdAt');
 

@@ -1,13 +1,28 @@
+import { Helmet } from 'react-helmet-async';
+import { useCMSContent } from '../hooks/useCMSContent';
+import { useSiteName, useConfig } from '../contexts/ConfigContext';
 import './LegalPage.css';
 
 export default function AccessibilityPage() {
+  const { content, hasCMSContent } = useCMSContent('legal_accessibility');
+  const siteName = useSiteName();
+  const { config } = useConfig();
+
   return (
     <div className="legal-page">
-      <h1>Accessibility Statement</h1>
-      <p className="last-updated">Last Updated: December 2024</p>
+      <Helmet>
+        <title>Accessibility Statement | {siteName}</title>
+        <meta name="description" content="Our commitment to digital accessibility for all users." />
+      </Helmet>
+      <h1>{content.title || 'Accessibility Statement'}</h1>
+      <p className="last-updated">Last Updated: {content.lastUpdated || 'December 2024'}</p>
 
-      <section>
-        <h2>Our Commitment</h2>
+      {hasCMSContent && content.body ? (
+        <div dangerouslySetInnerHTML={{ __html: content.body }} />
+      ) : (
+        <>
+          <section>
+          <h2>Our Commitment</h2>
         <p>
           MyFoundation is committed to ensuring digital accessibility for people with disabilities. We are continually improving the user experience for everyone and applying the relevant accessibility standards.
         </p>
@@ -62,8 +77,7 @@ export default function AccessibilityPage() {
           We welcome your feedback on the accessibility of our website. Please let us know if you encounter accessibility barriers:
         </p>
         <ul>
-          <li>Email: <a href="mailto:accessibility@myfoundation.org">accessibility@myfoundation.org</a></li>
-          <li>Phone: 1-800-DONATE-NOW</li>
+          <li>Email: <a href={`mailto:${config['contact.email'] || 'contact@example.org'}`}>{config['contact.email'] || 'contact@example.org'}</a></li>
         </ul>
         <p>
           We try to respond to accessibility feedback within 2 business days.
@@ -89,6 +103,8 @@ export default function AccessibilityPage() {
           MyFoundation assessed the accessibility of this website through self-evaluation and external accessibility audits.
         </p>
       </section>
+        </>
+      )}
     </div>
   );
 }

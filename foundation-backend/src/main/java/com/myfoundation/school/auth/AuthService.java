@@ -18,6 +18,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.myfoundation.school.audit.AuditAction;
+import com.myfoundation.school.audit.AuditLogService;
+import com.myfoundation.school.config.Constants;
 import com.myfoundation.school.security.JwtService;
 
 @Service
@@ -33,6 +36,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final OtpTokenRepository otpTokenRepository;
+    private final AuditLogService auditLogService;
 
     @Value("${app.auth.otp-enabled:false}")
     private boolean otpEnabled;
@@ -52,9 +56,33 @@ public class AuthService {
         if (!user.getActive()) {
             throw new RuntimeException("User account is disabled");
         }
+
+        // Check if account is locked
+        if (user.getLockedUntil() != null && user.getLockedUntil().isAfter(Instant.now())) {
+            long minutesRemaining = ChronoUnit.MINUTES.between(Instant.now(), user.getLockedUntil()) + 1;
+            throw new RuntimeException("Account temporarily locked. Try again in " + minutesRemaining + " minute(s).");
+        }
         
         if (!passwordMatches(user, request.getPassword())) {
+            int attempts = user.getFailedLoginAttempts() + 1;
+            user.setFailedLoginAttempts(attempts);
+            if (attempts >= Constants.Session.MAX_LOGIN_ATTEMPTS) {
+                user.setLockedUntil(Instant.now().plus(Constants.Session.LOCKOUT_DURATION_MINUTES, ChronoUnit.MINUTES));
+                adminUserRepository.save(user);
+                log.warn("Account locked for user {} after {} failed attempts", user.getUsername(), attempts);
+                auditLogService.log(AuditAction.ACCOUNT_LOCKED, "AdminUser", user.getId(), user.getUsername(), "Locked after " + attempts + " failed attempts");
+                throw new RuntimeException("Too many failed login attempts. Account locked for "
+                        + Constants.Session.LOCKOUT_DURATION_MINUTES + " minutes.");
+            }
+            adminUserRepository.save(user);
+            auditLogService.log(AuditAction.LOGIN_FAILED, "AdminUser", null, request.getUsername(), "Invalid password");
             throw new RuntimeException("Invalid username or password");
+        }
+
+        // Reset lockout counters on successful authentication
+        if (user.getFailedLoginAttempts() > 0 || user.getLockedUntil() != null) {
+            user.setFailedLoginAttempts(0);
+            user.setLockedUntil(null);
         }
 
         if (otpEnabled) {
@@ -71,6 +99,7 @@ public class AuthService {
         log.debug("Issued JWT for user {}", user.getUsername());
 
         log.info("User {} logged in successfully", user.getUsername());
+        auditLogService.log(AuditAction.LOGIN_SUCCESS, "AdminUser", user.getId(), user.getUsername(), null);
         return LoginResponse.withToken(user, token);
     }
     
@@ -80,12 +109,9 @@ public class AuthService {
         String normalizedEmail = request.getEmail().toLowerCase().trim();
         request.setEmail(normalizedEmail);
         
-        if (adminUserRepository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException("Username already exists");
-        }
-        
-        if (adminUserRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email already exists");
+        if (adminUserRepository.existsByUsername(request.getUsername()) ||
+            adminUserRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("A user with these details already exists");
         }
         
         // Don't set password yet - user will set it via email link
@@ -107,6 +133,7 @@ public class AuthService {
         emailService.sendPasswordSetupEmail(savedUser.getEmail(), savedUser.getUsername(), token);
         
         log.info("Created new user: {} with role: {} - Password setup email sent", savedUser.getUsername(), savedUser.getRole());
+        auditLogService.log(AuditAction.USER_CREATED, "AdminUser", savedUser.getId(), savedUser.getUsername(), "Role: " + savedUser.getRole());
         return savedUser;
     }
     
@@ -126,6 +153,8 @@ public class AuthService {
     
     @Transactional
     public void completePasswordSetup(String token, String password, List<SecurityAnswerRequest> securityAnswers) {
+        validatePasswordStrength(password);
+
         PasswordSetupToken tokenEntity = tokenRepository
                 .findByTokenAndUsedFalseAndExpiresAtAfter(token, Instant.now())
                 .orElseThrow(() -> new RuntimeException("Invalid or expired token"));
@@ -156,6 +185,7 @@ public class AuthService {
         tokenRepository.save(tokenEntity);
         
         log.info("User {} completed password setup", user.getUsername());
+        auditLogService.log(AuditAction.PASSWORD_SETUP_COMPLETED, "AdminUser", user.getId(), user.getUsername(), null);
     }
     
     public AdminUser validateToken(String token) {
@@ -174,16 +204,13 @@ public class AuthService {
         AdminUser user = adminUserRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         
-        // Check username uniqueness (excluding current user)
-        if (!user.getUsername().equals(request.getUsername()) && 
-            adminUserRepository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException("Username already exists");
-        }
-        
-        // Check email uniqueness (excluding current user)
-        if (!user.getEmail().equals(request.getEmail()) && 
-            adminUserRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email already exists");
+        // Check username/email uniqueness (excluding current user)
+        boolean usernameConflict = !user.getUsername().equals(request.getUsername()) &&
+            adminUserRepository.existsByUsername(request.getUsername());
+        boolean emailConflict = !user.getEmail().equals(request.getEmail()) &&
+            adminUserRepository.existsByEmail(request.getEmail());
+        if (usernameConflict || emailConflict) {
+            throw new RuntimeException("A user with these details already exists");
         }
         
         user.setUsername(request.getUsername());
@@ -194,6 +221,7 @@ public class AuthService {
         
         // Only update password if provided
         if (request.getPassword() != null && !request.getPassword().isEmpty()) {
+            validatePasswordStrength(request.getPassword());
             user.setPassword(passwordEncoder.encode(request.getPassword()));
         }
         
@@ -230,6 +258,14 @@ public class AuthService {
             throw new RuntimeException("Only the default admin can delete other admins.");
         }
 
+        // Prevent deleting the last admin user
+        if (target.getRole() == UserRole.ADMIN) {
+            long adminCount = adminUserRepository.countByRole(UserRole.ADMIN);
+            if (adminCount <= 1) {
+                throw new RuntimeException("Cannot delete the last admin user. At least one admin must remain.");
+            }
+        }
+
         // Clean up dependent records to satisfy FK constraints
         tokenRepository.deleteByUserId(target.getId());
         otpTokenRepository.deleteByUserId(target.getId());
@@ -245,27 +281,27 @@ public class AuthService {
     
     @Transactional
     public void initializeDefaultAdmin() {
-        // Check if admin@hopefoundation.org already exists
-        Optional<AdminUser> existing = adminUserRepository.findByEmail("admin@hopefoundation.org");
-        if (existing.isPresent()) {
-            log.info("Admin user already exists");
+        // Guard: skip if any admin user already exists (not just the default email)
+        long userCount = adminUserRepository.count();
+        if (userCount > 0) {
+            log.info("Admin initialization skipped - {} user(s) already exist", userCount);
             return;
         }
-        
+
         // Create default admin user
         AdminUser admin = AdminUser.builder()
                 .username("admin")
                 .email("admin@hopefoundation.org")
-                .password(passwordEncoder.encode("admin123"))
+                .password(passwordEncoder.encode("Admin123!"))
                 .fullName("System Administrator")
                 .role(UserRole.ADMIN)
                 .active(true)
                 .createdAt(Instant.now())
                 .updatedAt(Instant.now())
                 .build();
-        
+
         adminUserRepository.save(admin);
-        log.info("Created default admin user");
+        log.info("Created default admin user - disable app.allow-admin-bootstrap in production");
     }
 
     @Transactional
@@ -286,8 +322,9 @@ public class AuthService {
             throw new RuntimeException("Too many invalid attempts. Please login again.");
         }
 
-        String providedHash = hashOtp(request.getCode());
-        if (!providedHash.equals(otpToken.getCodeHash())) {
+        // Use BCrypt-aware matching (passwordEncoder.matches handles both BCrypt and
+        // legacy SHA-256 hashes transparently via the DelegatingPasswordEncoder).
+        if (!passwordEncoder.matches(request.getCode(), otpToken.getCodeHash())) {
             otpToken.setAttempts(otpToken.getAttempts() + 1);
             otpTokenRepository.save(otpToken);
 
@@ -315,7 +352,8 @@ public class AuthService {
         otpTokenRepository.deleteByUserId(user.getId());
 
         String code = generateNumericCode(otpLength);
-        String codeHash = hashOtp(code);
+        // Use BCrypt (via PasswordEncoder) for OTP storage — resistant to rainbow tables.
+        String codeHash = passwordEncoder.encode(code);
 
         OtpToken otpToken = OtpToken.builder()
                 .user(user)
@@ -345,10 +383,6 @@ public class AuthService {
         }
     }
 
-    private String hashOtp(String otp) {
-        return hashPassword(otp);
-    }
-    
     /**
      * Validates password strength to ensure minimum security requirements.
      * Requirements:
@@ -357,7 +391,7 @@ public class AuthService {
      * - Contains lowercase letter
      * - Contains digit
      */
-    private void validatePasswordStrength(String password) {
+    public void validatePasswordStrength(String password) {
         if (password == null || password.trim().isEmpty()) {
             throw new IllegalArgumentException("Password cannot be empty");
         }

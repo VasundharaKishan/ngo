@@ -1,9 +1,14 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import AccessibilityPage from './AccessibilityPage';
 import TermsPage from './TermsPage';
 import PrivacyPage from './PrivacyPage';
 import CookiesPage from './CookiesPage';
+
+vi.mock('../contexts/ConfigContext', () => ({
+  useSiteName: () => 'Test Foundation',
+  useConfig: () => ({ config: {}, loading: false, refetch: vi.fn() }),
+}));
 
 describe('Legal/Policy pages', () => {
   it('renders Accessibility statement content', () => {
@@ -17,7 +22,7 @@ describe('Legal/Policy pages', () => {
     render(<TermsPage />);
     expect(screen.getByText('Terms and Conditions')).toBeInTheDocument();
     expect(screen.getByText(/Acceptance of Terms/)).toBeInTheDocument();
-    expect(screen.getByText(/donate@yugalsavitriseva.org/)).toBeInTheDocument();
+    expect(screen.getAllByText(/contact@example\.org/).length).toBeGreaterThan(0);
   });
 
   it('renders Privacy page content', () => {

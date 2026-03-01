@@ -5,6 +5,7 @@ import { authFetch } from '../utils/auth';
 import { useToast } from '../components/ToastProvider';
 import { type JsonConfig } from '../types/common';
 import { RiImageLine, RiLayoutLine } from 'react-icons/ri';
+import logger from '../utils/logger';
 import './AdminHomepage.css';
 
 type TabType = 'hero' | 'sections';
@@ -16,6 +17,8 @@ interface HeroSlide {
   focus: 'CENTER' | 'LEFT' | 'RIGHT' | 'TOP' | 'BOTTOM';
   enabled: boolean;
   sortOrder: number;
+  title?: string;
+  subtitle?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -52,11 +55,13 @@ export default function AdminHomepage() {
   const [slides, setSlides] = useState<HeroSlide[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [newSlide, setNewSlide] = useState({ 
-    imageUrl: '', 
-    altText: '', 
-    focus: 'CENTER' as HeroSlide['focus'], 
-    filename: '' 
+  const [newSlide, setNewSlide] = useState({
+    imageUrl: '',
+    altText: '',
+    focus: 'CENTER' as HeroSlide['focus'],
+    filename: '',
+    title: '',
+    subtitle: '',
   });
 
   // Home Sections State
@@ -86,7 +91,7 @@ export default function AdminHomepage() {
       const data = await response.json();
       setSlides(data);
     } catch (error) {
-      console.error('Error loading slides:', error);
+      logger.error('AdminHomepage', 'Error loading slides:', error);
       showToast('Failed to load hero slides', 'error');
     }
   };
@@ -100,6 +105,18 @@ export default function AdminHomepage() {
   const updateSlideFocus = (id: string, focus: HeroSlide['focus']) => {
     setSlides(slides.map(slide =>
       slide.id === id ? { ...slide, focus } : slide
+    ));
+  };
+
+  const updateSlideTitle = (id: string, title: string) => {
+    setSlides(slides.map(slide =>
+      slide.id === id ? { ...slide, title } : slide
+    ));
+  };
+
+  const updateSlideSubtitle = (id: string, subtitle: string) => {
+    setSlides(slides.map(slide =>
+      slide.id === id ? { ...slide, subtitle } : slide
     ));
   };
 
@@ -137,7 +154,9 @@ export default function AdminHomepage() {
               altText: slide.altText,
               focus: slide.focus,
               enabled: slide.enabled,
-              sortOrder: slide.sortOrder
+              sortOrder: slide.sortOrder,
+              title: slide.title || null,
+              subtitle: slide.subtitle || null,
             })
           }
         );
@@ -147,7 +166,7 @@ export default function AdminHomepage() {
       showToast('Hero slides updated successfully', 'success');
       await loadSlides();
     } catch (error) {
-      console.error('Error saving slides:', error);
+      logger.error('AdminHomepage', 'Error saving slides:', error);
       showToast('Failed to save changes', 'error');
     } finally {
       setSaving(false);
@@ -181,18 +200,20 @@ export default function AdminHomepage() {
           altText: newSlide.altText,
           focus: newSlide.focus,
           enabled: true,
-          sortOrder: nextSortOrder
+          sortOrder: nextSortOrder,
+          title: newSlide.title || null,
+          subtitle: newSlide.subtitle || null,
         })
       });
 
       if (!response.ok) throw new Error('Failed to create slide');
 
       showToast('Slide added successfully', 'success');
-      setNewSlide({ imageUrl: '', altText: '', focus: 'CENTER', filename: '' });
+      setNewSlide({ imageUrl: '', altText: '', focus: 'CENTER', filename: '', title: '', subtitle: '' });
       setShowAddForm(false);
       await loadSlides();
     } catch (error) {
-      console.error('Error adding slide:', error);
+      logger.error('AdminHomepage', 'Error adding slide:', error);
       showToast('Failed to add slide', 'error');
     }
   };
@@ -226,7 +247,7 @@ export default function AdminHomepage() {
       setNewSlide(prev => ({ ...prev, imageUrl: data.url, filename: data.filename || '' }));
       showToast('Image uploaded successfully', 'success');
     } catch (error) {
-      console.error('Error uploading image:', error);
+      logger.error('AdminHomepage', 'Error uploading image:', error);
       const message = error instanceof Error ? error.message : 'Failed to upload image';
       showToast(message, 'error');
     } finally {
@@ -259,7 +280,7 @@ export default function AdminHomepage() {
       setNewSlide(prev => ({ ...prev, imageUrl: '', filename: '' }));
       showToast('Image deleted successfully', 'success');
     } catch (error) {
-      console.error('Error deleting image:', error);
+      logger.error('AdminHomepage', 'Error deleting image:', error);
       showToast('Failed to delete image', 'error');
     }
   };
@@ -277,7 +298,7 @@ export default function AdminHomepage() {
       showToast('Slide deleted successfully', 'success');
       await loadSlides();
     } catch (error) {
-      console.error('Error deleting slide:', error);
+      logger.error('AdminHomepage', 'Error deleting slide:', error);
       showToast('Failed to delete slide', 'error');
     }
   };
@@ -296,7 +317,7 @@ export default function AdminHomepage() {
       });
       setEditingConfig(configState);
     } catch (error) {
-      console.error('Error loading sections:', error);
+      logger.error('AdminHomepage', 'Error loading sections:', error);
       showToast('Failed to load home sections', 'error');
     }
   };
@@ -364,7 +385,7 @@ export default function AdminHomepage() {
       showToast('Home sections updated successfully', 'success');
       await loadSections();
     } catch (error) {
-      console.error('Error saving sections:', error);
+      logger.error('AdminHomepage', 'Error saving sections:', error);
       showToast(error instanceof Error ? error.message : 'Failed to save changes', 'error');
     } finally {
       setSaving(false);
@@ -492,6 +513,30 @@ export default function AdminHomepage() {
                   </select>
                 </div>
 
+                <div className="form-group">
+                  <label htmlFor="slide-title">Slide Title (optional — shown as text overlay)</label>
+                  <input
+                    id="slide-title"
+                    type="text"
+                    value={newSlide.title}
+                    onChange={(e) => setNewSlide(prev => ({ ...prev, title: e.target.value }))}
+                    placeholder="e.g. Supporting Rural Education"
+                    maxLength={255}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="slide-subtitle">Slide Subtitle (optional)</label>
+                  <input
+                    id="slide-subtitle"
+                    type="text"
+                    value={newSlide.subtitle}
+                    onChange={(e) => setNewSlide(prev => ({ ...prev, subtitle: e.target.value }))}
+                    placeholder="e.g. Help us reach 1,000 students this year"
+                    maxLength={500}
+                  />
+                </div>
+
                 <button
                   className="btn-primary"
                   onClick={addNewSlide}
@@ -543,6 +588,23 @@ export default function AdminHomepage() {
                             <option key={option} value={option}>{option}</option>
                           ))}
                         </select>
+
+                        <div className="slide-text-fields">
+                          <input
+                            type="text"
+                            value={slide.title || ''}
+                            onChange={(e) => updateSlideTitle(slide.id, e.target.value)}
+                            placeholder="Slide title (shown as overlay)"
+                            maxLength={255}
+                          />
+                          <input
+                            type="text"
+                            value={slide.subtitle || ''}
+                            onChange={(e) => updateSlideSubtitle(slide.id, e.target.value)}
+                            placeholder="Subtitle (optional)"
+                            maxLength={500}
+                          />
+                        </div>
                       </div>
 
                       <div className="slide-actions">

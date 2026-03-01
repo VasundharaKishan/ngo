@@ -22,19 +22,11 @@ test('donation form shows validation errors and handles submission state', async
     })
   );
 
-  await page.route('**/api/campaigns', route =>
-    route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify([mockCampaign]),
-    })
-  );
-
   await page.route('**/api/campaigns?*', route =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify([mockCampaign]),
+      body: JSON.stringify({ items: [mockCampaign], page: 0, size: 100, totalItems: 1, totalPages: 1 }),
     })
   );
 

@@ -35,7 +35,14 @@ public class JwtService {
 
     @PostConstruct
     void init() {
-        this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        byte[] secretBytes = secret.getBytes(StandardCharsets.UTF_8);
+        // HMAC-SHA-256 requires at least 32 bytes (256 bits). Fail fast at startup.
+        if (secretBytes.length < 32) {
+            throw new IllegalStateException(
+                "JWT secret is too short: " + secretBytes.length + " bytes. " +
+                "Set app.jwt.secret to a random string of at least 32 characters.");
+        }
+        this.key = Keys.hmacShaKeyFor(secretBytes);
     }
 
     public String generateToken(AdminUser user) {

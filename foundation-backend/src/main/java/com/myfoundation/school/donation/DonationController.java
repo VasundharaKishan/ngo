@@ -2,6 +2,7 @@ package com.myfoundation.school.donation;
 
 import com.myfoundation.school.dto.CheckoutSessionResponse;
 import com.myfoundation.school.dto.DonationRequest;
+import com.myfoundation.school.dto.DonationResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -46,10 +47,34 @@ public class DonationController {
     @PostMapping("/create")
     public ResponseEntity<CheckoutSessionResponse> createCheckoutSession(
             @Valid @RequestBody DonationRequest request) {
-        log.info("POST /api/donations/stripe/create - Creating checkout session for campaign: {}", 
+        log.info("POST /api/donations/stripe/create - Creating checkout session for campaign: {}",
                 request.getCampaignId());
-        
+
         CheckoutSessionResponse response = donationService.createStripeCheckoutSession(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(
+        summary = "Verify donation by Stripe session ID",
+        description = "Verifies a donation after Stripe checkout and returns donation details. " +
+                      "Used by the success page to confirm the donation was processed."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Donation found and verified",
+            content = @Content(schema = @Schema(implementation = DonationResponse.class))
+        ),
+        @ApiResponse(
+            responseCode = "404",
+            description = "No donation found for the given session ID"
+        )
+    })
+    @GetMapping("/verify")
+    public ResponseEntity<DonationResponse> verifyDonation(@RequestParam String sessionId) {
+        log.info("GET /api/donations/stripe/verify - Verifying donation for session: {}", sessionId);
+
+        DonationResponse response = donationService.verifyDonationBySessionId(sessionId);
         return ResponseEntity.ok(response);
     }
 }

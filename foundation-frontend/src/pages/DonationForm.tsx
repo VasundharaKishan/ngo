@@ -1,52 +1,60 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useState, useRef, type FormEvent } from 'react';
 import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { Helmet } from 'react-helmet-async';
 import { api, type Campaign } from '../api';
+import { useSiteName } from '../contexts/ConfigContext';
 import { getCurrencySymbol, amountToCents, centsToAmount } from '../utils/currency';
 import { isValidEmail, isEmpty } from '../utils/validators';
 import { DONATION } from '../config/constants';
 import './DonationForm.css';
 
 type DonationStep = 'amount' | 'personal' | 'payment';
+type DonationFrequency = 'one_time' | 'monthly';
 
 export default function DonationForm() {
+  const { t } = useTranslation();
   const { campaignId } = useParams<{ campaignId: string }>();
-  
+  const siteName = useSiteName();
+
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [currentStep, setCurrentStep] = useState<DonationStep>('amount');
+  const [frequency, setFrequency] = useState<DonationFrequency>('one_time');
   const [amount, setAmount] = useState<number>(DONATION.DEFAULT_AMOUNT);
   const [currency, setCurrency] = useState<string>('eur');
   const [customAmount, setCustomAmount] = useState('');
   const [donorName, setDonorName] = useState('');
   const [donorEmail, setDonorEmail] = useState('');
-  const [donorPhone, setDonorPhone] = useState('');
   const [anonymous, setAnonymous] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [campaignLoadError, setCampaignLoadError] = useState('');
   const [redirectingUrl, setRedirectingUrl] = useState<string>('');
+  const submittingRef = useRef(false);
 
   useEffect(() => {
     if (campaignId) {
       api.getCampaign(campaignId)
         .then(setCampaign)
-        .catch(() => setError('Failed to load campaign'));
+        .catch(() => setCampaignLoadError(t('donation.loadError')));
     }
   }, [campaignId]);
 
   const handleNextStep = () => {
     if (currentStep === 'amount') {
       if (amount <= 0) {
-        setError('Please select or enter a valid amount');
+        setError(t('donation.invalidAmount'));
         return;
       }
       setError('');
       setCurrentStep('personal');
     } else if (currentStep === 'personal') {
       if (!anonymous && (isEmpty(donorName) || isEmpty(donorEmail))) {
-        setError('Please provide your name and email, or choose to donate anonymously');
+        setError(t('donation.nameEmailRequired'));
         return;
       }
       if (!anonymous && donorEmail && !isValidEmail(donorEmail)) {
-        setError('Please enter a valid email address');
+        setError(t('donation.invalidEmail'));
         return;
       }
       setError('');
@@ -65,17 +73,21 @@ export default function DonationForm() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    
+
     if (!campaignId) return;
+
+    // Prevent double-submit
+    if (submittingRef.current) return;
+    submittingRef.current = true;
 
     setLoading(true);
     setError('');
-    
+
     try {
       const response = await api.createStripeSession({
         amount,
         currency: currency,
-        donorName: anonymous ? 'Anonymous' : donorName,
+        donorName: anonymous ? t('donation.anonymous') : donorName,
         donorEmail: anonymous ? undefined : donorEmail,
         campaignId,
       });
@@ -87,28 +99,43 @@ export default function DonationForm() {
       setRedirectingUrl(redirectUrl);
       redirectToCheckout(redirectUrl);
     } catch (err) {
-      setError('Failed to create checkout session. Please try again.');
+      setError(t('donation.checkoutError'));
       setLoading(false);
+      submittingRef.current = false;
     }
   };
 
   const handleCustomAmountChange = (value: string) => {
     setCustomAmount(value);
     const cents = amountToCents(value);
-    if (cents > 0) {
-      setAmount(cents);
-    }
+    setAmount(cents > 0 ? cents : 0);
   };
 
+  if (campaignLoadError) {
+    return (
+      <div className="container">
+        <div className="donation-form-container">
+          <div className="form-header">
+            <h1>{t('donation.campaignNotFound')}</h1>
+          </div>
+          <div style={{ padding: '2rem', textAlign: 'center' }}>
+            <p className="error">{campaignLoadError}</p>
+            <a href="/campaigns" style={{ marginTop: '1rem', display: 'inline-block' }}>{t('donation.browseCampaigns')}</a>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!campaign) {
-    return <div className="container"><p className="loading">Loading...</p></div>;
+    return <div className="container"><p className="loading">{t('common.loading')}</p></div>;
   }
 
   // Safety check for campaign data
   if (!campaign.id || !campaign.title) {
     return (
       <div className="container">
-        <p className="error">Invalid campaign data. Please try again.</p>
+        <p className="error">{t('donation.invalidCampaign')}</p>
       </div>
     );
   }
@@ -119,11 +146,11 @@ export default function DonationForm() {
       <div className="container">
         <div className="donation-form-container">
           <div className="form-header">
-            <h1>Campaign Not Available</h1>
+            <h1>{t('donation.campaignNotAvailable')}</h1>
           </div>
           <div className="inactive-notice" style={{ padding: '2rem', textAlign: 'center' }}>
-            <p className="inactive-message">⚠️ This campaign is not currently accepting donations</p>
-            <a href="/campaigns" style={{ marginTop: '1rem', display: 'inline-block' }}>← Back to campaigns</a>
+            <p className="inactive-message">{t('campaign.notAcceptingNotice')}</p>
+            <a href="/campaigns" style={{ marginTop: '1rem', display: 'inline-block' }}>{t('donation.backToCampaigns')}</a>
           </div>
         </div>
       </div>
@@ -132,9 +159,15 @@ export default function DonationForm() {
 
   return (
     <div className="container">
+      <Helmet>
+        <title>Donate to {campaign.title} | {siteName}</title>
+        <meta name="description" content={`Make a secure donation to support ${campaign.title}. Every contribution makes a difference.`} />
+        <meta property="og:title" content={`Support ${campaign.title}`} />
+        <meta name="robots" content="noindex" />
+      </Helmet>
       <div className="donation-form-container">
         <div className="form-header">
-          <h1>Make a Donation</h1>
+          <h1>{t('donation.makeADonation')}</h1>
           <p className="campaign-name">
             {campaign.categoryIcon && <span className="category-icon">{campaign.categoryIcon}</span>}
             <strong>{campaign.title || 'Untitled Campaign'}</strong>
@@ -145,22 +178,23 @@ export default function DonationForm() {
         <div className="steps-indicator">
           <div className={`step ${currentStep === 'amount' ? 'active' : ''} ${currentStep !== 'amount' ? 'completed' : ''}`}>
             <div className="step-number">1</div>
-            <div className="step-label">Amount</div>
+            <div className="step-label">{t('donation.stepAmount')}</div>
           </div>
           <div className="step-line"></div>
           <div className={`step ${currentStep === 'personal' ? 'active' : ''} ${currentStep === 'payment' ? 'completed' : ''}`}>
             <div className="step-number">2</div>
-            <div className="step-label">Your Info</div>
+            <div className="step-label">{t('donation.stepInfo')}</div>
           </div>
           <div className="step-line"></div>
           <div className={`step ${currentStep === 'payment' ? 'active' : ''}`}>
             <div className="step-number">3</div>
-            <div className="step-label">Payment</div>
+            <div className="step-label">{t('donation.stepPayment')}</div>
           </div>
         </div>
 
         {error && (
-          <div className="error-message" data-testid="donation-error">
+          <div className="error-message" data-testid="donation-error"
+               role="alert" aria-live="assertive">
             {error}
           </div>
         )}
@@ -169,10 +203,35 @@ export default function DonationForm() {
           {/* Step 1: Amount Selection */}
           {currentStep === 'amount' && (
             <div className="form-step">
-              <h2 className="step-title">Choose Your Donation Amount</h2>
-              
+              <h2 className="step-title">{t('donation.chooseAmount')}</h2>
+
+              {/* Frequency Toggle */}
+              <div className="frequency-toggle" role="group" aria-label="Donation frequency">
+                <button
+                  type="button"
+                  className={`frequency-btn ${frequency === 'one_time' ? 'active' : ''}`}
+                  onClick={() => setFrequency('one_time')}
+                  data-testid="freq-one-time"
+                >
+                  {t('donation.oneTime')}
+                </button>
+                <button
+                  type="button"
+                  className={`frequency-btn ${frequency === 'monthly' ? 'active monthly' : ''}`}
+                  onClick={() => setFrequency('monthly')}
+                  data-testid="freq-monthly"
+                >
+                  {t('donation.monthly')} ♻️
+                </button>
+              </div>
+              {frequency === 'monthly' && (
+                <p className="frequency-note" data-testid="monthly-note">
+                  💚 {t('donation.monthlyImpact')}
+                </p>
+              )}
+
               <div className="form-section">
-                <label className="form-label">Select Currency</label>
+                <label className="form-label">{t('donation.selectCurrency')}</label>
                 <select 
                   className="currency-select"
                   value={currency}
@@ -185,7 +244,7 @@ export default function DonationForm() {
               </div>
 
               <div className="form-section">
-                <label className="form-label">Select Amount ({currency.toUpperCase()})</label>
+                <label className="form-label">{t('donation.selectAmount', { currency: currency.toUpperCase() })}</label>
                 <div className="amount-buttons">
                   {DONATION.PRESET_AMOUNTS.map(preset => (
                     <button
@@ -203,13 +262,13 @@ export default function DonationForm() {
                 </div>
 
                 <div className="custom-amount">
-                  <label className="form-label">Or Enter Custom Amount</label>
+                  <label className="form-label">{t('donation.orEnterCustom')}</label>
                   <div className="input-with-prefix">
                     <span className="prefix">{getCurrencySymbol(currency)}</span>
                     <input
                       type="number"
                       className="form-input"
-                      placeholder="Enter amount"
+                      placeholder={t('donation.customPlaceholder')}
                       value={customAmount}
                       onChange={(e) => handleCustomAmountChange(e.target.value)}
                       min="1"
@@ -220,7 +279,7 @@ export default function DonationForm() {
                 </div>
 
                 <div className="amount-display">
-                  Your donation: <strong>{getCurrencySymbol(currency)}{centsToAmount(amount).toFixed(2)}</strong> {currency.toUpperCase()}
+                  {t('donation.yourDonation')} <strong>{getCurrencySymbol(currency)}{centsToAmount(amount).toFixed(2)}</strong> {currency.toUpperCase()}
                 </div>
               </div>
 
@@ -230,7 +289,7 @@ export default function DonationForm() {
                 onClick={handleNextStep}
                 data-testid="donation-next-amount"
               >
-                Continue to Your Information →
+                {t('donation.continueToInfo')}
               </button>
             </div>
           )}
@@ -238,7 +297,7 @@ export default function DonationForm() {
           {/* Step 2: Personal Information */}
           {currentStep === 'personal' && (
             <div className="form-step">
-              <h2 className="step-title">Your Information</h2>
+              <h2 className="step-title">{t('donation.yourInformation')}</h2>
 
               <div className="anonymous-option">
                 <label className="checkbox-label">
@@ -247,18 +306,18 @@ export default function DonationForm() {
                     checked={anonymous}
                     onChange={(e) => setAnonymous(e.target.checked)}
                   />
-                  <span>I want to donate anonymously</span>
+                  <span>{t('donation.donateAnonymously')}</span>
                 </label>
               </div>
 
               {!anonymous && (
                 <>
                   <div className="form-section">
-                    <label className="form-label">Full Name *</label>
+                    <label className="form-label">{t('donation.donorName')} *</label>
                     <input
                       type="text"
                       className="form-input"
-                      placeholder="John Doe"
+                      placeholder={t('donation.namePlaceholder')}
                       value={donorName}
                       onChange={(e) => setDonorName(e.target.value)}
                       required={!anonymous}
@@ -267,35 +326,25 @@ export default function DonationForm() {
                   </div>
 
                   <div className="form-section">
-                    <label className="form-label">Email Address *</label>
+                    <label className="form-label">{t('donation.donorEmail')} *</label>
                     <input
                       type="email"
                       className="form-input"
-                      placeholder="john@example.com"
+                      placeholder={t('donation.emailPlaceholder')}
                       value={donorEmail}
                       onChange={(e) => setDonorEmail(e.target.value)}
                       required={!anonymous}
                       data-testid="donation-email"
                     />
-                    <p className="form-hint">We'll send your donation receipt to this email</p>
+                    <p className="form-hint">{t('donation.receiptHint')}</p>
                   </div>
 
-                  <div className="form-section">
-                    <label className="form-label">Phone Number (Optional)</label>
-                    <input
-                      type="tel"
-                      className="form-input"
-                      placeholder="+1 (555) 000-0000"
-                      value={donorPhone}
-                      onChange={(e) => setDonorPhone(e.target.value)}
-                    />
-                  </div>
                 </>
               )}
 
               <div className="form-actions">
                 <button type="button" className="btn-secondary" onClick={handlePreviousStep}>
-                  ← Back
+                  {t('donation.back')}
                 </button>
                 <button
                   type="button"
@@ -303,7 +352,7 @@ export default function DonationForm() {
                   onClick={handleNextStep}
                   data-testid="donation-next-personal"
                 >
-                  Continue to Payment →
+                  {t('donation.continueToPayment')}
                 </button>
               </div>
             </div>
@@ -312,66 +361,71 @@ export default function DonationForm() {
           {/* Step 3: Payment Summary */}
           {currentStep === 'payment' && (
             <div className="form-step">
-              <h2 className="step-title">Review & Complete Payment</h2>
+              <h2 className="step-title">{t('donation.reviewPayment')}</h2>
 
               <div className="donation-summary">
-                <h3>Donation Summary</h3>
+                <h3>{t('donation.donationSummary')}</h3>
                 <div className="summary-row">
-                  <span>Campaign:</span>
+                  <span>{t('donation.campaign')}:</span>
                   <strong>{campaign.title}</strong>
                 </div>
                 <div className="summary-row">
-                  <span>Amount:</span>
+                  <span>{t('donation.frequency')}:</span>
+                  <strong>{frequency === 'monthly' ? `${t('donation.monthly')} ♻️` : t('donation.oneTime')}</strong>
+                </div>
+                <div className="summary-row">
+                  <span>{t('donation.amount')}:</span>
                   <strong>{getCurrencySymbol(currency)}{centsToAmount(amount).toFixed(2)} {currency.toUpperCase()}</strong>
                 </div>
                 {!anonymous && donorName && (
                   <div className="summary-row">
-                    <span>Donor:</span>
+                    <span>{t('donation.donorLabel')}</span>
                     <strong>{donorName}</strong>
                   </div>
                 )}
                 {anonymous && (
                   <div className="summary-row">
-                    <span>Donor:</span>
-                    <strong>Anonymous</strong>
+                    <span>{t('donation.donorLabel')}</span>
+                    <strong>{t('donation.anonymous')}</strong>
                   </div>
                 )}
               </div>
 
               <div className="payment-info">
                 <p>
-                  🔒 You will be redirected to Stripe's secure payment page to complete your donation.
-                  Your payment information is processed securely and never stored on our servers.
+                  🔒 {t('donation.paymentInfo')}
                 </p>
               </div>
 
               <div className="form-actions">
                 <button type="button" className="btn-secondary" onClick={handlePreviousStep}>
-                  ← Back
+                  {t('donation.back')}
                 </button>
                 <button
                   type="submit"
                   className="submit-btn"
                   disabled={loading}
+                  aria-busy={loading}
                   data-testid="donation-submit"
                 >
                   {loading ? (
-                    <span data-testid="donation-loading">Processing...</span>
+                    <span data-testid="donation-loading">{t('donation.processing')}</span>
                   ) : (
-                    'Proceed to Secure Payment →'
+                    t('donation.proceedToPayment')
                   )}
                 </button>
               </div>
 
               <p className="security-note">
-                🛡️ Secure payment powered by Stripe
+                {t('donation.secureStripe')}
               </p>
             </div>
           )}
         </form>
         {redirectingUrl && (
-          <p className="redirecting-message" data-testid="donation-redirecting">
-            Redirecting you to secure checkout...
+          <p className="redirecting-message" data-testid="donation-redirecting"
+             aria-live="polite">
+            {t('donation.redirecting')}
           </p>
         )}
       </div>

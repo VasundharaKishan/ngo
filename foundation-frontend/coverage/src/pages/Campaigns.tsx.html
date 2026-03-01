@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">96.84% </span>
+                <span class="strong">97.27% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>92/95</span>
+                <span class='fraction'>107/110</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">96.84% </span>
+                <span class="strong">97.27% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>92/95</span>
+                <span class='fraction'>107/110</span>
             </div>
         
             
@@ -192,7 +192,26 @@
 <a name='L127'></a><a href='#L127'>127</a>
 <a name='L128'></a><a href='#L128'>128</a>
 <a name='L129'></a><a href='#L129'>129</a>
-<a name='L130'></a><a href='#L130'>130</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L130'></a><a href='#L130'>130</a>
+<a name='L131'></a><a href='#L131'>131</a>
+<a name='L132'></a><a href='#L132'>132</a>
+<a name='L133'></a><a href='#L133'>133</a>
+<a name='L134'></a><a href='#L134'>134</a>
+<a name='L135'></a><a href='#L135'>135</a>
+<a name='L136'></a><a href='#L136'>136</a>
+<a name='L137'></a><a href='#L137'>137</a>
+<a name='L138'></a><a href='#L138'>138</a>
+<a name='L139'></a><a href='#L139'>139</a>
+<a name='L140'></a><a href='#L140'>140</a>
+<a name='L141'></a><a href='#L141'>141</a>
+<a name='L142'></a><a href='#L142'>142</a>
+<a name='L143'></a><a href='#L143'>143</a>
+<a name='L144'></a><a href='#L144'>144</a>
+<a name='L145'></a><a href='#L145'>145</a>
+<a name='L146'></a><a href='#L146'>146</a>
+<a name='L147'></a><a href='#L147'>147</a>
+<a name='L148'></a><a href='#L148'>148</a>
+<a name='L149'></a><a href='#L149'>149</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -212,6 +231,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-yes">5x</span>
@@ -252,6 +274,10 @@
 <span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-yes">5x</span>
@@ -308,6 +334,18 @@
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
@@ -322,11 +360,13 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { RiMegaphoneLine } from 'react-icons/ri';
 import { API_BASE_URL } from '../api';
 import { Link } from 'react-router-dom';
 import { authFetch } from '../utils/auth';
 import { formatCurrency, calculateProgress } from '../utils/currency';
+import { useSiteName } from '../contexts/ConfigContext';
 &nbsp;
 interface Campaign {
   id: string;
@@ -342,6 +382,7 @@ interface Campaign {
 }
 &nbsp;
 export default function Campaigns() {
+  const siteName = useSiteName();
   const [campaigns, setCampaigns] = useState&lt;Campaign[]&gt;([]);
   const [loading, setLoading] = useState(true);
 &nbsp;
@@ -377,13 +418,17 @@ export default function Campaigns() {
 &nbsp;
   return (
     &lt;&gt;
-      &lt;div className="content-header"&gt;
+      &lt;Helmet&gt;
+        &lt;title&gt;Campaigns | Admin | {siteName}&lt;/title&gt;
+        &lt;meta name="robots" content="noindex" /&gt;
+      &lt;/Helmet&gt;
+      &lt;div className="content-header" data-testid="campaigns-header"&gt;
         &lt;h2&gt;&lt;RiMegaphoneLine style={{verticalAlign: 'middle', marginRight: '0.5rem'}} /&gt; Campaigns&lt;/h2&gt;
         &lt;p&gt;Manage donation campaigns&lt;/p&gt;
       &lt;/div&gt;
 &nbsp;
-      &lt;div className="content-body"&gt;
-        &lt;Link to="/admin/campaigns/new" className="btn-add-new"&gt;
+      &lt;div className="content-body" data-testid="campaigns-list"&gt;
+        &lt;Link to="/admin/campaigns/new" className="btn-add-new" data-testid="campaigns-add-new"&gt;
           + Add New Campaign
         &lt;/Link&gt;
         
@@ -394,7 +439,7 @@ export default function Campaigns() {
             &lt;p&gt;No campaigns found. Create your first campaign!&lt;/p&gt;
           &lt;/div&gt;
         ) : (
-          &lt;table className="data-table"&gt;
+          &lt;table className="data-table" data-testid="campaigns-table"&gt;
             &lt;thead&gt;
               &lt;tr&gt;
                 &lt;th&gt;Title&lt;/th&gt;
@@ -413,7 +458,7 @@ export default function Campaigns() {
                 const progress = calculateProgress(currentCents, targetCents);
                 
                 return (
-                  &lt;tr key={campaign.id}&gt;
+                  &lt;tr key={campaign.id} data-testid={`campaign-row-${campaign.id}`}&gt;
                     &lt;td&gt;&lt;strong&gt;{campaign.title}&lt;/strong&gt;&lt;/td&gt;
                     &lt;td&gt;
                       {campaign.category ? (
@@ -436,8 +481,20 @@ export default function Campaigns() {
                     &lt;/td&gt;
                     &lt;td&gt;
                       &lt;div className="table-actions"&gt;
-                        &lt;Link to={`/admin/campaigns/${campaign.id}`} className="btn-edit"&gt;Edit&lt;/Link&gt;
-                        &lt;button onClick={() =&gt; deleteCampaign(campaign.id)} className="btn-delete"&gt;Delete&lt;/button&gt;
+                        &lt;Link
+                          to={`/admin/campaigns/${campaign.id}`}
+                          className="btn-edit"
+                          data-testid={`campaign-edit-${campaign.id}`}
+                        &gt;
+                          Edit
+                        &lt;/Link&gt;
+                        &lt;button
+                          onClick={() =&gt; deleteCampaign(campaign.id)}
+                          className="btn-delete"
+                          data-testid={`campaign-delete-${campaign.id}`}
+                        &gt;
+                          Delete
+                        &lt;/button&gt;
                       &lt;/div&gt;
                     &lt;/td&gt;
                   &lt;/tr&gt;
@@ -457,7 +514,7 @@ export default function Campaigns() {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-01-17T09:22:25.160Z
+                at 2026-02-22T15:37:03.463Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

@@ -18,14 +18,6 @@ test('public donation initiates stripe redirect via mocked checkout url', async 
     window.__SKIP_REDIRECT_TO_CHECKOUT = true;
   });
 
-  await page.route('**/api/campaigns', route =>
-    route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify([mockCampaign]),
-    })
-  );
-
   await page.route(`**/api/campaigns/${mockCampaign.id}`, route =>
     route.fulfill({
       status: 200,
@@ -38,7 +30,7 @@ test('public donation initiates stripe redirect via mocked checkout url', async 
     route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify([mockCampaign]),
+      body: JSON.stringify({ items: [mockCampaign], page: 0, size: 100, totalItems: 1, totalPages: 1 }),
     })
   );
 
@@ -46,7 +38,7 @@ test('public donation initiates stripe redirect via mocked checkout url', async 
     route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify({ checkoutUrl: stripeMockUrl }),
+      body: JSON.stringify({ url: stripeMockUrl }),
     })
   );
 

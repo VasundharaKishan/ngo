@@ -16,14 +16,17 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Rate limiting filter to prevent abuse and brute force attacks.
- * 
- * Uses token bucket algorithm to limit requests per IP address:
- * - General API: 100 requests per minute
- * - Login endpoint: 5 requests per minute (prevents brute force)
- * - Admin endpoints: 60 requests per minute
- * 
- * When rate limit is exceeded, returns 429 Too Many Requests with Retry-After header.
- * 
+ *
+ * Uses token bucket algorithm to limit requests per IP address.
+ * Window duration and per-group caps are fully configurable via application properties:
+ * - app.rate-limit.window-seconds     – window length in seconds (default: 1)
+ * - app.rate-limit.general            – max requests per window for public endpoints (default: 100)
+ * - app.rate-limit.admin              – max requests per window for admin endpoints  (default: 100)
+ * - app.rate-limit.login              – max requests per window for auth endpoints   (default: 5)
+ * - app.rate-limit.auth-login-window-seconds – override window for login (default: 60, for brute-force protection)
+ *
+ * When the rate limit is exceeded, returns 429 Too Many Requests with a Retry-After header.
+ *
  * @see <a href="https://owasp.org/www-community/controls/Blocking_Brute_Force_Attacks">OWASP Brute Force Prevention</a>
  */
 @Slf4j
@@ -31,21 +34,29 @@ import java.util.concurrent.TimeUnit;
 @Order(2)
 public class RateLimitingFilter implements Filter {
 
-    // Storage for rate limit buckets (IP -> Bucket)
+    // Storage for rate limit buckets (IP:endpointGroup -> Bucket)
     private final Map<String, TokenBucket> buckets = new ConcurrentHashMap<>();
-    
+
     // Cleanup old buckets periodically to prevent memory leak
     private static final long CLEANUP_INTERVAL_MS = TimeUnit.MINUTES.toMillis(10);
     private long lastCleanup = System.currentTimeMillis();
-    
-    // Rate limits by endpoint pattern (configurable via properties)
+
+    /** General window duration in seconds (applies to admin + general groups). */
+    @Value("${app.rate-limit.window-seconds:1}")
+    private int windowSeconds;
+
+    /** Separate window for login/OTP (longer = stronger brute-force protection). */
+    @Value("${app.rate-limit.auth-login-window-seconds:60}")
+    private int authLoginWindowSeconds;
+
+    // Per-group caps — requests allowed within their respective window
     @Value("${app.rate-limit.login:5}")
     private int loginLimit;
-    
-    @Value("${app.rate-limit.admin:500}")
+
+    @Value("${app.rate-limit.admin:100}")
     private int adminLimit;
-    
-    @Value("${app.rate-limit.general:500}")
+
+    @Value("${app.rate-limit.general:100}")
     private int generalLimit;
     
     @Override
@@ -59,15 +70,16 @@ public class RateLimitingFilter implements Filter {
         String clientIp = getClientIP(httpRequest);
         String requestURI = httpRequest.getRequestURI();
         
-        // Determine rate limit based on endpoint
+        // Determine rate limit and window based on endpoint
         int limit = determineRateLimit(requestURI);
-        
+        long windowMs = determineWindowMs(requestURI);
+
         // Create bucket key (IP + endpoint pattern for better isolation)
         String bucketKey = clientIp + ":" + getEndpointPattern(requestURI);
-        
-        // Get or create token bucket for this client
-        TokenBucket bucket = buckets.computeIfAbsent(bucketKey, k -> new TokenBucket(limit));
-        
+
+        // Get or create token bucket for this client+group
+        TokenBucket bucket = buckets.computeIfAbsent(bucketKey, k -> new TokenBucket(limit, windowMs));
+
         // Try to consume a token
         if (bucket.tryConsume()) {
             // Request allowed, proceed
@@ -75,9 +87,9 @@ public class RateLimitingFilter implements Filter {
         } else {
             // Rate limit exceeded
             long retryAfterSeconds = bucket.getTimeUntilRefill();
-            
-            log.warn("Rate limit exceeded for IP: {} on endpoint: {} (limit: {}/min)", 
-                clientIp, requestURI, limit);
+
+            log.warn("Rate limit exceeded for IP: {} on endpoint: {} (limit: {}/{}s)",
+                clientIp, requestURI, limit, windowMs / 1000);
             
             httpResponse.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
             httpResponse.setHeader("Retry-After", String.valueOf(retryAfterSeconds));
@@ -116,16 +128,27 @@ public class RateLimitingFilter implements Filter {
     }
     
     /**
-     * Determine rate limit based on endpoint pattern
+     * Determine the request cap for the given URI.
      */
     private int determineRateLimit(String uri) {
         if (uri.startsWith("/api/auth/login") || uri.startsWith("/api/auth/otp")) {
-            return loginLimit;  // Strict limit for auth endpoints
+            return loginLimit;   // Strict: brute-force protection
         } else if (uri.startsWith("/api/admin")) {
-            return adminLimit;  // Moderate limit for admin endpoints
+            return adminLimit;   // Admin group
         } else {
-            return generalLimit;  // Generous limit for public endpoints
+            return generalLimit; // Public endpoints
         }
+    }
+
+    /**
+     * Determine the window duration in milliseconds for the given URI.
+     * Auth/OTP endpoints use a longer window for stronger brute-force protection.
+     */
+    private long determineWindowMs(String uri) {
+        if (uri.startsWith("/api/auth/login") || uri.startsWith("/api/auth/otp")) {
+            return TimeUnit.SECONDS.toMillis(authLoginWindowSeconds);
+        }
+        return TimeUnit.SECONDS.toMillis(windowSeconds);
     }
     
     /**
@@ -163,8 +186,8 @@ public class RateLimitingFilter implements Filter {
     
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-        log.info("Rate limiting filter initialized - Login: {}/min, Admin: {}/min, General: {}/min",
-            loginLimit, adminLimit, generalLimit);
+        log.info("Rate limiting filter initialized - Login: {}/{}s, Admin: {}/{}s, General: {}/{}s",
+            loginLimit, authLoginWindowSeconds, adminLimit, windowSeconds, generalLimit, windowSeconds);
     }
     
     @Override
@@ -173,13 +196,13 @@ public class RateLimitingFilter implements Filter {
     }
     
     /**
-     * Token bucket implementation for rate limiting
-     * 
+     * Token bucket implementation for rate limiting.
+     *
      * Algorithm:
-     * - Bucket has a maximum capacity (rate limit)
-     * - Tokens are added at a constant rate (1 per second)
-     * - Each request consumes 1 token
-     * - If no tokens available, request is rejected
+     * - Bucket starts full (capacity = tokensPerWindow)
+     * - One token is added every (windowMs / tokensPerWindow) milliseconds
+     * - Each request consumes 1 token; rejected when empty
+     * - Window duration is configurable (default: 1 second → 100 tokens/s)
      */
     private static class TokenBucket {
         private final int capacity;
@@ -187,11 +210,16 @@ public class RateLimitingFilter implements Filter {
         private int tokens;
         private long lastRefillTime;
         private long lastAccessTime;
-        
-        public TokenBucket(int tokensPerMinute) {
-            this.capacity = tokensPerMinute;
-            this.tokens = tokensPerMinute;
-            this.refillIntervalMs = TimeUnit.MINUTES.toMillis(1) / tokensPerMinute;
+
+        /**
+         * @param tokensPerWindow maximum requests allowed within windowMs
+         * @param windowMs        window duration in milliseconds
+         */
+        public TokenBucket(int tokensPerWindow, long windowMs) {
+            this.capacity = tokensPerWindow;
+            this.tokens = tokensPerWindow;
+            // How many ms between each token refill
+            this.refillIntervalMs = Math.max(1, windowMs / tokensPerWindow);
             this.lastRefillTime = System.currentTimeMillis();
             this.lastAccessTime = System.currentTimeMillis();
         }

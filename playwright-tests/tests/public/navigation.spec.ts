@@ -101,11 +101,27 @@ test.describe('Public navigation and campaigns', () => {
       const campaignsIndex = parts.findIndex(segment => segment === 'campaigns');
 
       if (campaignsIndex !== -1 && parts.length === campaignsIndex + 1) {
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify(mockCampaigns),
-        });
+        if (url.searchParams.has('page')) {
+          // getCampaignsPaginated() — used by CampaignList; expects { items, totalPages, ... }
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({
+              items: mockCampaigns,
+              page: 0,
+              size: 100,
+              totalItems: mockCampaigns.length,
+              totalPages: 1,
+            }),
+          });
+        } else {
+          // getCampaigns() — used by FeaturedCampaignsSection; expects flat Campaign[]
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify(mockCampaigns),
+          });
+        }
         return;
       }
       const campaignId = parts[campaignsIndex + 1];

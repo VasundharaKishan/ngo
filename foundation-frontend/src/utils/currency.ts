@@ -1,11 +1,20 @@
 /**
  * Currency and Amount Formatting Utilities
- * 
+ *
  * Centralized functions for consistent currency display across the application.
  * All amounts are stored in cents/smallest currency unit and need conversion for display.
- * 
+ *
  * These utilities handle null/undefined values safely to prevent NaN errors.
  */
+
+/**
+ * Zero-decimal currencies: stored as whole units (no ÷100 needed).
+ * Reference: https://stripe.com/docs/currencies#zero-decimal
+ */
+export const ZERO_DECIMAL_CURRENCIES = new Set([
+  'BIF', 'CLP', 'DJF', 'GNF', 'JPY', 'KMF', 'KRW', 'MGA',
+  'PYG', 'RWF', 'UGX', 'VND', 'VUV', 'XAF', 'XOF', 'XPF',
+]);
 
 /**
  * Currency symbols map
@@ -30,82 +39,114 @@ export function getCurrencySymbol(currencyCode: string): string {
 }
 
 /**
- * Convert cents to dollars (or equivalent currency unit)
- * Safely handles null/undefined/NaN values
- * 
+ * Convert cents to dollars (or equivalent currency unit).
+ * Zero-decimal currencies (JPY, KRW, etc.) are returned as-is (no ÷100).
+ * Safely handles null/undefined/NaN values.
+ *
  * @param amountInCents - Amount in smallest currency unit (cents)
+ * @param currencyCode - Currency code to check for zero-decimal currencies
  * @returns Amount in main currency unit (dollars), defaults to 0
  */
-export function centsToAmount(amountInCents: number | null | undefined): number {
+export function centsToAmount(
+  amountInCents: number | null | undefined,
+  currencyCode: string = 'usd'
+): number {
   const amount = amountInCents ?? 0;
   if (isNaN(amount)) return 0;
+  if (ZERO_DECIMAL_CURRENCIES.has(currencyCode.toUpperCase())) return amount;
   return amount / 100;
 }
 
 /**
- * Convert dollars to cents (or equivalent currency unit)
- * Safely handles null/undefined/NaN values
- * 
+ * Convert dollars to cents (or equivalent currency unit).
+ * Zero-decimal currencies are returned as-is (no ×100).
+ * Safely handles null/undefined/NaN values.
+ *
  * @param amount - Amount in main currency unit (dollars)
+ * @param currencyCode - Currency code to check for zero-decimal currencies
  * @returns Amount in smallest currency unit (cents), defaults to 0
  */
-export function amountToCents(amount: number | string | null | undefined): number {
+export function amountToCents(
+  amount: number | string | null | undefined,
+  currencyCode: string = 'usd'
+): number {
   if (amount === null || amount === undefined || amount === '') return 0;
   const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
   if (isNaN(numAmount)) return 0;
+  if (ZERO_DECIMAL_CURRENCIES.has(currencyCode.toUpperCase())) return Math.round(numAmount);
   return Math.round(numAmount * 100);
 }
 
 /**
- * Format amount with currency symbol
- * Safely handles null/undefined/NaN values
- * 
+ * Format amount with currency symbol using locale-aware Intl.NumberFormat.
+ * Handles zero-decimal currencies (JPY, KRW, etc.) correctly.
+ * Safely handles null/undefined/NaN values.
+ *
  * @param amountInCents - Amount in smallest currency unit
- * @param currencyCode - Currency code (usd, eur, gbp, etc.)
+ * @param currencyCode - Currency code (usd, eur, gbp, jpy, etc.)
  * @param options - Formatting options
- * @returns Formatted string like "$1,234.56"
+ * @returns Formatted string like "$1,234.56" or "¥1,234"
  */
 export function formatCurrency(
   amountInCents: number | null | undefined,
   currencyCode: string = 'usd',
-  options: { 
+  options: {
     decimals?: number;
     includeSymbol?: boolean;
     includeCurrencyCode?: boolean;
+    locale?: string;
   } = {}
 ): string {
   const {
-    decimals = 2,
     includeSymbol = true,
     includeCurrencyCode = false,
+    locale = typeof navigator !== 'undefined' ? navigator.language : 'en-US',
   } = options;
 
-  const amount = centsToAmount(amountInCents);
+  const upper = currencyCode.toUpperCase();
+  const amount = centsToAmount(amountInCents, upper);
+
+  if (includeSymbol) {
+    try {
+      const formatted = new Intl.NumberFormat(locale, {
+        style: 'currency',
+        currency: upper,
+        currencyDisplay: includeCurrencyCode ? 'code' : 'symbol',
+      }).format(amount);
+      return formatted;
+    } catch {
+      // Fallback if currency code is not recognized by Intl
+    }
+  }
+
+  // Fallback: manual symbol + number
   const symbol = includeSymbol ? getCurrencySymbol(currencyCode) : '';
-  const code = includeCurrencyCode ? ` ${currencyCode.toUpperCase()}` : '';
-  
-  const formatted = amount.toLocaleString('en-US', {
+  const code = includeCurrencyCode ? ` ${upper}` : '';
+  const isZeroDecimal = ZERO_DECIMAL_CURRENCIES.has(upper);
+  const decimals = options.decimals ?? (isZeroDecimal ? 0 : 2);
+  const formatted = amount.toLocaleString(locale, {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
   });
-
   return `${symbol}${formatted}${code}`.trim();
 }
 
 /**
- * Format amount for display without currency symbol
- * Useful for input fields and calculations
- * 
+ * Format amount for display without currency symbol.
+ * Uses the user's locale for number formatting.
+ *
  * @param amountInCents - Amount in smallest currency unit
  * @param decimals - Number of decimal places
+ * @param locale - Locale string (defaults to navigator.language)
  * @returns Formatted number string like "1,234.56"
  */
 export function formatAmount(
   amountInCents: number | null | undefined,
-  decimals: number = 2
+  decimals: number = 2,
+  locale: string = typeof navigator !== 'undefined' ? navigator.language : 'en-US'
 ): string {
   const amount = centsToAmount(amountInCents);
-  return amount.toLocaleString('en-US', {
+  return amount.toLocaleString(locale, {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
   });

@@ -3,6 +3,8 @@ package com.myfoundation.school.hero;
 import com.myfoundation.school.exception.ResourceNotFoundException;
 import com.myfoundation.school.exception.ValidationException;
 import com.myfoundation.school.validation.ValidationUtils;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -70,7 +72,9 @@ public class HeroSlideService {
         existing.setFocus(updatedSlide.getFocus());
         existing.setEnabled(updatedSlide.isEnabled());
         existing.setSortOrder(updatedSlide.getSortOrder());
-        
+        existing.setTitle(updatedSlide.getTitle());
+        existing.setSubtitle(updatedSlide.getSubtitle());
+
         log.info("Updated hero slide: {}", id);
         return repository.save(existing);
     }
@@ -150,6 +154,16 @@ public class HeroSlideService {
             );
         }
         
+        // Validate optional title length
+        if (slide.getTitle() != null && slide.getTitle().length() > 255) {
+            throw new ValidationException("Title must be 255 characters or fewer");
+        }
+
+        // Validate optional subtitle length
+        if (slide.getSubtitle() != null && slide.getSubtitle().length() > 500) {
+            throw new ValidationException("Subtitle must be 500 characters or fewer");
+        }
+
         // Validate sortOrder
         if (slide.getSortOrder() < 0) {
             throw new ValidationException(
@@ -161,5 +175,8 @@ public class HeroSlideService {
     /**
      * Request DTO for reordering slides
      */
-    public record ReorderRequest(UUID id, int sortOrder) {}
+    public record ReorderRequest(
+            @NotNull(message = "Slide ID is required") UUID id,
+            @Min(value = 0, message = "Sort order must be non-negative") int sortOrder
+    ) {}
 }

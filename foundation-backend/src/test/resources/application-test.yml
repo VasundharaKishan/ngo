@@ -44,9 +44,18 @@ app:
     otp-max-attempts: 3
     otp-length: 6
   rate-limit:
+    window-seconds: 1
+    auth-login-window-seconds: 1
     login: 10000
     admin: 10000
     general: 10000
+    endpoint-auth-login: 10000
+    endpoint-donation-create: 10000
+    endpoint-webhook: 10000
+    endpoint-campaigns: 10000
+    endpoint-categories: 10000
+    endpoint-cms: 10000
+    endpoint-config: 10000
 
 storage:
   r2:

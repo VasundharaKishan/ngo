@@ -5,12 +5,24 @@ import { API_BASE_URL } from '../api';
 import { authFetch } from '../utils/auth';
 import { useToast } from '../components/ToastProvider';
 import Spinner from '../components/Spinner';
+import logger from '../utils/logger';
 import './AdminCampaignForm.css';
 
 interface Category {
   id: string;
   name: string;
   icon: string;
+}
+
+const CURRENCY_OPTIONS = [
+  { code: 'USD', symbol: '$', label: 'USD ($)' },
+  { code: 'EUR', symbol: '€', label: 'EUR (€)' },
+  { code: 'GBP', symbol: '£', label: 'GBP (£)' },
+  { code: 'INR', symbol: '₹', label: 'INR (₹)' },
+];
+
+function getCurrencySymbol(code: string): string {
+  return CURRENCY_OPTIONS.find(c => c.code === code)?.symbol || '$';
 }
 
 export default function AdminCampaignForm() {
@@ -29,6 +41,7 @@ export default function AdminCampaignForm() {
     categoryId: '',
     targetAmount: '',
     currentAmount: '0',
+    currency: 'USD',
     imageUrl: '',
     imageFilename: '',
     location: '',
@@ -40,8 +53,8 @@ export default function AdminCampaignForm() {
 
   useEffect(() => {
     // Check if user is logged in
-    const token = localStorage.getItem('adminToken');
-    if (!token) {
+    const user = localStorage.getItem('adminUser');
+    if (!user) {
       navigate('/admin/login');
       return;
     }
@@ -57,7 +70,7 @@ export default function AdminCampaignForm() {
       const data = await res.json();
       setCategories(data);
     } catch (error) {
-      console.error('Error loading categories:', error);
+      logger.error('AdminCampaignForm', 'Error loading categories:', error);
     }
   };
 
@@ -92,6 +105,7 @@ export default function AdminCampaignForm() {
         categoryId: data.category?.id || '',
         targetAmount: formatAmountForInput(data.targetAmount || 0),
         currentAmount: formatAmountForInput(data.currentAmount || 0),
+        currency: data.currency || 'USD',
         imageUrl: data.imageUrl || '',
         imageFilename: extractFilename(data.imageUrl || ''),
         location: data.location || '',
@@ -101,7 +115,7 @@ export default function AdminCampaignForm() {
         active: data.active ?? true
       });
     } catch (error) {
-      console.error('Error loading campaign:', error);
+      logger.error('AdminCampaignForm', 'Error loading campaign:', error);
       showToast('Failed to load campaign. Please try again.', 'error');
       navigate('/admin/campaigns');
     }
@@ -123,7 +137,7 @@ export default function AdminCampaignForm() {
       const data = await res.json();
       setFormData(prev => ({ ...prev, imageUrl: data.url, imageFilename: data.filename || '' }));
     } catch (error) {
-      console.error('Error uploading image:', error);
+      logger.error('AdminCampaignForm', 'Error uploading image:', error);
       showToast('Failed to upload image', 'error');
     } finally {
       setUploading(false);
@@ -151,7 +165,7 @@ export default function AdminCampaignForm() {
       }
       setFormData(prev => ({ ...prev, imageUrl: '', imageFilename: '' }));
     } catch (error) {
-      console.error('Error deleting image:', error);
+      logger.error('AdminCampaignForm', 'Error deleting image:', error);
       showToast('Failed to delete image', 'error');
     }
   };
@@ -203,7 +217,7 @@ export default function AdminCampaignForm() {
         showToast('Failed to save campaign', 'error');
       }
     } catch (error) {
-      console.error('Error saving campaign:', error);
+      logger.error('AdminCampaignForm', 'Error saving campaign:', error);
       showToast('Failed to save campaign', 'error');
     } finally {
       setSaving(false);
@@ -279,7 +293,20 @@ export default function AdminCampaignForm() {
           </div>
 
           <div className="form-group">
-            <label>Target Amount ($) *</label>
+            <label>Currency *</label>
+            <select
+              value={formData.currency}
+              data-testid="campaign-currency"
+              onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
+            >
+              {CURRENCY_OPTIONS.map(opt => (
+                <option key={opt.code} value={opt.code}>{opt.label}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label>Target Amount ({getCurrencySymbol(formData.currency)}) *</label>
             <input
               type="number"
               value={formData.targetAmount}
@@ -292,7 +319,7 @@ export default function AdminCampaignForm() {
           </div>
 
           <div className="form-group">
-            <label>Current Amount ($)</label>
+            <label>Current Amount ({getCurrencySymbol(formData.currency)})</label>
             <input
               type="number"
               value={formData.currentAmount}
@@ -340,11 +367,11 @@ export default function AdminCampaignForm() {
               )}
               <p className="help-text">Or enter image URL directly:</p>
               <input
-                type="url"
+                type="text"
                 value={formData.imageUrl}
                 data-testid="campaign-image-url"
                 onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                placeholder="https://example.com/image.jpg"
+                placeholder="https://example.com/image.jpg or /local-image.png"
               />
             </div>
           </div>

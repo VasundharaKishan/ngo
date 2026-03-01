@@ -1,5 +1,6 @@
 package com.myfoundation.school.auth;
 
+import com.myfoundation.school.audit.AuditLogService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -56,6 +57,9 @@ class AdminUserServiceTest {
 
     @Mock
     private PasswordSetupTokenRepository tokenRepository;
+
+    @Mock
+    private AuditLogService auditLogService;
 
     @InjectMocks
     private AdminUserService adminUserService;
@@ -326,6 +330,7 @@ class AdminUserServiceTest {
     void deleteUser_AdminBySuperAdmin_Success() {
         when(adminUserRepository.findById("admin-id")).thenReturn(Optional.of(regularAdmin));
         when(adminUserRepository.findByUsernameIgnoreCase("admin")).thenReturn(Optional.of(superAdmin));
+        when(adminUserRepository.countByRole(UserRole.ADMIN)).thenReturn(2L);
 
         adminUserService.deleteUser("admin-id", "admin");
 
@@ -339,6 +344,7 @@ class AdminUserServiceTest {
         superAdmin.setUsername("ADMIN");
         when(adminUserRepository.findById("admin-id")).thenReturn(Optional.of(regularAdmin));
         when(adminUserRepository.findByUsernameIgnoreCase("ADMIN")).thenReturn(Optional.of(superAdmin));
+        when(adminUserRepository.countByRole(UserRole.ADMIN)).thenReturn(2L);
 
         adminUserService.deleteUser("admin-id", "ADMIN");
 
@@ -430,17 +436,15 @@ class AdminUserServiceTest {
     }
 
     @Test
-    void changeUserPassword_Issue_NoPasswordValidation() {
-        // ISSUE: Password not validated before encoding
-        // Could set weak password like "123" or empty string
-        // Should reuse AuthService.validatePasswordStrength()
+    void changeUserPassword_Failure_WeakPassword() {
+        doThrow(new IllegalArgumentException("Password must be at least 8 characters long"))
+            .when(authService).validatePasswordStrength("weak");
+
         when(adminUserRepository.findById("user-id")).thenReturn(Optional.of(regularUser));
-        when(passwordEncoder.encode("weak")).thenReturn("encoded");
-        when(adminUserRepository.save(any(AdminUser.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        // Should throw exception but doesn't
-        assertDoesNotThrow(() -> adminUserService.changeUserPassword("user-id", "weak"));
+        assertThrows(IllegalArgumentException.class,
+            () -> adminUserService.changeUserPassword("user-id", "weak"));
 
-        assertTrue(true, "Documented: No password strength validation on change");
+        verify(passwordEncoder, never()).encode(anyString());
     }
 }

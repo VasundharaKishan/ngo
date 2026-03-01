@@ -22,4 +22,18 @@ public interface DonationRepository extends JpaRepository<Donation, String>, Jpa
      */
     @Query("SELECT COALESCE(SUM(d.amount), 0L) FROM Donation d WHERE d.campaign.id = :campaignId AND d.status = 'SUCCESS'")
     Long sumSuccessfulDonationsByCampaignId(@Param("campaignId") String campaignId);
+
+    /**
+     * Batch-fetch donation sums for multiple campaigns in a single query.
+     * Returns a list of [campaignId, totalAmount] pairs for campaigns that have at least one successful donation.
+     * Campaigns with no successful donations will NOT appear in the result; callers should default missing IDs to 0.
+     *
+     * Use this instead of calling {@link #sumSuccessfulDonationsByCampaignId} in a loop to avoid N+1 queries.
+     */
+    @Query("SELECT d.campaign.id, COALESCE(SUM(d.amount), 0L) FROM Donation d " +
+           "WHERE d.campaign.id IN :campaignIds AND d.status = 'SUCCESS' " +
+           "GROUP BY d.campaign.id")
+    List<Object[]> sumSuccessfulDonationsByCampaignIds(@Param("campaignIds") List<String> campaignIds);
+
 }
+

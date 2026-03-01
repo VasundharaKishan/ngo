@@ -33,12 +33,16 @@ class AuthControllerTest {
     private AdminUserRepository adminUserRepository;
 
     @Autowired
+    private OtpTokenRepository otpTokenRepository;
+
+    @Autowired
     private JwtService jwtService;
 
     private String adminJwt;
 
     @BeforeEach
     void setUp() {
+        otpTokenRepository.deleteAll();
         adminUserRepository.deleteAll();
         
         AdminUser admin = new AdminUser();
@@ -47,6 +51,7 @@ class AuthControllerTest {
         admin.setFullName("Auth Admin");
         admin.setRole(UserRole.ADMIN);
         admin.setActive(true);
+        admin.setPassword("$2a$10$placeholder.hashed.password.for.tests.only");
         admin.setCreatedAt(Instant.now());
         admin.setUpdatedAt(Instant.now());
         adminUserRepository.save(admin);

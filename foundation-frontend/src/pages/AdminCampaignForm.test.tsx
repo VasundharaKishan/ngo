@@ -79,7 +79,7 @@ describe('AdminCampaignForm', () => {
   });
 
   it('submits a new campaign with required fields', async () => {
-    localStorage.setItem('adminToken', 'token');
+    localStorage.setItem('adminUser', JSON.stringify({ username: 'admin' }));
 
     mockAuthFetch
       .mockResolvedValueOnce({ ok: true, json: async () => categories }) // load categories
@@ -92,7 +92,9 @@ describe('AdminCampaignForm', () => {
     fireEvent.change(textboxes[1], { target: { value: 'Short text' } }); // short description
     fireEvent.change(textboxes[2], { target: { value: 'Longer description' } }); // full description
 
-    fireEvent.change(screen.getByRole('combobox'), { target: { value: categories[0].id } });
+    const comboboxes = screen.getAllByRole('combobox');
+    // First combobox is Category, second is Currency
+    fireEvent.change(comboboxes[0], { target: { value: categories[0].id } });
 
     const spinboxes = screen.getAllByRole('spinbutton');
     fireEvent.change(spinboxes[0], { target: { value: '123.45' } }); // target amount
@@ -115,7 +117,7 @@ describe('AdminCampaignForm', () => {
   });
 
   it('prefills fields when editing an existing campaign', async () => {
-    localStorage.setItem('adminToken', 'token');
+    localStorage.setItem('adminUser', JSON.stringify({ username: 'admin' }));
 
     mockAuthFetch.mockImplementation((url: string) => {
       if (url === `${API_BASE_URL}/admin/categories`) {
@@ -133,6 +135,71 @@ describe('AdminCampaignForm', () => {
     expect(screen.getByDisplayValue(existingCampaign.shortDescription)).toBeInTheDocument();
     expect(screen.getByDisplayValue('5000.00')).toBeInTheDocument(); // target in dollars
     expect(screen.getByDisplayValue('1250.00')).toBeInTheDocument(); // current amount
-    expect((screen.getByRole('combobox') as HTMLSelectElement).value).toBe('cat-2');
+    const comboboxes = screen.getAllByRole('combobox');
+    // First combobox is Category, second is Currency
+    expect((comboboxes[0] as HTMLSelectElement).value).toBe('cat-2');
+  });
+
+  it('updates an existing campaign', async () => {
+    localStorage.setItem('adminUser', JSON.stringify({ username: 'admin' }));
+
+    mockAuthFetch.mockImplementation((url: string, options?: any) => {
+      if (url === `${API_BASE_URL}/admin/categories`) {
+        return Promise.resolve({ ok: true, json: async () => categories });
+      }
+      if (url === `${API_BASE_URL}/admin/campaigns/${existingCampaign.id}` && !options) {
+        return Promise.resolve({ ok: true, json: async () => existingCampaign });
+      }
+      if (url === `${API_BASE_URL}/admin/campaigns/${existingCampaign.id}` && options?.method === 'PUT') {
+        return Promise.resolve({ ok: true, json: async () => ({}) });
+      }
+      return Promise.resolve({ ok: true, json: async () => ({}) });
+    });
+
+    renderEdit();
+    await screen.findByDisplayValue(existingCampaign.title);
+    fireEvent.click(screen.getByRole('button', { name: /Update Campaign/i }));
+
+    await waitFor(() =>
+      expect(mockAuthFetch).toHaveBeenCalledWith(
+        `${API_BASE_URL}/admin/campaigns/${existingCampaign.id}`,
+        expect.objectContaining({ method: 'PUT' })
+      )
+    );
+    expect(mockNavigate).toHaveBeenCalledWith('/admin/campaigns');
+  });
+
+  it('validates required fields before submitting', async () => {
+    localStorage.setItem('adminUser', JSON.stringify({ username: 'admin' }));
+    mockAuthFetch.mockResolvedValue({ ok: true, json: async () => categories });
+    renderCreate();
+    await screen.findAllByRole('textbox');
+    // Submit form directly to bypass HTML5 validation
+    fireEvent.submit(document.querySelector('form')!);
+    await waitFor(() => expect(mockToast).toHaveBeenCalledWith('Title is required', 'error'));
+  });
+
+  it('changes currency selector', async () => {
+    localStorage.setItem('adminUser', JSON.stringify({ username: 'admin' }));
+    mockAuthFetch.mockResolvedValue({ ok: true, json: async () => categories });
+    renderCreate();
+    await screen.findAllByRole('textbox');
+    const comboboxes = screen.getAllByRole('combobox');
+    // Second combobox is Currency
+    fireEvent.change(comboboxes[1], { target: { value: 'EUR' } });
+    expect((comboboxes[1] as HTMLSelectElement).value).toBe('EUR');
+  });
+
+  it('toggles featured checkbox', async () => {
+    localStorage.setItem('adminUser', JSON.stringify({ username: 'admin' }));
+    mockAuthFetch.mockResolvedValue({ ok: true, json: async () => categories });
+    renderCreate();
+    await screen.findAllByRole('textbox');
+    const checkboxes = screen.getAllByRole('checkbox');
+    const featuredCheckbox = checkboxes.find(cb => (cb as HTMLInputElement).type === 'checkbox');
+    if (featuredCheckbox) {
+      fireEvent.click(featuredCheckbox);
+      expect((featuredCheckbox as HTMLInputElement).checked).toBe(true);
+    }
   });
 });

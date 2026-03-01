@@ -8,6 +8,8 @@ import com.myfoundation.school.dto.CheckoutSessionResponse;
 import com.myfoundation.school.dto.DonationRequest;
 import com.myfoundation.school.dto.DonationResponse;
 import com.myfoundation.school.dto.DonationPageResponse;
+import com.myfoundation.school.exception.BusinessException;
+import com.myfoundation.school.exception.ResourceNotFoundException;
 import com.stripe.exception.StripeException;
 import com.stripe.model.checkout.Session;
 import com.stripe.param.checkout.SessionCreateParams;
@@ -114,10 +116,10 @@ public class DonationService {
         
         // Validate campaign exists and is active
         Campaign campaign = campaignRepository.findById(request.getCampaignId())
-                .orElseThrow(() -> new RuntimeException("Campaign not found with id: " + request.getCampaignId()));
-        
+                .orElseThrow(() -> new ResourceNotFoundException("Campaign", request.getCampaignId()));
+
         if (!campaign.getActive()) {
-            throw new RuntimeException("This campaign is not accepting donations at this time. Please choose another campaign.");
+            throw new BusinessException("This campaign is not accepting donations at this time. Please choose another campaign.");
         }
         
         // Validate minimum donation amount
@@ -186,8 +188,8 @@ public class DonationService {
                     .build();
             
         } catch (StripeException e) {
-            log.error("Failed to create Stripe checkout session", e);
-            throw new RuntimeException("Failed to create checkout session: " + e.getMessage(), e);
+            log.error("Failed to create Stripe checkout session: {} (code: {})", e.getMessage(), e.getCode(), e);
+            throw new BusinessException("Failed to create checkout session. Please try again.", e);
         }
     }
     
@@ -196,8 +198,8 @@ public class DonationService {
         log.info("[Webhook] Attempting to mark donation {} as SUCCESS with paymentIntent: {}", donationId, paymentIntentId);
         
         Donation donation = donationRepository.findById(donationId)
-                .orElseThrow(() -> new RuntimeException("Donation not found with id: " + donationId));
-        
+                .orElseThrow(() -> new ResourceNotFoundException("Donation", donationId));
+
         // Idempotency check: if already SUCCESS, skip update (duplicate webhook)
         if (donation.getStatus() == DonationStatus.SUCCESS) {
             log.info("[Webhook] Donation {} already marked as SUCCESS - idempotent webhook, skipping", donationId);
@@ -216,8 +218,8 @@ public class DonationService {
             try {
                 String campaignTitle = donation.getCampaign() != null ? donation.getCampaign().getTitle() : "General Donation";
                 String donationDate = donation.getCreatedAt()
-                    .atZone(java.time.ZoneId.systemDefault())
-                    .format(DateTimeFormatter.ofPattern("MMMM dd, yyyy 'at' hh:mm a"));
+                    .atZone(java.time.ZoneId.of("UTC"))
+                    .format(DateTimeFormatter.ofPattern("MMMM dd, yyyy 'at' hh:mm a z"));
                 
                 // Send thank you email to donor
                 log.info("[Webhook] Sending donation acknowledgement email to donor: {}", donation.getDonorEmail());
@@ -258,8 +260,8 @@ public class DonationService {
         log.info("[Webhook] Attempting to mark donation {} as FAILED", donationId);
         
         Donation donation = donationRepository.findById(donationId)
-                .orElseThrow(() -> new RuntimeException("Donation not found with id: " + donationId));
-        
+                .orElseThrow(() -> new ResourceNotFoundException("Donation", donationId));
+
         // Idempotency check: if already SUCCESS, don't change it (payment succeeded)
         if (donation.getStatus() == DonationStatus.SUCCESS) {
             log.warn("[Webhook] Donation {} already marked as SUCCESS - cannot mark as FAILED, skipping", donationId);
@@ -311,6 +313,24 @@ public class DonationService {
                 .build();
     }
     
+    /**
+     * Verify a donation by Stripe session ID.
+     * Used by the success page to confirm a donation was processed and show details.
+     *
+     * @param sessionId Stripe checkout session ID
+     * @return DonationResponse with donation details
+     * @throws ResourceNotFoundException if no donation found for session ID
+     */
+    @Transactional(readOnly = true)
+    public DonationResponse verifyDonationBySessionId(String sessionId) {
+        log.info("Verifying donation for Stripe session: {}", sessionId);
+
+        Donation donation = donationRepository.findByStripeSessionId(sessionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Donation", "sessionId:" + sessionId));
+
+        return toDonationResponse(donation);
+    }
+
     private DonationResponse toDonationResponse(Donation donation) {
         Campaign campaign = donation.getCampaign();
         

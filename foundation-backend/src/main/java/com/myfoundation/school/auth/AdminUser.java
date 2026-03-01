@@ -44,6 +44,13 @@ public class AdminUser {
     
     @Column
     private Instant lastLoginAt;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private int failedLoginAttempts = 0;
+
+    @Column
+    private Instant lockedUntil;
     
     @Column(nullable = false, updatable = false)
     private Instant createdAt;

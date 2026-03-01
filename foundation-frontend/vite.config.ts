@@ -78,6 +78,15 @@ export default defineConfig({
       brotliSize: true
     })
   ],
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
   build: {
     rollupOptions: {
       output: {
@@ -89,12 +98,9 @@ export default defineConfig({
             './src/pages/Campaigns.tsx',
             './src/pages/Categories.tsx',
             './src/pages/AdminUsers.tsx',
-            './src/pages/AdminSettings.tsx',
+            './src/pages/AdminSettingsConsolidated.tsx',
             './src/pages/AdminContactSettings.tsx',
-            './src/pages/AdminFooterSettings.tsx',
             './src/pages/AdminDonatePopupSettings.tsx',
-            './src/pages/AdminHeroSlides.tsx',
-            './src/pages/AdminHomeSections.tsx',
             './src/pages/AdminCMS.tsx',
             './src/pages/AdminLogin.tsx',
             './src/pages/AdminCampaignForm.tsx',

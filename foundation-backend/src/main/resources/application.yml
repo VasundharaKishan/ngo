@@ -9,7 +9,7 @@ spring:
   
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     show-sql: false
     properties:
       hibernate:
@@ -38,7 +38,7 @@ spring:
     host: ${MAIL_HOST:example.brevo.com}
     port: ${MAIL_PORT:587}
     username: ${MAIL_USERNAME:example_username}
-    password: ${BREVO_SMTP_KEY:example
+    password: ${BREVO_SMTP_KEY:}
     properties:
       mail:
         smtp:
@@ -72,7 +72,7 @@ app:
     cookie-enabled: ${JWT_COOKIE_ENABLED:true}
     cookie-name: ${JWT_COOKIE_NAME:admin_jwt}
     cookie-domain: ${JWT_COOKIE_DOMAIN:}
-    cookie-secure: ${JWT_COOKIE_SECURE:false}
+    cookie-secure: ${JWT_COOKIE_SECURE:true}
   allow-admin-bootstrap: ${ALLOW_ADMIN_BOOTSTRAP:true}
   auth:
     otp-enabled: ${AUTH_OTP_ENABLED:false}
@@ -80,15 +80,25 @@ app:
     otp-max-attempts: ${AUTH_OTP_MAX_ATTEMPTS:5}
     otp-length: ${AUTH_OTP_LENGTH:6}
   rate-limit:
-    enabled: ${RATE_LIMIT_ENABLED:true}
-    requests-per-minute: ${RATE_LIMIT_REQUESTS_PER_MINUTE:60}
-    burst-size: ${RATE_LIMIT_BURST_SIZE:10}
-    login: ${APP_RATE_LIMIT_LOGIN:100}
+    # Window duration — all limits below are "requests per this many seconds"
+    window-seconds: ${RATE_LIMIT_WINDOW_SECONDS:1}
+    # Per-group caps for RateLimitingFilter (token bucket) — requests per window-seconds
+    login: ${APP_RATE_LIMIT_LOGIN:5}
     admin: ${APP_RATE_LIMIT_ADMIN:100}
     general: ${APP_RATE_LIMIT_GENERAL:100}
+    # Login brute-force uses its own longer window for stronger protection
+    auth-login-window-seconds: ${RATE_LIMIT_AUTH_LOGIN_WINDOW:60}
+    # Per-endpoint caps for RateLimitingInterceptor (sliding window) — requests per window-seconds
+    endpoint-auth-login: ${RATE_LIMIT_ENDPOINT_AUTH_LOGIN:7}
+    endpoint-donation-create: ${RATE_LIMIT_ENDPOINT_DONATION_CREATE:20}
+    endpoint-webhook: ${RATE_LIMIT_ENDPOINT_WEBHOOK:120}
+    endpoint-campaigns: ${RATE_LIMIT_ENDPOINT_CAMPAIGNS:100}
+    endpoint-categories: ${RATE_LIMIT_ENDPOINT_CATEGORIES:50}
+    endpoint-cms: ${RATE_LIMIT_ENDPOINT_CMS:50}
+    endpoint-config: ${RATE_LIMIT_ENDPOINT_CONFIG:50}
 
 cors:
-  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:5174,http://localhost:3000,https://www.yugalsavitriseva.org,https://frontend-three-psi-17.vercel.app,https://foundation-frontend-three.vercel.app}
 
 storage:
   r2:
@@ -105,6 +115,10 @@ stripe:
   success-url: ${STRIPE_SUCCESS_URL:http://localhost:5173/donate/success?session_id={CHECKOUT_SESSION_ID}}
   cancel-url: ${STRIPE_CANCEL_URL:http://localhost:5173/donate/cancel}
 
+
+springdoc:
+  swagger-ui:
+    enabled: ${SWAGGER_ENABLED:false}
 
 logging:
   level:

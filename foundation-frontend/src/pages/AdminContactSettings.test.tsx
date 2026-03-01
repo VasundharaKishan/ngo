@@ -52,7 +52,7 @@ describe('AdminContactSettings', () => {
   });
 
   it('loads and saves contact information through the admin endpoint', async () => {
-    localStorage.setItem('adminToken', 'test-token');
+    localStorage.setItem('adminUser', JSON.stringify({ username: 'admin' }));
 
     const updatedEmail = 'new@example.com';
 
@@ -83,5 +83,45 @@ describe('AdminContactSettings', () => {
     expect(requestBody.locations[0].label).toBe(sampleContact.locations[0].label);
 
     expect(mockAuthFetch.mock.calls[2][0]).toBe(`${API_BASE_URL}/admin/config/contact`);
+  });
+
+  it('adds a new location', async () => {
+    localStorage.setItem('adminUser', JSON.stringify({ username: 'admin' }));
+    mockAuthFetch.mockResolvedValue({ json: async () => ({ email: '', locations: [] }) });
+    renderWithRouter();
+    await screen.findByRole('button', { name: 'Save Contact Information' });
+    fireEvent.click(screen.getByRole('button', { name: /Add Location/i }));
+    // After adding, a new location card appears with address textarea
+    await waitFor(() => expect(screen.getByPlaceholderText(/Street address/i)).toBeInTheDocument());
+  });
+
+  it('removes a location with confirmation', async () => {
+    localStorage.setItem('adminUser', JSON.stringify({ username: 'admin' }));
+    mockAuthFetch.mockResolvedValue({ json: async () => sampleContact });
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    renderWithRouter();
+    await screen.findByDisplayValue(sampleContact.email);
+    const removeBtn = screen.getByRole('button', { name: /Remove/i });
+    fireEvent.click(removeBtn);
+    await waitFor(() => expect(screen.queryByDisplayValue('Ireland')).toBeNull());
+  });
+
+  it('validates email before saving', async () => {
+    localStorage.setItem('adminUser', JSON.stringify({ username: 'admin' }));
+    mockAuthFetch.mockResolvedValue({ json: async () => ({ email: 'not-an-email', locations: [] }) });
+    renderWithRouter();
+    await screen.findByRole('button', { name: 'Save Contact Information' });
+    fireEvent.click(screen.getByRole('button', { name: 'Save Contact Information' }));
+    await waitFor(() => expect(mockToast).toHaveBeenCalledWith(expect.stringContaining('valid email'), 'error'));
+  });
+
+  it('updates location fields', async () => {
+    localStorage.setItem('adminUser', JSON.stringify({ username: 'admin' }));
+    mockAuthFetch.mockResolvedValue({ json: async () => sampleContact });
+    renderWithRouter();
+    await screen.findByDisplayValue(sampleContact.email);
+    const labelInput = screen.getByDisplayValue('Ireland');
+    fireEvent.change(labelInput, { target: { value: 'UK' } });
+    expect(screen.getByDisplayValue('UK')).toBeInTheDocument();
   });
 });
