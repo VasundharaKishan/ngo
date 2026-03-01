@@ -38,17 +38,19 @@ describe('CampaignCard', () => {
     );
 
     expect(screen.getByText(/Goal:/)).toBeInTheDocument();
-    expect(screen.getByText(/\$10,000\.00/)).toBeInTheDocument();
+    // Amount displayed without decimals: $10,000
+    expect(screen.getByText(/\$10,000/)).toBeInTheDocument();
   });
 
-  it('displays currency code', () => {
+  it('displays currency symbol in goal', () => {
     render(
       <BrowserRouter>
         <CampaignCard campaign={mockCampaign} />
       </BrowserRouter>
     );
 
-    expect(screen.getByText(/USD/)).toBeInTheDocument();
+    // Currency symbol ($) is included in the formatted amount
+    expect(screen.getByText(/\$10,000/)).toBeInTheDocument();
   });
 
   it('has link to campaign detail', () => {
@@ -73,14 +75,15 @@ describe('CampaignCard', () => {
     expect(donateLink).toHaveAttribute('href', '/donate/1');
   });
 
-  it('shows active badge when campaign is active', () => {
+  it('shows donate link for active campaign', () => {
     render(
       <BrowserRouter>
         <CampaignCard campaign={mockCampaign} />
       </BrowserRouter>
     );
 
-    expect(screen.getByText('Active')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /donate/i })).toBeInTheDocument();
+    expect(screen.queryByText('Not Accepting Donations')).not.toBeInTheDocument();
   });
 
   it('does not show donate link when inactive', () => {
@@ -102,7 +105,8 @@ describe('CampaignCard', () => {
       </BrowserRouter>
     );
 
-    expect(screen.getByText(/\$10,000\.00/)).toBeInTheDocument();
+    // Amount now displayed without decimal places: $10,000
+    expect(screen.getByText(/\$10,000/)).toBeInTheDocument();
   });
 
   it('has both View Details and Donate links when active', () => {
@@ -137,7 +141,7 @@ describe('CampaignCard', () => {
     expect(screen.getByText('Short desc')).toBeInTheDocument();
   });
 
-  it('does not show active badge when inactive', () => {
+  it('shows inactive label and no donate link when inactive', () => {
     const inactiveCampaign = { ...mockCampaign, active: false };
     render(
       <BrowserRouter>
@@ -145,10 +149,11 @@ describe('CampaignCard', () => {
       </BrowserRouter>
     );
 
-    expect(screen.queryByText('Active')).not.toBeInTheDocument();
+    expect(screen.getByText('Not Accepting Donations')).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /donate/i })).not.toBeInTheDocument();
   });
 
-  it('truncates long descriptions', () => {
+  it('renders with long description field without error', () => {
     const longDescCampaign = {
       ...mockCampaign,
       description: 'A'.repeat(200)
@@ -159,7 +164,38 @@ describe('CampaignCard', () => {
       </BrowserRouter>
     );
 
-    const description = screen.getByText(/A+/);
-    expect(description).toBeInTheDocument();
+    // Card always shows shortDescription, not the full description field
+    expect(screen.getByText(/Test campaign description/)).toBeInTheDocument();
+  });
+
+  it('renders campaign image when imageUrl is provided', () => {
+    render(
+      <BrowserRouter>
+        <CampaignCard campaign={mockCampaign} />
+      </BrowserRouter>
+    );
+    const img = screen.getByRole('img');
+    expect(img).toHaveAttribute('src', 'https://example.com/image.jpg');
+    expect(img).toHaveAttribute('alt', 'Test Campaign');
+  });
+
+  it('renders image container without img element when imageUrl is absent', () => {
+    const noImage = { ...mockCampaign, imageUrl: undefined };
+    const { container } = render(
+      <BrowserRouter>
+        <CampaignCard campaign={noImage} />
+      </BrowserRouter>
+    );
+    expect(container.querySelector('.card-image-container')).toBeInTheDocument();
+    expect(container.querySelector('.card-image')).not.toBeInTheDocument();
+  });
+
+  it('sets loading="lazy" on campaign image', () => {
+    render(
+      <BrowserRouter>
+        <CampaignCard campaign={mockCampaign} />
+      </BrowserRouter>
+    );
+    expect(screen.getByRole('img')).toHaveAttribute('loading', 'lazy');
   });
 });

@@ -35,6 +35,8 @@ export default function AdminDashboard() {
   const [donations, setDonations] = useState<Donation[]>([]);
   const [spotlightSettings, setSpotlightSettings] = useState<DonatePopupSettingsResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [authError, setAuthError] = useState(false);
+  const [loadError, setLoadError] = useState('');
 
   useEffect(() => {
     loadData();
@@ -42,21 +44,36 @@ export default function AdminDashboard() {
 
   const loadData = async () => {
     setLoading(true);
+    setAuthError(false);
+    setLoadError('');
     try {
       const [campaignsRes, donationsRes, spotlightData] = await Promise.all([
         authFetch(`${API_BASE_URL}/admin/campaigns`),
         authFetch(`${API_BASE_URL}/admin/donations`),
         getDonatePopupSettings()
       ]);
-      
+
+      // Handle auth failure — redirect to login
+      if (campaignsRes.status === 401 || donationsRes.status === 401) {
+        setAuthError(true);
+        return;
+      }
+
+      if (!campaignsRes.ok) {
+        setLoadError(`Failed to load campaigns (${campaignsRes.status})`);
+        return;
+      }
+
       const campaignsData = await campaignsRes.json();
-      const donationsData = await donationsRes.json();
-      
-      setCampaigns(campaignsData);
-      setDonations(donationsData);
+      const donationsData = donationsRes.ok ? await donationsRes.json() : [];
+
+      // Guard: ensure API returned arrays, not error objects
+      setCampaigns(Array.isArray(campaignsData) ? campaignsData : []);
+      setDonations(Array.isArray(donationsData) ? donationsData : []);
       setSpotlightSettings(spotlightData);
     } catch (error) {
       console.error('Error loading data:', error);
+      setLoadError('Could not reach the server. Please check your connection.');
     } finally {
       setLoading(false);
     }
@@ -67,6 +84,36 @@ export default function AdminDashboard() {
       <div className="content-header">
         <h2><RiDashboardLine style={{verticalAlign: 'middle', marginRight: '0.5rem'}} /> Dashboard</h2>
         <p>Loading dashboard...</p>
+      </div>
+    );
+  }
+
+  if (authError) {
+    return (
+      <div className="content-header">
+        <h2><RiDashboardLine style={{verticalAlign: 'middle', marginRight: '0.5rem'}} /> Dashboard</h2>
+        <div style={{ marginTop: '1.5rem', padding: '1.5rem', background: '#fff3cd', border: '1px solid #ffc107', borderRadius: '8px', color: '#856404' }}>
+          <strong>⚠️ Session Expired</strong>
+          <p style={{ margin: '0.5rem 0 1rem' }}>Your session has expired. Please log in again to view the dashboard.</p>
+          <a href="/admin/login" style={{ background: '#2a3da8', color: 'white', padding: '0.5rem 1.25rem', borderRadius: '6px', textDecoration: 'none', fontWeight: 600 }}>
+            Go to Login
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="content-header">
+        <h2><RiDashboardLine style={{verticalAlign: 'middle', marginRight: '0.5rem'}} /> Dashboard</h2>
+        <div style={{ marginTop: '1.5rem', padding: '1.5rem', background: '#fee2e2', border: '1px solid #fca5a5', borderRadius: '8px', color: '#991b1b' }}>
+          <strong>⚠️ Error Loading Dashboard</strong>
+          <p style={{ margin: '0.5rem 0 1rem' }}>{loadError}</p>
+          <button onClick={loadData} style={{ background: '#2a3da8', color: 'white', padding: '0.5rem 1.25rem', borderRadius: '6px', border: 'none', cursor: 'pointer', fontWeight: 600 }}>
+            Retry
+          </button>
+        </div>
       </div>
     );
   }

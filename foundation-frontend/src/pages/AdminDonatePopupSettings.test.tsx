@@ -51,7 +51,7 @@ describe('AdminDonatePopupSettings', () => {
   });
 
   it('loads campaigns/settings and saves selection', async () => {
-    localStorage.setItem('adminToken', 'token');
+    localStorage.setItem('adminUser', JSON.stringify({ username: 'admin' }));
 
     (api.getCampaigns as any).mockResolvedValue([
       { id: 'c1', title: 'Water', active: true, featured: false, urgent: false },

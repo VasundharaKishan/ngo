@@ -4,6 +4,11 @@ import { MemoryRouter } from 'react-router-dom';
 import Campaigns from './Campaigns';
 import { API_BASE_URL } from '../api';
 
+vi.mock('../contexts/ConfigContext', () => ({
+  useSiteName: () => 'Test Foundation',
+  useConfig: () => ({ config: {}, loading: false, refetch: vi.fn() }),
+}));
+
 const mockAuthFetch = vi.fn();
 
 vi.mock('../utils/auth', () => ({

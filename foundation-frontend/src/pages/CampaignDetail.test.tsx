@@ -1,9 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import CampaignDetail from './CampaignDetail';
 import { api } from '../api';
 import type { Campaign } from '../api';
+
+vi.mock('../contexts/ConfigContext', () => ({
+  useSiteName: () => 'Test Foundation',
+  useConfig: () => ({ config: {}, loading: false, refetch: vi.fn() }),
+}));
 
 vi.mock('../api', () => ({
   api: {
@@ -212,5 +217,38 @@ describe('CampaignDetail', () => {
     await waitFor(() => {
       expect(screen.getByText(/50,000\.00/)).toBeInTheDocument();
     });
+  });
+
+  it('shows inactive notice when campaign is not active', async () => {
+    const inactiveCampaign = { ...mockCampaign, active: false };
+    vi.mocked(api.getCampaign).mockResolvedValue(inactiveCampaign);
+
+    render(
+      <MemoryRouter initialEntries={['/campaigns/1']}>
+        <Routes>
+          <Route path="/campaigns/:id" element={<CampaignDetail />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText(/not currently accepting donations/i)).toBeInTheDocument();
+    });
+  });
+
+  it('hides image on load error', async () => {
+    render(
+      <MemoryRouter initialEntries={['/campaigns/1']}>
+        <Routes>
+          <Route path="/campaigns/:id" element={<CampaignDetail />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    const img = await screen.findByRole('img');
+    expect(img).toBeInTheDocument();
+    // Simulate image load error
+    fireEvent.error(img);
+    expect(img).toHaveStyle('display: none');
   });
 });

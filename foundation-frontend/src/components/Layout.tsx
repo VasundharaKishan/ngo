@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, Outlet } from 'react-router-dom';
 import './Layout.css';
 import '../styles/ui-polish.css';
@@ -40,6 +40,10 @@ const getSocialIcon = (platform: string) => {
 
 export default function Layout() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [newsletterStatus, setNewsletterStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const newsletterRef = useRef<HTMLInputElement>(null);
   const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
   const [contactLoading, setContactLoading] = useState(true);
   const [contactError, setContactError] = useState(false);
@@ -76,13 +80,11 @@ export default function Layout() {
       try {
         const response = await fetch(`${API_BASE_URL}/cms/content/site-settings`);
         if (response.ok) {
-          const data = await response.json();
-          const bannerSetting = data.find((item: CMSContent) => item.key === 'development_banner');
-          if (bannerSetting && bannerSetting.active) {
+          // API returns Map<key, value> of active items only
+          const data: Record<string, string> = await response.json();
+          if (data['development_banner'] !== undefined) {
             setShowBanner(true);
-            if (bannerSetting.value) {
-              setBannerMessage(bannerSetting.value);
-            }
+            setBannerMessage(data['development_banner']);
           }
         }
       } catch (error) {
@@ -109,24 +111,11 @@ export default function Layout() {
         // Fetch footer content from CMS
         const contentResponse = await fetch(`${API_BASE_URL}/cms/content/footer`);
         if (contentResponse.ok) {
-          const contentData: CMSContent[] = await contentResponse.json();
-          
-          // Extract footer content by key
-          contentData.forEach((item) => {
-            if (item.active) {
-              switch (item.key) {
-                case 'tagline':
-                  setFooterTagline(item.value);
-                  break;
-                case 'copyright':
-                  setCopyrightText(item.value);
-                  break;
-                case 'disclaimer':
-                  setDisclaimerText(item.value);
-                  break;
-              }
-            }
-          });
+          // API returns Map<key, value> of active items only
+          const contentData: Record<string, string> = await contentResponse.json();
+          if (contentData['tagline'])   setFooterTagline(contentData['tagline']);
+          if (contentData['copyright']) setCopyrightText(contentData['copyright']);
+          if (contentData['disclaimer']) setDisclaimerText(contentData['disclaimer']);
         }
       } catch (error) {
         console.error('Failed to load footer content:', error);
@@ -140,6 +129,17 @@ export default function Layout() {
   const handleDonateClick = (e: React.MouseEvent) => {
     e.preventDefault();
     setIsModalOpen(true);
+  };
+
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newsletterEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newsletterEmail)) {
+      setNewsletterStatus('error');
+      return;
+    }
+    // UI-only for now — wire to backend when newsletter endpoint is available
+    setNewsletterStatus('success');
+    setNewsletterEmail('');
   };
 
   return (
@@ -156,11 +156,13 @@ export default function Layout() {
         <div className="header-inner">
           <Link to="/" className="site-logo" aria-label="Home">
             <img src={logoUrl} alt={`${siteName} logo`} className="logo-img" />
-            <h1>{siteName}</h1>
+            <span className="site-logo-name">{siteName}</span>
           </Link>
           <nav className="nav" role="navigation" aria-label="Main navigation">
             <Link to="/" className="nav-link">Home</Link>
             <Link data-testid="nav-campaigns" to="/campaigns" className="nav-link">Campaigns</Link>
+            <Link to="/about" className="nav-link">About</Link>
+            <Link to="/contact" className="nav-link">Contact</Link>
             <a href="#" className="btn-donate-header btn-hero" onClick={handleDonateClick} aria-label="Open donation form">
               <span className="heart-icon" aria-hidden="true">❤️</span>
               Donate
@@ -175,6 +177,17 @@ export default function Layout() {
         </ErrorBoundary>
       </main>
 
+      <div className="trust-strip" aria-label="Trust indicators">
+        <div className="trust-strip-inner">
+          <span className="trust-item"><span aria-hidden="true">🔒</span> Secure payments via Stripe</span>
+          <span className="trust-divider" aria-hidden="true">·</span>
+          <span className="trust-item"><span aria-hidden="true">🏛️</span> Registered NGO</span>
+          <span className="trust-divider" aria-hidden="true">·</span>
+          <span className="trust-item"><span aria-hidden="true">💯</span> 100% reaches beneficiaries</span>
+          <span className="trust-divider" aria-hidden="true">·</span>
+          <span className="trust-item"><span aria-hidden="true">📋</span> Annual reports available</span>
+        </div>
+      </div>
       <footer className="footer" role="contentinfo">
         <div className="container">
           <div className="footer-content">
@@ -186,9 +199,11 @@ export default function Layout() {
             </div>
 
             <div className="footer-section">
-              <h4>Quick Links</h4>
+              <h4>Explore</h4>
               <ul>
                 <li><Link to="/campaigns">All Campaigns</Link></li>
+                <li><Link to="/about">About Us</Link></li>
+                <li><Link to="/contact">Contact</Link></li>
                 <li><Link to="/terms">Terms & Conditions</Link></li>
                 <li><Link to="/accessibility">Accessibility</Link></li>
               </ul>
@@ -198,7 +213,35 @@ export default function Layout() {
               <h4>Get Involved</h4>
               <ul>
                 <li><a href="#" onClick={handleDonateClick}>Make a Donation</a></li>
+                <li><Link to="/contact?subject=volunteer">Volunteer</Link></li>
+                <li><Link to="/contact?subject=partnership">Partner With Us</Link></li>
               </ul>
+            </div>
+
+            <div className="footer-section footer-newsletter">
+              <h4>Stay Updated</h4>
+              <p className="newsletter-description">Get updates on our campaigns and impact.</p>
+              {newsletterStatus === 'success' ? (
+                <div className="newsletter-success">
+                  ✅ Thank you! You're on the list.
+                </div>
+              ) : (
+                <form className="newsletter-form" onSubmit={handleNewsletterSubmit} noValidate>
+                  <input
+                    ref={newsletterRef}
+                    type="email"
+                    value={newsletterEmail}
+                    onChange={e => { setNewsletterEmail(e.target.value); setNewsletterStatus('idle'); }}
+                    placeholder="your@email.com"
+                    aria-label="Email address for newsletter"
+                    className={`newsletter-input ${newsletterStatus === 'error' ? 'newsletter-input-error' : ''}`}
+                  />
+                  {newsletterStatus === 'error' && (
+                    <span className="newsletter-error">Please enter a valid email.</span>
+                  )}
+                  <button type="submit" className="btn-newsletter">Subscribe</button>
+                </form>
+              )}
             </div>
 
             {contactInfo && contactInfo.showInFooter !== false && (
@@ -247,7 +290,7 @@ export default function Layout() {
                 ))}
               </div>
             )}
-            <span className="copyright">© 2025 YSS</span>
+            <span className="copyright">© {new Date().getFullYear()} {siteName}</span>
           </div>
         </div>
       </footer>

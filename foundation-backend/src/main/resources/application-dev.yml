@@ -1,0 +1,18 @@
+# Development profile overrides
+# Activate with: --spring.profiles.active=dev or SPRING_PROFILES_ACTIVE=dev
+
+app:
+  jwt:
+    cookie-secure: false  # Allow HTTP cookies in local development
+
+springdoc:
+  swagger-ui:
+    enabled: true  # Enable Swagger UI in dev only
+
+logging:
+  level:
+    com.myfoundation.school: DEBUG
+    com.myfoundation.school.security: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.web.cors: DEBUG
+    org.hibernate.SQL: DEBUG

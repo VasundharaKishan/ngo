@@ -70,7 +70,9 @@ public class HeroSlideService {
         existing.setFocus(updatedSlide.getFocus());
         existing.setEnabled(updatedSlide.isEnabled());
         existing.setSortOrder(updatedSlide.getSortOrder());
-        
+        existing.setTitle(updatedSlide.getTitle());
+        existing.setSubtitle(updatedSlide.getSubtitle());
+
         log.info("Updated hero slide: {}", id);
         return repository.save(existing);
     }
@@ -150,6 +152,16 @@ public class HeroSlideService {
             );
         }
         
+        // Validate optional title length
+        if (slide.getTitle() != null && slide.getTitle().length() > 255) {
+            throw new ValidationException("Title must be 255 characters or fewer");
+        }
+
+        // Validate optional subtitle length
+        if (slide.getSubtitle() != null && slide.getSubtitle().length() > 500) {
+            throw new ValidationException("Subtitle must be 500 characters or fewer");
+        }
+
         // Validate sortOrder
         if (slide.getSortOrder() < 0) {
             throw new ValidationException(

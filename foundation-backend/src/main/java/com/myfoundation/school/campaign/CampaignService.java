@@ -1,12 +1,15 @@
 package com.myfoundation.school.campaign;
 
 import com.myfoundation.school.donation.DonationRepository;
+import com.myfoundation.school.dto.CampaignPageResponse;
 import com.myfoundation.school.dto.CampaignPopupDto;
 import com.myfoundation.school.dto.CampaignResponse;
 import com.myfoundation.school.dto.CampaignSummaryDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -76,7 +79,33 @@ public class CampaignService {
     public List<CampaignResponse> getAllActiveCampaigns() {
         return getCampaigns(null, null, null);
     }
-    
+
+    /**
+     * Get a paginated page of active campaigns with optional filters.
+     */
+    public CampaignPageResponse getCampaignsPaginated(String categoryId, Boolean featured, Boolean urgent, Pageable pageable) {
+        Page<Campaign> campaignPage;
+        if (Boolean.TRUE.equals(featured)) {
+            campaignPage = campaignRepository.findByActiveTrueAndFeaturedTrue(pageable);
+        } else if (Boolean.TRUE.equals(urgent)) {
+            campaignPage = campaignRepository.findByActiveTrueAndUrgentTrue(pageable);
+        } else if (categoryId != null && !categoryId.isEmpty()) {
+            campaignPage = campaignRepository.findByActiveTrueAndCategoryId(categoryId, pageable);
+        } else {
+            campaignPage = campaignRepository.findByActiveTrue(pageable);
+        }
+        List<CampaignResponse> items = campaignPage.getContent().stream()
+                .map(this::toCampaignResponse)
+                .collect(Collectors.toList());
+        return CampaignPageResponse.builder()
+                .items(items)
+                .page(campaignPage.getNumber())
+                .size(campaignPage.getSize())
+                .totalItems(campaignPage.getTotalElements())
+                .totalPages(campaignPage.getTotalPages())
+                .build();
+    }
+
     /**
      * Get a single campaign by its unique identifier.
      * 

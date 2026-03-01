@@ -16,6 +16,8 @@ interface HeroSlide {
   focus: 'CENTER' | 'LEFT' | 'RIGHT' | 'TOP' | 'BOTTOM';
   enabled: boolean;
   sortOrder: number;
+  title?: string;
+  subtitle?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -52,11 +54,13 @@ export default function AdminHomepage() {
   const [slides, setSlides] = useState<HeroSlide[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [newSlide, setNewSlide] = useState({ 
-    imageUrl: '', 
-    altText: '', 
-    focus: 'CENTER' as HeroSlide['focus'], 
-    filename: '' 
+  const [newSlide, setNewSlide] = useState({
+    imageUrl: '',
+    altText: '',
+    focus: 'CENTER' as HeroSlide['focus'],
+    filename: '',
+    title: '',
+    subtitle: '',
   });
 
   // Home Sections State
@@ -103,6 +107,18 @@ export default function AdminHomepage() {
     ));
   };
 
+  const updateSlideTitle = (id: string, title: string) => {
+    setSlides(slides.map(slide =>
+      slide.id === id ? { ...slide, title } : slide
+    ));
+  };
+
+  const updateSlideSubtitle = (id: string, subtitle: string) => {
+    setSlides(slides.map(slide =>
+      slide.id === id ? { ...slide, subtitle } : slide
+    ));
+  };
+
   const moveSlideUp = (index: number) => {
     if (index === 0) return;
     const newSlides = [...slides];
@@ -137,7 +153,9 @@ export default function AdminHomepage() {
               altText: slide.altText,
               focus: slide.focus,
               enabled: slide.enabled,
-              sortOrder: slide.sortOrder
+              sortOrder: slide.sortOrder,
+              title: slide.title || null,
+              subtitle: slide.subtitle || null,
             })
           }
         );
@@ -181,14 +199,16 @@ export default function AdminHomepage() {
           altText: newSlide.altText,
           focus: newSlide.focus,
           enabled: true,
-          sortOrder: nextSortOrder
+          sortOrder: nextSortOrder,
+          title: newSlide.title || null,
+          subtitle: newSlide.subtitle || null,
         })
       });
 
       if (!response.ok) throw new Error('Failed to create slide');
 
       showToast('Slide added successfully', 'success');
-      setNewSlide({ imageUrl: '', altText: '', focus: 'CENTER', filename: '' });
+      setNewSlide({ imageUrl: '', altText: '', focus: 'CENTER', filename: '', title: '', subtitle: '' });
       setShowAddForm(false);
       await loadSlides();
     } catch (error) {
@@ -492,6 +512,30 @@ export default function AdminHomepage() {
                   </select>
                 </div>
 
+                <div className="form-group">
+                  <label htmlFor="slide-title">Slide Title (optional — shown as text overlay)</label>
+                  <input
+                    id="slide-title"
+                    type="text"
+                    value={newSlide.title}
+                    onChange={(e) => setNewSlide(prev => ({ ...prev, title: e.target.value }))}
+                    placeholder="e.g. Supporting Rural Education"
+                    maxLength={255}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="slide-subtitle">Slide Subtitle (optional)</label>
+                  <input
+                    id="slide-subtitle"
+                    type="text"
+                    value={newSlide.subtitle}
+                    onChange={(e) => setNewSlide(prev => ({ ...prev, subtitle: e.target.value }))}
+                    placeholder="e.g. Help us reach 1,000 students this year"
+                    maxLength={500}
+                  />
+                </div>
+
                 <button
                   className="btn-primary"
                   onClick={addNewSlide}
@@ -543,6 +587,23 @@ export default function AdminHomepage() {
                             <option key={option} value={option}>{option}</option>
                           ))}
                         </select>
+
+                        <div className="slide-text-fields">
+                          <input
+                            type="text"
+                            value={slide.title || ''}
+                            onChange={(e) => updateSlideTitle(slide.id, e.target.value)}
+                            placeholder="Slide title (shown as overlay)"
+                            maxLength={255}
+                          />
+                          <input
+                            type="text"
+                            value={slide.subtitle || ''}
+                            onChange={(e) => updateSlideSubtitle(slide.id, e.target.value)}
+                            placeholder="Subtitle (optional)"
+                            maxLength={500}
+                          />
+                        </div>
                       </div>
 
                       <div className="slide-actions">

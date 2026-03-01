@@ -1,5 +1,8 @@
 package com.myfoundation.school.auth;
 
+import com.myfoundation.school.security.JwtService;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -21,6 +24,7 @@ import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -30,6 +34,8 @@ import java.util.Map;
 public class AuthController {
     
     private final AuthService authService;
+    private final JwtService jwtService;
+    private final AdminUserRepository adminUserRepository;
     @Value("${app.allow-admin-bootstrap:false}")
     private boolean allowAdminBootstrap;
     @Value("${app.jwt.cookie-enabled:false}")
@@ -133,6 +139,67 @@ public class AuthController {
         return builder.body(Map.of("message", "Logged out successfully"));
     }
     
+    @Operation(
+        summary = "Refresh JWT token",
+        description = "Issues a new JWT if the current one is still valid. Extends the admin session without re-login.",
+        security = @SecurityRequirement(name = "Bearer Authentication")
+    )
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refreshToken(HttpServletRequest request) {
+        // Resolve JWT from cookie or Authorization header
+        String token = null;
+        if (cookieEnabled && request.getCookies() != null) {
+            for (Cookie c : request.getCookies()) {
+                if (cookieName.equals(c.getName())) {
+                    token = c.getValue();
+                    break;
+                }
+            }
+        }
+        if (token == null) {
+            String authHeader = request.getHeader("Authorization");
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                token = authHeader.substring(7);
+            }
+        }
+
+        if (token == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "No token provided"));
+        }
+
+        Optional<Jws<Claims>> claimsOpt = jwtService.parseToken(token);
+        if (claimsOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Invalid or expired token"));
+        }
+
+        String username = claimsOpt.get().getPayload().get("username", String.class);
+        AdminUser user = adminUserRepository.findByUsername(username).orElse(null);
+        if (user == null || !user.getActive()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "User not found or inactive"));
+        }
+
+        String newToken = jwtService.generateToken(user);
+        ResponseEntity.BodyBuilder builder = ResponseEntity.ok();
+
+        if (cookieEnabled) {
+            ResponseCookie cookie = ResponseCookie.from(cookieName, newToken)
+                    .httpOnly(true)
+                    .secure(cookieSecure)
+                    .path("/")
+                    .sameSite("Lax")
+                    .maxAge(jwtExpiryMinutes * 60)
+                    .domain(cookieDomain.isBlank() ? null : cookieDomain)
+                    .build();
+            builder.header("Set-Cookie", cookie.toString());
+        }
+
+        log.info("JWT refreshed for user: {}", username);
+        return builder.body(Map.of("message", "Token refreshed", "token", newToken));
+    }
+
     @Operation(
         summary = "Initialize CSRF token",
         description = "GET endpoint that triggers CSRF token generation. The CSRF token is automatically set in XSRF-TOKEN cookie by Spring Security. Requires authentication.",

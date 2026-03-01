@@ -90,63 +90,61 @@ export const authFetch = async (url: string, options: RequestInit = {}) => {
     // Get CSRF token from cookie and include in header for mutation requests
     if (options.method && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(options.method.toUpperCase())) {
       const csrfToken = getCsrfToken();
-      console.log('[authFetch] CSRF Token from cookie:', csrfToken);
-      console.log('[authFetch] All cookies:', document.cookie);
       if (csrfToken) {
         headers.set('X-XSRF-TOKEN', csrfToken);
-      } else {
-        console.warn('[authFetch] No CSRF token found in cookies for', options.method, 'request!');
       }
     }
 
     // Include credentials to send httpOnly cookies
-    return fetch(url, { 
-      ...options, 
+    return fetch(url, {
+      ...options,
       headers,
       credentials: 'include' // Send cookies with every request
     });
   };
 
   // Make the initial request
-  const response = await makeRequest();
+  let response = await makeRequest();
 
-  // If we get a 403 and it's a CSRF error, refresh the token and retry once
+  // If we get a 401, attempt to refresh the JWT token and retry once
+  if (response.status === 401) {
+    try {
+      const refreshResponse = await fetch(`${API_BASE_URL}/auth/refresh`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      if (refreshResponse.ok) {
+        // JWT refreshed — retry the original request
+        response = await makeRequest();
+      }
+    } catch {
+      // Refresh failed — return the original 401
+    }
+  }
+
+  // If we get a 403 and it's a CSRF error, refresh the CSRF token and retry once
   if (response.status === 403 && (options.method === 'POST' || options.method === 'PUT' || options.method === 'DELETE')) {
     try {
       const errorBody = await response.clone().json();
       if (errorBody.message && errorBody.message.includes('CSRF')) {
-        console.log('[authFetch] CSRF error detected, refreshing token and retrying...');
-        
         // Refresh CSRF token
         const csrfResponse = await fetch(`${API_BASE_URL}/auth/csrf`, {
           method: 'GET',
           credentials: 'include'
         });
-        
-        if (!csrfResponse.ok) {
-          console.error('[authFetch] Failed to refresh CSRF token:', csrfResponse.status);
-          return response; // Return original error response
+
+        if (csrfResponse.ok) {
+          await new Promise(resolve => setTimeout(resolve, 200));
+          const newToken = getCsrfToken();
+          if (newToken) {
+            return makeRequest();
+          }
         }
-        
-        // Wait a bit for cookie to be set
-        await new Promise(resolve => setTimeout(resolve, 200));
-        
-        // Verify token was set
-        const newToken = getCsrfToken();
-        console.log('[authFetch] New CSRF token after refresh:', newToken);
-        
-        if (!newToken) {
-          console.error('[authFetch] CSRF token still not available after refresh');
-          return response; // Return original error response
-        }
-        
-        // Retry the original request
-        console.log('[authFetch] Retrying request with new CSRF token');
-        return makeRequest();
       }
-    } catch (e) {
+    } catch {
       // If we can't parse the error or refresh fails, return original response
-      console.error('[authFetch] Failed to refresh CSRF token:', e);
     }
   }
 

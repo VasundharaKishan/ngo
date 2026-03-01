@@ -25,4 +25,6 @@ public class AdminCategoryRequest {
     private Integer displayOrder;
     
     private Boolean active = true;
+
+    private String imageUrl;
 }

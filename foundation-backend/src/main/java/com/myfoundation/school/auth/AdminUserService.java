@@ -75,6 +75,14 @@ public class AdminUserService {
             throw new RuntimeException("Only the super admin can delete other admins");
         }
 
+        // Prevent deleting the last admin user
+        if (target.getRole() == UserRole.ADMIN) {
+            long adminCount = adminUserRepository.countByRole(UserRole.ADMIN);
+            if (adminCount <= 1) {
+                throw new RuntimeException("Cannot delete the last admin user. At least one admin must remain.");
+            }
+        }
+
         // Delete associated password setup tokens first to avoid foreign key constraint violation
         tokenRepository.deleteByUserId(target.getId());
         log.info("Deleted password setup tokens for user: {}", target.getUsername());

@@ -12,8 +12,12 @@ const mockCampaign = {
 };
 
 test('public flows: home -> campaigns -> details', async ({ page }) => {
-  await page.route('**/api/campaigns', route =>
-    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([mockCampaign]) })
+  await page.route('**/api/campaigns?**', route =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ items: [mockCampaign], page: 0, size: 100, totalItems: 1, totalPages: 1 }),
+    })
   );
   await page.route(`**/api/campaigns/${mockCampaign.id}`, route =>
     route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockCampaign) })

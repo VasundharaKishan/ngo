@@ -3,7 +3,10 @@
  */
 
 // ===== API Configuration =====
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+// In dev: relative URL goes through the Vite proxy (/api → localhost:8080/api),
+// so cookies are same-origin and CSRF works correctly.
+// In production: set VITE_API_BASE_URL to the actual backend URL.
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 // ===== API Endpoints =====
 export const API_ENDPOINTS = {

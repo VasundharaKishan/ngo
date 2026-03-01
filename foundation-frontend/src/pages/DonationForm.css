@@ -474,3 +474,62 @@
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+/* ---- Frequency Toggle ---- */
+.frequency-toggle {
+  display: flex;
+  gap: 0;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 0.75rem;
+}
+
+.frequency-btn {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: none;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.frequency-btn.active {
+  background: #2a3da8;
+  color: white;
+}
+
+.frequency-btn.active.monthly {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  color: white;
+}
+
+.frequency-btn:not(.active):hover {
+  background: #f0f4ff;
+  color: #2a3da8;
+}
+
+.frequency-note {
+  font-size: 0.875rem;
+  color: #065f46;
+  background: #d1fae5;
+  border: 1px solid #6ee7b7;
+  border-radius: 8px;
+  padding: 0.6rem 0.875rem;
+  margin-bottom: 0.75rem;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 0.95rem;
+}
+
+.summary-row:last-child {
+  border-bottom: none;
+}

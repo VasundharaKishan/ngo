@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">95.14% </span>
+                <span class="strong">95.37% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>98/103</span>
+                <span class='fraction'>103/108</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">95.14% </span>
+                <span class="strong">95.37% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>98/103</span>
+                <span class='fraction'>103/108</span>
             </div>
         
             
@@ -207,7 +207,14 @@
 <a name='L142'></a><a href='#L142'>142</a>
 <a name='L143'></a><a href='#L143'>143</a>
 <a name='L144'></a><a href='#L144'>144</a>
-<a name='L145'></a><a href='#L145'>145</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L145'></a><a href='#L145'>145</a>
+<a name='L146'></a><a href='#L146'>146</a>
+<a name='L147'></a><a href='#L147'>147</a>
+<a name='L148'></a><a href='#L148'>148</a>
+<a name='L149'></a><a href='#L149'>149</a>
+<a name='L150'></a><a href='#L150'>150</a>
+<a name='L151'></a><a href='#L151'>151</a>
+<a name='L152'></a><a href='#L152'>152</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -224,6 +231,10 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">9x</span>
+<span class="cline-any cline-yes">9x</span>
 <span class="cline-any cline-yes">9x</span>
 <span class="cline-any cline-yes">9x</span>
 <span class="cline-any cline-yes">9x</span>
@@ -233,8 +244,6 @@
 <span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -242,9 +251,7 @@
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -316,6 +323,14 @@
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
@@ -345,14 +360,15 @@
 <span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { API_BASE_URL } from '../api';
+import { useSiteName, useSiteLogo } from '../contexts/ConfigContext';
 import HeroCarousel from '../components/HeroCarousel';
 import FeaturedCampaignsSection from '../components/sections/FeaturedCampaignsSection';
 import StatsSection from '../components/sections/StatsSection';
@@ -372,23 +388,21 @@ export default function Home() {
   const [sections, setSections] = useState&lt;HomeSection[]&gt;([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState&lt;string | null&gt;(null);
+  const siteName = useSiteName();
+  const logoUrl = useSiteLogo();
 &nbsp;
   useEffect(() =&gt; {
     const loadSections = async () =&gt; {
       try {
-        console.log('🔄 Fetching home sections from:', `${API_BASE_URL}/public/home`);
         const response = await fetch(`${API_BASE_URL}/public/home`);
-        console.log('📡 Response status:', response.status, response.statusText);
-        
+&nbsp;
         if (!response.ok) {
           throw new Error(`Failed to load home sections (${response.status})`);
         }
         const data: HomeSection[] = await response.json();
-        console.log('✅ Loaded sections:', data);
         setSections(data);
         setLoading(false);
       } catch (err) {
-        console.error('❌ Error loading home sections:', err);
         setError(err instanceof Error ? err.<span class="branch-0 cbranch-no" title="branch not covered" >message : 'Unknown error')</span>;
         setLoading(false);
       }
@@ -459,6 +473,14 @@ export default function Home() {
 &nbsp;
   return (
     &lt;div className="home"&gt;
+      &lt;Helmet&gt;
+        &lt;title&gt;{siteName} — Supporting Education, Healthcare &amp; Community&lt;/title&gt;
+        &lt;meta name="description" content="Join us in making a difference through transparent donations to education, healthcare, and community development campaigns in India." /&gt;
+        &lt;meta property="og:title" content={siteName} /&gt;
+        &lt;meta property="og:description" content="Support meaningful causes through transparent donations." /&gt;
+        &lt;meta property="og:type" content="website" /&gt;
+        &lt;meta property="og:image" content={logoUrl} /&gt;
+      &lt;/Helmet&gt;
       {sections.map((section) =&gt; (
         &lt;SectionRenderer key={section.id} section={section} /&gt;
       ))}
@@ -490,7 +512,6 @@ function SectionRenderer({ section }: { section: HomeSection }) {
 <span class="cstat-no" title="statement not covered" >      return &lt;WhyDonateSection config={config} /&gt;;</span>
     
     default:
-      console.warn(`Unknown section type: ${section.type}`);
       return null;
   }
 }
@@ -502,7 +523,7 @@ function SectionRenderer({ section }: { section: HomeSection }) {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-01-17T09:22:25.160Z
+                at 2026-02-22T15:37:03.463Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

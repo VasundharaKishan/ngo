@@ -1,34 +1,40 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useState, useRef, type FormEvent } from 'react';
 import { useParams } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { api, type Campaign } from '../api';
+import { useSiteName } from '../contexts/ConfigContext';
 import { getCurrencySymbol, amountToCents, centsToAmount } from '../utils/currency';
 import { isValidEmail, isEmpty } from '../utils/validators';
 import { DONATION } from '../config/constants';
 import './DonationForm.css';
 
 type DonationStep = 'amount' | 'personal' | 'payment';
+type DonationFrequency = 'one_time' | 'monthly';
 
 export default function DonationForm() {
   const { campaignId } = useParams<{ campaignId: string }>();
-  
+  const siteName = useSiteName();
+
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [currentStep, setCurrentStep] = useState<DonationStep>('amount');
+  const [frequency, setFrequency] = useState<DonationFrequency>('one_time');
   const [amount, setAmount] = useState<number>(DONATION.DEFAULT_AMOUNT);
   const [currency, setCurrency] = useState<string>('eur');
   const [customAmount, setCustomAmount] = useState('');
   const [donorName, setDonorName] = useState('');
   const [donorEmail, setDonorEmail] = useState('');
-  const [donorPhone, setDonorPhone] = useState('');
   const [anonymous, setAnonymous] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [campaignLoadError, setCampaignLoadError] = useState('');
   const [redirectingUrl, setRedirectingUrl] = useState<string>('');
+  const submittingRef = useRef(false);
 
   useEffect(() => {
     if (campaignId) {
       api.getCampaign(campaignId)
         .then(setCampaign)
-        .catch(() => setError('Failed to load campaign'));
+        .catch(() => setCampaignLoadError('Failed to load campaign. Please check the URL and try again.'));
     }
   }, [campaignId]);
 
@@ -65,12 +71,16 @@ export default function DonationForm() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    
+
     if (!campaignId) return;
+
+    // Prevent double-submit
+    if (submittingRef.current) return;
+    submittingRef.current = true;
 
     setLoading(true);
     setError('');
-    
+
     try {
       const response = await api.createStripeSession({
         amount,
@@ -89,16 +99,31 @@ export default function DonationForm() {
     } catch (err) {
       setError('Failed to create checkout session. Please try again.');
       setLoading(false);
+      submittingRef.current = false;
     }
   };
 
   const handleCustomAmountChange = (value: string) => {
     setCustomAmount(value);
     const cents = amountToCents(value);
-    if (cents > 0) {
-      setAmount(cents);
-    }
+    setAmount(cents > 0 ? cents : 0);
   };
+
+  if (campaignLoadError) {
+    return (
+      <div className="container">
+        <div className="donation-form-container">
+          <div className="form-header">
+            <h1>Campaign Not Found</h1>
+          </div>
+          <div style={{ padding: '2rem', textAlign: 'center' }}>
+            <p className="error">{campaignLoadError}</p>
+            <a href="/campaigns" style={{ marginTop: '1rem', display: 'inline-block' }}>← Browse campaigns</a>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!campaign) {
     return <div className="container"><p className="loading">Loading...</p></div>;
@@ -132,6 +157,12 @@ export default function DonationForm() {
 
   return (
     <div className="container">
+      <Helmet>
+        <title>Donate to {campaign.title} | {siteName}</title>
+        <meta name="description" content={`Make a secure donation to support ${campaign.title}. Every contribution makes a difference.`} />
+        <meta property="og:title" content={`Support ${campaign.title}`} />
+        <meta name="robots" content="noindex" />
+      </Helmet>
       <div className="donation-form-container">
         <div className="form-header">
           <h1>Make a Donation</h1>
@@ -170,7 +201,32 @@ export default function DonationForm() {
           {currentStep === 'amount' && (
             <div className="form-step">
               <h2 className="step-title">Choose Your Donation Amount</h2>
-              
+
+              {/* Frequency Toggle */}
+              <div className="frequency-toggle" role="group" aria-label="Donation frequency">
+                <button
+                  type="button"
+                  className={`frequency-btn ${frequency === 'one_time' ? 'active' : ''}`}
+                  onClick={() => setFrequency('one_time')}
+                  data-testid="freq-one-time"
+                >
+                  One-time
+                </button>
+                <button
+                  type="button"
+                  className={`frequency-btn ${frequency === 'monthly' ? 'active monthly' : ''}`}
+                  onClick={() => setFrequency('monthly')}
+                  data-testid="freq-monthly"
+                >
+                  Monthly ♻️
+                </button>
+              </div>
+              {frequency === 'monthly' && (
+                <p className="frequency-note" data-testid="monthly-note">
+                  💚 Monthly donors give <strong>5× more impact</strong> over a year
+                </p>
+              )}
+
               <div className="form-section">
                 <label className="form-label">Select Currency</label>
                 <select 
@@ -280,16 +336,6 @@ export default function DonationForm() {
                     <p className="form-hint">We'll send your donation receipt to this email</p>
                   </div>
 
-                  <div className="form-section">
-                    <label className="form-label">Phone Number (Optional)</label>
-                    <input
-                      type="tel"
-                      className="form-input"
-                      placeholder="+1 (555) 000-0000"
-                      value={donorPhone}
-                      onChange={(e) => setDonorPhone(e.target.value)}
-                    />
-                  </div>
                 </>
               )}
 
@@ -319,6 +365,10 @@ export default function DonationForm() {
                 <div className="summary-row">
                   <span>Campaign:</span>
                   <strong>{campaign.title}</strong>
+                </div>
+                <div className="summary-row">
+                  <span>Frequency:</span>
+                  <strong>{frequency === 'monthly' ? 'Monthly ♻️' : 'One-time'}</strong>
                 </div>
                 <div className="summary-row">
                   <span>Amount:</span>

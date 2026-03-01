@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RiMegaphoneLine, RiStarLine } from 'react-icons/ri';
 import { api, type CampaignPopupDto, type DonatePopupResponse } from '../api';
 import { formatCurrency } from '../utils/currency';
+import { useSiteName } from '../contexts/ConfigContext';
 import './FeaturedCampaignModal.css';
 
 interface FeaturedCampaignModalProps {
@@ -15,6 +16,50 @@ export default function FeaturedCampaignModal({ isOpen, onClose }: FeaturedCampa
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const modalRef = useRef<HTMLDivElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
+  const siteName = useSiteName();
+
+  // Focus trap: move focus into modal when opened, restore when closed
+  useEffect(() => {
+    if (isOpen) {
+      previousFocusRef.current = document.activeElement as HTMLElement;
+      // Defer so the modal is rendered before we focus
+      setTimeout(() => {
+        const firstFocusable = modalRef.current?.querySelector<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        firstFocusable?.focus();
+      }, 0);
+    } else {
+      previousFocusRef.current?.focus();
+    }
+  }, [isOpen]);
+
+  // Trap Tab / Shift+Tab inside the modal
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLDivElement>) => {
+      if (e.key === 'Escape') {
+        onClose();
+        return;
+      }
+      if (e.key !== 'Tab' || !modalRef.current) return;
+      const focusable = Array.from(
+        modalRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        )
+      ).filter(el => !el.hasAttribute('disabled'));
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey) {
+        if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+      } else {
+        if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    },
+    [onClose]
+  );
 
   useEffect(() => {
     if (isOpen) {
@@ -59,7 +104,12 @@ export default function FeaturedCampaignModal({ isOpen, onClose }: FeaturedCampa
 
   return (
     <div className="modal-overlay" onClick={onClose} role="dialog" aria-modal="true" aria-labelledby="modal-title">
-      <div className="featured-modal" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="featured-modal"
+        onClick={(e) => e.stopPropagation()}
+        ref={modalRef}
+        onKeyDown={handleKeyDown}
+      >
         <button className="modal-close" onClick={onClose} aria-label="Close modal">×</button>
         
         {loading ? (
@@ -92,7 +142,7 @@ export default function FeaturedCampaignModal({ isOpen, onClose }: FeaturedCampa
                   <div className="modal-logos">
                     <div className="modal-logo">🤝</div>
                     <span className="modal-support-text">in support of</span>
-                    <div className="modal-org-logo">Yugal Savitri Seva</div>
+                    <div className="modal-org-logo">{siteName}</div>
                   </div>
                 </div>
 

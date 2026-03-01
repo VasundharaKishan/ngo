@@ -1,5 +1,212 @@
-/* Import AdminDashboardNew styles */
-@import '../pages/AdminDashboardNew.css';
+
+/* ========== Admin CSS Variable Aliases ========== */
+/*
+   The design system (design-system.css) uses --space-N, --radius-*, --text-*, --bg-*.
+   Admin page CSS files use --spacing-N, --border-radius-*, --color-text-*, --color-bg-*.
+   This :root block bridges the gap so all admin tokens resolve correctly.
+*/
+:root {
+  /* Spacing — design system has --space-N, admin CSS expects --spacing-N */
+  --spacing-1: 0.25rem;
+  --spacing-2: 0.5rem;
+  --spacing-3: 0.75rem;
+  --spacing-4: 1rem;
+  --spacing-5: 1.25rem;
+  --spacing-6: 1.5rem;
+  --spacing-8: 2rem;
+
+  /* Border radius — design system has --radius-*, admin CSS expects --border-radius-* */
+  --border-radius-sm: 4px;
+  --border-radius-md: 6px;
+  --border-radius-lg: 12px;
+  --border-radius-xl: 16px;
+
+  /* Borders — not defined in design system at all */
+  --color-border: #e5e7eb;
+
+  /* Text colors — design system has --text-*, admin CSS expects --color-text-* */
+  --color-text-primary: #111827;
+  --color-text-secondary: #4b5563;
+  --color-text-tertiary: #6b7280;
+
+  /* Background colors — design system has --bg-*, admin CSS expects --color-bg-* */
+  --color-bg-secondary: #f0f9ff;
+  --color-bg-tertiary: #e0f2fe;
+
+  /* Font sizes — design system has --text-*, admin CSS expects --font-size-* */
+  --font-size-xs:   0.75rem;
+  --font-size-sm:   0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg:   1.125rem;
+  --font-size-xl:   1.25rem;
+  --font-size-2xl:  1.5rem;
+  --font-size-3xl:  1.875rem;
+  --font-size-4xl:  2.25rem;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.16);
+
+  /* Colors used across admin pages */
+  --color-primary: #2a3da8;
+  --color-primary-dark: #1e3a8a;
+  --color-error: #dc2626;
+  --color-success: #10b981;
+}
+
+/* ========== Desktop Layout: Sidebar + Main side-by-side ========== */
+.admin-dashboard-new {
+  display: flex;
+  min-height: 100vh;
+  background: var(--bg-secondary, #f0f9ff);
+}
+
+.admin-sidebar {
+  width: 280px;
+  flex-shrink: 0;
+  min-height: 100vh;
+  position: sticky;
+  top: 0;
+  overflow-y: auto;
+  background: white;
+  border-right: 1px solid var(--color-border, #e5e7eb);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ========== Sidebar Header ========== */
+
+.sidebar-header {
+  padding: 1.5rem 1.25rem 1rem;
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+}
+
+.sidebar-header h1 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-primary, #2a3da8);
+  margin: 0 0 0.375rem 0;
+}
+
+.header-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.user-info .user-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-primary, #111827);
+  line-height: 1.2;
+}
+
+.user-info .user-role {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-secondary, #6b7280);
+}
+
+/* ========== Sidebar Navigation ========== */
+
+.admin-sidebar nav {
+  flex: 1;
+  padding: 0.75rem 0;
+}
+
+.sidebar-menu {
+  list-style: none;
+  margin: 0;
+  padding: 0 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.sidebar-menu-item {
+  width: 100%;
+}
+
+.sidebar-menu-button {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-text-secondary, #4b5563);
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease;
+  white-space: nowrap;
+}
+
+.sidebar-menu-button:hover {
+  background: var(--color-bg-secondary, #f0f9ff);
+  color: var(--color-primary, #2a3da8);
+}
+
+.sidebar-menu-button.active {
+  background: #eff6ff;
+  color: var(--color-primary, #2a3da8);
+  font-weight: 600;
+}
+
+.menu-icon {
+  font-size: 1.125rem;
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
+.sidebar-menu-button.active .menu-icon {
+  opacity: 1;
+}
+
+/* ========== Sidebar Footer (Logout) ========== */
+
+.sidebar-footer {
+  padding: 0.75rem;
+  border-top: 1px solid var(--color-border, #e5e7eb);
+}
+
+.btn-logout-sidebar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-error, #dc2626);
+  cursor: pointer;
+  transition: background 0.15s ease;
+  text-align: left;
+}
+
+.btn-logout-sidebar:hover {
+  background: #fef2f2;
+}
+
+.admin-main-content {
+  flex: 1;
+  min-width: 0;       /* prevents flex child from overflowing */
+  overflow-y: auto;
+}
 
 /* Hamburger Button - Hidden on Desktop */
 .hamburger-button {
@@ -450,5 +657,3 @@ textarea:focus-visible {
   }
 }
 
-/* AdminLayout uses the same styles as AdminDashboardNew */
-/* No additional styles needed - reusing existing dashboard styles */

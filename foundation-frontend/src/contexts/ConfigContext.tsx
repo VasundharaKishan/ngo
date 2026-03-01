@@ -67,7 +67,6 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
       // Apply theme CSS variables to document root
       applyThemeVariables(mergedConfig);
       
-      console.log('Site configuration loaded:', mergedConfig);
     } catch (err) {
       console.error('Failed to load site configuration:', err);
       setError(err instanceof Error ? err : new Error('Unknown error'));
@@ -117,7 +116,6 @@ function applyThemeVariables(config: SiteConfig) {
     const value = config[configKey];
     if (value) {
       root.style.setProperty(cssVar, value);
-      console.log(`Applied CSS variable: ${cssVar} = ${value}`);
     }
   });
 
@@ -159,5 +157,6 @@ export function useFeaturedCampaignsCount(): number {
 export function useCampaignsPerPage(): number {
   const { config } = useConfig();
   const value = config['campaigns_page.items_per_page'] || DEFAULT_CONFIG['campaigns_page.items_per_page'];
-  return parseInt(value!, 10);
+  const parsed = parseInt(value!, 10);
+  return parsed > 0 ? parsed : 12; // guard against 0 or NaN from bad config values
 }

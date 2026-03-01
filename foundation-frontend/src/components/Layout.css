@@ -60,7 +60,8 @@
    ======================================== */
 
 .header {
-  color: var(--color-white);
+  background: rgba(255, 255, 255, 0.97);
+  color: var(--color-text, #1e293b);
   height: var(--header-height);
   box-shadow: var(--shadow-lg);
   top: 0;
@@ -88,7 +89,7 @@
 
 .site-logo {
   text-decoration: none;
-  color: var(--color-white);
+  color: var(--color-primary, #2a3da8);
   transition: transform var(--transition-base);
   display: inline-flex;
   align-items: center;
@@ -104,24 +105,34 @@
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-bold);
   letter-spacing: var(--letter-spacing-tight);
-  color: #2a3da8;
+  color: var(--color-primary, #2a3da8);
+}
+
+/* Site name span — the text next to the logo icon */
+.site-logo-name {
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--color-primary, #2a3da8);
+  white-space: nowrap;
 }
 
 .logo-img {
-  width: 40px;
-  height: 40px;
+  width: 52px;
+  height: 52px;
   object-fit: contain;
   display: block;
   border-radius: var(--radius-lg);
 }
 
 @media (max-width: 640px) {
-  .site-logo h1 {
+  .site-logo h1,
+  .site-logo-name {
     font-size: var(--font-size-lg);
   }
   .logo-img {
-    width: 32px;
-    height: 32px;
+    width: 40px;
+    height: 40px;
   }
 }
 
@@ -194,6 +205,53 @@
 
 .main {
   flex: 1;
+}
+
+/* ========================================
+   TRUST STRIP
+   ======================================== */
+
+.trust-strip {
+  background: #f0f4ff;
+  border-top: 1px solid #dbeafe;
+  border-bottom: 1px solid #dbeafe;
+  padding: 0.65rem 1rem;
+}
+
+.trust-strip-inner {
+  max-width: var(--container-max-width, 1280px);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+}
+
+.trust-item {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #1e3a8a;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  white-space: nowrap;
+}
+
+.trust-divider {
+  color: #93c5fd;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+@media (max-width: 640px) {
+  .trust-divider {
+    display: none;
+  }
+
+  .trust-strip-inner {
+    gap: 0.4rem 0.75rem;
+  }
 }
 
 /* ========================================
@@ -348,6 +406,76 @@
 .footer-loading {
   color: rgba(255, 255, 255, 0.6);
   font-style: italic;
+}
+
+/* ===== Newsletter signup in footer ===== */
+.footer-newsletter .newsletter-description {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.75);
+  margin: 0 0 0.75rem;
+}
+
+.newsletter-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.newsletter-input {
+  padding: 0.625rem 0.875rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 0.9rem;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.newsletter-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.newsletter-input:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.newsletter-input-error {
+  border-color: #f87171;
+}
+
+.newsletter-error {
+  font-size: 0.8rem;
+  color: #fca5a5;
+}
+
+.btn-newsletter {
+  padding: 0.625rem;
+  background: white;
+  color: #2a3da8;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-newsletter:hover {
+  background: #f0f4ff;
+  transform: translateY(-1px);
+}
+
+.newsletter-success {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(16, 185, 129, 0.2);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  border-radius: 8px;
+  padding: 0.75rem;
 }
 
 .footer-error-note {

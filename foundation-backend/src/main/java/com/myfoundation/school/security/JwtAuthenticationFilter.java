@@ -1,5 +1,7 @@
 package com.myfoundation.school.security;
 
+import com.myfoundation.school.auth.AdminUser;
+import com.myfoundation.school.auth.AdminUserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import jakarta.servlet.FilterChain;
@@ -29,6 +31,7 @@ import java.util.Optional;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
+    private final AdminUserRepository adminUserRepository;
     @Value("${app.jwt.cookie-enabled:false}")
     private boolean cookieEnabled;
     @Value("${app.jwt.cookie-name:admin_jwt}")
@@ -53,6 +56,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         Claims claims = claimsOpt.get().getPayload();
         String username = claims.get("username", String.class);
         String role = claims.get("role", String.class);
+
+        // Verify user is still active in the database
+        Optional<AdminUser> userOpt = adminUserRepository.findByUsername(username);
+        if (userOpt.isEmpty() || !userOpt.get().getActive()) {
+            log.warn("JWT valid but user '{}' is inactive or deleted — rejecting request", username);
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                 username,

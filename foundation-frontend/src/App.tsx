@@ -1,8 +1,10 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
+import { Helmet } from 'react-helmet-async';
 import Layout from './components/Layout';
 import AdminLayout from './components/AdminLayout';
 import ConfigLoader from './components/ConfigLoader';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Lazy load all pages for code splitting
 const Home = lazy(() => import('./pages/Home'));
@@ -27,6 +29,10 @@ const TermsPage = lazy(() => import('./pages/TermsPage'));
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
 const AccessibilityPage = lazy(() => import('./pages/AccessibilityPage'));
 const CookiesPage = lazy(() => import('./pages/CookiesPage'));
+const AboutPage = lazy(() => import('./pages/AboutPage'));
+const ContactPage = lazy(() => import('./pages/ContactPage'));
+const NotFound = lazy(() => import('./pages/NotFound'));
+import CookieConsent from './components/CookieConsent';
 
 // Loading spinner component
 const LoadingFallback = () => (
@@ -38,6 +44,10 @@ const LoadingFallback = () => (
 function App() {
   return (
     <ConfigLoader>
+      <Helmet>
+        <title>Donate</title>
+        <meta name="description" content="Supporting education, healthcare, and community development through transparent donations." />
+      </Helmet>
       <BrowserRouter>
         <Suspense fallback={<LoadingFallback />}>
           <Routes>
@@ -46,10 +56,12 @@ function App() {
             <Route path="/admin/setup-password" element={<PasswordSetup />} />
             
             {/* Admin Routes - Nested with Sidebar */}
-            <Route path="/admin" element={<AdminLayout />}>
+            <Route path="/admin" element={<ErrorBoundary><AdminLayout /></ErrorBoundary>}>
               <Route index element={<Dashboard />} />
               <Route path="donations" element={<Donations />} />
               <Route path="campaigns" element={<Campaigns />} />
+              <Route path="campaigns/new" element={<AdminCampaignForm />} />
+              <Route path="campaigns/:id" element={<AdminCampaignForm />} />
               <Route path="categories" element={<Categories />} />
               <Route path="users" element={<AdminUsers />} />
               <Route path="settings" element={<AdminSettingsConsolidated />} />
@@ -57,10 +69,6 @@ function App() {
               <Route path="homepage" element={<AdminHomepage />} />
               <Route path="cms" element={<AdminCMS />} />
             </Route>
-            
-            {/* Campaign Form Routes (No Sidebar - separate) */}
-            <Route path="/admin/campaigns/new" element={<AdminCampaignForm />} />
-            <Route path="/admin/campaigns/:id" element={<AdminCampaignForm />} />
             
             {/* Public Routes - With Layout */}
             <Route element={<Layout />}>
@@ -70,13 +78,17 @@ function App() {
               <Route path="/donate/:campaignId" element={<DonationForm />} />
               <Route path="/donate/success" element={<Success />} />
               <Route path="/donate/cancel" element={<Cancel />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/contact" element={<ContactPage />} />
               <Route path="/terms" element={<TermsPage />} />
               <Route path="/privacy" element={<PrivacyPage />} />
               <Route path="/accessibility" element={<AccessibilityPage />} />
               <Route path="/cookies" element={<CookiesPage />} />
+              <Route path="*" element={<NotFound />} />
             </Route>
           </Routes>
         </Suspense>
+        <CookieConsent />
       </BrowserRouter>
     </ConfigLoader>
   );

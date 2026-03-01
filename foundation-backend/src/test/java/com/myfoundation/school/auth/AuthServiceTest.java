@@ -545,7 +545,7 @@ class AuthServiceTest {
 
     @Test
     void initializeDefaultAdmin_CreatesAdmin_WhenNotExists() {
-        when(adminUserRepository.findByEmail("admin@hopefoundation.org")).thenReturn(Optional.empty());
+        when(adminUserRepository.count()).thenReturn(0L);
         when(passwordEncoder.encode("admin123")).thenReturn("$2a$12$encodedAdmin");
         when(adminUserRepository.save(any(AdminUser.class))).thenAnswer(i -> i.getArgument(0));
 
@@ -561,8 +561,7 @@ class AuthServiceTest {
 
     @Test
     void initializeDefaultAdmin_DoesNothing_WhenAdminExists() {
-        when(adminUserRepository.findByEmail("admin@hopefoundation.org"))
-            .thenReturn(Optional.of(testUser));
+        when(adminUserRepository.count()).thenReturn(1L);
 
         authService.initializeDefaultAdmin();
 

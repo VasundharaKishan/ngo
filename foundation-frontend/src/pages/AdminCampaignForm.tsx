@@ -13,6 +13,17 @@ interface Category {
   icon: string;
 }
 
+const CURRENCY_OPTIONS = [
+  { code: 'USD', symbol: '$', label: 'USD ($)' },
+  { code: 'EUR', symbol: '€', label: 'EUR (€)' },
+  { code: 'GBP', symbol: '£', label: 'GBP (£)' },
+  { code: 'INR', symbol: '₹', label: 'INR (₹)' },
+];
+
+function getCurrencySymbol(code: string): string {
+  return CURRENCY_OPTIONS.find(c => c.code === code)?.symbol || '$';
+}
+
 export default function AdminCampaignForm() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -29,6 +40,7 @@ export default function AdminCampaignForm() {
     categoryId: '',
     targetAmount: '',
     currentAmount: '0',
+    currency: 'USD',
     imageUrl: '',
     imageFilename: '',
     location: '',
@@ -40,8 +52,8 @@ export default function AdminCampaignForm() {
 
   useEffect(() => {
     // Check if user is logged in
-    const token = localStorage.getItem('adminToken');
-    if (!token) {
+    const user = localStorage.getItem('adminUser');
+    if (!user) {
       navigate('/admin/login');
       return;
     }
@@ -92,6 +104,7 @@ export default function AdminCampaignForm() {
         categoryId: data.category?.id || '',
         targetAmount: formatAmountForInput(data.targetAmount || 0),
         currentAmount: formatAmountForInput(data.currentAmount || 0),
+        currency: data.currency || 'USD',
         imageUrl: data.imageUrl || '',
         imageFilename: extractFilename(data.imageUrl || ''),
         location: data.location || '',
@@ -279,7 +292,20 @@ export default function AdminCampaignForm() {
           </div>
 
           <div className="form-group">
-            <label>Target Amount ($) *</label>
+            <label>Currency *</label>
+            <select
+              value={formData.currency}
+              data-testid="campaign-currency"
+              onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
+            >
+              {CURRENCY_OPTIONS.map(opt => (
+                <option key={opt.code} value={opt.code}>{opt.label}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label>Target Amount ({getCurrencySymbol(formData.currency)}) *</label>
             <input
               type="number"
               value={formData.targetAmount}
@@ -292,7 +318,7 @@ export default function AdminCampaignForm() {
           </div>
 
           <div className="form-group">
-            <label>Current Amount ($)</label>
+            <label>Current Amount ({getCurrencySymbol(formData.currency)})</label>
             <input
               type="number"
               value={formData.currentAmount}

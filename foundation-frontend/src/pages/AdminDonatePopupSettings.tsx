@@ -16,8 +16,8 @@ export default function AdminDonatePopupSettings() {
 
   useEffect(() => {
     // Check if user is logged in
-    const token = localStorage.getItem('adminToken');
-    if (!token) {
+    const user = localStorage.getItem('adminUser');
+    if (!user) {
       navigate('/admin/login');
       return;
     }
@@ -93,8 +93,7 @@ export default function AdminDonatePopupSettings() {
 
   return (
     <div className="admin-settings">
-      <div className="settings-container">
-        <div className="settings-section">
+      <div className="settings-section">
           <h2>Donate Popup Settings</h2>
           <p className="section-description">
             Choose which campaign appears when users click the "Donate Now" button. 
@@ -219,7 +218,6 @@ export default function AdminDonatePopupSettings() {
               <li>Changes take effect immediately for all users</li>
             </ul>
           </div>
-        </div>
       </div>
     </div>
   );

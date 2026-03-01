@@ -278,7 +278,7 @@ public class EmailService {
             String donationDate) {
         
         String formattedAmount = formatCurrency(amount, currency);
-        String logoUrl = "https://yugalsavitriseva.org/logo.png"; // TODO: Update with actual logo URL
+        String logoUrl = frontendUrl + "/logo.png";
         
         return """
             <!DOCTYPE html>

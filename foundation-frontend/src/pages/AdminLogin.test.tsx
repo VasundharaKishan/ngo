@@ -4,6 +4,11 @@ import { MemoryRouter } from 'react-router-dom';
 import AdminLogin from './AdminLogin';
 import { API_BASE_URL } from '../api';
 
+vi.mock('../contexts/ConfigContext', () => ({
+  useSiteName: () => 'Test Foundation',
+  useConfig: () => ({ config: {}, loading: false, refetch: vi.fn() }),
+}));
+
 const mockNavigate = vi.fn();
 
 vi.mock('react-router-dom', async (importOriginal) => {

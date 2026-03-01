@@ -3,6 +3,11 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import DonationForm from './DonationForm';
 
+vi.mock('../contexts/ConfigContext', () => ({
+  useSiteName: () => 'Test Foundation',
+  useConfig: () => ({ config: {}, loading: false, refetch: vi.fn() }),
+}));
+
 const mockGetCampaign = vi.fn();
 const mockCreateStripeSession = vi.fn();
 

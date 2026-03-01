@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.myfoundation.school.config.Constants;
 import com.myfoundation.school.security.JwtService;
 
 @Service
@@ -52,9 +53,31 @@ public class AuthService {
         if (!user.getActive()) {
             throw new RuntimeException("User account is disabled");
         }
+
+        // Check if account is locked
+        if (user.getLockedUntil() != null && user.getLockedUntil().isAfter(Instant.now())) {
+            long minutesRemaining = ChronoUnit.MINUTES.between(Instant.now(), user.getLockedUntil()) + 1;
+            throw new RuntimeException("Account temporarily locked. Try again in " + minutesRemaining + " minute(s).");
+        }
         
         if (!passwordMatches(user, request.getPassword())) {
+            int attempts = user.getFailedLoginAttempts() + 1;
+            user.setFailedLoginAttempts(attempts);
+            if (attempts >= Constants.Session.MAX_LOGIN_ATTEMPTS) {
+                user.setLockedUntil(Instant.now().plus(Constants.Session.LOCKOUT_DURATION_MINUTES, ChronoUnit.MINUTES));
+                adminUserRepository.save(user);
+                log.warn("Account locked for user {} after {} failed attempts", user.getUsername(), attempts);
+                throw new RuntimeException("Too many failed login attempts. Account locked for "
+                        + Constants.Session.LOCKOUT_DURATION_MINUTES + " minutes.");
+            }
+            adminUserRepository.save(user);
             throw new RuntimeException("Invalid username or password");
+        }
+
+        // Reset lockout counters on successful authentication
+        if (user.getFailedLoginAttempts() > 0 || user.getLockedUntil() != null) {
+            user.setFailedLoginAttempts(0);
+            user.setLockedUntil(null);
         }
 
         if (otpEnabled) {
@@ -230,6 +253,14 @@ public class AuthService {
             throw new RuntimeException("Only the default admin can delete other admins.");
         }
 
+        // Prevent deleting the last admin user
+        if (target.getRole() == UserRole.ADMIN) {
+            long adminCount = adminUserRepository.countByRole(UserRole.ADMIN);
+            if (adminCount <= 1) {
+                throw new RuntimeException("Cannot delete the last admin user. At least one admin must remain.");
+            }
+        }
+
         // Clean up dependent records to satisfy FK constraints
         tokenRepository.deleteByUserId(target.getId());
         otpTokenRepository.deleteByUserId(target.getId());
@@ -245,13 +276,13 @@ public class AuthService {
     
     @Transactional
     public void initializeDefaultAdmin() {
-        // Check if admin@hopefoundation.org already exists
-        Optional<AdminUser> existing = adminUserRepository.findByEmail("admin@hopefoundation.org");
-        if (existing.isPresent()) {
-            log.info("Admin user already exists");
+        // Guard: skip if any admin user already exists (not just the default email)
+        long userCount = adminUserRepository.count();
+        if (userCount > 0) {
+            log.info("Admin initialization skipped - {} user(s) already exist", userCount);
             return;
         }
-        
+
         // Create default admin user
         AdminUser admin = AdminUser.builder()
                 .username("admin")
@@ -263,9 +294,9 @@ public class AuthService {
                 .createdAt(Instant.now())
                 .updatedAt(Instant.now())
                 .build();
-        
+
         adminUserRepository.save(admin);
-        log.info("Created default admin user");
+        log.info("Created default admin user - disable app.allow-admin-bootstrap in production");
     }
 
     @Transactional

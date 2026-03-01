@@ -1,5 +1,6 @@
 package com.myfoundation.school.security;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,8 +20,16 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Rate limiting filter to prevent abuse of API endpoints.
- * Implements a token bucket algorithm with IP-based tracking.
+ * Fixed-window rate limiting filter with IP-based tracking.
+ *
+ * Configuration properties (all under app.rate-limit.*):
+ *   enabled             – enable/disable this filter (default: true)
+ *   requests-per-second – max requests per IP per window (default: 100)
+ *   window-seconds      – window duration in seconds (default: 1)
+ *   burst-size          – kept for reference; not enforced by this filter
+ *
+ * Sensitive endpoints (auth, admin, donations, otp) are limited to 50 % of the
+ * configured cap to provide an extra layer of protection with no additional config.
  */
 @Component
 @Slf4j
@@ -29,8 +38,13 @@ public class RateLimitFilter extends OncePerRequestFilter {
     @Value("${app.rate-limit.enabled:true}")
     private boolean rateLimitEnabled;
 
-    @Value("${app.rate-limit.requests-per-minute:60}")
-    private int requestsPerMinute;
+    /** Maximum requests per IP within one window. */
+    @Value("${app.rate-limit.requests-per-second:100}")
+    private int requestsPerSecond;
+
+    /** Window length in seconds; counters are reset at this interval. */
+    @Value("${app.rate-limit.window-seconds:1}")
+    private long windowSeconds;
 
     @Value("${app.rate-limit.burst-size:10}")
     private int burstSize;
@@ -39,12 +53,15 @@ public class RateLimitFilter extends OncePerRequestFilter {
     private final Map<String, AtomicInteger> requestCounts = new ConcurrentHashMap<>();
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
-    public RateLimitFilter() {
-        // Reset counters every minute
+    @PostConstruct
+    private void initScheduler() {
+        // Reset counters every windowSeconds seconds
         scheduler.scheduleAtFixedRate(() -> {
             requestCounts.clear();
-            log.debug("Rate limit counters reset");
-        }, 1, 1, TimeUnit.MINUTES);
+            log.debug("Rate limit counters reset (window={}s)", windowSeconds);
+        }, windowSeconds, windowSeconds, TimeUnit.SECONDS);
+        log.info("RateLimitFilter initialised — limit: {}/{}s, sensitive endpoints: {}/{}s",
+                requestsPerSecond, windowSeconds, requestsPerSecond / 2, windowSeconds);
     }
 
     @Override
@@ -59,21 +76,22 @@ public class RateLimitFilter extends OncePerRequestFilter {
         String clientIP = getClientIP(request);
         String endpoint = request.getRequestURI();
 
-        // Apply stricter limits to sensitive endpoints
-        int limit = isSensitiveEndpoint(endpoint) ? requestsPerMinute / 2 : requestsPerMinute;
+        // Sensitive endpoints get 50 % of the general cap for extra protection
+        int limit = isSensitiveEndpoint(endpoint) ? requestsPerSecond / 2 : requestsPerSecond;
 
         AtomicInteger counter = requestCounts.computeIfAbsent(clientIP, k -> new AtomicInteger(0));
         int currentCount = counter.incrementAndGet();
 
         if (currentCount > limit) {
-            log.warn("Rate limit exceeded for IP: {} on endpoint: {} (count: {})", clientIP, endpoint, currentCount);
+            log.warn("Rate limit exceeded for IP: {} on endpoint: {} (count: {}/{}s)",
+                    clientIP, endpoint, currentCount, windowSeconds);
             response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
             response.setContentType("application/json");
             response.getWriter().write("{\"error\":\"Rate limit exceeded. Please try again later.\"}");
             return;
         }
 
-        // Add rate limit headers
+        // Informational rate-limit headers
         response.addHeader("X-RateLimit-Limit", String.valueOf(limit));
         response.addHeader("X-RateLimit-Remaining", String.valueOf(Math.max(0, limit - currentCount)));
         response.addHeader("X-RateLimit-Reset", String.valueOf(getNextResetTime()));
@@ -104,8 +122,8 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
     private long getNextResetTime() {
         long currentTime = System.currentTimeMillis();
-        long oneMinute = 60 * 1000;
-        return ((currentTime / oneMinute) + 1) * oneMinute;
+        long windowMs = windowSeconds * 1000L;
+        return ((currentTime / windowMs) + 1) * windowMs;
     }
 
     @Override

@@ -24,6 +24,16 @@ vi.mock('./components/ConfigLoader', () => ({
   default: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
+vi.mock('react-helmet-async', () => ({
+  Helmet: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  HelmetProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
+vi.mock('./components/CookieConsent', () => ({
+  __esModule: true,
+  default: () => null,
+}));
+
 vi.mock('./components/Layout', async () => {
   const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom');
   const Outlet = actual.Outlet;

@@ -103,7 +103,7 @@ describe('AdminSettingsConsolidated', () => {
       if (url.endsWith('/admin/config/footer')) {
         return { ok: true, json: () => Promise.resolve(footerPayload) };
       }
-      if (url.endsWith('/admin/cms/content/site-settings')) {
+      if (url.endsWith('/admin/cms/content/section/site-settings')) {
         return { ok: true, json: () => Promise.resolve(bannerPayload) };
       }
       return { ok: true, json: () => Promise.resolve({}) };
@@ -169,7 +169,7 @@ describe('AdminSettingsConsolidated', () => {
       if (url.endsWith('/admin/config/footer')) {
         return { ok: true, json: () => Promise.resolve(footerPayload) };
       }
-      if (url.endsWith('/admin/cms/content/site-settings')) {
+      if (url.endsWith('/admin/cms/content/section/site-settings')) {
         return { ok: true, json: () => Promise.resolve(bannerPayload) };
       }
       return { ok: true, json: () => Promise.resolve({}) };
@@ -177,5 +177,142 @@ describe('AdminSettingsConsolidated', () => {
 
     renderPage();
     await waitFor(() => expect(screen.getByText('Manage all site settings in one place')).toBeInTheDocument());
+  });
+
+  it('switches to Contact tab and shows contact form', async () => {
+    seedAuthUser();
+    setupMockResponses();
+    renderPage();
+    await screen.findByRole('heading', { name: /General Settings/ });
+    fireEvent.click(screen.getByTestId('settings-tab-contact'));
+    await waitFor(() => expect(screen.getByRole('heading', { name: /Contact Information/ })).toBeInTheDocument());
+  });
+
+  it('switches to Footer tab and shows footer form', async () => {
+    seedAuthUser();
+    setupMockResponses();
+    renderPage();
+    await screen.findByRole('heading', { name: /General Settings/ });
+    fireEvent.click(screen.getByTestId('settings-tab-footer'));
+    await waitFor(() => expect(screen.getByRole('heading', { name: /Footer Configuration/ })).toBeInTheDocument());
+  });
+
+  it('switches to Banner tab and shows banner form', async () => {
+    seedAuthUser();
+    setupMockResponses();
+    renderPage();
+    await screen.findByRole('heading', { name: /General Settings/ });
+    fireEvent.click(screen.getByTestId('settings-tab-banner'));
+    // Banner tab content should render
+    await waitFor(() => expect(screen.queryByRole('heading', { name: /General Settings/ })).toBeNull());
+  });
+
+  it('saves contact settings', async () => {
+    seedAuthUser();
+    setupMockResponses();
+    renderPage();
+    await screen.findByRole('heading', { name: /General Settings/ });
+    fireEvent.click(screen.getByTestId('settings-tab-contact'));
+    await screen.findByRole('heading', { name: /Contact Information/ });
+    fireEvent.click(screen.getByRole('button', { name: /Save Settings/i }));
+    await waitFor(() =>
+      expect(mockAuthFetch).toHaveBeenCalledWith(
+        `${API_BASE_URL}/admin/config/contact`,
+        expect.objectContaining({ method: 'PUT' })
+      )
+    );
+  });
+
+  it('saves footer settings', async () => {
+    seedAuthUser();
+    setupMockResponses();
+    renderPage();
+    await screen.findByRole('heading', { name: /General Settings/ });
+    fireEvent.click(screen.getByTestId('settings-tab-footer'));
+    await screen.findByRole('heading', { name: /Footer Configuration/ });
+    fireEvent.click(screen.getByRole('button', { name: /Save Settings/i }));
+    await waitFor(() =>
+      expect(mockAuthFetch).toHaveBeenCalledWith(
+        `${API_BASE_URL}/admin/config/footer`,
+        expect.objectContaining({ method: 'PUT' })
+      )
+    );
+  });
+
+  it('adds a contact location', async () => {
+    seedAuthUser();
+    setupMockResponses();
+    renderPage();
+    await screen.findByRole('heading', { name: /General Settings/ });
+    fireEvent.click(screen.getByTestId('settings-tab-contact'));
+    await screen.findByRole('heading', { name: /Contact Information/ });
+    const addBtn = screen.getByRole('button', { name: /Add Location/i });
+    fireEvent.click(addBtn);
+    await waitFor(() => expect(screen.getByPlaceholderText(/Main Office/i)).toBeInTheDocument());
+  });
+
+  it('removes a contact location', async () => {
+    seedAuthUser();
+    setupMockResponses();
+    renderPage();
+    await screen.findByRole('heading', { name: /General Settings/ });
+    fireEvent.click(screen.getByTestId('settings-tab-contact'));
+    await screen.findByRole('heading', { name: /Contact Information/ });
+    fireEvent.click(screen.getByRole('button', { name: /Add Location/i }));
+    await screen.findByPlaceholderText(/Main Office/i);
+    fireEvent.click(screen.getByRole('button', { name: /^Remove$/ }));
+    await waitFor(() => expect(screen.queryByPlaceholderText(/Main Office/i)).toBeNull());
+  });
+
+  it('updates location label', async () => {
+    seedAuthUser();
+    setupMockResponses();
+    renderPage();
+    await screen.findByRole('heading', { name: /General Settings/ });
+    fireEvent.click(screen.getByTestId('settings-tab-contact'));
+    await screen.findByRole('heading', { name: /Contact Information/ });
+    fireEvent.click(screen.getByRole('button', { name: /Add Location/i }));
+    const labelInput = await screen.findByPlaceholderText(/Main Office/i);
+    fireEvent.change(labelInput, { target: { value: 'Test Office' } });
+    expect(labelInput).toHaveValue('Test Office');
+  });
+
+  it('adds an address line within a location', async () => {
+    seedAuthUser();
+    setupMockResponses();
+    renderPage();
+    await screen.findByRole('heading', { name: /General Settings/ });
+    fireEvent.click(screen.getByTestId('settings-tab-contact'));
+    await screen.findByRole('heading', { name: /Contact Information/ });
+    fireEvent.click(screen.getByRole('button', { name: /Add Location/i }));
+    await screen.findByPlaceholderText(/Main Office/i);
+    const addLineBtn = screen.getByRole('button', { name: /Add Address Line/i });
+    fireEvent.click(addLineBtn);
+    await waitFor(() => expect(screen.getByPlaceholderText(/Address line 2/i)).toBeInTheDocument());
+  });
+
+  it('updates footer tagline', async () => {
+    seedAuthUser();
+    setupMockResponses();
+    renderPage();
+    await screen.findByRole('heading', { name: /General Settings/ });
+    fireEvent.click(screen.getByTestId('settings-tab-footer'));
+    await screen.findByRole('heading', { name: /Footer Configuration/ });
+    const taglineInput = screen.getByDisplayValue('Empowering communities worldwide');
+    fireEvent.change(taglineInput, { target: { value: 'New tagline' } });
+    expect(taglineInput).toHaveValue('New tagline');
+  });
+
+  it('validates email in contact tab before saving', async () => {
+    seedAuthUser();
+    setupMockResponses();
+    renderPage();
+    await screen.findByRole('heading', { name: /General Settings/ });
+    fireEvent.click(screen.getByTestId('settings-tab-contact'));
+    await screen.findByRole('heading', { name: /Contact Information/ });
+    const emailInput = screen.getByPlaceholderText('info@example.org');
+    fireEvent.change(emailInput, { target: { value: 'notanemail' } });
+    fireEvent.click(screen.getByRole('button', { name: /Save Settings/i }));
+    await waitFor(() => expect(mockToast).toHaveBeenCalledWith('Please enter a valid email address', 'error'));
   });
 });

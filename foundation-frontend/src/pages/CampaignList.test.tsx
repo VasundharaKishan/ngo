@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import CampaignList from './CampaignList';
 import { api } from '../api';
@@ -10,6 +10,7 @@ vi.mock('../api', () => ({
   API_BASE_URL: 'http://localhost:8080/api',
   api: {
     getCampaigns: vi.fn(),
+    getCampaignsPaginated: vi.fn(),
     getCategories: vi.fn(),
     getPublicConfig: vi.fn()
   }
@@ -87,6 +88,7 @@ describe('CampaignList', () => {
       } as Response)
     );
     vi.mocked(api.getCampaigns).mockResolvedValue(mockCampaigns);
+    vi.mocked(api.getCampaignsPaginated).mockResolvedValue({ items: mockCampaigns, totalPages: 1, totalItems: 3, currentPage: 0 });
     vi.mocked(api.getCategories).mockResolvedValue(mockCategories);
     vi.mocked(api.getPublicConfig).mockResolvedValue({ featuredCampaignsCount: 3, itemsPerPage: 12 });
   });
@@ -102,7 +104,7 @@ describe('CampaignList', () => {
   });
 
   it('displays loading state initially', async () => {
-    vi.mocked(api.getCampaigns).mockImplementation(
+    vi.mocked(api.getCampaignsPaginated).mockImplementation(
       () => new Promise(() => {})
     );
 
@@ -118,7 +120,7 @@ describe('CampaignList', () => {
     renderWithProviders(<CampaignList />);
 
     await waitFor(() => {
-      expect(api.getCampaigns).toHaveBeenCalled();
+      expect(api.getCampaignsPaginated).toHaveBeenCalled();
     });
   });
 
@@ -131,7 +133,7 @@ describe('CampaignList', () => {
   });
 
   it('handles API error gracefully', async () => {
-    vi.mocked(api.getCampaigns).mockRejectedValue(new Error('API Error'));
+    vi.mocked(api.getCampaignsPaginated).mockRejectedValue(new Error('API Error'));
 
     renderWithProviders(<CampaignList />);
 
@@ -141,7 +143,7 @@ describe('CampaignList', () => {
   });
 
   it('displays empty state when no campaigns', async () => {
-    vi.mocked(api.getCampaigns).mockResolvedValue([]);
+    vi.mocked(api.getCampaignsPaginated).mockResolvedValue({ items: [], totalPages: 0, totalItems: 0, currentPage: 0 });
 
     renderWithProviders(<CampaignList />);
 
@@ -154,7 +156,7 @@ describe('CampaignList', () => {
     renderWithProviders(<CampaignList />);
 
     await waitFor(() => {
-      expect(screen.getByText(/choose a campaign/i)).toBeInTheDocument();
+      expect(screen.getByText(/active campaigns/i)).toBeInTheDocument();
     });
   });
 
@@ -172,15 +174,105 @@ describe('CampaignList', () => {
     renderWithProviders(<CampaignList />);
 
     await waitFor(() => {
-      expect(screen.getByText(/all campaigns/i)).toBeInTheDocument();
+      expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
     });
   });
 
-  it('calls getCampaigns on mount', async () => {
+  it('calls getCampaignsPaginated on mount', async () => {
     renderWithProviders(<CampaignList />);
 
     await waitFor(() => {
-      expect(api.getCampaigns).toHaveBeenCalled();
+      expect(api.getCampaignsPaginated).toHaveBeenCalled();
+    });
+  });
+
+  // Helper: override fetch to set itemsPerPage=1 so 3 campaigns => 3 client-side pages
+  const fetchWithItemsPerPage1 = () =>
+    Promise.resolve({
+      ok: true,
+      json: async () => ({
+        'campaigns_page.items_per_page': '1',
+        'homepage.featured_campaigns_count': '3',
+        'site.name': 'Test Site',
+      }),
+    } as Response);
+
+  it('shows pagination controls when totalPages > 1', async () => {
+    global.fetch = vi.fn().mockImplementation(fetchWithItemsPerPage1);
+    vi.mocked(api.getCampaignsPaginated).mockResolvedValue({
+      items: mockCampaigns,
+      totalPages: 1,
+      totalItems: 3,
+      currentPage: 0,
+    });
+
+    renderWithProviders(<CampaignList />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('campaigns-next')).toBeInTheDocument();
+    });
+    expect(screen.getByTestId('campaigns-prev')).toBeInTheDocument();
+    expect(screen.getByTestId('campaigns-page-1')).toBeInTheDocument();
+    expect(screen.getByTestId('campaigns-page-2')).toBeInTheDocument();
+    expect(screen.getByTestId('campaigns-page-3')).toBeInTheDocument();
+  });
+
+  it('calls handlePageChange and scrolls to top when Next is clicked', async () => {
+    const scrollToMock = vi.fn();
+    vi.spyOn(window, 'scrollTo').mockImplementation(scrollToMock);
+
+    global.fetch = vi.fn().mockImplementation(fetchWithItemsPerPage1);
+    vi.mocked(api.getCampaignsPaginated).mockResolvedValue({
+      items: mockCampaigns,
+      totalPages: 1,
+      totalItems: 3,
+      currentPage: 0,
+    });
+
+    renderWithProviders(<CampaignList />);
+
+    const nextBtn = await screen.findByTestId('campaigns-next');
+    fireEvent.click(nextBtn);
+
+    await waitFor(() => {
+      expect(scrollToMock).toHaveBeenCalledWith({ top: 0, behavior: 'smooth' });
+    });
+  });
+
+  it('previous button is disabled on first page', async () => {
+    global.fetch = vi.fn().mockImplementation(fetchWithItemsPerPage1);
+    vi.mocked(api.getCampaignsPaginated).mockResolvedValue({
+      items: mockCampaigns,
+      totalPages: 1,
+      totalItems: 3,
+      currentPage: 0,
+    });
+
+    renderWithProviders(<CampaignList />);
+
+    const prevBtn = await screen.findByTestId('campaigns-prev');
+    expect(prevBtn).toBeDisabled();
+  });
+
+  it('clicking a page number button calls handlePageChange', async () => {
+    const scrollToMock = vi.fn();
+    vi.spyOn(window, 'scrollTo').mockImplementation(scrollToMock);
+
+    global.fetch = vi.fn().mockImplementation(fetchWithItemsPerPage1);
+    vi.mocked(api.getCampaignsPaginated).mockResolvedValue({
+      items: mockCampaigns,
+      totalPages: 1,
+      totalItems: 3,
+      currentPage: 0,
+    });
+
+    renderWithProviders(<CampaignList />);
+
+    const page2Btn = await screen.findByTestId('campaigns-page-2');
+    fireEvent.click(page2Btn);
+
+    await waitFor(() => {
+      expect(scrollToMock).toHaveBeenCalledWith({ top: 0, behavior: 'smooth' });
     });
   });
 });

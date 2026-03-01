@@ -1,6 +1,7 @@
 package com.myfoundation.school.campaign;
 
 import com.myfoundation.school.config.SiteConfigService;
+import com.myfoundation.school.dto.CampaignPageResponse;
 import com.myfoundation.school.dto.CampaignResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,6 +13,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,14 +44,27 @@ public class CampaignController {
         )
     })
     @GetMapping
-    public ResponseEntity<List<CampaignResponse>> getAllActiveCampaigns(
+    public ResponseEntity<?> getAllActiveCampaigns(
             @Parameter(description = "Filter by category ID") @RequestParam(required = false) String categoryId,
             @Parameter(description = "Filter featured campaigns only") @RequestParam(required = false) Boolean featured,
             @Parameter(description = "Filter urgent campaigns only") @RequestParam(required = false) Boolean urgent,
-            @Parameter(description = "Maximum number of campaigns to return") @RequestParam(required = false) Integer limit) {
-        log.info("GET /api/campaigns - Fetching campaigns with filters: categoryId={}, featured={}, urgent={}, limit={}", 
+            @Parameter(description = "Maximum number of campaigns to return") @RequestParam(required = false) Integer limit,
+            @Parameter(description = "Page number (0-based) for server-side pagination") @RequestParam(required = false) Integer page,
+            @Parameter(description = "Page size for server-side pagination (max 100)") @RequestParam(required = false) Integer size) {
+
+        if (page != null) {
+            log.info("GET /api/campaigns (paginated) - page={}, size={}, categoryId={}, featured={}, urgent={}",
+                    page, size, categoryId, featured, urgent);
+            int pageNum = Math.max(0, page);
+            int pageSize = (size != null && size > 0 && size <= 100) ? size : 12;
+            Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
+            CampaignPageResponse response = campaignService.getCampaignsPaginated(categoryId, featured, urgent, pageable);
+            return ResponseEntity.ok(response);
+        }
+
+        log.info("GET /api/campaigns - Fetching campaigns with filters: categoryId={}, featured={}, urgent={}, limit={}",
                 categoryId, featured, urgent, limit);
-        
+
         // If featured and no explicit limit, use config value
         if (Boolean.TRUE.equals(featured) && limit == null) {
             limit = siteConfigService.getIntConfigValue("homepage.featured_campaigns_count");

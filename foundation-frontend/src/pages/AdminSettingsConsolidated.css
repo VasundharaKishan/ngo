@@ -295,6 +295,26 @@
   background: var(--color-primary-dark);
 }
 
+.btn-upload {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: var(--spacing-2) var(--spacing-3);
+  background: var(--color-secondary, #7c3aed);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-upload:hover {
+  filter: brightness(1.1);
+}
+
 .btn-remove {
   padding: var(--spacing-2) var(--spacing-3);
   background: var(--color-error);

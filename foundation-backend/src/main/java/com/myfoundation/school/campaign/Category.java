@@ -34,7 +34,10 @@ public class Category {
     
     @Column(nullable = false)
     private String color; // Hex color code for category theme
-    
+
+    @Column(length = 1024)
+    private String imageUrl;
+
     @Column(nullable = false)
     @Builder.Default
     private Boolean active = true;

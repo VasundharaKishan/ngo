@@ -53,4 +53,12 @@ describe('ToastProvider', () => {
 
     expect(screen.queryByText('Saved!')).not.toBeInTheDocument();
   });
+
+  it('throws when useToast is used outside ToastProvider', () => {
+    const WrappedComponent = () => {
+      useToast();
+      return null;
+    };
+    expect(() => render(<WrappedComponent />)).toThrow('useToast must be used within a ToastProvider');
+  });
 });

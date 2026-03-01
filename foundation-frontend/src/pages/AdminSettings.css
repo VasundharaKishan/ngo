@@ -399,3 +399,25 @@
 .settings-info-box strong {
   font-weight: 700;
 }
+
+/* ===== Upload Button ===== */
+.btn-upload {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.85rem;
+  background: var(--color-secondary, #7c3aed);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius-md, 6px);
+  font-size: var(--font-size-sm, 0.875rem);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.btn-upload:hover {
+  filter: brightness(1.1);
+}

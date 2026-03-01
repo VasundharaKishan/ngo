@@ -50,6 +50,7 @@ class FileUploadControllerTest {
         admin.setFullName("Upload Admin");
         admin.setRole(UserRole.ADMIN);
         admin.setActive(true);
+        admin.setPassword("$2a$10$placeholder.hashed.password.for.tests.only");
         admin.setCreatedAt(Instant.now());
         admin.setUpdatedAt(Instant.now());
         adminUserRepository.save(admin);

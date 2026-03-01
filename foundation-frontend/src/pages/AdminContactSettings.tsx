@@ -32,8 +32,8 @@ export default function AdminContactSettings() {
 
   useEffect(() => {
     // Check if user is logged in
-    const token = localStorage.getItem('adminToken');
-    if (!token) {
+    const user = localStorage.getItem('adminUser');
+    if (!user) {
       navigate('/admin/login');
       return;
     }
@@ -112,6 +112,8 @@ export default function AdminContactSettings() {
   };
 
   const removeLocation = (index: number) => {
+    const label = contactInfo.locations[index]?.label || `Location ${index + 1}`;
+    if (!confirm(`Are you sure you want to remove "${label}"?`)) return;
     const updatedLocations = contactInfo.locations.filter((_, i) => i !== index);
     setContactInfo({ ...contactInfo, locations: updatedLocations });
   };

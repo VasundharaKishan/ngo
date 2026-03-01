@@ -17,6 +17,7 @@ import com.myfoundation.school.dto.DonationPageResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -24,7 +25,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -101,7 +104,26 @@ public class AdminDonationController {
     
     // Campaign CRUD endpoints
     @GetMapping("/campaigns")
-    public ResponseEntity<List<AdminCampaignResponse>> getAllCampaigns() {
+    public ResponseEntity<?> getAllCampaigns(
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size) {
+        if (page != null) {
+            log.info("GET /api/admin/campaigns (paginated) - page={}, size={}", page, size);
+            int pageNum = Math.max(0, page);
+            int pageSize = (size != null && size > 0 && size <= 100) ? size : 25;
+            Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
+            Page<Campaign> campaignPage = campaignRepository.findAll(pageable);
+            List<AdminCampaignResponse> items = campaignPage.getContent().stream()
+                    .map(this::toAdminCampaignResponse)
+                    .collect(Collectors.toList());
+            Map<String, Object> response = new HashMap<>();
+            response.put("items", items);
+            response.put("page", campaignPage.getNumber());
+            response.put("size", campaignPage.getSize());
+            response.put("totalItems", campaignPage.getTotalElements());
+            response.put("totalPages", campaignPage.getTotalPages());
+            return ResponseEntity.ok(response);
+        }
         log.info("GET /api/admin/campaigns - Fetching all campaigns");
         List<Campaign> campaigns = campaignRepository.findAll();
         List<AdminCampaignResponse> responses = campaigns.stream()
@@ -169,7 +191,14 @@ public class AdminDonationController {
         Category category = adminCategoryService.updateCategory(id, request);
         return ResponseEntity.ok(category);
     }
-    
+
+    @PatchMapping("/categories/{id}")
+    public ResponseEntity<Category> patchCategory(@PathVariable String id, @RequestBody AdminCategoryRequest request) {
+        log.info("PATCH /api/admin/categories/{} - Patching category", id);
+        Category category = adminCategoryService.updateCategory(id, request);
+        return ResponseEntity.ok(category);
+    }
+
     @DeleteMapping("/categories/{id}")
     public ResponseEntity<Void> deleteCategory(@PathVariable String id) {
         log.info("DELETE /api/admin/categories/{} - Deleting category", id);

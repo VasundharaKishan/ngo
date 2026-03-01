@@ -326,6 +326,7 @@ class AdminUserServiceTest {
     void deleteUser_AdminBySuperAdmin_Success() {
         when(adminUserRepository.findById("admin-id")).thenReturn(Optional.of(regularAdmin));
         when(adminUserRepository.findByUsernameIgnoreCase("admin")).thenReturn(Optional.of(superAdmin));
+        when(adminUserRepository.countByRole(UserRole.ADMIN)).thenReturn(2L);
 
         adminUserService.deleteUser("admin-id", "admin");
 
@@ -339,6 +340,7 @@ class AdminUserServiceTest {
         superAdmin.setUsername("ADMIN");
         when(adminUserRepository.findById("admin-id")).thenReturn(Optional.of(regularAdmin));
         when(adminUserRepository.findByUsernameIgnoreCase("ADMIN")).thenReturn(Optional.of(superAdmin));
+        when(adminUserRepository.countByRole(UserRole.ADMIN)).thenReturn(2L);
 
         adminUserService.deleteUser("admin-id", "ADMIN");
 

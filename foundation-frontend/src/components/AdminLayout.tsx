@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import ErrorBoundary from './ErrorBoundary';
+import '../styles/AdminCommon.css';
 import { 
   RiDashboardLine, 
   RiMoneyDollarCircleLine, 
@@ -433,7 +435,9 @@ export default function AdminLayout() {
 
         {/* Page Content */}
         <div className="admin-content-wrapper">
-          <Outlet />
+          <ErrorBoundary>
+            <Outlet />
+          </ErrorBoundary>
         </div>
       </main>
         </>

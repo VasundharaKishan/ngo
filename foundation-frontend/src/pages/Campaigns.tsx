@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { RiMegaphoneLine } from 'react-icons/ri';
 import { API_BASE_URL } from '../api';
 import { Link } from 'react-router-dom';
 import { authFetch } from '../utils/auth';
 import { formatCurrency, calculateProgress } from '../utils/currency';
+import { useSiteName } from '../contexts/ConfigContext';
 
 interface Campaign {
   id: string;
@@ -19,6 +21,7 @@ interface Campaign {
 }
 
 export default function Campaigns() {
+  const siteName = useSiteName();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -54,6 +57,10 @@ export default function Campaigns() {
 
   return (
     <>
+      <Helmet>
+        <title>Campaigns | Admin | {siteName}</title>
+        <meta name="robots" content="noindex" />
+      </Helmet>
       <div className="content-header" data-testid="campaigns-header">
         <h2><RiMegaphoneLine style={{verticalAlign: 'middle', marginRight: '0.5rem'}} /> Campaigns</h2>
         <p>Manage donation campaigns</p>

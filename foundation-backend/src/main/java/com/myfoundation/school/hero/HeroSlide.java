@@ -37,6 +37,12 @@ public class HeroSlide {
     @Column(name = "sort_order", nullable = false)
     private int sortOrder;
     
+    @Column(name = "title", length = 255)
+    private String title;
+
+    @Column(name = "subtitle", length = 500)
+    private String subtitle;
+
     @Column(name = "deleted", nullable = false)
     private boolean deleted = false;
     

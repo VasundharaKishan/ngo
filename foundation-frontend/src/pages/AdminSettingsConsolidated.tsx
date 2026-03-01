@@ -97,6 +97,7 @@ export default function AdminSettingsConsolidated() {
   // General Settings State
   const [settings, setSettings] = useState<Record<string, SiteSetting>>({});
   const [formValues, setFormValues] = useState<Record<string, string>>({});
+  const [logoUploading, setLogoUploading] = useState(false);
 
   // Contact Settings State
   const [contactInfo, setContactInfo] = useState<ContactInfo>({
@@ -170,6 +171,31 @@ export default function AdminSettingsConsolidated() {
 
   const handleGeneralChange = (key: string, value: string) => {
     setFormValues(prev => ({ ...prev, [key]: value }));
+  };
+
+  const handleLogoUpload = async (file: File) => {
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      showToast('Logo file must be under 5 MB', 'error');
+      return;
+    }
+    setLogoUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await authFetch(`${API_BASE_URL}/admin/upload/image`, {
+        method: 'POST',
+        body: formData,
+      });
+      if (!res.ok) throw new Error('Upload failed');
+      const data = await res.json();
+      handleGeneralChange('site.logo_url', data.url);
+      showToast('Logo uploaded successfully', 'success');
+    } catch {
+      showToast('Failed to upload logo', 'error');
+    } finally {
+      setLogoUploading(false);
+    }
   };
 
   const saveGeneralSettings = async () => {
@@ -352,7 +378,7 @@ export default function AdminSettingsConsolidated() {
   // BANNER SETTINGS FUNCTIONS
   const loadBannerSettings = async () => {
     try {
-      const response = await authFetch(`${API_BASE_URL}/admin/cms/content/site-settings`);
+      const response = await authFetch(`${API_BASE_URL}/admin/cms/content/section/site-settings`);
 
       if (!response.ok) return;
 
@@ -476,14 +502,62 @@ export default function AdminSettingsConsolidated() {
               {GENERAL_SETTINGS.filter(s => s.category === 'branding').map(setting => (
                 <div key={setting.key} className="form-group">
                   <label htmlFor={setting.key}>{setting.label}</label>
-                  <input
-                    id={setting.key}
-                    type={setting.type}
-                    value={formValues[setting.key] || ''}
-                    onChange={(e) => handleGeneralChange(setting.key, e.target.value)}
-                    placeholder={setting.placeholder}
-                    data-testid={buildGeneralSettingTestId(setting.key)}
-                  />
+                  {setting.key === 'site.logo_url' ? (
+                    <>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+                        <input
+                          id={setting.key}
+                          type="text"
+                          value={formValues[setting.key] || ''}
+                          onChange={(e) => handleGeneralChange(setting.key, e.target.value)}
+                          placeholder={setting.placeholder}
+                          data-testid={buildGeneralSettingTestId(setting.key)}
+                          style={{ flex: 1, minWidth: '200px' }}
+                        />
+                        <label
+                          htmlFor="logo-file-upload"
+                          className="btn-upload"
+                          style={{ cursor: logoUploading ? 'not-allowed' : 'pointer', opacity: logoUploading ? 0.6 : 1 }}
+                          title="Upload a logo image (max 5 MB)"
+                        >
+                          {logoUploading ? 'Uploading…' : '📁 Upload Logo'}
+                        </label>
+                        <input
+                          id="logo-file-upload"
+                          type="file"
+                          accept="image/*"
+                          style={{ display: 'none' }}
+                          disabled={logoUploading}
+                          data-testid="logo-file-input"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleLogoUpload(file);
+                            e.target.value = '';
+                          }}
+                        />
+                      </div>
+                      {formValues[setting.key] && (
+                        <div style={{ marginTop: '0.5rem' }}>
+                          <img
+                            src={formValues[setting.key]}
+                            alt="Current logo preview"
+                            style={{ maxHeight: '64px', maxWidth: '200px', objectFit: 'contain', border: '1px solid #ddd', borderRadius: '4px', padding: '4px' }}
+                            data-testid="logo-preview"
+                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                          />
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <input
+                      id={setting.key}
+                      type={setting.type}
+                      value={formValues[setting.key] || ''}
+                      onChange={(e) => handleGeneralChange(setting.key, e.target.value)}
+                      placeholder={setting.placeholder}
+                      data-testid={buildGeneralSettingTestId(setting.key)}
+                    />
+                  )}
                   {setting.description && (
                     <small className="field-description">{setting.description}</small>
                   )}

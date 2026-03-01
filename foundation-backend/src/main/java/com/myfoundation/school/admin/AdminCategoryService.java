@@ -22,6 +22,7 @@ public class AdminCategoryService {
         category.setDescription(request.getDescription());
         category.setIcon(request.getIcon());
         category.setColor(request.getColor());
+        category.setImageUrl(request.getImageUrl());
         category.setDisplayOrder(request.getDisplayOrder());
         category.setActive(request.getActive());
         category.setCreatedAt(Instant.now());
@@ -40,6 +41,7 @@ public class AdminCategoryService {
         category.setDescription(request.getDescription());
         category.setIcon(request.getIcon());
         category.setColor(request.getColor());
+        category.setImageUrl(request.getImageUrl());
         category.setDisplayOrder(request.getDisplayOrder());
         category.setActive(request.getActive());
         category.setUpdatedAt(Instant.now());

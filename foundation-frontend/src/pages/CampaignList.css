@@ -1,17 +1,169 @@
-.container h1 {
+/* ===== Page Header ===== */
+.campaigns-page-header {
   text-align: center;
-  font-size: 2rem;
-  color: #f5f7fa;
-  margin-bottom: 0.75rem;
-  font-weight: 700;
+  margin-bottom: 2rem;
+}
+
+.campaigns-page-header h1 {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: var(--color-primary, #2a3da8);
+  margin: 0 0 0.5rem;
 }
 
 .subtitle {
   text-align: center;
   color: #64748b;
   font-size: 1rem;
-  margin-bottom: 2.5rem;
+  margin-bottom: 0;
   line-height: 1.6;
+}
+
+/* ===== Search + Filters ===== */
+.campaigns-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  margin-bottom: 2rem;
+  background: white;
+  padding: 1.25rem 1.5rem;
+  border-radius: 16px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e2e8f0;
+}
+
+.campaigns-search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 0.875rem;
+  font-size: 1rem;
+  pointer-events: none;
+}
+
+.campaigns-search {
+  width: 100%;
+  padding: 0.75rem 2.5rem 0.75rem 2.5rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-family: inherit;
+  color: #1e293b;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.campaigns-search:focus {
+  outline: none;
+  border-color: #2a3da8;
+  box-shadow: 0 0 0 3px rgba(42, 61, 168, 0.1);
+}
+
+.campaigns-search::-webkit-search-cancel-button {
+  display: none;
+}
+
+.search-clear {
+  position: absolute;
+  right: 0.875rem;
+  background: none;
+  border: none;
+  font-size: 0.875rem;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0.25rem;
+  line-height: 1;
+}
+
+.search-clear:hover {
+  color: #475569;
+}
+
+.campaigns-filter-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.filter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.375rem 0.875rem;
+  background: #f1f5f9;
+  color: #475569;
+  border: 2px solid transparent;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.filter-pill:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.filter-pill.active {
+  background: #eff6ff;
+  color: #2a3da8;
+  border-color: #2a3da8;
+}
+
+.filter-pill-urgent.active {
+  background: #fef2f2;
+  color: #dc2626;
+  border-color: #dc2626;
+}
+
+.filter-pill-featured.active {
+  background: #fffbeb;
+  color: #d97706;
+  border-color: #d97706;
+}
+
+.filter-clear {
+  background: none;
+  border: none;
+  color: #64748b;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0.375rem 0.5rem;
+  margin-left: auto;
+}
+
+.filter-clear:hover {
+  color: #1e293b;
+}
+
+.campaigns-results-count {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin: 0 0 1rem;
+  font-weight: 500;
+}
+
+.campaigns-empty {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #64748b;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.campaigns-empty p {
+  font-size: 1.1rem;
+  margin: 0;
 }
 
 .loading, .error {
@@ -26,7 +178,7 @@
 
 .campaign-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 2.5rem;
   margin-top: 3rem;
 }
@@ -49,15 +201,94 @@
 
 .card-image-container {
   width: 100%;
-  height: 220px;
+  aspect-ratio: 3 / 2;
   overflow: hidden;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  position: relative;
+}
+
+/* ---- Card Badges ---- */
+.card-badges {
+  position: absolute;
+  top: 0.6rem;
+  left: 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  z-index: 2;
+}
+
+.card-badge {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+}
+
+.badge-urgent {
+  background: #ef4444;
+  color: #fff;
+}
+
+.badge-almost-funded {
+  background: #10b981;
+  color: #fff;
+}
+
+.badge-featured {
+  background: #f59e0b;
+  color: #1e293b;
+}
+
+/* ---- Progress Bar on Card ---- */
+.card-progress {
+  padding: 0 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.card-progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.card-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #2a3da8 0%, #667eea 100%);
+  border-radius: 999px;
+  transition: width 0.6s ease;
+}
+
+.card-progress-fill.almost-funded {
+  background: linear-gradient(90deg, #059669 0%, #10b981 100%);
+}
+
+.card-progress-stats {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.35rem;
+  font-size: 0.75rem;
+}
+
+.progress-pct {
+  color: #1e293b;
+}
+
+.progress-remaining {
+  color: #64748b;
 }
 
 .card-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
   transition: transform 0.4s ease;
 }
 
@@ -111,10 +342,7 @@
 }
 
 .card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: start;
-  gap: 1rem;
+  display: block;
 }
 
 .card-header h2 {
@@ -123,8 +351,6 @@
   margin: 0;
   font-weight: var(--font-weight-bold);
   line-height: var(--line-height-tight);
-  padding-right: 0.5rem;
-  flex: 1;
 }
 
 .badge-active {

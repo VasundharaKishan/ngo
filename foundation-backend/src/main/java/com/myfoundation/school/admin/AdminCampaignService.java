@@ -37,7 +37,7 @@ public class AdminCampaignService {
         campaign.setShortDescription(request.getShortDescription());
         campaign.setDescription(request.getFullDescription());
         campaign.setSlug(request.getTitle().toLowerCase().replaceAll("[^a-z0-9]+", "-"));
-        campaign.setCurrency("USD");
+        campaign.setCurrency(request.getCurrency() != null ? request.getCurrency() : "USD");
         campaign.setCategory(category);
         campaign.setTargetAmount(request.getTargetAmount());
         // Note: currentAmount is now calculated from donations, not stored
@@ -83,8 +83,11 @@ public class AdminCampaignService {
         campaign.setFeatured(request.getFeatured());
         campaign.setUrgent(request.getUrgent());
         campaign.setActive(request.getActive());
+        if (request.getCurrency() != null) {
+            campaign.setCurrency(request.getCurrency());
+        }
         campaign.setUpdatedAt(Instant.now());
-        
+
         return campaignRepository.save(campaign);
     }
     
