@@ -3,6 +3,8 @@ package com.myfoundation.school.hero;
 import com.myfoundation.school.exception.ResourceNotFoundException;
 import com.myfoundation.school.exception.ValidationException;
 import com.myfoundation.school.validation.ValidationUtils;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -173,5 +175,8 @@ public class HeroSlideService {
     /**
      * Request DTO for reordering slides
      */
-    public record ReorderRequest(UUID id, int sortOrder) {}
+    public record ReorderRequest(
+            @NotNull(message = "Slide ID is required") UUID id,
+            @Min(value = 0, message = "Sort order must be non-negative") int sortOrder
+    ) {}
 }

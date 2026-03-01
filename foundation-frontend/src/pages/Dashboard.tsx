@@ -3,6 +3,7 @@ import { RiDashboardLine, RiMoneyDollarCircleLine, RiMegaphoneLine, RiStarLine }
 import { API_BASE_URL, getDonatePopupSettings, type DonatePopupSettingsResponse } from '../api';
 import { authFetch } from '../utils/auth';
 import { formatCurrency, calculateProgress } from '../utils/currency';
+import logger from '../utils/logger';
 
 interface Campaign {
   id: string;
@@ -72,7 +73,7 @@ export default function AdminDashboard() {
       setDonations(Array.isArray(donationsData) ? donationsData : []);
       setSpotlightSettings(spotlightData);
     } catch (error) {
-      console.error('Error loading data:', error);
+      logger.error('Dashboard', 'Error loading data:', error);
       setLoadError('Could not reach the server. Please check your connection.');
     } finally {
       setLoading(false);

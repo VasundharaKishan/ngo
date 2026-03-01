@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { API_BASE_URL } from '../api';
+import logger from '../utils/logger';
 
 export interface SiteConfig {
   'homepage.featured_campaigns_count'?: string;
@@ -68,7 +69,7 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
       applyThemeVariables(mergedConfig);
       
     } catch (err) {
-      console.error('Failed to load site configuration:', err);
+      logger.error('ConfigContext', 'Failed to load site configuration:', err);
       setError(err instanceof Error ? err : new Error('Unknown error'));
       
       // Continue with defaults on error

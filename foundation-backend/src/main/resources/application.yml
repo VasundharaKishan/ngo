@@ -9,7 +9,7 @@ spring:
   
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     show-sql: false
     properties:
       hibernate:
@@ -38,7 +38,7 @@ spring:
     host: ${MAIL_HOST:example.brevo.com}
     port: ${MAIL_PORT:587}
     username: ${MAIL_USERNAME:example_username}
-    password: ${BREVO_SMTP_KEY:example
+    password: ${BREVO_SMTP_KEY:}
     properties:
       mail:
         smtp:
@@ -80,13 +80,8 @@ app:
     otp-max-attempts: ${AUTH_OTP_MAX_ATTEMPTS:5}
     otp-length: ${AUTH_OTP_LENGTH:6}
   rate-limit:
-    enabled: ${RATE_LIMIT_ENABLED:true}
     # Window duration — all limits below are "requests per this many seconds"
     window-seconds: ${RATE_LIMIT_WINDOW_SECONDS:1}
-    # General request cap (used by RateLimitFilter fixed-window)
-    requests-per-second: ${RATE_LIMIT_REQUESTS_PER_SECOND:100}
-    requests-per-minute: ${RATE_LIMIT_REQUESTS_PER_MINUTE:60}   # kept for reference / legacy
-    burst-size: ${RATE_LIMIT_BURST_SIZE:10}
     # Per-group caps for RateLimitingFilter (token bucket) — requests per window-seconds
     login: ${APP_RATE_LIMIT_LOGIN:5}
     admin: ${APP_RATE_LIMIT_ADMIN:100}

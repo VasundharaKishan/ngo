@@ -218,8 +218,8 @@ public class DonationService {
             try {
                 String campaignTitle = donation.getCampaign() != null ? donation.getCampaign().getTitle() : "General Donation";
                 String donationDate = donation.getCreatedAt()
-                    .atZone(java.time.ZoneId.systemDefault())
-                    .format(DateTimeFormatter.ofPattern("MMMM dd, yyyy 'at' hh:mm a"));
+                    .atZone(java.time.ZoneId.of("UTC"))
+                    .format(DateTimeFormatter.ofPattern("MMMM dd, yyyy 'at' hh:mm a z"));
                 
                 // Send thank you email to donor
                 log.info("[Webhook] Sending donation acknowledgement email to donor: {}", donation.getDonorEmail());

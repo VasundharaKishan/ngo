@@ -1,5 +1,7 @@
 package com.myfoundation.school.auth;
 
+import com.myfoundation.school.audit.AuditAction;
+import com.myfoundation.school.audit.AuditLogService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,7 +20,8 @@ public class AdminUserService {
     private final PasswordEncoder passwordEncoder;
     private final AuthService authService;
     private final PasswordSetupTokenRepository tokenRepository;
-    
+    private final AuditLogService auditLogService;
+
     public List<AdminUser> getAllUsers() {
         return adminUserRepository.findAll();
     }
@@ -40,18 +43,22 @@ public class AdminUserService {
         
         user.setActive(active);
         user.setUpdatedAt(Instant.now());
-        return adminUserRepository.save(user);
+        AdminUser saved = adminUserRepository.save(user);
+        auditLogService.log(AuditAction.USER_STATUS_CHANGED, "AdminUser", id, user.getUsername(), "Active: " + active);
+        return saved;
     }
-    
+
     @Transactional
     public void changeUserPassword(String id, String newPassword) {
         AdminUser user = adminUserRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         
+        authService.validatePasswordStrength(newPassword);
         user.setPassword(passwordEncoder.encode(newPassword));
         user.setUpdatedAt(Instant.now());
         adminUserRepository.save(user);
-        
+        auditLogService.log(AuditAction.PASSWORD_CHANGED, "AdminUser", id, user.getUsername(), null);
+
         log.info("Password changed for user: {}", user.getUsername());
     }
     
@@ -89,5 +96,6 @@ public class AdminUserService {
 
         adminUserRepository.delete(target);
         log.info("Deleted user: {} by {}", target.getUsername(), actor.getUsername());
+        auditLogService.log(AuditAction.USER_DELETED, "AdminUser", id, actingUsername, "Deleted user: " + target.getUsername());
     }
 }

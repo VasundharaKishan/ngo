@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../api';
 import { authFetch } from '../utils/auth';
 import { useToast } from '../components/ToastProvider';
+import logger from '../utils/logger';
 import './AdminUsers.css';
 
 interface AdminUser {
@@ -40,7 +41,7 @@ export default function AdminUsers() {
       setUsers(data);
       setLoading(false);
     } catch (error) {
-      console.error('Error loading users:', error);
+      logger.error('AdminUsers', 'Error loading users:', error);
       setLoading(false);
     }
   };
@@ -69,7 +70,7 @@ export default function AdminUsers() {
         showToast(errorData.error || 'Operation failed', 'error');
       }
     } catch (error) {
-      console.error('Error saving user:', error);
+      logger.error('AdminUsers', 'Error saving user:', error);
       showToast('Failed to save user', 'error');
     }
   };
@@ -86,16 +87,7 @@ export default function AdminUsers() {
     setShowForm(true);
   };
 
-  const handleDelete = async (id: string, username: string, role: 'ADMIN' | 'OPERATOR') => {
-    if (username.toLowerCase() === 'admin') {
-      showToast('Default admin cannot be deleted', 'error');
-      return;
-    }
-    if (role === 'ADMIN' && !isSuperAdmin) {
-      showToast('Only the default admin can delete other admins', 'error');
-      return;
-    }
-
+  const handleDelete = async (id: string, username: string, _role: 'ADMIN' | 'OPERATOR') => {
     if (!confirm(`Are you sure you want to delete user: ${username}?`)) return;
 
     try {
@@ -111,7 +103,7 @@ export default function AdminUsers() {
         showToast(errorData.error || 'Failed to delete user', 'error');
       }
     } catch (error) {
-      console.error('Error deleting user:', error);
+      logger.error('AdminUsers', 'Error deleting user:', error);
       showToast('Failed to delete user', 'error');
     }
   };
@@ -271,12 +263,6 @@ export default function AdminUsers() {
                         <button
                           onClick={() => handleDelete(user.id, user.username, user.role)}
                           className="btn-delete"
-                          disabled={user.role === 'ADMIN' && !isSuperAdmin}
-                          title={
-                            user.role === 'ADMIN' && !isSuperAdmin
-                              ? 'Only the default admin can delete admin users'
-                              : undefined
-                          }
                           data-testid={`admin-users-delete-${user.id}`}
                         >
                           Delete
@@ -293,5 +279,3 @@ export default function AdminUsers() {
     </div>
   );
 }
-  const currentUser = JSON.parse(localStorage.getItem('adminUser') || '{}');
-  const isSuperAdmin = currentUser?.username?.toLowerCase() === 'admin';

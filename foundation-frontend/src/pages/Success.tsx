@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Helmet } from 'react-helmet-async';
 import { API_BASE_URL } from '../api';
 import { useSiteName } from '../contexts/ConfigContext';
@@ -24,6 +25,7 @@ function formatAmount(amount: number, currency: string): string {
 }
 
 export default function Success() {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get('session_id');
   const [donation, setDonation] = useState<DonationDetails | null>(null);
@@ -60,13 +62,13 @@ export default function Success() {
     return (
       <div className="container">
         <Helmet>
-          <title>Thank You for Your Donation | {siteName}</title>
+          <title>{t('donation.successTitle')} | {siteName}</title>
           <meta name="robots" content="noindex" />
         </Helmet>
         <div className="status-page">
           <div className="success-icon" style={{ opacity: 0.5 }}>...</div>
-          <h1>Verifying Your Donation...</h1>
-          <p className="message">Please wait while we confirm your payment.</p>
+          <h1>{t('donation.verifying')}</h1>
+          <p className="message">{t('donation.verifyingMessage')}</p>
         </div>
       </div>
     );
@@ -75,12 +77,12 @@ export default function Success() {
   return (
     <div className="container">
       <Helmet>
-        <title>Thank You for Your Donation | {siteName}</title>
+        <title>{t('donation.successTitle')} | {siteName}</title>
         <meta name="robots" content="noindex" />
       </Helmet>
       <div className="status-page">
         <div className="success-icon">✓</div>
-        <h1>Thank You for Your Donation!</h1>
+        <h1>{t('donation.successTitle')}</h1>
 
         {donation && (
           <div className="donation-details" style={{
@@ -92,51 +94,49 @@ export default function Success() {
             textAlign: 'left',
           }}>
             <p style={{ margin: '0.35rem 0', color: '#334155' }}>
-              <strong>Amount:</strong> {formatAmount(donation.amount, donation.currency)}
+              <strong>{t('donation.amountLabel')}</strong> {formatAmount(donation.amount, donation.currency)}
             </p>
             <p style={{ margin: '0.35rem 0', color: '#334155' }}>
-              <strong>Campaign:</strong> {donation.campaignTitle}
+              <strong>{t('donation.campaignLabel')}</strong> {donation.campaignTitle}
             </p>
             <p style={{ margin: '0.35rem 0', color: '#334155' }}>
-              <strong>Donor:</strong> {donation.donorName || 'Anonymous'}
+              <strong>{t('donation.donorLabel')}</strong> {donation.donorName || t('donation.anonymous')}
             </p>
             <p style={{ margin: '0.35rem 0', color: '#334155' }}>
-              <strong>Status:</strong>{' '}
+              <strong>{t('donation.statusLabel')}</strong>{' '}
               <span style={{
                 color: donation.status === 'SUCCESS' ? '#16a34a' :
                        donation.status === 'PENDING' ? '#d97706' : '#dc2626',
                 fontWeight: 600,
               }}>
-                {donation.status === 'SUCCESS' ? 'Completed' :
-                 donation.status === 'PENDING' ? 'Processing' : 'Failed'}
+                {donation.status === 'SUCCESS' ? t('donation.statusCompleted') :
+                 donation.status === 'PENDING' ? t('donation.statusProcessing') : t('donation.statusFailed')}
               </span>
             </p>
             <p style={{ margin: '0.35rem 0', fontSize: '0.85rem', color: '#64748b' }}>
-              Reference: {donation.id}
+              {t('donation.referenceLabel')} {donation.id}
             </p>
           </div>
         )}
 
         {error && (
           <p className="message" style={{ color: '#d97706' }}>
-            We could not verify your donation details, but if you completed the payment it has been received.
-            A confirmation email will be sent to you shortly.
+            {t('donation.verifyError')}
           </p>
         )}
 
         {!donation && !error && (
           <p className="message">
-            Your generous contribution will help us build schools and change lives.
-            A confirmation email has been sent to you.
+            {t('donation.genericSuccess')}
           </p>
         )}
 
         <div className="actions">
           <Link to="/campaigns" className="btn-primary">
-            View Other Campaigns
+            {t('donation.viewOtherCampaigns')}
           </Link>
           <Link to="/" className="btn-secondary">
-            Return Home
+            {t('donation.returnHome')}
           </Link>
         </div>
       </div>

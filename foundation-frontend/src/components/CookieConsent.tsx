@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const CONSENT_KEY = 'cookie_consent';
 
 export default function CookieConsent() {
+  const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -50,8 +52,8 @@ export default function CookieConsent() {
       }}
     >
       <p style={{ margin: 0, maxWidth: '600px' }}>
-        We use essential cookies to ensure our site works. By continuing, you agree to our{' '}
-        <Link to="/cookies" style={{ color: '#93c5fd', textDecoration: 'underline' }}>Cookie Policy</Link>.
+        {t('cookie.message')}{' '}
+        <Link to="/cookies" style={{ color: '#93c5fd', textDecoration: 'underline' }}>{t('cookie.policyLink')}</Link>.
       </p>
       <div style={{ display: 'flex', gap: '0.5rem' }}>
         <button
@@ -67,7 +69,7 @@ export default function CookieConsent() {
             fontSize: '0.85rem',
           }}
         >
-          Accept
+          {t('cookie.accept')}
         </button>
         <button
           onClick={handleDecline}
@@ -81,7 +83,7 @@ export default function CookieConsent() {
             fontSize: '0.85rem',
           }}
         >
-          Decline
+          {t('cookie.decline')}
         </button>
       </div>
     </div>

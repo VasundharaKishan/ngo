@@ -168,7 +168,7 @@ describe('FeaturedCampaignModal', () => {
       expect(screen.getByText('Education Campaign')).toBeInTheDocument();
     });
 
-    const learnMoreButton = screen.getByText('Learn more');
+    const learnMoreButton = screen.getByText('Learn More');
     fireEvent.click(learnMoreButton);
 
     expect(mockNavigate).toHaveBeenCalledWith('/campaigns/camp-001');

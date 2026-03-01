@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api, getDonatePopupSettings, updateDonatePopupSettings, type Campaign, type DonatePopupSettingsResponse } from '../api';
 import { useToast } from '../components/ToastProvider';
+import logger from '../utils/logger';
 import './AdminSettings.css';
 
 export default function AdminDonatePopupSettings() {
@@ -40,7 +41,7 @@ export default function AdminDonatePopupSettings() {
       
       setLoading(false);
     } catch (error) {
-      console.error('Error loading data:', error);
+      logger.error('AdminDonatePopupSettings', 'Error loading data:', error);
       showToast('Failed to load settings', 'error');
       setLoading(false);
     }
@@ -65,7 +66,7 @@ export default function AdminDonatePopupSettings() {
       // Reload to show updated info
       await loadData();
     } catch (error) {
-      console.error('Error updating settings:', error);
+      logger.error('AdminDonatePopupSettings', 'Error updating settings:', error);
       showToast('Failed to update spotlight campaign', 'error');
     } finally {
       setSaving(false);
@@ -80,7 +81,7 @@ export default function AdminDonatePopupSettings() {
       showToast('Spotlight campaign cleared - automatic selection enabled', 'success');
       await loadData();
     } catch (error) {
-      console.error('Error clearing spotlight:', error);
+      logger.error('AdminDonatePopupSettings', 'Error clearing spotlight:', error);
       showToast('Failed to clear spotlight campaign', 'error');
     } finally {
       setSaving(false);

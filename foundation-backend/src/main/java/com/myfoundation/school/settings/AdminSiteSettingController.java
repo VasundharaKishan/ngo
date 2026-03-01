@@ -1,5 +1,8 @@
 package com.myfoundation.school.settings;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -59,7 +62,7 @@ public class AdminSiteSettingController {
      * POST /api/admin/settings - Create new setting
      */
     @PostMapping
-    public ResponseEntity<SiteSetting> createSetting(@RequestBody CreateSettingRequest request) {
+    public ResponseEntity<SiteSetting> createSetting(@Valid @RequestBody CreateSettingRequest request) {
         log.info("Admin creating new setting: {}", request.key());
         
         try {
@@ -80,9 +83,9 @@ public class AdminSiteSettingController {
      * Request DTO for creating settings
      */
     public record CreateSettingRequest(
-            String key,
-            String value,
-            SiteSetting.SettingType type,
+            @NotBlank(message = "Setting key is required") String key,
+            @NotBlank(message = "Setting value is required") String value,
+            @NotNull(message = "Setting type is required") SiteSetting.SettingType type,
             boolean isPublic,
             String description
     ) {}

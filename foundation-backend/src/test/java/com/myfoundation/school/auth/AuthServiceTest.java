@@ -1,5 +1,6 @@
 package com.myfoundation.school.auth;
 
+import com.myfoundation.school.audit.AuditLogService;
 import com.myfoundation.school.security.JwtService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -63,7 +64,10 @@ class AuthServiceTest {
     
     @Mock
     private OtpTokenRepository otpTokenRepository;
-    
+
+    @Mock
+    private AuditLogService auditLogService;
+
     @InjectMocks
     private AuthService authService;
 
@@ -308,7 +312,7 @@ class AuthServiceTest {
         RuntimeException exception = assertThrows(RuntimeException.class, 
             () -> authService.createUser(createUserRequest));
         
-        assertEquals("Username already exists", exception.getMessage());
+        assertEquals("A user with these details already exists", exception.getMessage());
     }
 
     @Test
@@ -319,7 +323,7 @@ class AuthServiceTest {
         RuntimeException exception = assertThrows(RuntimeException.class, 
             () -> authService.createUser(createUserRequest));
         
-        assertEquals("Email already exists", exception.getMessage());
+        assertEquals("A user with these details already exists", exception.getMessage());
     }
 
     // ISSUE: Email check is case-sensitive, allowing test@example.com and TEST@example.com
@@ -372,19 +376,14 @@ class AuthServiceTest {
         verify(tokenRepository).save(argThat(t -> t.isUsed()));
     }
 
-    // ISSUE: No password strength validation
     @Test
-    void completePasswordSetup_Issue_NoPasswordStrengthValidation() {
-        // This documents missing validation
-        // Current: Accepts any password, even "123" or "password"
-        // Should: Enforce minimum length, complexity requirements
-        
+    void completePasswordSetup_Failure_WeakPassword() {
         String weakPassword = "123";
-        
-        // TODO: Implement password strength validation
-        // - Minimum 8 characters
-        // - At least one uppercase, one lowercase, one number
-        // - Optional: Special characters
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+            () -> authService.completePasswordSetup("some-token", weakPassword, Arrays.asList()));
+
+        assertTrue(exception.getMessage().contains("Password must be at least 8 characters"));
     }
 
     // ISSUE: Security answers use SHA-256 instead of BCrypt
@@ -402,8 +401,8 @@ class AuthServiceTest {
             .thenReturn(Optional.empty());
 
         RuntimeException exception = assertThrows(RuntimeException.class, 
-            () -> authService.completePasswordSetup("invalid", "password", Arrays.asList()));
-        
+            () -> authService.completePasswordSetup("invalid", "StrongPass1", Arrays.asList()));
+
         assertEquals("Invalid or expired token", exception.getMessage());
     }
 
@@ -416,8 +415,8 @@ class AuthServiceTest {
             .thenReturn(Optional.empty());
 
         RuntimeException exception = assertThrows(RuntimeException.class, 
-            () -> authService.completePasswordSetup(token, "password", Arrays.asList()));
-        
+            () -> authService.completePasswordSetup(token, "StrongPass1", Arrays.asList()));
+
         assertEquals("Invalid or expired token", exception.getMessage());
     }
 
@@ -445,6 +444,23 @@ class AuthServiceTest {
         assertEquals("updated@example.com", result.getEmail());
         assertEquals(UserRole.ADMIN, result.getRole());
         assertEquals("$2a$12$encodedPassword", result.getPassword());
+    }
+
+    @Test
+    void updateUser_Failure_WeakPassword() {
+        CreateUserRequest updateRequest = new CreateUserRequest();
+        updateRequest.setUsername("testuser");
+        updateRequest.setEmail("test@example.com");
+        updateRequest.setFullName("Test User");
+        updateRequest.setRole(UserRole.OPERATOR);
+        updateRequest.setPassword("weak");
+
+        when(adminUserRepository.findById("user-123")).thenReturn(Optional.of(testUser));
+
+        assertThrows(IllegalArgumentException.class,
+            () -> authService.updateUser("user-123", updateRequest));
+
+        verify(passwordEncoder, never()).encode(anyString());
     }
 
     @Test
@@ -546,7 +562,7 @@ class AuthServiceTest {
     @Test
     void initializeDefaultAdmin_CreatesAdmin_WhenNotExists() {
         when(adminUserRepository.count()).thenReturn(0L);
-        when(passwordEncoder.encode("admin123")).thenReturn("$2a$12$encodedAdmin");
+        when(passwordEncoder.encode("Admin123!")).thenReturn("$2a$12$encodedAdmin");
         when(adminUserRepository.save(any(AdminUser.class))).thenAnswer(i -> i.getArgument(0));
 
         authService.initializeDefaultAdmin();

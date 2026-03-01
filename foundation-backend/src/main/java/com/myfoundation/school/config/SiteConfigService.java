@@ -22,6 +22,7 @@ public class SiteConfigService {
         DEFAULT_CONFIGS.put("homepage.featured_campaigns_count", "3");
         DEFAULT_CONFIGS.put("campaigns_page.items_per_page", "12");
         DEFAULT_CONFIGS.put("donate_popup.spotlight_campaign_id", null);
+        DEFAULT_CONFIGS.put("admin.notification.email", "contact@yugalsavitriseva.org");
     }
     
     public String getConfigValue(String key) {
@@ -80,6 +81,7 @@ public class SiteConfigService {
             case "homepage.featured_campaigns_count" -> "Number of featured campaigns to show on homepage";
             case "campaigns_page.items_per_page" -> "Number of campaigns to show per page on campaigns list";
             case "donate_popup.spotlight_campaign_id" -> "Campaign ID to feature in Donate Now popup (null for automatic selection)";
+            case "admin.notification.email" -> "Email address that receives donation notification alerts";
             default -> "";
         };
     }

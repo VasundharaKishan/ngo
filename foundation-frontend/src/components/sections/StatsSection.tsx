@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { cmsApi, type HomepageStat } from '../../cmsApi';
+import logger from '../../utils/logger';
 import '../../pages/Home.css';
 
 interface StatsSectionProps {
@@ -97,7 +98,7 @@ export default function StatsSection({ config }: StatsSectionProps) {
         const data = await cmsApi.getStats();
         setStats(data);
       } catch (error) {
-        console.error('Error loading stats:', error);
+        logger.error('StatsSection', 'Error loading stats:', error);
       } finally {
         setLoading(false);
       }

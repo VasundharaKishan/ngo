@@ -1,4 +1,5 @@
 import { useConfig } from '../contexts/ConfigContext';
+import logger from '../utils/logger';
 import './ConfigLoader.css';
 
 interface ConfigLoaderProps {
@@ -18,7 +19,7 @@ export default function ConfigLoader({ children }: ConfigLoaderProps) {
   }
 
   if (error) {
-    console.warn('Config loading error (using defaults):', error);
+    logger.warn('ConfigLoader', 'Config loading error (using defaults):', error);
     // Continue with defaults even if config fails to load
   }
 

@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { RiAdminLine, RiAlertLine } from 'react-icons/ri';
 import { API_BASE_URL } from '../api';
 import { useSiteName } from '../contexts/ConfigContext';
+import logger from '../utils/logger';
 import './AdminLogin.css';
 
 export default function AdminLogin() {
@@ -53,7 +54,7 @@ export default function AdminLogin() {
             credentials: 'include'
           });
         } catch (csrfError) {
-          console.warn('Failed to initialize CSRF token:', csrfError);
+          logger.warn('AdminLogin', 'Failed to initialize CSRF token:', csrfError);
         }
         
         navigate('/admin');
@@ -62,7 +63,7 @@ export default function AdminLogin() {
         setError(errorData.error || 'Login failed');
       }
     } catch (error) {
-      console.error('Login error:', error);
+      logger.error('AdminLogin', 'Login error:', error);
       setError('Connection error. Please try again.');
     } finally {
       setLoading(false);

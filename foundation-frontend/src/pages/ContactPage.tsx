@@ -1,15 +1,29 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useSiteName } from '../contexts/ConfigContext';
 import { fetchContactInfo } from '../utils/contactApi';
-import { useEffect } from 'react';
 import type { ContactInfo } from '../utils/contactApi';
 import './ContactPage.css';
 
 export default function ContactPage() {
   const siteName = useSiteName();
+  const { t } = useTranslation();
+  const [searchParams] = useSearchParams();
   const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
-  const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
+
+  // Pre-fill form from URL query params (e.g. from newsletter redirect)
+  const subjectParam = searchParams.get('subject') || '';
+  const emailParam = searchParams.get('email') || '';
+  const subjectLabel = subjectParam === 'newsletter' ? 'Newsletter subscription request' : subjectParam;
+
+  const [form, setForm] = useState({
+    name: '',
+    email: emailParam,
+    subject: subjectLabel,
+    message: subjectParam === 'newsletter' ? 'Please add me to your newsletter mailing list.' : '',
+  });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
 
@@ -19,12 +33,12 @@ export default function ContactPage() {
 
   const validate = () => {
     const e: Record<string, string> = {};
-    if (!form.name.trim()) e.name = 'Name is required';
-    if (!form.email.trim()) e.email = 'Email is required';
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = 'Enter a valid email';
-    if (!form.subject.trim()) e.subject = 'Subject is required';
-    if (!form.message.trim()) e.message = 'Message is required';
-    else if (form.message.trim().length < 20) e.message = 'Please write at least 20 characters';
+    if (!form.name.trim()) e.name = t('contact.validation.nameRequired');
+    if (!form.email.trim()) e.email = t('contact.validation.emailRequired');
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = t('contact.validation.emailInvalid');
+    if (!form.subject.trim()) e.subject = t('contact.validation.subjectRequired');
+    if (!form.message.trim()) e.message = t('contact.validation.messageRequired');
+    else if (form.message.trim().length < 20) e.message = t('contact.validation.messageTooShort');
     return e;
   };
 
@@ -56,8 +70,8 @@ export default function ContactPage() {
       {/* Hero */}
       <section className="contact-hero">
         <div className="contact-hero-inner">
-          <h1>Get in Touch</h1>
-          <p>Have a question, want to volunteer, or just want to say hello? We'd love to hear from you.</p>
+          <h1>{t('contact.heroTitle')}</h1>
+          <p>{t('contact.heroSubtitle')}</p>
         </div>
       </section>
 
@@ -66,13 +80,13 @@ export default function ContactPage() {
 
           {/* Contact info panel */}
           <aside className="contact-info-panel">
-            <h2>Contact Information</h2>
+            <h2>{t('contact.infoTitle')}</h2>
 
             {contactInfo?.email && (
               <div className="contact-info-item">
                 <span className="contact-info-icon" aria-hidden="true">✉️</span>
                 <div>
-                  <strong>Email</strong>
+                  <strong>{t('contact.email')}</strong>
                   <a href={`mailto:${contactInfo.email}`}>{contactInfo.email}</a>
                 </div>
               </div>
@@ -82,7 +96,7 @@ export default function ContactPage() {
               <div className="contact-info-item">
                 <span className="contact-info-icon" aria-hidden="true">📍</span>
                 <div>
-                  <strong>Locations</strong>
+                  <strong>{t('contact.locations')}</strong>
                   {contactInfo.locations.map((loc, i) => (
                     <div key={i} className="contact-location">
                       <span className="contact-location-label">{loc.label}</span>
@@ -98,17 +112,17 @@ export default function ContactPage() {
             <div className="contact-info-item">
               <span className="contact-info-icon" aria-hidden="true">🕐</span>
               <div>
-                <strong>Response Time</strong>
-                <span>We typically reply within 24–48 hours</span>
+                <strong>{t('contact.responseTime')}</strong>
+                <span>{t('contact.responseTimeValue')}</span>
               </div>
             </div>
 
             <div className="contact-ways">
-              <h3>Other ways to get involved</h3>
+              <h3>{t('contact.otherWays')}</h3>
               <ul>
-                <li>🤝 <strong>Volunteer</strong> — Join our team on the ground</li>
-                <li>🏢 <strong>Partner</strong> — Corporate or institutional partnerships</li>
-                <li>📢 <strong>Spread the word</strong> — Share our campaigns with your network</li>
+                <li>🤝 {t('contact.volunteer')}</li>
+                <li>🏢 {t('contact.partner')}</li>
+                <li>📢 {t('contact.spread')}</li>
               </ul>
             </div>
           </aside>
@@ -118,81 +132,105 @@ export default function ContactPage() {
             {status === 'success' ? (
               <div className="contact-success" data-testid="contact-success">
                 <span className="contact-success-icon" aria-hidden="true">✅</span>
-                <h2>Message Sent!</h2>
-                <p>Thank you for reaching out. We'll get back to you within 24–48 hours.</p>
+                <h2>{t('contact.successTitle')}</h2>
+                <p>{t('contact.successMessage')}</p>
                 <button className="btn-contact-again" onClick={() => setStatus('idle')}>
-                  Send another message
+                  {t('contact.sendAnother')}
                 </button>
               </div>
             ) : (
               <form className="contact-form" onSubmit={handleSubmit} noValidate data-testid="contact-form">
-                <h2>Send us a Message</h2>
+                <h2>{t('contact.formTitle')}</h2>
 
                 <div className="contact-form-row">
                   <div className={`contact-field ${errors.name ? 'has-error' : ''}`}>
-                    <label htmlFor="contact-name">Full Name *</label>
+                    <label htmlFor="contact-name">{t('contact.name')} *</label>
                     <input
                       id="contact-name"
                       name="name"
                       type="text"
                       value={form.name}
                       onChange={handleChange}
-                      placeholder="Your full name"
+                      placeholder={t('contact.namePlaceholder')}
                       autoComplete="name"
+                      aria-invalid={!!errors.name}
+                      aria-describedby={errors.name ? 'contact-name-error' : undefined}
                     />
-                    {errors.name && <span className="contact-error">{errors.name}</span>}
+                    {errors.name && (
+                      <span id="contact-name-error" className="contact-error" role="alert">
+                        {errors.name}
+                      </span>
+                    )}
                   </div>
 
                   <div className={`contact-field ${errors.email ? 'has-error' : ''}`}>
-                    <label htmlFor="contact-email">Email Address *</label>
+                    <label htmlFor="contact-email">{t('contact.emailField')} *</label>
                     <input
                       id="contact-email"
                       name="email"
                       type="email"
                       value={form.email}
                       onChange={handleChange}
-                      placeholder="your@email.com"
+                      placeholder={t('contact.emailPlaceholder')}
                       autoComplete="email"
+                      aria-invalid={!!errors.email}
+                      aria-describedby={errors.email ? 'contact-email-error' : undefined}
                     />
-                    {errors.email && <span className="contact-error">{errors.email}</span>}
+                    {errors.email && (
+                      <span id="contact-email-error" className="contact-error" role="alert">
+                        {errors.email}
+                      </span>
+                    )}
                   </div>
                 </div>
 
                 <div className={`contact-field ${errors.subject ? 'has-error' : ''}`}>
-                  <label htmlFor="contact-subject">Subject *</label>
+                  <label htmlFor="contact-subject">{t('contact.subject')} *</label>
                   <select
                     id="contact-subject"
                     name="subject"
                     value={form.subject}
                     onChange={handleChange}
+                    aria-invalid={!!errors.subject}
+                    aria-describedby={errors.subject ? 'contact-subject-error' : undefined}
                   >
-                    <option value="">Select a topic…</option>
-                    <option value="general">General Enquiry</option>
-                    <option value="donation">Donation Question</option>
-                    <option value="volunteer">Volunteering</option>
-                    <option value="partnership">Partnership / Corporate</option>
-                    <option value="media">Media / Press</option>
-                    <option value="other">Other</option>
+                    <option value="">{t('contact.subjectPlaceholder')}</option>
+                    <option value="general">{t('contact.subjects.general')}</option>
+                    <option value="donation">{t('contact.subjects.donation')}</option>
+                    <option value="volunteer">{t('contact.subjects.volunteer')}</option>
+                    <option value="partnership">{t('contact.subjects.partnership')}</option>
+                    <option value="media">{t('contact.subjects.media')}</option>
+                    <option value="other">{t('contact.subjects.other')}</option>
                   </select>
-                  {errors.subject && <span className="contact-error">{errors.subject}</span>}
+                  {errors.subject && (
+                    <span id="contact-subject-error" className="contact-error" role="alert">
+                      {errors.subject}
+                    </span>
+                  )}
                 </div>
 
                 <div className={`contact-field ${errors.message ? 'has-error' : ''}`}>
-                  <label htmlFor="contact-message">Message *</label>
+                  <label htmlFor="contact-message">{t('contact.message')} *</label>
                   <textarea
                     id="contact-message"
                     name="message"
                     value={form.message}
                     onChange={handleChange}
-                    placeholder="Tell us how we can help…"
+                    placeholder={t('contact.messagePlaceholder')}
                     rows={6}
+                    aria-invalid={!!errors.message}
+                    aria-describedby={errors.message ? 'contact-message-error' : undefined}
                   />
-                  {errors.message && <span className="contact-error">{errors.message}</span>}
+                  {errors.message && (
+                    <span id="contact-message-error" className="contact-error" role="alert">
+                      {errors.message}
+                    </span>
+                  )}
                 </div>
 
                 {status === 'error' && (
                   <p className="contact-submit-error">
-                    Something went wrong. Please try again or email us directly.
+                    {t('contact.errorMessage')}
                   </p>
                 )}
 
@@ -201,7 +239,7 @@ export default function ContactPage() {
                   className="btn-contact-submit"
                   disabled={status === 'submitting'}
                 >
-                  {status === 'submitting' ? 'Sending…' : 'Send Message ✉️'}
+                  {status === 'submitting' ? t('contact.sending') : `${t('contact.send')} ✉️`}
                 </button>
               </form>
             )}

@@ -6,6 +6,7 @@ import { usePaginationParams } from '../hooks/usePaginationParams';
 import { useDebounce } from '../hooks/useDebounce';
 import { formatDateTime } from '../utils/dateUtils';
 import { TIMING } from '../config/constants';
+import logger from '../utils/logger';
 import './Donations.css';
 
 export default function Donations() {
@@ -31,7 +32,7 @@ export default function Donations() {
         const response = await fetchDonationsPaginated({ page, size, sort, q, status });
         setData(response);
       } catch (err) {
-        console.error('Error loading donations:', err);
+        logger.error('Donations', 'Error loading donations:', err);
         setError('Failed to load donations. Please try again.');
       } finally {
         setLoading(false);

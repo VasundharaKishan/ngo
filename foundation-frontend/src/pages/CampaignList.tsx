@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Helmet } from 'react-helmet-async';
 import { api, type Campaign } from '../api';
 import CampaignCard from '../components/CampaignCard';
@@ -11,11 +12,12 @@ import './CampaignList.css';
 const stripHtml = (s: string) => s.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
 
 export default function CampaignList() {
+  const { t } = useTranslation();
   const [allCampaigns, setAllCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [currentPage, setCurrentPage] = useState(0); // 0-indexed for pagination
-  const [totalServerPages, setTotalServerPages] = useState(0);
+  const [_totalServerPages, setTotalServerPages] = useState(0);
 
   // Filter state
   const [searchQuery, setSearchQuery] = useState('');
@@ -48,12 +50,19 @@ export default function CampaignList() {
         setLoading(false);
         setTimeout(() => refreshScrollAnimations(), 100);
       } catch (err) {
-        setError('Failed to load campaigns. Please try again.');
+        setError(t('campaign.loadListError'));
         setLoading(false);
       }
     };
     loadData();
   }, []);
+
+  // Re-observe new campaign cards whenever the page changes
+  useEffect(() => {
+    if (loading) return;
+    const timer = setTimeout(() => refreshScrollAnimations(), 50);
+    return () => clearTimeout(timer);
+  }, [currentPage, loading]);
 
   // Extract unique categories from loaded campaigns
   const categories = useMemo(() => {
@@ -168,9 +177,9 @@ export default function CampaignList() {
         <div className="container">
           {/* Page heading */}
           <div className="campaigns-page-header">
-            <h1>Support a Cause</h1>
+            <h1>{t('campaign.supportACause')}</h1>
             <p className="subtitle">
-              {allCampaigns.length} active campaigns — find one that matters to you
+              {t('campaign.activeCampaignsSubtitle', { count: allCampaigns.length })}
             </p>
           </div>
 
@@ -182,7 +191,7 @@ export default function CampaignList() {
               <input
                 type="text"
                 className="campaigns-search"
-                placeholder="Search campaigns…"
+                placeholder={t('campaign.searchPlaceholder')}
                 value={searchQuery}
                 onChange={e => handleSearch(e.target.value)}
                 aria-label="Search campaigns"
@@ -206,7 +215,7 @@ export default function CampaignList() {
                   className={`filter-pill ${!selectedCategory ? 'active' : ''}`}
                   onClick={() => handleCategory('')}
                 >
-                  All
+                  {t('campaign.all')}
                 </button>
                 {categories.map(cat => (
                   <button
@@ -226,18 +235,18 @@ export default function CampaignList() {
                 className={`filter-pill filter-pill-urgent ${selectedBadge === 'urgent' ? 'active' : ''}`}
                 onClick={() => handleBadge('urgent')}
               >
-                ⚡ Urgent
+                {t('campaign.filterUrgent')}
               </button>
               <button
                 className={`filter-pill filter-pill-featured ${selectedBadge === 'featured' ? 'active' : ''}`}
                 onClick={() => handleBadge('featured')}
               >
-                ⭐ Featured
+                {t('campaign.filterFeatured')}
               </button>
 
               {hasFilters && (
                 <button className="filter-clear" onClick={handleClearFilters}>
-                  Clear filters
+                  {t('campaign.clearFilters')}
                 </button>
               )}
             </div>
@@ -245,20 +254,20 @@ export default function CampaignList() {
 
           {/* Results */}
           {allCampaigns.length === 0 ? (
-            <p className="no-campaigns">No active campaigns at the moment. Check back soon!</p>
+            <p className="no-campaigns">{t('campaign.noCampaignsYet')}</p>
           ) : filteredCampaigns.length === 0 ? (
             <div className="campaigns-empty">
               <span aria-hidden="true" style={{ fontSize: '3rem' }}>🔍</span>
-              <p>No campaigns match your filters.</p>
+              <p>{t('campaign.noMatchFilters')}</p>
               <button className="filter-clear" onClick={handleClearFilters}>
-                Clear filters
+                {t('campaign.clearFilters')}
               </button>
             </div>
           ) : (
             <>
               {hasFilters && (
                 <p className="campaigns-results-count">
-                  {filteredCampaigns.length} result{filteredCampaigns.length !== 1 ? 's' : ''}
+                  {t('campaign.resultsCount', { count: filteredCampaigns.length })}
                 </p>
               )}
               <div className="campaign-grid">
@@ -277,7 +286,7 @@ export default function CampaignList() {
                     className="pagination-btn"
                     data-testid="campaigns-prev"
                   >
-                    ← Previous
+                    {t('campaign.previous')}
                   </button>
 
                   <div className="pagination-numbers">
@@ -299,7 +308,7 @@ export default function CampaignList() {
                     className="pagination-btn"
                     data-testid="campaigns-next"
                   >
-                    Next →
+                    {t('campaign.next')}
                   </button>
                 </div>
               )}

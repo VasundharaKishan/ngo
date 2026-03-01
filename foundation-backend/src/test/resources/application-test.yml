@@ -45,7 +45,6 @@ app:
     otp-length: 6
   rate-limit:
     window-seconds: 1
-    requests-per-second: 10000
     auth-login-window-seconds: 1
     login: 10000
     admin: 10000

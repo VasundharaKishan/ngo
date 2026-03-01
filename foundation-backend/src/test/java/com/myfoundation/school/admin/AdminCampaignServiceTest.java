@@ -1,5 +1,6 @@
 package com.myfoundation.school.admin;
 
+import com.myfoundation.school.audit.AuditLogService;
 import com.myfoundation.school.campaign.Campaign;
 import com.myfoundation.school.campaign.CampaignRepository;
 import com.myfoundation.school.campaign.Category;
@@ -44,6 +45,9 @@ class AdminCampaignServiceTest {
 
     @Mock
     private CategoryRepository categoryRepository;
+
+    @Mock
+    private AuditLogService auditLogService;
 
     @InjectMocks
     private AdminCampaignService adminCampaignService;

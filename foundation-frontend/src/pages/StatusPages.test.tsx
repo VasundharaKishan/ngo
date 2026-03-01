@@ -29,7 +29,7 @@ describe('Status pages', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText(/Payment Cancelled/i)).toBeInTheDocument();
+    expect(screen.getByText(/Donation Cancelled/i)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Back to Campaigns/i })).toHaveAttribute('href', '/campaigns');
     expect(screen.getByRole('link', { name: /Return Home/i })).toHaveAttribute('href', '/');
   });

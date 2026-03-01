@@ -1,5 +1,6 @@
 package com.myfoundation.school.hero;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -46,7 +47,7 @@ public class AdminHeroSlideController {
      * Create a new hero slide
      */
     @PostMapping
-    public ResponseEntity<HeroSlide> createSlide(@RequestBody HeroSlide slide) {
+    public ResponseEntity<HeroSlide> createSlide(@Valid @RequestBody HeroSlide slide) {
         log.info("Admin creating new hero slide: {}", slide.getAltText());
         HeroSlide created = heroSlideService.createSlide(slide);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
@@ -59,7 +60,7 @@ public class AdminHeroSlideController {
     @PutMapping("/{id}")
     public ResponseEntity<HeroSlide> updateSlide(
             @PathVariable UUID id,
-            @RequestBody HeroSlide slide) {
+            @Valid @RequestBody HeroSlide slide) {
         log.info("Admin updating hero slide: {}", id);
         HeroSlide updated = heroSlideService.updateSlide(id, slide);
         return ResponseEntity.ok(updated);

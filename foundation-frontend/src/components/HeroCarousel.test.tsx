@@ -58,7 +58,7 @@ describe('HeroCarousel', () => {
     global.fetch = vi.fn(() => new Promise(() => {})) as any;
 
     renderCarousel();
-    expect(screen.getByText('Loading...')).toBeInTheDocument();
+    expect(screen.getByText('Loading…')).toBeInTheDocument();
   });
 
   it('loads and displays slides', async () => {

@@ -5,6 +5,7 @@ import { authFetch } from '../utils/auth';
 import { useToast } from '../components/ToastProvider';
 import { type JsonConfig } from '../types/common';
 import { RiImageLine, RiLayoutLine } from 'react-icons/ri';
+import logger from '../utils/logger';
 import './AdminHomepage.css';
 
 type TabType = 'hero' | 'sections';
@@ -90,7 +91,7 @@ export default function AdminHomepage() {
       const data = await response.json();
       setSlides(data);
     } catch (error) {
-      console.error('Error loading slides:', error);
+      logger.error('AdminHomepage', 'Error loading slides:', error);
       showToast('Failed to load hero slides', 'error');
     }
   };
@@ -165,7 +166,7 @@ export default function AdminHomepage() {
       showToast('Hero slides updated successfully', 'success');
       await loadSlides();
     } catch (error) {
-      console.error('Error saving slides:', error);
+      logger.error('AdminHomepage', 'Error saving slides:', error);
       showToast('Failed to save changes', 'error');
     } finally {
       setSaving(false);
@@ -212,7 +213,7 @@ export default function AdminHomepage() {
       setShowAddForm(false);
       await loadSlides();
     } catch (error) {
-      console.error('Error adding slide:', error);
+      logger.error('AdminHomepage', 'Error adding slide:', error);
       showToast('Failed to add slide', 'error');
     }
   };
@@ -246,7 +247,7 @@ export default function AdminHomepage() {
       setNewSlide(prev => ({ ...prev, imageUrl: data.url, filename: data.filename || '' }));
       showToast('Image uploaded successfully', 'success');
     } catch (error) {
-      console.error('Error uploading image:', error);
+      logger.error('AdminHomepage', 'Error uploading image:', error);
       const message = error instanceof Error ? error.message : 'Failed to upload image';
       showToast(message, 'error');
     } finally {
@@ -279,7 +280,7 @@ export default function AdminHomepage() {
       setNewSlide(prev => ({ ...prev, imageUrl: '', filename: '' }));
       showToast('Image deleted successfully', 'success');
     } catch (error) {
-      console.error('Error deleting image:', error);
+      logger.error('AdminHomepage', 'Error deleting image:', error);
       showToast('Failed to delete image', 'error');
     }
   };
@@ -297,7 +298,7 @@ export default function AdminHomepage() {
       showToast('Slide deleted successfully', 'success');
       await loadSlides();
     } catch (error) {
-      console.error('Error deleting slide:', error);
+      logger.error('AdminHomepage', 'Error deleting slide:', error);
       showToast('Failed to delete slide', 'error');
     }
   };
@@ -316,7 +317,7 @@ export default function AdminHomepage() {
       });
       setEditingConfig(configState);
     } catch (error) {
-      console.error('Error loading sections:', error);
+      logger.error('AdminHomepage', 'Error loading sections:', error);
       showToast('Failed to load home sections', 'error');
     }
   };
@@ -384,7 +385,7 @@ export default function AdminHomepage() {
       showToast('Home sections updated successfully', 'success');
       await loadSections();
     } catch (error) {
-      console.error('Error saving sections:', error);
+      logger.error('AdminHomepage', 'Error saving sections:', error);
       showToast(error instanceof Error ? error.message : 'Failed to save changes', 'error');
     } finally {
       setSaving(false);

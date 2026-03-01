@@ -1,26 +1,27 @@
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { useTranslation } from 'react-i18next';
 import { useSiteName } from '../contexts/ConfigContext';
 import './AboutPage.css';
 
 export default function AboutPage() {
   const siteName = useSiteName();
+  const { t } = useTranslation();
 
   return (
     <div className="about-page" data-testid="about-page">
       <Helmet>
-        <title>About Us | {siteName}</title>
-        <meta name="description" content={`Learn about ${siteName} — our mission, values, and the communities we serve.`} />
-        <meta property="og:title" content={`About Us | ${siteName}`} />
+        <title>{t('about.title')} | {siteName}</title>
+        <meta name="description" content={`${t('about.title')} — ${siteName}`} />
+        <meta property="og:title" content={`${t('about.title')} | ${siteName}`} />
       </Helmet>
 
       {/* Hero */}
       <section className="about-hero">
         <div className="about-hero-inner">
-          <h1>Our Story</h1>
+          <h1>{t('about.heroTitle')}</h1>
           <p>
-            {siteName} was founded with a simple belief: that every community deserves access to
-            education, healthcare, and opportunity — regardless of geography or circumstance.
+            {t('about.heroDescription', { siteName })}
           </p>
         </div>
       </section>
@@ -31,28 +32,18 @@ export default function AboutPage() {
           <div className="mission-grid">
             <div className="mission-card">
               <span className="mission-icon" aria-hidden="true">🎯</span>
-              <h2>Our Mission</h2>
-              <p>
-                To empower underserved communities through transparent, accountable,
-                and impactful philanthropic initiatives — ensuring every donated rupee
-                or dollar reaches the people who need it most.
-              </p>
+              <h2>{t('about.mission')}</h2>
+              <p>{t('about.missionDesc')}</p>
             </div>
             <div className="mission-card">
               <span className="mission-icon" aria-hidden="true">🌍</span>
-              <h2>Our Vision</h2>
-              <p>
-                A world where access to education, clean water, nutrition, and healthcare
-                is a reality for every child and family — not a privilege of geography or wealth.
-              </p>
+              <h2>{t('about.vision')}</h2>
+              <p>{t('about.visionDesc')}</p>
             </div>
             <div className="mission-card">
               <span className="mission-icon" aria-hidden="true">💎</span>
-              <h2>Our Values</h2>
-              <p>
-                Transparency in every transaction. Accountability to our donors and beneficiaries.
-                Partnership with local communities. Impact measured by lives changed, not funds raised.
-              </p>
+              <h2>{t('about.values')}</h2>
+              <p>{t('about.valuesDesc')}</p>
             </div>
           </div>
         </div>
@@ -61,39 +52,30 @@ export default function AboutPage() {
       {/* How it works */}
       <section className="about-section about-how-it-works">
         <div className="about-container">
-          <h2 className="section-title">How Your Donation Works</h2>
+          <h2 className="section-title">{t('about.howTitle')}</h2>
           <p className="section-subtitle">
-            From your heart to the people who need it — a fully transparent process.
+            {t('about.howSubtitle')}
           </p>
           <div className="steps-grid">
             <div className="step-card">
               <div className="step-number">1</div>
               <div className="step-icon" aria-hidden="true">❤️</div>
-              <h3>You Choose & Donate</h3>
-              <p>
-                Browse our campaigns, pick a cause that resonates with you, and donate securely
-                via Stripe. One-time or monthly — every contribution counts.
-              </p>
+              <h3>{t('about.step1Title')}</h3>
+              <p>{t('about.step1Desc')}</p>
             </div>
             <div className="step-connector" aria-hidden="true">→</div>
             <div className="step-card">
               <div className="step-number">2</div>
               <div className="step-icon" aria-hidden="true">📋</div>
-              <h3>We Allocate & Execute</h3>
-              <p>
-                100% of your donation goes directly to the campaign. Our team works with
-                vetted local partners to execute the project with full documentation.
-              </p>
+              <h3>{t('about.step2Title')}</h3>
+              <p>{t('about.step2Desc')}</p>
             </div>
             <div className="step-connector" aria-hidden="true">→</div>
             <div className="step-card">
               <div className="step-number">3</div>
               <div className="step-icon" aria-hidden="true">🌟</div>
-              <h3>Community Benefits</h3>
-              <p>
-                Real people receive real help. We report back with outcomes, photos,
-                and impact data so you know exactly what your generosity achieved.
-              </p>
+              <h3>{t('about.step3Title')}</h3>
+              <p>{t('about.step3Desc')}</p>
             </div>
           </div>
         </div>
@@ -102,26 +84,20 @@ export default function AboutPage() {
       {/* Where we work */}
       <section className="about-section about-where">
         <div className="about-container">
-          <h2 className="section-title">Where We Work</h2>
+          <h2 className="section-title">{t('about.whereTitle')}</h2>
           <p className="section-subtitle">
-            Currently focused on India and Ireland, with plans to expand responsibly.
+            {t('about.whereSubtitle')}
           </p>
           <div className="where-grid">
             <div className="where-card">
               <span className="where-flag" aria-hidden="true">🇮🇳</span>
-              <h3>India</h3>
-              <p>
-                Education initiatives, school construction, scholarship programs for girls,
-                nutrition projects, and clean water access in rural communities.
-              </p>
+              <h3>{t('about.india')}</h3>
+              <p>{t('about.indiaDesc')}</p>
             </div>
             <div className="where-card">
               <span className="where-flag" aria-hidden="true">🇮🇪</span>
-              <h3>Ireland</h3>
-              <p>
-                Community development, social inclusion programs, and support for
-                vulnerable families across urban and rural regions.
-              </p>
+              <h3>{t('about.ireland')}</h3>
+              <p>{t('about.irelandDesc')}</p>
             </div>
           </div>
         </div>
@@ -130,27 +106,27 @@ export default function AboutPage() {
       {/* Trust & Transparency */}
       <section className="about-section about-trust">
         <div className="about-container">
-          <h2 className="section-title">Why Trust Us</h2>
+          <h2 className="section-title">{t('about.trustTitle')}</h2>
           <div className="trust-grid">
             <div className="trust-item-card">
               <span className="trust-icon" aria-hidden="true">🔒</span>
-              <h3>Secure Payments</h3>
-              <p>All donations processed via Stripe — PCI-DSS compliant and fully encrypted.</p>
+              <h3>{t('about.trustSecure')}</h3>
+              <p>{t('about.trustSecureDesc')}</p>
             </div>
             <div className="trust-item-card">
               <span className="trust-icon" aria-hidden="true">🏛️</span>
-              <h3>Registered NGO</h3>
-              <p>Legally registered non-governmental organisation with full statutory compliance.</p>
+              <h3>{t('about.trustNgo')}</h3>
+              <p>{t('about.trustNgoDesc')}</p>
             </div>
             <div className="trust-item-card">
               <span className="trust-icon" aria-hidden="true">💯</span>
-              <h3>Zero Admin Fees</h3>
-              <p>100% of your donation reaches the campaign. We are volunteer-driven at the core.</p>
+              <h3>{t('about.trustFees')}</h3>
+              <p>{t('about.trustFeesDesc')}</p>
             </div>
             <div className="trust-item-card">
               <span className="trust-icon" aria-hidden="true">📋</span>
-              <h3>Annual Reports</h3>
-              <p>We publish annual impact reports detailing where every penny went and the outcomes achieved.</p>
+              <h3>{t('about.trustReports')}</h3>
+              <p>{t('about.trustReportsDesc')}</p>
             </div>
           </div>
         </div>
@@ -159,14 +135,14 @@ export default function AboutPage() {
       {/* CTA */}
       <section className="about-cta">
         <div className="about-container">
-          <h2>Ready to Make a Difference?</h2>
-          <p>Browse our active campaigns and support a cause that matters to you.</p>
+          <h2>{t('about.ctaTitle')}</h2>
+          <p>{t('about.ctaSubtitle')}</p>
           <div className="about-cta-buttons">
             <Link to="/campaigns" className="btn-about-primary">
-              Browse Campaigns
+              {t('about.ctaBrowse')}
             </Link>
             <Link to="/contact" className="btn-about-secondary">
-              Get in Touch
+              {t('about.ctaContact')}
             </Link>
           </div>
         </div>

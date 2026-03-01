@@ -26,22 +26,22 @@ describe('NotFound page', () => {
     expect(screen.getByRole('heading', { name: /Page Not Found/i })).toBeInTheDocument();
   });
 
-  it('"Go Home" link points to /', () => {
+  it('home link points to /', () => {
     renderNotFound();
-    const homeLink = screen.getByRole('link', { name: /Go Home/i });
+    const homeLink = screen.getByRole('link', { name: /back to home/i });
     expect(homeLink).toBeInTheDocument();
     expect(homeLink).toHaveAttribute('href', '/');
   });
 
-  it('"Browse Campaigns" link points to /campaigns', () => {
+  it('campaigns link points to /campaigns', () => {
     renderNotFound();
-    const campaignsLink = screen.getByRole('link', { name: /Browse Campaigns/i });
+    const campaignsLink = screen.getByRole('link', { name: /all campaigns/i });
     expect(campaignsLink).toBeInTheDocument();
     expect(campaignsLink).toHaveAttribute('href', '/campaigns');
   });
 
   it('renders descriptive message about page not existing', () => {
     renderNotFound();
-    expect(screen.getByText(/does not exist or has been moved/i)).toBeInTheDocument();
+    expect(screen.getByText(/exist.*has been moved/i)).toBeInTheDocument();
   });
 });

@@ -107,6 +107,7 @@ public class RateLimitingInterceptor implements HandlerInterceptor {
         if (!allowed) {
             log.warn("Rate limit exceeded for {} on path {} (limit={} per {}s)", client, path, config.maxRequests, config.windowSeconds);
             response.setStatus(429);
+            response.setHeader("Retry-After", String.valueOf(config.windowSeconds));
             return false;
         }
         return true;

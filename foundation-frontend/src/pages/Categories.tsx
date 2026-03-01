@@ -5,6 +5,7 @@ import { API_BASE_URL } from '../api';
 import { authFetch } from '../utils/auth';
 import { useToast } from '../components/ToastProvider';
 import { useSiteName } from '../contexts/ConfigContext';
+import logger from '../utils/logger';
 
 interface Category {
   id: string;
@@ -35,7 +36,7 @@ export default function Categories() {
       const data = await res.json();
       setCategories(data);
     } catch (error) {
-      console.error('Error loading categories:', error);
+      logger.error('Categories', 'Error loading categories:', error);
     } finally {
       setLoading(false);
     }
@@ -98,7 +99,7 @@ export default function Categories() {
       showToast('Category deleted', 'success');
       loadCategories();
     } catch (error) {
-      console.error('Error deleting category:', error);
+      logger.error('Categories', 'Error deleting category:', error);
       showToast('Failed to delete category', 'error');
     }
   };

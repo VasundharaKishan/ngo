@@ -47,15 +47,11 @@ public class AdminUserController {
     }
     
     @PatchMapping("/{id}/status")
-    public ResponseEntity<?> toggleUserStatus(@PathVariable String id, @RequestBody Map<String, Boolean> request, Authentication authentication) {
+    public ResponseEntity<?> toggleUserStatus(@PathVariable String id, @Valid @RequestBody UpdateUserStatusRequest request, Authentication authentication) {
         try {
             String currentUsername = authentication.getName();
             log.info("Admin {} toggling status for user: {}", currentUsername, id);
-            Boolean active = request.get("active");
-            if (active == null) {
-                return ResponseEntity.badRequest().body(Map.of("error", "active field is required"));
-            }
-            AdminUser user = adminUserService.updateUserStatus(id, active);
+            AdminUser user = adminUserService.updateUserStatus(id, request.getActive());
             user.setPassword(null);
             return ResponseEntity.ok(user);
         } catch (RuntimeException e) {
@@ -63,17 +59,13 @@ public class AdminUserController {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
-    
+
     @PatchMapping("/{id}/password")
-    public ResponseEntity<?> changeUserPassword(@PathVariable String id, @RequestBody Map<String, String> request, Authentication authentication) {
+    public ResponseEntity<?> changeUserPassword(@PathVariable String id, @Valid @RequestBody ChangePasswordRequest request, Authentication authentication) {
         try {
             String currentUsername = authentication.getName();
             log.info("Admin {} changing password for user: {}", currentUsername, id);
-            String newPassword = request.get("newPassword");
-            if (newPassword == null || newPassword.length() < 8) {
-                return ResponseEntity.badRequest().body(Map.of("error", "Password must be at least 8 characters"));
-            }
-            adminUserService.changeUserPassword(id, newPassword);
+            adminUserService.changeUserPassword(id, request.getNewPassword());
             return ResponseEntity.ok(Map.of("message", "Password changed successfully"));
         } catch (RuntimeException e) {
             log.error("Password change failed: {}", e.getMessage());

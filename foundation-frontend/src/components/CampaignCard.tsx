@@ -1,4 +1,6 @@
+import React from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { type Campaign } from '../api';
 import { formatCurrency, calculateProgress } from '../utils/currency';
 import { IMAGES } from '../config/constants';
@@ -8,7 +10,8 @@ interface CampaignCardProps {
   campaign: Campaign;
 }
 
-export default function CampaignCard({ campaign }: CampaignCardProps) {
+function CampaignCard({ campaign }: CampaignCardProps) {
+  const { t } = useTranslation();
   const progress = calculateProgress(campaign.currentAmount, campaign.targetAmount);
   const isAlmostFunded = progress >= 85;
   const remaining = campaign.targetAmount && campaign.currentAmount != null
@@ -33,13 +36,13 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
         {/* Badges overlaid on image */}
         <div className="card-badges">
           {campaign.urgent && (
-            <span className="card-badge badge-urgent">⚡ Urgent</span>
+            <span className="card-badge badge-urgent">{t('campaign.filterUrgent')}</span>
           )}
           {isAlmostFunded && campaign.currentAmount != null && (
-            <span className="card-badge badge-almost-funded">Almost Funded</span>
+            <span className="card-badge badge-almost-funded">{t('campaign.almostFunded')}</span>
           )}
           {campaign.featured && !campaign.urgent && (
-            <span className="card-badge badge-featured">⭐ Featured</span>
+            <span className="card-badge badge-featured">{t('campaign.filterFeatured')}</span>
           )}
         </div>
       </div>
@@ -58,10 +61,10 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
             />
           </div>
           <div className="card-progress-stats">
-            <span className="progress-pct"><strong>{progress.toFixed(0)}% funded</strong></span>
+            <span className="progress-pct"><strong>{t('campaign.progress', { percent: progress.toFixed(0) })}</strong></span>
             {remaining !== null && remaining > 0 && (
               <span className="progress-remaining">
-                {formatCurrency(remaining, campaign.currency, { decimals: 0 })} to go
+                {formatCurrency(remaining, campaign.currency, { decimals: 0 })} {t('campaign.toGo')}
               </span>
             )}
           </div>
@@ -70,7 +73,7 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
 
       <div className="campaign-meta">
         <div className="meta-item">
-          <span className="label">Goal:</span>
+          <span className="label">{t('campaign.goalLabel')}</span>
           <span className="value">
             {formatCurrency(campaign.targetAmount, campaign.currency, { decimals: 0 })}
           </span>
@@ -78,18 +81,20 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
       </div>
       <div className="card-actions">
         <Link to={`/campaigns/${campaign.id}`} className="btn-secondary">
-          View Details
+          {t('campaign.viewDetails')}
         </Link>
         {campaign.active && (
           <Link to={`/donate/${campaign.id}`} className="btn-primary">
             <span className="heart-icon" aria-hidden="true">❤️</span>
-            Donate
+            {t('campaign.donate')}
           </Link>
         )}
         {!campaign.active && (
-          <span className="inactive-label">Not Accepting Donations</span>
+          <span className="inactive-label">{t('campaign.notAccepting')}</span>
         )}
       </div>
     </div>
   );
 }
+
+export default React.memo(CampaignCard);

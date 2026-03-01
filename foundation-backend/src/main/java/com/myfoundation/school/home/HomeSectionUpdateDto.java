@@ -1,5 +1,7 @@
 package com.myfoundation.school.home;
 
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,8 +18,10 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class HomeSectionUpdateDto {
+    @NotNull(message = "Section ID is required")
     private UUID id;
     private boolean enabled;
+    @Min(value = 0, message = "Sort order must be non-negative")
     private int sortOrder;
     private Map<String, Object> config;
 }

@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { authFetch } from '../utils/auth';
 import { formatCurrency, calculateProgress } from '../utils/currency';
 import { useSiteName } from '../contexts/ConfigContext';
+import logger from '../utils/logger';
 
 interface Campaign {
   id: string;
@@ -36,7 +37,7 @@ export default function Campaigns() {
       const data = await res.json();
       setCampaigns(data);
     } catch (error) {
-      console.error('Error loading campaigns:', error);
+      logger.error('Campaigns', 'Error loading campaigns:', error);
     } finally {
       setLoading(false);
     }
@@ -51,7 +52,7 @@ export default function Campaigns() {
       });
       loadCampaigns();
     } catch (error) {
-      console.error('Error deleting campaign:', error);
+      logger.error('Campaigns', 'Error deleting campaign:', error);
     }
   };
 

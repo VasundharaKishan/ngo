@@ -1,6 +1,9 @@
 package com.myfoundation.school.hero;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,9 +24,12 @@ public class HeroSlide {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
     
+    @NotBlank(message = "Image URL is required")
     @Column(name = "image_url", nullable = false, length = 500)
     private String imageUrl;
-    
+
+    @NotBlank(message = "Alt text is required")
+    @Size(min = 3, max = 255, message = "Alt text must be between 3 and 255 characters")
     @Column(name = "alt_text", nullable = false, length = 255)
     private String altText;
     
@@ -34,12 +40,15 @@ public class HeroSlide {
     @Column(name = "enabled", nullable = false)
     private boolean enabled;
     
+    @Min(value = 0, message = "Sort order must be non-negative")
     @Column(name = "sort_order", nullable = false)
     private int sortOrder;
-    
+
+    @Size(max = 255, message = "Title must be 255 characters or fewer")
     @Column(name = "title", length = 255)
     private String title;
 
+    @Size(max = 500, message = "Subtitle must be 500 characters or fewer")
     @Column(name = "subtitle", length = 500)
     private String subtitle;
 

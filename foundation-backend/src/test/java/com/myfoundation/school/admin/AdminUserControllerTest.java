@@ -159,7 +159,7 @@ class AdminUserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error", containsString("Email already exists")));
+                .andExpect(jsonPath("$.error", containsString("A user with these details already exists")));
 
         // Verify email was NOT sent
         verify(emailService, never()).sendPasswordSetupEmail(anyString(), anyString(), anyString());
@@ -180,7 +180,7 @@ class AdminUserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error", containsString("Username already exists")));
+                .andExpect(jsonPath("$.error", containsString("A user with these details already exists")));
     }
 
     @Test
@@ -245,7 +245,7 @@ class AdminUserControllerTest {
                         .with(csrf())
                         .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"newPassword\": \"newpassword123\"}"))
+                        .content("{\"newPassword\": \"NewPassword123\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message", containsString("Password changed successfully")));
     }

@@ -56,8 +56,8 @@ describe('DonationForm', () => {
     fireEvent.click(screen.getByRole('button', { name: /Continue to Your Information/ }));
 
     // Fill personal info
-    fireEvent.change(screen.getByPlaceholderText(/John Doe/i), { target: { value: 'Alice' } });
-    fireEvent.change(screen.getByPlaceholderText(/john@example.com/i), { target: { value: 'alice@example.com' } });
+    fireEvent.change(screen.getByPlaceholderText(/Full name/i), { target: { value: 'Alice' } });
+    fireEvent.change(screen.getByPlaceholderText(/you@example.com/i), { target: { value: 'alice@example.com' } });
     fireEvent.click(screen.getByRole('button', { name: /Continue to Payment/ }));
 
     // Submit payment

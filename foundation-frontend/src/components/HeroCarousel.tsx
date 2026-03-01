@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { API_BASE_URL } from '../api';
 import { TIMING } from '../config/constants';
+import logger from '../utils/logger';
 import './HeroCarousel.css';
 
 type FocusPosition = 'CENTER' | 'RIGHT' | 'LEFT' | 'TOP' | 'BOTTOM';
@@ -26,6 +28,7 @@ const focusMap: Record<FocusPosition, string> = {
 };
 
 export default function HeroCarousel() {
+  const { t } = useTranslation();
   const [slides, setSlides] = useState<HeroSlide[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -43,7 +46,7 @@ export default function HeroCarousel() {
         setSlides(data);
         setLoading(false);
       } catch (error) {
-        console.error('Error loading hero slides:', error);
+        logger.error('HeroCarousel', 'Error loading hero slides:', error);
         setLoading(false);
       }
     };
@@ -59,9 +62,6 @@ export default function HeroCarousel() {
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
   }, [slides.length]);
 
-  const goToSlide = (index: number) => {
-    setCurrentSlide(index);
-  };
 
   useEffect(() => {
     if (!isPaused && slides.length > 0) {
@@ -73,7 +73,7 @@ export default function HeroCarousel() {
   if (loading) {
     return (
       <div className="hero-carousel">
-        <div className="carousel-loading">Loading...</div>
+        <div className="carousel-loading">{t('common.loading')}</div>
       </div>
     );
   }
@@ -110,7 +110,7 @@ export default function HeroCarousel() {
                   <p className="carousel-caption-subtitle">{slide.subtitle}</p>
                 )}
                 <Link to="/campaigns" className="carousel-cta-btn">
-                  Donate Now →
+                  {t('campaign.donateNow')} →
                 </Link>
               </div>
             )}

@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { api, type Campaign } from '../api';
 import { TIMING, IMAGES } from '../config/constants';
+import logger from '../utils/logger';
 import './CampaignCarousel.css';
 
 interface CampaignCarouselProps {
@@ -15,6 +17,7 @@ export default function CampaignCarousel({
   title = 'Our Campaigns',
   featured = false,
 }: CampaignCarouselProps) {
+  const { t } = useTranslation();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -29,7 +32,7 @@ export default function CampaignCarousel({
         });
         setCampaigns(data);
       } catch (error) {
-        console.error('Error loading campaign carousel:', error);
+        logger.error('CampaignCarousel', 'Error loading campaign carousel:', error);
       } finally {
         setLoading(false);
       }
@@ -116,7 +119,7 @@ export default function CampaignCarousel({
                       className="campaign-carousel-btn-donate"
                       tabIndex={index === currentSlide ? 0 : -1}
                     >
-                      Donate Now
+                      {t('campaign.donateNow')}
                     </Link>
                   )}
                   <Link
@@ -124,7 +127,7 @@ export default function CampaignCarousel({
                     className="campaign-carousel-btn-details"
                     tabIndex={index === currentSlide ? 0 : -1}
                   >
-                    View Campaign
+                    {t('campaign.viewCampaign')}
                   </Link>
                 </div>
               </div>

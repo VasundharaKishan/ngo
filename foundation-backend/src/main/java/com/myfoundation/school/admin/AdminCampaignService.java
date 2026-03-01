@@ -1,5 +1,7 @@
 package com.myfoundation.school.admin;
 
+import com.myfoundation.school.audit.AuditAction;
+import com.myfoundation.school.audit.AuditLogService;
 import com.myfoundation.school.campaign.Campaign;
 import com.myfoundation.school.campaign.CampaignRepository;
 import com.myfoundation.school.campaign.Category;
@@ -16,6 +18,7 @@ public class AdminCampaignService {
     
     private final CampaignRepository campaignRepository;
     private final CategoryRepository categoryRepository;
+    private final AuditLogService auditLogService;
     
     @Transactional
     public Campaign createCampaign(AdminCampaignRequest request) {
@@ -49,8 +52,10 @@ public class AdminCampaignService {
         campaign.setActive(request.getActive());
         campaign.setCreatedAt(Instant.now());
         campaign.setUpdatedAt(Instant.now());
-        
-        return campaignRepository.save(campaign);
+
+        Campaign saved = campaignRepository.save(campaign);
+        auditLogService.log(AuditAction.CAMPAIGN_CREATED, "Campaign", saved.getId(), null, "Title: " + saved.getTitle());
+        return saved;
     }
     
     @Transactional
@@ -88,13 +93,16 @@ public class AdminCampaignService {
         }
         campaign.setUpdatedAt(Instant.now());
 
-        return campaignRepository.save(campaign);
+        Campaign saved = campaignRepository.save(campaign);
+        auditLogService.log(AuditAction.CAMPAIGN_UPDATED, "Campaign", id, null, "Title: " + saved.getTitle());
+        return saved;
     }
-    
+
     @Transactional
     public void deleteCampaign(String id) {
         Campaign campaign = campaignRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Campaign not found"));
         campaignRepository.delete(campaign);
+        auditLogService.log(AuditAction.CAMPAIGN_DELETED, "Campaign", id, null, "Title: " + campaign.getTitle());
     }
 }
