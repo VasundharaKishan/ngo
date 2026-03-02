@@ -1,11 +1,20 @@
 package com.myfoundation.school;
 
 import com.myfoundation.school.auth.EmailService;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
+/**
+ * Manual smoke-test for email sending — NOT part of the automated test suite.
+ * Run individual methods directly from the IDE when you need to verify real
+ * email delivery (requires valid BREVO_SMTP_KEY set in the environment).
+ */
+@Disabled("Manual test — requires real SMTP credentials; run from IDE when needed")
 @SpringBootTest
+@ActiveProfiles("test")
 public class TestEmailSending {
 
     @Autowired
