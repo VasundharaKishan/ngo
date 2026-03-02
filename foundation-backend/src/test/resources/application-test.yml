@@ -3,8 +3,11 @@ spring:
     url: jdbc:h2:mem:testdb
     driver-class-name: org.h2.Driver
     username: sa
-    password: 
-  
+    password:
+
+  flyway:
+    enabled: false   # migrations use PostgreSQL syntax; H2 tests rely on ddl-auto=create-drop instead
+
   jpa:
     hibernate:
       ddl-auto: create-drop
