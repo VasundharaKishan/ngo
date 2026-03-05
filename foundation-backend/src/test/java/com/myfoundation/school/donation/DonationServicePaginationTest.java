@@ -46,8 +46,10 @@ class DonationServicePaginationTest {
         campaignRepository.deleteAll();
         categoryRepository.deleteAll();
 
-        // Create test category
-        Category category = Category.builder()
+        // Create test category — capture the managed entity returned by save()
+        // (Spring Data JPA calls merge() for entities with a manually-set ID,
+        //  returning a new managed instance; the original builder instance stays detached)
+        Category category = categoryRepository.save(Category.builder()
                 .id("test-category")
                 .name("Test Category")
                 .slug("test-category")
@@ -55,11 +57,10 @@ class DonationServicePaginationTest {
                 .color("#000000")
                 .active(true)
                 .displayOrder(1)
-                .build();
-        categoryRepository.save(category);
+                .build());
 
-        // Create test campaign
-        testCampaign = Campaign.builder()
+        // Create test campaign — use the managed category instance
+        testCampaign = campaignRepository.save(Campaign.builder()
                 .id("test-campaign")
                 .title("Test Campaign")
                 .slug("test-campaign")
@@ -70,8 +71,7 @@ class DonationServicePaginationTest {
                 .currency("usd")
                 .active(true)
                 .category(category)
-                .build();
-        campaignRepository.save(testCampaign);
+                .build());
 
         // Create test donations
         for (int i = 1; i <= 15; i++) {
