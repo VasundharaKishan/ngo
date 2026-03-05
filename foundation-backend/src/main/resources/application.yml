@@ -15,17 +15,22 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: none   # Flyway owns schema management
     show-sql: false
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
-    defer-datasource-initialization: true
+    # NOTE: defer-datasource-initialization must NOT be set here.
+    # Setting it to true causes a circular depends-on between 'flyway' and
+    # 'entityManagerFactory' in Spring Boot 3.2.x: defer-datasource-init makes
+    # entityManagerFactory wait for Flyway; Spring Boot's Flyway auto-config also
+    # makes Flyway aware of JPA — creating a deadlock at startup.
+    # We use spring.sql.init.mode=never so this property is not needed anyway.
 
   sql:
     init:
-      mode: never
+      mode: never      # No schema.sql / data.sql scripts; Flyway handles all DDL
       data-locations: classpath:sample-data.sql
       continue-on-error: false
   
