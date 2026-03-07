@@ -8,47 +8,48 @@
 -- ─────────────────────────────────────────────────────────────────────────────
 DELETE FROM hero_slides;
 
--- id must be explicit: production hero_slides.id has no DEFAULT gen_random_uuid()
--- because V6 (which added the DEFAULT) was skipped via baseline-version=14.
-INSERT INTO hero_slides (id, image_url, alt_text, focus, enabled, sort_order, title, subtitle, created_at, updated_at)
+-- Production hero_slides has NO DEFAULT on any NOT NULL column (id, deleted, focus,
+-- enabled, etc.) because V6 which defined those defaults was skipped via baseline-version=14.
+-- Every NOT NULL column must be supplied explicitly.
+INSERT INTO hero_slides (id, image_url, alt_text, focus, enabled, deleted, sort_order, title, subtitle, created_at, updated_at)
 VALUES
     (gen_random_uuid(), 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=1600&auto=format&q=80',
-     'Children Education', 'CENTER', TRUE, 10,
+     'Children Education', 'CENTER', TRUE, FALSE, 10,
      'Every Child Deserves to Learn',
      'Providing quality education to children in rural communities',
      NOW(), NOW()),
     (gen_random_uuid(), 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=1600&auto=format&q=80',
-     'Child Nutrition', 'CENTER', TRUE, 20,
+     'Child Nutrition', 'CENTER', TRUE, FALSE, 20,
      'No Child Should Go Hungry',
      'Nutritious meals for 500 children every day',
      NOW(), NOW()),
     (gen_random_uuid(), 'https://images.unsplash.com/photo-1547036967-23d11aacaee0?w=1600&auto=format&q=80',
-     'Clean Water', 'CENTER', TRUE, 30,
+     'Clean Water', 'CENTER', TRUE, FALSE, 30,
      'Safe Water for Every Village',
      'Clean drinking water transforms lives and communities',
      NOW(), NOW()),
     (gen_random_uuid(), 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=1600&auto=format&q=80',
-     'Women Empowerment', 'RIGHT', TRUE, 40,
+     'Women Empowerment', 'RIGHT', TRUE, FALSE, 40,
      'Empowering Women, Transforming Communities',
      'Supporting women through education, skills, and financial independence',
      NOW(), NOW()),
     (gen_random_uuid(), 'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=1600&auto=format&q=80',
-     'Skill Development', 'CENTER', TRUE, 50,
+     'Skill Development', 'CENTER', TRUE, FALSE, 50,
      'Skills That Build Futures',
      'Vocational training and job placement for youth across India',
      NOW(), NOW()),
     (gen_random_uuid(), 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=1600&auto=format&q=80',
-     'Rural Development', 'RIGHT', TRUE, 60,
+     'Rural Development', 'RIGHT', TRUE, FALSE, 60,
      'Transforming Villages One Step at a Time',
      'Supporting farmers and rural communities with modern tools',
      NOW(), NOW()),
     (gen_random_uuid(), 'https://images.unsplash.com/photo-1631815589968-fdb09a223b1e?w=1600&auto=format&q=80',
-     'Healthcare', 'CENTER', TRUE, 70,
+     'Healthcare', 'CENTER', TRUE, FALSE, 70,
      'Quality Healthcare for All',
      'Free medical camps reaching the most remote villages',
      NOW(), NOW()),
     (gen_random_uuid(), 'https://images.unsplash.com/photo-1587093336587-eeca6cb17cf8?w=1600&auto=format&q=80',
-     'Emergency Relief', 'RIGHT', TRUE, 80,
+     'Emergency Relief', 'RIGHT', TRUE, FALSE, 80,
      'Standing With Communities in Crisis',
      'Rapid disaster relief and emergency support when it matters most',
      NOW(), NOW());
