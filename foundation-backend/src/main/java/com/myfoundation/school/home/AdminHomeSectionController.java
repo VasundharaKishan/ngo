@@ -15,7 +15,6 @@ import java.util.UUID;
 @PreAuthorize("hasAuthority('ADMIN')")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "${cors.allowed-origins}")
 public class AdminHomeSectionController {
     
     private final HomeSectionService sectionService;

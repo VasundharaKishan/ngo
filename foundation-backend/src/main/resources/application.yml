@@ -109,7 +109,7 @@ app:
     endpoint-config: ${RATE_LIMIT_ENDPOINT_CONFIG:50}
 
 cors:
-  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:5174,http://localhost:3000,https://www.yugalsavitriseva.org,https://frontend-three-psi-17.vercel.app,https://foundation-frontend-three.vercel.app}
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:5174,http://localhost:3000,https://yugalsavitriseva.org,https://www.yugalsavitriseva.org,https://frontend-three-psi-17.vercel.app,https://foundation-frontend-three.vercel.app}
 
 storage:
   r2:

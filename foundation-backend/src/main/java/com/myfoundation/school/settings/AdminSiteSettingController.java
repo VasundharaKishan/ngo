@@ -17,7 +17,6 @@ import java.util.Map;
 @PreAuthorize("hasAuthority('ADMIN')")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "${cors.allowed-origins}")
 public class AdminSiteSettingController {
     
     private final SiteSettingService settingService;
