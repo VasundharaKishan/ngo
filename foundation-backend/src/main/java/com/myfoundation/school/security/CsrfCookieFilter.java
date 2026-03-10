@@ -14,25 +14,36 @@ import java.io.IOException;
  * Filter to ensure CSRF token is loaded and available on every request.
  * This is necessary for SPA applications where the token needs to be
  * available in cookies for JavaScript to read and send back in headers.
+ *
+ * SameSite is set to "None" when secure=true (production HTTPS) so the cookie
+ * is sent on cross-site requests (frontend and backend on different domains).
+ * SameSite falls back to "Lax" when secure=false (local HTTP development).
  */
 public class CsrfCookieFilter extends OncePerRequestFilter {
 
+    private final boolean secure;
+
+    public CsrfCookieFilter(boolean secure) {
+        this.secure = secure;
+    }
+
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, 
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         // Access the deferred CSRF token to trigger it to be loaded and set in the response
         CsrfToken csrfToken = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
         if (csrfToken != null) {
             // Force the token to be generated
             String tokenValue = csrfToken.getToken();
-            
+
             // Explicitly set the cookie to ensure it's in the response
             // This is necessary for test environments and SPA clients
             Cookie cookie = new Cookie("XSRF-TOKEN", tokenValue);
             cookie.setPath("/");
             cookie.setHttpOnly(false);
-            cookie.setSecure(false); // Set to true in production with HTTPS
-            cookie.setAttribute("SameSite", "Lax"); // Allow cross-origin but with some restrictions
+            cookie.setSecure(this.secure);
+            // SameSite=None required for cross-domain setups; must pair with Secure=true
+            cookie.setAttribute("SameSite", this.secure ? "None" : "Lax");
             response.addCookie(cookie);
         }
         filterChain.doFilter(request, response);

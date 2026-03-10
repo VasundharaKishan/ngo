@@ -75,11 +75,13 @@ public class AuthController {
 
             if (cookieEnabled) {
                 log.info("Cookie enabled, building cookie...");
+                // SameSite=None required for cross-site requests (frontend and backend on different domains).
+                // SameSite=None MUST be paired with Secure=true, so fall back to Lax on local HTTP dev.
                 ResponseCookie cookie = ResponseCookie.from(cookieName, response.getToken())
                         .httpOnly(true)
                         .secure(cookieSecure)
                         .path("/")
-                        .sameSite("Lax")
+                        .sameSite(cookieSecure ? "None" : "Lax")
                         .maxAge(jwtExpiryMinutes * 60)
                         .domain(cookieDomain.isBlank() ? null : cookieDomain)
                         .build();
@@ -124,12 +126,12 @@ public class AuthController {
         ResponseEntity.BodyBuilder builder = ResponseEntity.ok();
         
         if (cookieEnabled) {
-            // Clear the JWT cookie
+            // Clear the JWT cookie — same SameSite/Secure settings as login
             ResponseCookie cookie = ResponseCookie.from(cookieName, "")
                     .httpOnly(true)
                     .secure(cookieSecure)
                     .path("/")
-                    .sameSite("Lax")
+                    .sameSite(cookieSecure ? "None" : "Lax")
                     .maxAge(0)  // Expire immediately
                     .domain(cookieDomain.isBlank() ? null : cookieDomain)
                     .build();
@@ -189,7 +191,7 @@ public class AuthController {
                     .httpOnly(true)
                     .secure(cookieSecure)
                     .path("/")
-                    .sameSite("Lax")
+                    .sameSite(cookieSecure ? "None" : "Lax")
                     .maxAge(jwtExpiryMinutes * 60)
                     .domain(cookieDomain.isBlank() ? null : cookieDomain)
                     .build();
