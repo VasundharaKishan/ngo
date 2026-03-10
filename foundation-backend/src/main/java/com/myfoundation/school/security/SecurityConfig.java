@@ -52,6 +52,9 @@ public class SecurityConfig {
     @Value("${cors.allowed-origins:}")
     private String corsAllowedOrigins;
 
+    @Value("${app.jwt.cookie-secure:true}")
+    private boolean cookieSecure;
+
     @Value("${springdoc.swagger-ui.enabled:false}")
     private boolean swaggerEnabled;
 
@@ -186,7 +189,7 @@ public class SecurityConfig {
                     .policy("geolocation=(), microphone=(), camera=(), fullscreen=(self)"));
             })
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-            .addFilterAfter(new CsrfCookieFilter(), org.springframework.security.web.csrf.CsrfFilter.class);
+            .addFilterAfter(new CsrfCookieFilter(cookieSecure), org.springframework.security.web.csrf.CsrfFilter.class);
         
         // Only add CSRF debug filter if it's available (dev/local profiles)
         if (csrfDebugFilter != null) {
