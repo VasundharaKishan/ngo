@@ -466,6 +466,125 @@ public class EmailService {
             """.formatted(donorName, formattedAmount, campaignTitle, donationDate, donationId);
     }
     
+    /**
+     * Notify admin when a new contact-form submission arrives.
+     * Never throws — email failure must not block the submission.
+     */
+    public void sendContactNotificationToAdmin(
+            String senderName,
+            String senderEmail,
+            String subject,
+            String message,
+            Long submissionId) {
+        try {
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
+
+            helper.setFrom(fromSystem, fromName);
+            String adminEmail = siteConfigService.getConfigValue("admin.notification.email");
+            if (adminEmail == null || adminEmail.isBlank()) {
+                adminEmail = replyTo; // fallback to reply-to address
+            }
+            helper.setTo(adminEmail);
+            helper.setReplyTo(senderEmail); // reply goes directly to the visitor
+            helper.setSubject("New contact message: " + truncate(subject, 60));
+
+            String adminUrl = frontendUrl + "/admin/contact-submissions";
+            String htmlContent = buildContactNotificationHtml(
+                    senderName, senderEmail, subject, message, submissionId, adminUrl);
+            helper.setText(htmlContent, true);
+
+            mailSender.send(mimeMessage);
+            log.info("Contact notification email sent to admin for submission id={}", submissionId);
+        } catch (MessagingException | UnsupportedEncodingException e) {
+            log.error("Failed to send contact notification email for submission id={}", submissionId, e);
+            // Don't throw — email failure must not block the contact submission
+        }
+    }
+
+    private String buildContactNotificationHtml(
+            String senderName,
+            String senderEmail,
+            String subject,
+            String message,
+            Long submissionId,
+            String adminUrl) {
+        // Escape HTML in user-supplied fields to prevent injection
+        String safeName = escapeHtml(senderName);
+        String safeEmail = escapeHtml(senderEmail);
+        String safeSubject = escapeHtml(subject);
+        String safeMessage = escapeHtml(message).replace("\n", "<br>");
+
+        return """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <style>
+                    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333;
+                           max-width: 600px; margin: 0 auto; padding: 20px; background: #f5f5f5; }
+                    .container { background: white; border-radius: 8px; padding: 30px;
+                                 box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+                    .header { background: linear-gradient(135deg, #1e3a8a 0%%, #312e81 100%%);
+                              color: white; padding: 20px; border-radius: 6px; margin-bottom: 20px; }
+                    .header h2 { margin: 0; font-size: 20px; }
+                    .info td { padding: 10px 12px; border-bottom: 1px solid #e5e7eb; }
+                    .info td:first-child { font-weight: 600; color: #6b7280; width: 100px; }
+                    .message-box { background: #f8fafc; border-left: 4px solid #1e3a8a;
+                                   padding: 15px 18px; margin: 20px 0; border-radius: 4px;
+                                   font-size: 15px; line-height: 1.65; color: #1e293b; }
+                    .btn { display: inline-block; padding: 12px 24px; background: #1e3a8a;
+                           color: white; text-decoration: none; border-radius: 6px;
+                           font-weight: 600; font-size: 14px; }
+                    .footer { margin-top: 25px; padding-top: 15px; border-top: 1px solid #e5e7eb;
+                              font-size: 13px; color: #6b7280; text-align: center; }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <h2>New contact message</h2>
+                        <p style="margin:5px 0 0;opacity:0.9;font-size:14px;">
+                            Someone submitted the contact form on your website
+                        </p>
+                    </div>
+                    <table class="info" style="width:100%%;border-collapse:collapse;">
+                        <tr><td>From</td><td><strong>%s</strong></td></tr>
+                        <tr><td>Email</td><td><a href="mailto:%s">%s</a></td></tr>
+                        <tr><td>Subject</td><td><strong>%s</strong></td></tr>
+                        <tr><td>ID</td><td>#%d</td></tr>
+                    </table>
+                    <div class="message-box">%s</div>
+                    <p style="text-align:center;margin:25px 0 10px;">
+                        <a href="%s" class="btn">View in admin panel</a>
+                    </p>
+                    <p style="text-align:center;font-size:13px;color:#64748b;">
+                        You can reply directly to this email — it will go to <strong>%s</strong>.
+                    </p>
+                    <div class="footer">
+                        <p>Automated notification from your website contact form.</p>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """.formatted(safeName, safeEmail, safeEmail, safeSubject, submissionId, safeMessage, adminUrl, safeEmail);
+    }
+
+    private static String escapeHtml(String input) {
+        if (input == null) return "";
+        return input
+                .replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&#39;");
+    }
+
+    private static String truncate(String s, int max) {
+        if (s == null || s.length() <= max) return s;
+        return s.substring(0, max - 1) + "…";
+    }
+
     private String buildAdminNotificationHtml(
             String donorName,
             String donorEmail,

@@ -1,0 +1,129 @@
+/* LegalRegistrationTab.css
+   Lightweight styles. Uses existing tab-panel + form-group conventions where possible. */
+
+.legal-reg-tab .tab-description {
+  margin-top: -0.25rem;
+  margin-bottom: 1.25rem;
+  color: #555;
+  max-width: 64ch;
+  font-size: 0.9rem;
+}
+
+.legal-reg-tab .status-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.75rem;
+}
+
+.legal-reg-tab .status-card {
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 0.9rem 1rem;
+  cursor: pointer;
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  transition: border-color 120ms ease, background 120ms ease;
+  background: #fff;
+}
+
+.legal-reg-tab .status-card:hover {
+  border-color: #93c5fd;
+}
+
+.legal-reg-tab .status-card.selected {
+  border-color: #1e40af;
+  background: #f5f8ff;
+  box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.08);
+}
+
+.legal-reg-tab .status-card input[type='radio'] {
+  margin-top: 0.2rem;
+  accent-color: #1e40af;
+}
+
+.legal-reg-tab .status-card-body strong {
+  display: block;
+  font-size: 0.95rem;
+  margin-bottom: 0.2rem;
+  color: #111827;
+}
+
+.legal-reg-tab .status-card-body p {
+  margin: 0;
+  color: #4b5563;
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.legal-reg-tab .warning-banner {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  background: #fef3c7;
+  border: 1px solid #f59e0b;
+  border-radius: 8px;
+  color: #78350f;
+  font-size: 0.88rem;
+}
+
+.legal-reg-tab .warning-banner strong {
+  color: #78350f;
+}
+
+.legal-reg-tab .form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.75rem;
+}
+
+.legal-reg-tab .form-group input:disabled,
+.legal-reg-tab .form-group textarea:disabled {
+  background: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.legal-reg-tab .locked-tag {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.1rem 0.4rem;
+  font-size: 0.7rem;
+  background: #e5e7eb;
+  color: #6b7280;
+  border-radius: 4px;
+  vertical-align: middle;
+  font-weight: 500;
+}
+
+.legal-reg-tab .pages-affected {
+  margin-top: 1.5rem;
+  padding: 1rem 1.2rem;
+  background: #f9fafb;
+  border: 1px dashed #d1d5db;
+  border-radius: 10px;
+}
+
+.legal-reg-tab .pages-affected h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.9rem;
+  color: #374151;
+}
+
+.legal-reg-tab .pages-affected ul {
+  margin: 0 0 0.5rem 0;
+  padding-left: 1.2rem;
+  columns: 2;
+  font-size: 0.85rem;
+  color: #4b5563;
+}
+
+.legal-reg-tab .pages-affected small {
+  color: #6b7280;
+  font-size: 0.78rem;
+}
+
+@media (max-width: 640px) {
+  .legal-reg-tab .pages-affected ul {
+    columns: 1;
+  }
+}

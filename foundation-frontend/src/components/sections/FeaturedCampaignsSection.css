@@ -1,0 +1,202 @@
+/* FeaturedCampaignsSection — "Live campaigns" grid.
+   Matches mockup: eyebrow + heading row with "All campaigns →" link,
+   3-col grid of rounded-2xl cards with gradient image, category badge,
+   saffron progress bar, and stats row. */
+
+.campaigns-section {
+  padding: var(--space-14, 3.5rem) 0;
+}
+
+@media (min-width: 768px) {
+  .campaigns-section {
+    padding: var(--space-20) 0;
+  }
+}
+
+.campaigns-container {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 0 var(--space-4);
+}
+
+@media (min-width: 640px) {
+  .campaigns-container {
+    padding: 0 var(--space-6);
+  }
+}
+
+@media (min-width: 1024px) {
+  .campaigns-container {
+    padding: 0 var(--space-8);
+  }
+}
+
+/* Header row: left text + right link */
+.campaigns-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.campaigns-eyebrow {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-saffron-600);
+}
+
+.campaigns-title {
+  margin-top: var(--space-2);
+  font-size: clamp(1.875rem, 3.5vw, 2.25rem);
+  color: var(--color-ink-900);
+  line-height: var(--line-height-tight);
+}
+
+.campaigns-all-link {
+  font-size: var(--font-size-sm);
+  color: var(--color-trust-800);
+  font-weight: var(--font-weight-semibold);
+  text-decoration: none;
+  transition: color 180ms ease;
+  white-space: nowrap;
+}
+
+.campaigns-all-link:hover {
+  text-decoration: underline;
+}
+
+/* Grid */
+.campaigns-grid {
+  margin-top: var(--space-8);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-5);
+}
+
+@media (min-width: 640px) {
+  .campaigns-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .campaigns-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Campaign card */
+.campaign-card-v2 {
+  background: var(--color-white);
+  border: 1px solid var(--color-paper-300);
+  border-radius: var(--radius-2xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+  transition: box-shadow 200ms ease;
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+}
+
+.campaign-card-v2:hover {
+  box-shadow: var(--shadow-lift);
+}
+
+/* Card image */
+.campaign-card-v2__image {
+  aspect-ratio: 16 / 10;
+  background: linear-gradient(135deg, var(--color-trust-700, #1e40af), var(--color-saffron-500));
+  overflow: hidden;
+}
+
+.campaign-card-v2__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Card body */
+.campaign-card-v2__body {
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  flex: 1;
+}
+
+/* Category badge */
+.campaign-card-v2__badge {
+  display: inline-block;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--radius-sm, 4px);
+  width: fit-content;
+}
+
+.campaign-card-v2__badge--education {
+  color: var(--color-saffron-700, #b45309);
+  background: var(--color-saffron-50);
+}
+
+.campaign-card-v2__badge--healthcare {
+  color: var(--color-moss-600, #16a34a);
+  background: rgba(22, 163, 74, 0.1);
+}
+
+.campaign-card-v2__badge--livelihood {
+  color: var(--color-saffron-700, #b45309);
+  background: var(--color-saffron-50);
+}
+
+.campaign-card-v2__badge--default {
+  color: var(--color-trust-800);
+  background: var(--color-trust-50, #eff6ff);
+}
+
+/* Card title */
+.campaign-card-v2__title {
+  margin: var(--space-3) 0 0;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-ink-900);
+  line-height: var(--line-height-normal);
+}
+
+/* Progress bar */
+.campaign-card-v2__progress {
+  margin-top: var(--space-3);
+  height: 0.5rem;
+  background: var(--color-paper-200);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.campaign-card-v2__progress-fill {
+  height: 100%;
+  background: var(--color-saffron-500);
+  border-radius: var(--radius-full);
+  transition: width 600ms ease;
+}
+
+/* Stats row */
+.campaign-card-v2__stats {
+  margin-top: var(--space-2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: var(--font-size-xs);
+  color: var(--color-ink-500);
+}
+
+/* Empty state */
+.campaigns-empty {
+  text-align: center;
+  color: var(--color-ink-500);
+  padding: var(--space-8) 0;
+}

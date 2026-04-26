@@ -1,0 +1,222 @@
+/* AdminDonationPresets.css — admin editor for donation_presets list. Mirrors
+   AdminTrustBadges.css so the two admin surfaces feel cohesive. */
+
+.admin-donation-presets {
+  padding: 1.5rem 2rem 3rem;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.adp-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.adp-header h1 {
+  margin: 0 0 0.35rem 0;
+  font-size: 1.6rem;
+  color: #0f172a;
+}
+
+.adp-sub {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.9rem;
+  max-width: 60ch;
+  line-height: 1.5;
+}
+
+.adp-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.adp-card {
+  display: grid;
+  grid-template-columns: 68px 1fr;
+  gap: 1rem;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.adp-card--muted {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  opacity: 0.85;
+}
+
+.adp-card-order {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding-top: 0.25rem;
+}
+
+.adp-card-position {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.adp-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.adp-row {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 0.9rem;
+}
+
+@media (max-width: 720px) {
+  .adp-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.adp-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.adp-field label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.adp-field input[type='text'],
+.adp-field input[type='number'] {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.55rem 0.7rem;
+  font-size: 0.95rem;
+  color: #0f172a;
+  background: #ffffff;
+  font-family: inherit;
+}
+
+.adp-field--amount input[type='number'] {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.adp-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  align-items: center;
+}
+
+.adp-toggle {
+  font-size: 0.85rem;
+  color: #334155;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.adp-toggle input {
+  margin: 0;
+}
+
+.adp-toggle--disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.adp-gate-notice {
+  background: #fff7ed;
+  border-left: 3px solid #fb923c;
+  color: #9a3412;
+  padding: 0.45rem 0.65rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+
+.adp-card-actions {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.adp-clear-default {
+  margin-top: 0.75rem;
+  text-align: right;
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: #2563eb;
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0.25rem 0.5rem;
+}
+
+.btn-link:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.adp-new {
+  margin-top: 2rem;
+  padding: 1.25rem;
+  background: #ffffff;
+  border: 1px dashed #cbd5e1;
+  border-radius: 12px;
+}
+
+.adp-new h2 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+  color: #0f172a;
+}
+
+.adp-new-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  gap: 0.9rem;
+  align-items: end;
+}
+
+@media (max-width: 720px) {
+  .adp-new-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.adp-dirty-banner {
+  position: sticky;
+  bottom: 0.75rem;
+  margin-top: 1.5rem;
+  background: #1e293b;
+  color: #e2e8f0;
+  border-radius: 8px;
+  padding: 0.65rem 1rem;
+  font-size: 0.85rem;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.25);
+}
+
+.field-description {
+  color: #64748b;
+  font-size: 0.75rem;
+  line-height: 1.4;
+}

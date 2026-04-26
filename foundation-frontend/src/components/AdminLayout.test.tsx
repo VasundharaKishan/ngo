@@ -50,7 +50,7 @@ describe('AdminLayout', () => {
       </MemoryRouter>
     );
 
-    expect(await screen.findByText(/Admin Portal/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Admin console/i)).toBeInTheDocument();
     expect(localStorage.getItem(STORAGE_KEYS.SESSION_ID)).toBeTruthy();
     expect(localStorage.getItem(STORAGE_KEYS.LAST_ACTIVITY)).toBeTruthy();
 

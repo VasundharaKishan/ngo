@@ -144,6 +144,14 @@ public class SecurityConfig {
                     .requestMatchers("/api/auth/users/**").hasRole("ADMIN")
                     .requestMatchers("/api/auth/admin/**").hasRole("ADMIN")
                     
+                    // Static frontend assets and SPA routes (React build output + React Router paths).
+                    // All non-API, non-actuator paths forward to index.html via SpaFallbackController.
+                    // Real auth is enforced at the /api/** level; HTML routes are public by design.
+                    .requestMatchers(request -> {
+                        String uri = request.getRequestURI();
+                        return !uri.startsWith("/api/") && !uri.startsWith("/actuator/");
+                    }).permitAll()
+
                     // Health check
                     .requestMatchers("/actuator/health").permitAll()
                     

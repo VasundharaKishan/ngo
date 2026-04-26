@@ -1,0 +1,198 @@
+# Patch for foundation-frontend/src/components/Layout.tsx
+#
+# Footer cleanup, reviewed from the user screenshot:
+#
+#   1. Remove "Corporate / CSR" footer link. It currently points to
+#      /contact, i.e. it's not a real CSR landing page. Remove it rather
+#      than leave a confusing stub. Add back when (and if) a dedicated
+#      /corporate page is built, after the trust has MCA CSR-1
+#      registration.
+#
+#   2. Add "Cookies" under LEGAL. The /cookies route already exists in
+#      App.tsx; the link was simply missing from the footer.
+#
+#   3. Render registered office address under the tagline in the brand
+#      column, backed by legal.registered_address from site_settings so
+#      admins can edit it without a deploy.
+#
+#   4. Render a thin "registration badges" strip directly above the
+#      bottom bar, driven by legal.registration_{80g,12a,fcra,csr1,pan}
+#      from site_settings. Each badge is rendered conditionally — a key
+#      with an empty value simply does not appear — so the strip
+#      gracefully degrades to zero badges on day one and grows as the
+#      admin fills in documents. This is independent of the existing
+#      `useRegistrationInfo` hook, which continues to drive the prose
+#      disclosure line next to the copyright.
+#
+# Layout.tsx is in the uncommitted set, so this change is kept as a
+# patch rather than a direct edit. Apply AFTER V33 has been re-applied
+# (or the new keys added manually), otherwise the five new config
+# lookups will all resolve to empty strings and the new UI will just be
+# blank. That's safe but defeats the point of the change.
+#
+# Usage:
+#   cd <repo root>
+#   git apply patches/0003-layout-tsx-footer-cleanup.patch
+#
+# If the hunks don't apply cleanly because of nearby in-flight edits,
+# apply the changes by hand from this file.
+#
+# --- a/foundation-frontend/src/components/Layout.tsx
+# +++ b/foundation-frontend/src/components/Layout.tsx
+#
+# @@ change 1: pull in useConfig so we can read the new legal.* keys.
+#
+#  import { useRegistrationInfo, footerDisclosureFor } from '../hooks/useRegistrationInfo';
+# -import { useSiteName, useSiteLogo } from '../contexts/ConfigContext';
+# +import { useSiteName, useSiteLogo, useConfig } from '../contexts/ConfigContext';
+#
+# @@ change 2: read the new keys alongside the existing config hooks.
+#
+#   const siteName = useSiteName();
+#   const logoUrl = useSiteLogo();
+# +  const { config } = useConfig();
+# +
+# +  // Admin-editable footer values, all sourced from site_settings.
+# +  const registeredAddress = config['legal.registered_address'] || '';
+# +  const registrationBadges = [
+# +    { label: '80G', value: config['legal.registration_80g'] || config['legal.80g_number'] || '' },
+# +    { label: '12A', value: config['legal.registration_12a'] || '' },
+# +    { label: 'FCRA', value: config['legal.registration_fcra'] || '' },
+# +    { label: 'CSR-1', value: config['legal.registration_csr1'] || '' },
+# +    { label: 'PAN', value: config['legal.registration_pan'] || '' },
+# +  ].filter(b => b.value);
+#
+#   const registration = useRegistrationInfo();
+#   const registrationDisclosure = footerDisclosureFor(registration);
+#
+# @@ change 3: render the registered address under the tagline.
+#
+#               <p className="footer-tagline">
+#                 {footerTagline || 'Education, health, and dignity for rural India. A community-led foundation.'}
+#               </p>
+# +              {registeredAddress && (
+# +                <address className="footer-registered-address" data-testid="footer-registered-address">
+# +                  {registeredAddress}
+# +                </address>
+# +              )}
+#             </div>
+#
+# @@ change 4: remove the Corporate / CSR line.
+#
+#             {/* Col 2: Give */}
+#             <div className="footer-col">
+#               <div className="footer-col-heading">Give</div>
+#               <ul className="footer-links">
+#                 <li><a href="#donate" onClick={handleDonateClick}>Donate once</a></li>
+#                 <li><a href="#donate" onClick={handleDonateClick}>Give monthly</a></li>
+#                 <li><Link to="/campaigns">All campaigns</Link></li>
+# -               <li><Link to="/contact">Corporate / CSR</Link></li>
+#               </ul>
+#             </div>
+#
+# @@ change 5: add Cookies under LEGAL.
+#
+#             {/* Col 4: Legal */}
+#             <div className="footer-col">
+#               <div className="footer-col-heading">Legal</div>
+#               <ul className="footer-links">
+#                 <li><Link to="/privacy">Privacy policy</Link></li>
+#                 <li><Link to="/terms">Terms</Link></li>
+#                 <li><Link to="/refund">Refund policy</Link></li>
+# +               <li><Link to="/cookies">Cookies</Link></li>
+#                 <li><Link to="/accessibility">Accessibility</Link></li>
+#               </ul>
+#             </div>
+#
+# @@ change 6: insert the registration badges strip between the grid
+#              and the bottom-bar wrapper. Only renders if at least one
+#              badge has a value; no badges → no DOM noise.
+#
+#           </div>
+#         </div>
+#
+# +       {registrationBadges.length > 0 && (
+# +         <div className="footer-badges-wrapper">
+# +           <div
+# +             className="footer-badges"
+# +             role="list"
+# +             aria-label="Statutory registrations"
+# +             data-testid="footer-registration-badges"
+# +           >
+# +             {registrationBadges.map(b => (
+# +               <span key={b.label} className="footer-badge" role="listitem">
+# +                 <span className="footer-badge-label">{b.label}</span>
+# +                 <span className="footer-badge-value">{b.value}</span>
+# +               </span>
+# +             ))}
+# +           </div>
+# +         </div>
+# +       )}
+# +
+#         {/* Bottom bar */}
+#         <div className="footer-bottom-wrapper">
+#
+# ---------------------------------------------------------------------
+# Minimal CSS to add to Layout.css (keep in same commit):
+# ---------------------------------------------------------------------
+#
+#   .footer-registered-address {
+#     margin-top: 12px;
+#     font-size: 13px;
+#     line-height: 1.5;
+#     color: var(--text-muted, #6b7280);
+#     font-style: normal;
+#     white-space: pre-line;     /* respect admin line breaks */
+#   }
+#
+#   .footer-badges-wrapper {
+#     border-top: 1px solid var(--border-subtle, #e5e7eb);
+#     padding: 14px 0;
+#   }
+#
+#   .footer-badges {
+#     max-width: var(--container-max, 1200px);
+#     margin: 0 auto;
+#     padding: 0 var(--container-pad, 24px);
+#     display: flex;
+#     flex-wrap: wrap;
+#     gap: 10px;
+#     justify-content: center;
+#   }
+#
+#   .footer-badge {
+#     display: inline-flex;
+#     align-items: center;
+#     gap: 6px;
+#     padding: 4px 10px;
+#     border: 1px solid var(--border-subtle, #e5e7eb);
+#     border-radius: 999px;
+#     background: var(--bg-subtle, #f9fafb);
+#     font-size: 12px;
+#     line-height: 1.4;
+#   }
+#
+#   .footer-badge-label {
+#     font-weight: 600;
+#     color: var(--text-strong, #111827);
+#   }
+#
+#   .footer-badge-value {
+#     color: var(--text-muted, #6b7280);
+#     font-variant-numeric: tabular-nums;
+#   }
+#
+# ---------------------------------------------------------------------
+# Verification after applying:
+#
+#   * Before adding any registration values in admin: /* renders exactly
+#     as today, MINUS Corporate/CSR, PLUS Cookies, PLUS the registered
+#     address (if legal.registered_address has a value). Badges strip
+#     not rendered.
+#   * After setting e.g. legal.registration_80g='AAATR1234E20231' and
+#     legal.registration_12a='AAATR1234E21234' in admin: two pill badges
+#     appear between the grid and the bottom bar.
+#   * Footer "Cookies" link navigates to /cookies (route already wired).
+#   * No regression in the existing registration disclosure next to the
+#     copyright — it's driven by useRegistrationInfo and untouched by
+#     this patch.

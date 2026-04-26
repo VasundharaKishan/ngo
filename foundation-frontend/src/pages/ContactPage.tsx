@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useSiteName } from '../contexts/ConfigContext';
 import { fetchContactInfo } from '../utils/contactApi';
 import type { ContactInfo } from '../utils/contactApi';
+import { API_BASE_URL } from '../api';
+import logger from '../utils/logger';
 import './ContactPage.css';
 
 export default function ContactPage() {
@@ -26,9 +28,80 @@ export default function ContactPage() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+  const [submitError, setSubmitError] = useState('');
+
+  // Turnstile CAPTCHA state
+  const [captchaEnabled, setCaptchaEnabled] = useState(false);
+  const [captchaSiteKey, setCaptchaSiteKey] = useState('');
+  const [turnstileToken, setTurnstileToken] = useState('');
+  const turnstileRef = useRef<HTMLDivElement>(null);
+  const turnstileWidgetId = useRef<string | null>(null);
 
   useEffect(() => {
     fetchContactInfo().then(setContactInfo).catch(() => {});
+  }, []);
+
+  // Load CAPTCHA config from backend
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/public/contact/captcha-config`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data && data.enabled && data.siteKey) {
+          setCaptchaEnabled(true);
+          setCaptchaSiteKey(data.siteKey);
+        }
+      })
+      .catch((err) => logger.warn('ContactPage', 'Failed to load CAPTCHA config', err));
+  }, []);
+
+  // Load Turnstile script and render widget when config is ready
+  useEffect(() => {
+    if (!captchaEnabled || !captchaSiteKey || !turnstileRef.current) return;
+
+    const renderWidget = () => {
+      if (!turnstileRef.current) return;
+      // Clear any previously rendered widget
+      if (turnstileWidgetId.current && window.turnstile) {
+        try { window.turnstile.remove(turnstileWidgetId.current); } catch { /* ignore */ }
+      }
+      if (window.turnstile) {
+        turnstileWidgetId.current = window.turnstile.render(turnstileRef.current, {
+          sitekey: captchaSiteKey,
+          callback: (token: string) => setTurnstileToken(token),
+          'expired-callback': () => setTurnstileToken(''),
+          'error-callback': () => setTurnstileToken(''),
+          theme: 'light',
+        });
+      }
+    };
+
+    // Check if Turnstile script is already loaded
+    if (window.turnstile) {
+      renderWidget();
+      return;
+    }
+
+    // Load script
+    const script = document.createElement('script');
+    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+    script.async = true;
+    script.onload = () => renderWidget();
+    document.head.appendChild(script);
+
+    return () => {
+      if (turnstileWidgetId.current && window.turnstile) {
+        try { window.turnstile.remove(turnstileWidgetId.current); } catch { /* ignore */ }
+        turnstileWidgetId.current = null;
+      }
+    };
+  }, [captchaEnabled, captchaSiteKey]);
+
+  // Reset Turnstile widget after submission
+  const resetTurnstile = useCallback(() => {
+    setTurnstileToken('');
+    if (turnstileWidgetId.current && window.turnstile) {
+      try { window.turnstile.reset(turnstileWidgetId.current); } catch { /* ignore */ }
+    }
   }, []);
 
   const validate = () => {
@@ -51,13 +124,38 @@ export default function ContactPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const errs = validate();
+    if (captchaEnabled && !turnstileToken) {
+      errs.captcha = 'Please complete the CAPTCHA verification';
+    }
     if (Object.keys(errs).length > 0) { setErrors(errs); return; }
 
     setStatus('submitting');
-    // Simulate a short delay — replace with real API call when backend endpoint exists
-    await new Promise(res => setTimeout(res, 800));
-    setStatus('success');
-    setForm({ name: '', email: '', subject: '', message: '' });
+    setSubmitError('');
+    try {
+      const res = await fetch(`${API_BASE_URL}/public/contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: form.name.trim(),
+          email: form.email.trim(),
+          subject: form.subject.trim(),
+          message: form.message.trim(),
+          turnstileToken: turnstileToken || '',
+        }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || (data && !data.success)) {
+        throw new Error(data?.message || `Submission failed (HTTP ${res.status})`);
+      }
+      setStatus('success');
+      setForm({ name: '', email: '', subject: '', message: '' });
+      resetTurnstile();
+    } catch (err) {
+      logger.error('ContactPage', 'Submission failed', err);
+      setSubmitError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
+      setStatus('error');
+      resetTurnstile();
+    }
   };
 
   return (
@@ -228,9 +326,18 @@ export default function ContactPage() {
                   )}
                 </div>
 
+                {captchaEnabled && (
+                  <div className="contact-captcha">
+                    <div ref={turnstileRef} data-testid="turnstile-widget" />
+                    {errors.captcha && (
+                      <span className="contact-error" role="alert">{errors.captcha}</span>
+                    )}
+                  </div>
+                )}
+
                 {status === 'error' && (
                   <p className="contact-submit-error">
-                    {t('contact.errorMessage')}
+                    {submitError || t('contact.errorMessage')}
                   </p>
                 )}
 

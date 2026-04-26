@@ -1,16 +1,23 @@
+/**
+ * Impact statistics section — matches mockup "Our work so far" section.
+ *
+ * Left-aligned eyebrow + Fraunces heading + description,
+ * 4-column stat cards with count-up animation and trust-blue Fraunces numbers.
+ */
 import { useEffect, useState, useRef } from 'react';
 import { cmsApi, type HomepageStat } from '../../cmsApi';
 import logger from '../../utils/logger';
-import '../../pages/Home.css';
+import './StatsSection.css';
 
 interface StatsSectionProps {
   config: {
     animated?: boolean;
     title?: string;
+    eyebrow?: string;
+    subtitle?: string;
   };
 }
 
-/** Parse a stat string like "50,000+" or "$2.5M" into { prefix, value, suffix } */
 function parseStatValue(raw: string): { prefix: string; value: number; suffix: string } {
   const str = raw.trim();
   const prefixMatch = str.match(/^([^0-9]*)/);
@@ -26,40 +33,37 @@ function parseStatValue(raw: string): { prefix: string; value: number; suffix: s
 
 function formatCount(value: number, hasDecimal: boolean): string {
   if (hasDecimal) return value.toFixed(1);
-  return Math.round(value).toLocaleString('en-US');
+  return Math.round(value).toLocaleString('en-IN');
 }
 
 function easeOut(t: number): number {
   return 1 - Math.pow(1 - t, 3);
 }
 
-interface AnimatedStatProps {
+function AnimatedStat({
+  stat,
+  animate,
+}: {
   stat: { id?: string | number; statValue: string; statLabel: string };
   animate: boolean;
-}
-
-function AnimatedStat({ stat, animate }: AnimatedStatProps) {
+}) {
   const { prefix, value, suffix } = parseStatValue(stat.statValue);
   const hasDecimal = stat.statValue.includes('.');
   const [displayed, setDisplayed] = useState(0);
   const rafRef = useRef<number | null>(null);
-  const startTimeRef = useRef<number | null>(null);
-  const DURATION = 1500;
+  const startRef = useRef<number | null>(null);
+  const DURATION = 1400;
 
   useEffect(() => {
     if (!animate) return;
-    startTimeRef.current = null;
+    startRef.current = null;
 
     const tick = (now: number) => {
-      if (startTimeRef.current === null) startTimeRef.current = now;
-      const elapsed = now - startTimeRef.current;
-      const progress = Math.min(elapsed / DURATION, 1);
-      setDisplayed(value * easeOut(progress));
-      if (progress < 1) {
-        rafRef.current = requestAnimationFrame(tick);
-      }
+      if (startRef.current === null) startRef.current = now;
+      const p = Math.min((now - startRef.current) / DURATION, 1);
+      setDisplayed(value * easeOut(p));
+      if (p < 1) rafRef.current = requestAnimationFrame(tick);
     };
-
     rafRef.current = requestAnimationFrame(tick);
     return () => {
       if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
@@ -71,29 +75,35 @@ function AnimatedStat({ stat, animate }: AnimatedStatProps) {
     : stat.statValue;
 
   return (
-    <div className="stat-card">
-      <h3 className="stat-number">{display}</h3>
-      <p className="stat-label">{stat.statLabel}</p>
+    <div className="stats-card">
+      <div className="stats-card-number font-display">{display}</div>
+      <div className="stats-card-label">{stat.statLabel}</div>
     </div>
   );
 }
 
 const DEFAULT_STATS = [
-  { id: 'd1', statValue: '20+', statLabel: 'Active Campaigns' },
-  { id: 'd2', statValue: '8', statLabel: 'Causes We Support' },
-  { id: 'd3', statValue: '5,000+', statLabel: 'Lives Impacted' },
-  { id: 'd4', statValue: '$750K+', statLabel: 'Funds Raised' },
+  { id: 'd1', statValue: '5,432', statLabel: 'Children reached' },
+  { id: 'd2', statValue: '47', statLabel: 'Villages served' },
+  { id: 'd3', statValue: '312', statLabel: 'Monthly donors' },
+  { id: 'd4', statValue: '92%', statLabel: 'To programmes' },
 ];
 
 export default function StatsSection({ config }: StatsSectionProps) {
-  const { animated = true, title = 'Our Impact' } = config;
+  const {
+    animated = true,
+    title = 'Small gifts. Specific lives. Real numbers.',
+    eyebrow = 'Our work so far',
+    subtitle = 'Figures below are maintained by our volunteers and cross-checked against school registers. Spending reports are published quarterly.',
+  } = config;
+
   const [stats, setStats] = useState<HomepageStat[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasAnimated, setHasAnimated] = useState(false);
   const sectionRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    const loadStats = async () => {
+    const load = async () => {
       try {
         const data = await cmsApi.getStats();
         setStats(data);
@@ -103,14 +113,13 @@ export default function StatsSection({ config }: StatsSectionProps) {
         setLoading(false);
       }
     };
-    loadStats();
+    load();
   }, []);
 
   useEffect(() => {
     if (!animated || hasAnimated) return;
     const el = sectionRef.current;
     if (!el) return;
-
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -118,7 +127,7 @@ export default function StatsSection({ config }: StatsSectionProps) {
           observer.disconnect();
         }
       },
-      { threshold: 0.25 }
+      { threshold: 0.4 }
     );
     observer.observe(el);
     return () => observer.disconnect();
@@ -126,13 +135,24 @@ export default function StatsSection({ config }: StatsSectionProps) {
 
   if (loading) return null;
 
-  const displayStats: Array<{ id: string | number; statValue: string; statLabel: string }> =
-    stats.length > 0 ? stats : DEFAULT_STATS;
+  const displayStats = stats.length > 0 ? stats : DEFAULT_STATS;
 
   return (
-    <section className="impact-stats" aria-label="Impact statistics" ref={sectionRef}>
-      <div className="container">
-        <h2 className="sr-only">{title}</h2>
+    <section
+      id="impact"
+      className="stats-section"
+      aria-labelledby="stats-section-title"
+      ref={sectionRef}
+    >
+      <div className="stats-container">
+        {/* Left-aligned header */}
+        <div className="stats-header">
+          <div className="stats-eyebrow">{eyebrow}</div>
+          <h2 id="stats-section-title" className="stats-title font-display">{title}</h2>
+          <p className="stats-subtitle">{subtitle}</p>
+        </div>
+
+        {/* Stat cards */}
         <div className="stats-grid">
           {displayStats.map((stat) => (
             <AnimatedStat
