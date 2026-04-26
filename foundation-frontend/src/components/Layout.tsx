@@ -1,12 +1,11 @@
-import { useState, useEffect, useRef } from 'react';
-import { Link, Outlet, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, Outlet } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import logger from '../utils/logger';
 import './Layout.css';
 import '../styles/ui-polish.css';
 import FeaturedCampaignModal from './FeaturedCampaignModal';
 import ErrorBoundary from './ErrorBoundary';
-import TrustBadges from './TrustBadges';
 import AnnouncementBar from './AnnouncementBar';
 import { fetchContactInfo, type ContactInfo } from '../utils/contactApi';
 import { useSiteName, useSiteLogo } from '../contexts/ConfigContext';
@@ -52,13 +51,12 @@ const MenuIcon = ({ open }: { open: boolean }) => (
 );
 
 export default function Layout() {
-  const navigate = useNavigate();
   const { t } = useTranslation();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
-  const [contactLoading, setContactLoading] = useState(true);
-  const [contactError, setContactError] = useState(false);
+  const [, setContactInfo] = useState<ContactInfo | null>(null);
+  const [, setContactLoading] = useState(true);
+  const [, setContactError] = useState(false);
   const [socialLinks, setSocialLinks] = useState<SocialMediaLink[]>([]);
   const [footerTagline, setFooterTagline] = useState<string>('');
   const [footerLoading, setFooterLoading] = useState(true);

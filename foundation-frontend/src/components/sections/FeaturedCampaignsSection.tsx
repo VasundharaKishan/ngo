@@ -34,13 +34,6 @@ function formatINR(amount: number): string {
   return '₹' + amount.toLocaleString('en-IN');
 }
 
-function daysLeft(endDate?: string): string {
-  if (!endDate) return '';
-  const diff = Math.ceil((new Date(endDate).getTime() - Date.now()) / 86400000);
-  if (diff <= 0) return 'Ended';
-  return `${diff} days`;
-}
-
 export default function FeaturedCampaignsSection({ config }: FeaturedCampaignsSectionProps) {
   const { t } = useTranslation();
   const {
@@ -89,8 +82,9 @@ export default function FeaturedCampaignsSection({ config }: FeaturedCampaignsSe
         ) : (
           <div className="campaigns-grid">
             {campaigns.map((campaign) => {
+              const raised = campaign.currentAmount ?? 0;
               const pct = campaign.targetAmount > 0
-                ? Math.min(100, Math.round((campaign.currentAmount / campaign.targetAmount) * 100))
+                ? Math.min(100, Math.round((raised / campaign.targetAmount) * 100))
                 : 0;
 
               return (
@@ -108,9 +102,9 @@ export default function FeaturedCampaignsSection({ config }: FeaturedCampaignsSe
 
                   {/* Body */}
                   <div className="campaign-card-v2__body">
-                    {campaign.category && (
-                      <span className={`campaign-card-v2__badge ${getBadgeClass(campaign.category)}`}>
-                        {campaign.category}
+                    {campaign.categoryName && (
+                      <span className={`campaign-card-v2__badge ${getBadgeClass(campaign.categoryName)}`}>
+                        {campaign.categoryName}
                       </span>
                     )}
 
@@ -133,11 +127,8 @@ export default function FeaturedCampaignsSection({ config }: FeaturedCampaignsSe
                     {/* Stats */}
                     <div className="campaign-card-v2__stats">
                       <span>
-                        {formatINR(campaign.currentAmount)} of {formatINR(campaign.targetAmount)}
+                        {formatINR(raised)} of {formatINR(campaign.targetAmount)}
                       </span>
-                      {campaign.endDate && (
-                        <span>{daysLeft(campaign.endDate)}</span>
-                      )}
                     </div>
                   </div>
                 </Link>
