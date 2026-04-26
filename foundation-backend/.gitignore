@@ -40,3 +40,7 @@ build/
 
 ### macOS ###
 .DS_Store
+
+### Frontend build output (written by `npm run build` in foundation-frontend) ###
+src/main/resources/static/*
+!src/main/resources/static/.gitkeep

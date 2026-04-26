@@ -1,0 +1,58 @@
+server:
+  port: ${PORT:8080}
+
+app:
+  frontend:
+    url: ${RENDER_EXTERNAL_URL:http://localhost:8080}
+
+  jwt:
+    cookie-secure: true
+
+  # B2: disable auto-admin bootstrap in prod. If a first-run admin is ever needed,
+  # set ALLOW_ADMIN_BOOTSTRAP=true transiently via env and immediately rotate the password.
+  allow-admin-bootstrap: ${ALLOW_ADMIN_BOOTSTRAP:false}
+
+# B1: expose health + info for Docker / Railway / Render healthchecks.
+# Disclose minimum detail externally. Everything else stays hidden.
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: never
+      probes:
+        enabled: true
+  info:
+    env:
+      enabled: false
+
+# Keep JPA + web logs quiet in prod even if application.yml left them at DEBUG
+logging:
+  level:
+    root: WARN
+    com.myfoundation: INFO
+    com.myfoundation.school.security: INFO
+    org.springframework.security: INFO
+    org.springframework.web.cors: INFO
+    org.hibernate.SQL: WARN
+    org.hibernate.type.descriptor.sql: WARN
+
+# Ensure sample-data initializer does NOT run in prod
+data:
+  init:
+    enabled: false
+
+spring:
+  sql:
+    init:
+      mode: never
+  jpa:
+    show-sql: false
+
+# Disable Swagger UI in prod unless explicitly enabled
+springdoc:
+  swagger-ui:
+    enabled: ${SWAGGER_ENABLED:false}

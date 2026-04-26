@@ -90,6 +90,15 @@ app:
     otp-expiration-minutes: ${AUTH_OTP_EXPIRATION_MINUTES:5}
     otp-max-attempts: ${AUTH_OTP_MAX_ATTEMPTS:5}
     otp-length: ${AUTH_OTP_LENGTH:6}
+  captcha:
+    turnstile:
+      # Cloudflare Turnstile — set real keys in env vars for production.
+      # Use Cloudflare's test keys for local dev:
+      #   site-key:   1x00000000000000000000AA  (always passes)
+      #   secret-key: 1x0000000000000000000000000000000AA  (always passes)
+      # Leave blank to DISABLE CAPTCHA entirely (contact form will accept without verification).
+      site-key: ${TURNSTILE_SITE_KEY:}
+      secret-key: ${TURNSTILE_SECRET_KEY:}
   rate-limit:
     # Window duration — all limits below are "requests per this many seconds"
     window-seconds: ${RATE_LIMIT_WINDOW_SECONDS:1}

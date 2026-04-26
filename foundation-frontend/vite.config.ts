@@ -72,7 +72,7 @@ export default defineConfig({
       threshold: 10240
     }),
     visualizer({
-      filename: './dist/stats.html',
+      filename: './stats.html',
       open: false,
       gzipSize: true,
       brotliSize: true
@@ -88,6 +88,8 @@ export default defineConfig({
     },
   },
   build: {
+    outDir: '../foundation-backend/src/main/resources/static',
+    emptyOutDir: true,
     rollupOptions: {
       output: {
         manualChunks: {

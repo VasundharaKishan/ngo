@@ -1,0 +1,106 @@
+/* TransparencySection — dark trust-900 block with link cards.
+   Matches mockup: 3-col layout, saffron eyebrow, glassy link cards. */
+
+.transparency-section {
+  padding: var(--space-14, 3.5rem) 0;
+  background: var(--color-trust-900);
+  color: var(--color-white);
+}
+
+@media (min-width: 768px) {
+  .transparency-section {
+    padding: var(--space-20) 0;
+  }
+}
+
+.transparency-container {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 0 var(--space-4);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-10, 2.5rem);
+}
+
+@media (min-width: 640px) {
+  .transparency-container {
+    padding: 0 var(--space-6);
+  }
+}
+
+@media (min-width: 768px) {
+  .transparency-container {
+    grid-template-columns: 1fr 2fr;
+  }
+}
+
+@media (min-width: 1024px) {
+  .transparency-container {
+    padding: 0 var(--space-8);
+  }
+}
+
+/* Left heading column */
+.transparency-heading {
+  /* No extra styles needed beyond grid placement */
+}
+
+.transparency-eyebrow {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-saffron-400, #fbbf24);
+}
+
+.transparency-title {
+  margin-top: var(--space-2);
+  font-size: clamp(1.875rem, 3.5vw, 2.25rem);
+  line-height: var(--line-height-tight);
+  color: var(--color-white);
+}
+
+/* Right cards grid — 2×2 on sm+ */
+.transparency-cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+}
+
+@media (min-width: 640px) {
+  .transparency-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Individual card */
+.transparency-card {
+  padding: var(--space-5);
+  border-radius: var(--radius-xl);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  text-decoration: none;
+  color: var(--color-white);
+  transition: background 200ms ease;
+}
+
+.transparency-card:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.transparency-card:focus-visible {
+  outline: 2px solid var(--color-saffron-400, #fbbf24);
+  outline-offset: 2px;
+}
+
+.transparency-card-title {
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-base);
+}
+
+.transparency-card-desc {
+  margin-top: var(--space-1, 0.25rem);
+  font-size: var(--font-size-sm);
+  color: rgba(219, 234, 254, 0.7); /* trust-100/70 */
+  line-height: var(--line-height-relaxed);
+}
