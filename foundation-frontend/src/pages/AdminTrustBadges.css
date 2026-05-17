@@ -1,0 +1,270 @@
+/* AdminTrustBadges.css — admin editor for trust_badges list */
+
+.admin-trust-badges {
+  padding: 1.5rem 2rem 3rem;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.atb-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.atb-header h1 {
+  margin: 0 0 0.35rem 0;
+  font-size: 1.6rem;
+  color: #0f172a;
+}
+
+.atb-sub {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.9rem;
+  max-width: 60ch;
+  line-height: 1.5;
+}
+
+.atb-banner {
+  background: #fef3c7;
+  border: 1px solid #fcd34d;
+  color: #78350f;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  margin-bottom: 1.25rem;
+  line-height: 1.55;
+}
+
+.atb-banner a {
+  color: #92400e;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.atb-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.atb-card {
+  display: grid;
+  grid-template-columns: 68px 1fr;
+  gap: 1rem;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.atb-card--muted {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.atb-card-order {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding-top: 0.25rem;
+}
+
+.btn-reorder {
+  width: 36px;
+  height: 28px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  color: #0f172a;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-reorder:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.atb-card-position {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.atb-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.atb-row {
+  display: grid;
+  grid-template-columns: 90px 1fr 200px;
+  gap: 0.9rem;
+}
+
+@media (max-width: 720px) {
+  .atb-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.atb-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.atb-field label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.atb-field input[type='text'],
+.atb-field textarea {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.55rem 0.7rem;
+  font-size: 0.95rem;
+  color: #0f172a;
+  background: #ffffff;
+  font-family: inherit;
+}
+
+.atb-field input:disabled,
+.atb-field input[readonly] {
+  background: #f8fafc;
+  color: #64748b;
+  cursor: not-allowed;
+}
+
+.atb-field--icon input {
+  text-align: center;
+  font-size: 1.1rem;
+}
+
+.atb-field textarea {
+  resize: vertical;
+  min-height: 58px;
+  line-height: 1.45;
+}
+
+.atb-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+}
+
+.atb-toggle {
+  font-size: 0.85rem;
+  color: #334155;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.atb-toggle input[type='checkbox'] {
+  margin: 0;
+}
+
+.atb-toggle--gate {
+  color: #92400e;
+  font-weight: 600;
+}
+
+.atb-gate-notice {
+  background: #fff7ed;
+  border-left: 3px solid #fb923c;
+  color: #9a3412;
+  padding: 0.45rem 0.65rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+
+.atb-card-actions {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.btn-danger-outline {
+  background: #ffffff;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-danger-outline:hover:not(:disabled) {
+  background: #fef2f2;
+  border-color: #fca5a5;
+}
+
+.btn-danger-outline:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.atb-new {
+  margin-top: 2rem;
+  padding: 1.25rem;
+  background: #ffffff;
+  border: 1px dashed #cbd5e1;
+  border-radius: 12px;
+}
+
+.atb-new h2 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+  color: #0f172a;
+}
+
+.atb-new-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  gap: 0.9rem;
+  align-items: end;
+}
+
+@media (max-width: 720px) {
+  .atb-new-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.atb-dirty-banner {
+  position: sticky;
+  bottom: 0.75rem;
+  margin-top: 1.5rem;
+  background: #1e293b;
+  color: #e2e8f0;
+  border-radius: 8px;
+  padding: 0.65rem 1rem;
+  font-size: 0.85rem;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.25);
+}
+
+.required {
+  color: #dc2626;
+  margin-left: 0.15rem;
+}
+
+.field-description {
+  color: #64748b;
+  font-size: 0.75rem;
+  line-height: 1.4;
+}

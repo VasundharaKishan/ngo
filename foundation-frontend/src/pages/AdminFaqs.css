@@ -1,0 +1,214 @@
+/* AdminFaqs.css — mirrors the visual language of AdminStories and
+   AdminMoneyAllocations. The `af-` prefix is local to this admin editor. */
+
+.admin-faqs {
+  padding: 1.5rem 2rem 3rem;
+  max-width: 1040px;
+  margin: 0 auto;
+}
+
+.af-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.af-header h1 {
+  margin: 0 0 0.35rem 0;
+  font-size: 1.6rem;
+  color: #0f172a;
+}
+
+.af-sub {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.9rem;
+  max-width: 64ch;
+  line-height: 1.5;
+}
+
+.af-sub code {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 0.05rem 0.35rem;
+  font-size: 0.85em;
+  color: #1e293b;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.af-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.af-card {
+  display: grid;
+  grid-template-columns: 68px 1fr;
+  gap: 1rem;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.af-card--muted {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  opacity: 0.92;
+}
+
+.af-card-order {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  padding-top: 0.25rem;
+}
+
+.af-card-position {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.af-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  min-width: 0;
+}
+
+.af-row {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.af-row--top {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+}
+
+.af-row--bottom {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (max-width: 720px) {
+  .af-row--top {
+    grid-template-columns: 1fr;
+  }
+}
+
+.af-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.af-field--question {
+  flex: 1 1 auto;
+}
+
+.af-field label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.af-field input[type='text'],
+.af-field textarea {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.55rem 0.7rem;
+  font-size: 0.95rem;
+  color: #0f172a;
+  background: #ffffff;
+  font-family: inherit;
+}
+
+.af-field textarea {
+  resize: vertical;
+  min-height: 110px;
+  line-height: 1.55;
+}
+
+.af-field input:focus,
+.af-field textarea:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 1px;
+  border-color: #3b82f6;
+}
+
+.af-toggle {
+  font-size: 0.85rem;
+  color: #334155;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  font-weight: 500;
+  white-space: nowrap;
+  padding-bottom: 0.55rem;
+}
+
+.af-toggle input {
+  margin: 0;
+}
+
+.af-counter {
+  font-size: 0.75rem;
+  color: #64748b;
+  align-self: flex-end;
+}
+
+.af-counter--warn {
+  color: #b45309;
+  font-weight: 600;
+}
+
+.af-card-actions {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.af-new {
+  margin-top: 2rem;
+  padding: 1.25rem;
+  background: #ffffff;
+  border: 1px dashed #cbd5e1;
+  border-radius: 12px;
+}
+
+.af-new h2 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+  color: #0f172a;
+}
+
+.af-new-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.9rem;
+  align-items: end;
+}
+
+@media (max-width: 620px) {
+  .af-new-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.af-new-hint {
+  margin: 0.75rem 0 0 0;
+  color: #64748b;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}

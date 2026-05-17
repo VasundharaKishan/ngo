@@ -1,0 +1,94 @@
+services:
+  - type: web
+    name: ngo-foundation
+    runtime: java
+    buildCommand: >-
+      cd foundation-frontend && npm ci --legacy-peer-deps && npm run build &&
+      cd ../foundation-backend && mvn package -DskipTests
+    startCommand: java -jar foundation-backend/target/school-donation-backend-1.0.0-SNAPSHOT.jar
+    plan: free
+    healthCheckPath: /actuator/health
+    envVars:
+      # --- Core ---
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: PORT
+        value: 8080
+
+      # --- Database ---
+      - key: DATABASE_URL
+        sync: false
+      - key: DATABASE_USERNAME
+        sync: false
+      - key: DATABASE_PASSWORD
+        sync: false
+
+      # --- Auth / JWT (B4) ---
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_COOKIE_DOMAIN
+        sync: false
+      - key: JWT_COOKIE_SECURE
+        value: "true"
+
+      # --- Admin bootstrap (B2) ---
+      # Keep false in steady state. To bootstrap a first admin, flip to true,
+      # set ADMIN_BOOTSTRAP_PASSWORD, deploy, log in, rotate, flip back to false.
+      - key: ALLOW_ADMIN_BOOTSTRAP
+        value: "false"
+      - key: ADMIN_BOOTSTRAP_PASSWORD
+        sync: false
+
+      # --- Stripe ---
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: STRIPE_SUCCESS_URL
+        sync: false
+      - key: STRIPE_CANCEL_URL
+        sync: false
+
+      # --- Frontend / CORS ---
+      - key: FRONTEND_URL
+        sync: false
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+
+      # --- Mail (Brevo SMTP) ---
+      - key: MAIL_HOST
+        sync: false
+      - key: MAIL_PORT
+        sync: false
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: BREVO_SMTP_KEY
+        sync: false
+      - key: MAIL_FROM_NAME
+        sync: false
+      - key: MAIL_REPLY_TO
+        sync: false
+
+      # --- Cloudflare R2 storage ---
+      - key: R2_ENDPOINT
+        sync: false
+      - key: R2_BUCKET
+        sync: false
+      - key: R2_ACCESS_KEY
+        sync: false
+      - key: R2_SECRET_KEY
+        sync: false
+      - key: R2_PUBLIC_BASE_URL
+        sync: false
+
+      # --- Captcha (Cloudflare Turnstile) ---
+      - key: TURNSTILE_SITE_KEY
+        sync: false
+      - key: TURNSTILE_SECRET_KEY
+        sync: false
+
+      # --- Docs / misc ---
+      - key: SWAGGER_ENABLED
+        value: "false"

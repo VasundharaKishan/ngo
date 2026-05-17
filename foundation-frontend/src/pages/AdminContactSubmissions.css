@@ -1,0 +1,381 @@
+/* AdminContactSubmissions.css — inbox-style list for contact form messages.
+   The `acs-` prefix is local to this admin page. */
+
+.admin-contact-submissions {
+  padding: 1.5rem 2rem 3rem;
+  max-width: 1040px;
+  margin: 0 auto;
+}
+
+.acs-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.acs-header h1 {
+  margin: 0 0 0.35rem 0;
+  font-size: 1.6rem;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.acs-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: #ef4444;
+  color: #ffffff;
+  letter-spacing: 0.03em;
+}
+
+.acs-sub {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.9rem;
+  max-width: 64ch;
+  line-height: 1.5;
+}
+
+.acs-sub code {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 0.05rem 0.35rem;
+  font-size: 0.85em;
+  color: #1e293b;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* ---------- filters ---------- */
+
+.acs-filters {
+  display: flex;
+  gap: 0.35rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 0;
+}
+
+.acs-filter-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  background: none;
+  color: #64748b;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+
+.acs-filter-btn:hover {
+  color: #1e293b;
+}
+
+.acs-filter-btn--active {
+  color: #1e3a8a;
+  border-bottom-color: #1e3a8a;
+}
+
+/* ---------- empty ---------- */
+
+.acs-empty {
+  padding: 2rem;
+  text-align: center;
+  color: #64748b;
+  font-size: 0.95rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+/* ---------- list ---------- */
+
+.acs-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.acs-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: border-color 120ms ease;
+}
+
+.acs-card--new {
+  border-left: 3px solid #3b82f6;
+}
+
+.acs-card--read {
+  border-left: 3px solid #94a3b8;
+  opacity: 0.88;
+}
+
+.acs-card--archived {
+  border-left: 3px solid #cbd5e1;
+  opacity: 0.7;
+}
+
+/* ---------- card header (click to expand) ---------- */
+
+.acs-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  padding: 0.85rem 1.1rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+}
+
+.acs-card-header:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: -2px;
+}
+
+.acs-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.acs-status-dot {
+  flex: 0 0 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+}
+
+.acs-status-dot--new {
+  background: #3b82f6;
+}
+
+.acs-status-dot--read {
+  background: #94a3b8;
+}
+
+.acs-status-dot--archived {
+  background: #cbd5e1;
+}
+
+.acs-card-name {
+  font-size: 0.95rem;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+}
+
+.acs-card-email {
+  font-size: 0.82rem;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+}
+
+.acs-card-right {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex: 0 0 auto;
+}
+
+.acs-card-subject {
+  font-size: 0.85rem;
+  color: #334155;
+  max-width: 180px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.acs-card-time {
+  font-size: 0.78rem;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+.acs-expand-icon {
+  flex: 0 0 24px;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #475569;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+/* ---------- card body (expanded) ---------- */
+
+.acs-card-body {
+  padding: 0 1.1rem 1.1rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+.acs-message {
+  padding: 0.75rem 0;
+  color: #1e293b;
+  font-size: 0.95rem;
+  line-height: 1.65;
+}
+
+.acs-message p {
+  margin: 0 0 0.6rem 0;
+}
+
+.acs-message p:last-child {
+  margin-bottom: 0;
+}
+
+.acs-detail-row {
+  display: flex;
+  gap: 0.6rem;
+  font-size: 0.82rem;
+  color: #475569;
+  padding: 0.2rem 0;
+}
+
+.acs-detail-label {
+  font-weight: 600;
+  color: #1e293b;
+  min-width: 70px;
+  font-size: 0.82rem;
+}
+
+.acs-ip {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.8rem;
+}
+
+/* ---------- note ---------- */
+
+.acs-note-section {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.acs-note-section textarea {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.5rem 0.65rem;
+  font-size: 0.9rem;
+  color: #0f172a;
+  background: #ffffff;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 48px;
+  line-height: 1.5;
+}
+
+.acs-note-section textarea:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 1px;
+  border-color: #3b82f6;
+}
+
+/* ---------- actions ---------- */
+
+.acs-card-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.btn-small {
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 120ms ease;
+}
+
+.btn-small:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-small.btn-primary {
+  background: #1e3a8a;
+  color: #ffffff;
+  border-color: #1e3a8a;
+}
+
+.btn-small.btn-primary:hover:not(:disabled) {
+  background: #1e40af;
+}
+
+.btn-small.btn-secondary {
+  background: #f1f5f9;
+  color: #334155;
+  border-color: #cbd5e1;
+}
+
+.btn-small.btn-secondary:hover:not(:disabled) {
+  background: #e2e8f0;
+}
+
+.btn-small.btn-outline {
+  background: transparent;
+  color: #1e3a8a;
+  border-color: #93c5fd;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.btn-small.btn-outline:hover {
+  background: #eff6ff;
+}
+
+/* ---------- responsive ---------- */
+
+@media (max-width: 720px) {
+  .acs-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+  }
+  .acs-card-right {
+    width: 100%;
+  }
+  .acs-card-name {
+    max-width: 100%;
+  }
+  .acs-card-email {
+    max-width: 100%;
+  }
+}

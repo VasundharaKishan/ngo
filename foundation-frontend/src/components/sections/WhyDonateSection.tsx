@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { cmsApi } from '../../cmsApi';
 import logger from '../../utils/logger';
-import '../../pages/Home.css';
+import './WhyDonateSection.css';
 
 interface WhyDonateSectionProps {
   config: {
@@ -42,7 +42,7 @@ export default function WhyDonateSection({ config }: WhyDonateSectionProps) {
   return (
     <section className="why-donate">
       <div className="container">
-        <h2 className="section-title">{title}</h2>
+        <h2 className="section-title font-display">{title}</h2>
         <div className="why-grid">
           <div className="why-card">
             <h3>{content.card2_title || '🌍 Global Reach'}</h3>

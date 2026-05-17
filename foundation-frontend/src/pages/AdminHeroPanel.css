@@ -1,0 +1,239 @@
+/* AdminHeroPanel.css — admin editor for the home hero panel */
+
+.admin-hero-panel {
+  padding: 1.5rem 2rem 3rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.ahp-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.5rem;
+  margin-bottom: 1.75rem;
+}
+
+.ahp-header h1 {
+  margin: 0 0 0.35rem 0;
+  font-size: 1.6rem;
+  color: #0f172a;
+}
+
+.ahp-sub {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.9rem;
+  max-width: 60ch;
+  line-height: 1.5;
+}
+
+.ahp-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 520px);
+  gap: 2rem;
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .ahp-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Editor card */
+.ahp-editor {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.ahp-editor .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.ahp-editor label {
+  font-weight: 600;
+  color: #1e293b;
+  font-size: 0.9rem;
+}
+
+.ahp-editor input[type='text'],
+.ahp-editor textarea,
+.ahp-editor select {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.95rem;
+  color: #0f172a;
+  background: #ffffff;
+  font-family: inherit;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ahp-editor input[type='text']:focus,
+.ahp-editor textarea:focus,
+.ahp-editor select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.ahp-editor textarea {
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.45;
+}
+
+.required {
+  color: #dc2626;
+  margin-left: 0.15rem;
+}
+
+.field-description {
+  color: #64748b;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.field-description.warning {
+  color: #b45309;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 640px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.image-url-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+
+.image-url-row input[type='text'] {
+  flex: 1;
+  min-width: 0;
+}
+
+.btn-upload {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 1rem;
+  border-radius: 8px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #0f172a;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease;
+}
+
+.btn-upload:hover {
+  background: #e2e8f0;
+}
+
+.ahp-updated {
+  margin: 0;
+  padding-top: 0.5rem;
+  border-top: 1px dashed #e2e8f0;
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+/* Preview */
+.ahp-preview {
+  position: sticky;
+  top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ahp-preview-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.ahp-preview-frame {
+  background: #0f172a;
+  padding: 0.5rem;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
+}
+
+.ahp-hero {
+  min-height: 360px;
+  border-radius: 12px;
+  padding: 2.25rem 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  color: #ffffff;
+  background-size: cover;
+  background-position: center;
+}
+
+.ahp-hero-eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  font-weight: 700;
+  opacity: 0.9;
+  margin-bottom: 0.75rem;
+}
+
+.ahp-hero-headline {
+  margin: 0 0 0.9rem 0;
+  font-size: 1.9rem;
+  line-height: 1.2;
+  font-weight: 700;
+  max-width: 22ch;
+}
+
+.ahp-hero-subtitle {
+  margin: 0 0 1.3rem 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  opacity: 0.92;
+  max-width: 40ch;
+}
+
+.ahp-hero-cta {
+  display: inline-block;
+  background: #ffffff;
+  color: #1e40af;
+  font-weight: 700;
+  font-size: 0.9rem;
+  padding: 0.65rem 1.2rem;
+  border-radius: 999px;
+  width: fit-content;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.25);
+}
+
+.ahp-preview-note {
+  margin: 0.25rem 0 0;
+  color: #94a3b8;
+  font-size: 0.75rem;
+  line-height: 1.4;
+}

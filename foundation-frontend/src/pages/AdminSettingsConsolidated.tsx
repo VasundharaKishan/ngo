@@ -6,11 +6,13 @@ import GeneralSettingsTab from './settings/GeneralSettingsTab';
 import ContactSettingsTab from './settings/ContactSettingsTab';
 import FooterSettingsTab from './settings/FooterSettingsTab';
 import BannerSettingsTab from './settings/BannerSettingsTab';
+import LegalRegistrationTab from './settings/LegalRegistrationTab';
 import {
   RiSettings3Line,
   RiPhoneLine,
   RiLayoutBottomLine,
-  RiGlobalLine
+  RiGlobalLine,
+  RiShieldCheckLine
 } from 'react-icons/ri';
 import './AdminSettingsConsolidated.css';
 
@@ -24,6 +26,7 @@ export default function AdminSettingsConsolidated() {
   const contactRef = useRef<TabRef>(null);
   const footerRef = useRef<TabRef>(null);
   const bannerRef = useRef<TabRef>(null);
+  const legalRef = useRef<TabRef>(null);
 
   useEffect(() => {
     const user = localStorage.getItem('adminUser');
@@ -47,6 +50,9 @@ export default function AdminSettingsConsolidated() {
           break;
         case 'banner':
           await bannerRef.current?.save();
+          break;
+        case 'legal':
+          await legalRef.current?.save();
           break;
       }
     } finally {
@@ -95,6 +101,14 @@ export default function AdminSettingsConsolidated() {
           <RiGlobalLine className="tab-icon" />
           <span>Banner</span>
         </button>
+        <button
+          className={`tab-button ${activeTab === 'legal' ? 'active' : ''}`}
+          onClick={() => setActiveTab('legal')}
+          data-testid="settings-tab-legal"
+        >
+          <RiShieldCheckLine className="tab-icon" />
+          <span>Legal / Registration</span>
+        </button>
       </div>
 
       {/* Tab Content */}
@@ -103,6 +117,7 @@ export default function AdminSettingsConsolidated() {
         {activeTab === 'contact' && <ContactSettingsTab ref={contactRef} showToast={showToast} />}
         {activeTab === 'footer' && <FooterSettingsTab ref={footerRef} showToast={showToast} />}
         {activeTab === 'banner' && <BannerSettingsTab ref={bannerRef} showToast={showToast} />}
+        {activeTab === 'legal' && <LegalRegistrationTab ref={legalRef} showToast={showToast} />}
       </div>
 
       {/* Save Button */}

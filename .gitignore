@@ -1,3 +1,46 @@
+# ============================================================================
+# Root .gitignore
+# Per-module .gitignores also exist in foundation-backend/ and foundation-frontend/.
+# ============================================================================
+
+# Playwright
 playwright-tests/node_modules/
 playwright-tests/test-results/
 playwright-tests/playwright-report/
+
+# OS artifacts (B8)
+**/.DS_Store
+Thumbs.db
+
+# Secrets — never commit any .env* file (B3)
+# Keep only .env.example files.
+**/.env
+**/.env.local
+**/.env.*.local
+**/.env.backup
+**/.env.bak
+
+# Editor / IDE noise
+.vscode/
+.idea/
+*.iml
+
+# Logs
+*.log
+backend.log
+logs/
+
+# Build output
+target/
+node_modules/
+dist/
+coverage/
+
+# Vitest stale timestamp files (B9 hygiene)
+**/vitest.config.ts.timestamp-*
+**/vitest.config.*.timestamp-*
+
+# Backup files (B9)
+*.backup
+*.bak
+*.orig

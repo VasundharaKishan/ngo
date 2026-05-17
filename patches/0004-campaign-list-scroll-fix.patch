@@ -1,0 +1,118 @@
+# Patch for foundation-frontend/src/pages/CampaignList.tsx
+#
+# Fix: "Next" on the campaigns page appears to show no campaigns.
+#
+# Root cause: handlePageChange calls
+#     window.scrollTo({ top: 0, behavior: 'smooth' })
+# which scrolls the user above the hero heading + subtitle + search box +
+# filter pills, i.e. well above the campaign grid. The new page of cards
+# IS rendered — it's just below the viewport. User reads this as
+# "nothing loaded." Compounds with the .scroll-animate-stagger
+# opacity:0 initial state because the IntersectionObserver only flips
+# cards to .in-view once they enter the viewport.
+#
+# Fix: attach a ref to the grid container and scroll the grid into
+# view instead of scrolling the window to 0. This lands the user at
+# the top of the new card set, which is what every well-known paginated
+# catalog does (think Amazon, Algolia, Meilisearch demos, Shopify).
+#
+# This patch is intentionally tiny: one import diff, one ref, one
+# two-line handler change, one prop on the grid div. No changes to
+# state shape, API, or styling.
+#
+# CampaignList.tsx is in your uncommitted set, so this is kept as a
+# patch rather than a direct edit.
+#
+# Usage:
+#   cd <repo root>
+#   git apply patches/0004-campaign-list-scroll-fix.patch
+#
+# If the hunks don't apply cleanly (e.g. because you have other
+# in-flight edits nearby), apply the four edits below by hand.
+#
+# --- a/foundation-frontend/src/pages/CampaignList.tsx
+# +++ b/foundation-frontend/src/pages/CampaignList.tsx
+#
+# @@ change 1: add useRef to the React imports.
+#
+# -import { useEffect, useState, useMemo } from 'react';
+# +import { useEffect, useState, useMemo, useRef } from 'react';
+#
+# @@ change 2: create the ref inside the component, next to the other
+#              hook calls near line 27.
+#
+#   const itemsPerPage = useCampaignsPerPage();
+#   const siteName = useSiteName();
+# +
+# +  // Ref on the campaign grid so pagination clicks land users at the
+# +  // top of the new cards rather than above the page heading.
+# +  const gridRef = useRef<HTMLDivElement>(null);
+#
+# @@ change 3: update handlePageChange to scroll the grid into view
+#              instead of the window.
+#
+#   const handlePageChange = (page: number) => {
+#     setCurrentPage(page);
+# -   window.scrollTo({ top: 0, behavior: 'smooth' });
+# +   // Scroll to the top of the grid — NOT the window — so the user
+# +   // sees the new cards immediately instead of landing on the hero.
+# +   // `block: 'start'` leaves a comfortable visual margin for the
+# +   // sticky header if you add one later.
+# +   gridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+#   };
+#
+# @@ change 4: attach the ref to the campaign grid container
+#              (around line 273).
+#
+# -             <div className="campaign-grid">
+# +             <div className="campaign-grid" ref={gridRef}>
+#                 {pagedCampaigns.map((campaign) => (
+#                   <div key={campaign.id} className="scroll-animate-stagger">
+#                     <CampaignCard campaign={campaign} />
+#                   </div>
+#                 ))}
+#               </div>
+#
+# ---------------------------------------------------------------------
+# Verification after applying:
+#
+#   * Seed more than `campaigns_page.items_per_page` active campaigns
+#     (default 12) so pagination actually renders.
+#   * Load /campaigns. Scroll down, click Next. Expect: the new card
+#     set is visible in the viewport on arrival. You should NOT have to
+#     scroll to see them.
+#   * Type a search string that yields >12 results, click Next. Same
+#     expectation: the next batch of filtered results is visible.
+#   * Click a page-number button (not just Next). Same expectation.
+#   * Click Previous on page 2. Same expectation.
+#   * Mobile (narrow viewport): Next still lands on the grid — the
+#     stacked card layout means the top card should be in view.
+#
+# Recommended Playwright test to add (file: tests/campaigns.spec.ts):
+#
+#   test('pagination lands user on the grid, not above it', async ({ page }) => {
+#     await page.goto('/campaigns');
+#     const nextBtn = page.getByTestId('campaigns-next');
+#     await nextBtn.scrollIntoViewIfNeeded();
+#     await nextBtn.click();
+#     // After the smooth-scroll settles, the first card must be visible.
+#     const firstCard = page.locator('.campaign-grid .scroll-animate-stagger').first();
+#     await expect(firstCard).toBeInViewport();
+#   });
+#
+# ---------------------------------------------------------------------
+# OPTIONAL follow-up (NOT in this patch — call it out in review):
+#
+# The .scroll-animate-stagger opacity:0 initial state means cards are
+# briefly invisible between mount and the IntersectionObserver firing.
+# After this patch that's not a user-visible problem because the
+# observer runs on mount and cards are immediately in viewport. If you
+# later see a flash of blank grid on slower devices, consider either:
+#
+#   * dropping the .scroll-animate-stagger wrapper for paginated
+#     re-renders (keep it for the initial load only), or
+#   * replacing the `setTimeout(refreshScrollAnimations, 50)` in the
+#     pagination useEffect with a useLayoutEffect so the observer
+#     attaches on the same frame as the DOM commit.
+#
+# Neither is required for correctness — just for polish.

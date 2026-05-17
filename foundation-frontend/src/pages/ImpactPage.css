@@ -1,0 +1,269 @@
+/* ===== Impact Page ===== */
+.impact-page {
+  width: 100%;
+}
+
+.impact-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+/* Hero */
+.impact-hero {
+  background: linear-gradient(135deg, #2a3da8 0%, #1e3a8a 60%, #312e81 100%);
+  color: white;
+  padding: 5rem 2rem 4rem;
+  text-align: center;
+}
+
+.impact-hero-inner {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.impact-hero h1 {
+  font-family: var(--font-display, 'Fraunces', serif);
+  font-size: 3rem;
+  font-weight: 800;
+  margin: 0 0 1.25rem;
+  line-height: 1.15;
+}
+
+.impact-hero p {
+  font-size: 1.2rem;
+  line-height: 1.7;
+  opacity: 0.9;
+  margin: 0;
+}
+
+/* Shared section styles */
+.impact-section {
+  padding: 4rem 0;
+}
+
+.impact-section .section-title {
+  font-family: var(--font-display, 'Fraunces', serif);
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--color-ink-900, #1e293b);
+  text-align: center;
+  margin: 0 0 0.75rem;
+}
+
+.impact-section .section-subtitle {
+  font-size: 1.05rem;
+  color: var(--color-ink-500, #64748b);
+  text-align: center;
+  margin: 0 0 3rem;
+}
+
+/* How it works */
+.impact-how-it-works {
+  background: var(--color-white, #fff);
+}
+
+.impact-page .steps-grid {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+}
+
+.impact-page .step-card {
+  flex: 1;
+  text-align: center;
+  padding: 2rem 1.5rem;
+  background: var(--color-trust-50, #f0f9ff);
+  border-radius: 16px;
+  border: 2px solid #bae6fd;
+  position: relative;
+}
+
+.impact-page .step-number {
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 32px;
+  height: 32px;
+  background: var(--color-trust-800, #1e40af);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.impact-page .step-icon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.impact-page .step-card h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-ink-900, #1e293b);
+  margin: 0 0 0.75rem;
+}
+
+.impact-page .step-card p {
+  font-size: 0.9rem;
+  color: var(--color-ink-600, #475569);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.impact-page .step-connector {
+  font-size: 2rem;
+  color: var(--color-ink-300, #94a3b8);
+  padding: 0 0.5rem;
+  padding-top: 3.5rem;
+  flex-shrink: 0;
+  font-weight: 700;
+}
+
+/* Where we work */
+.impact-where {
+  background: var(--color-paper-100, #f8fafc);
+}
+
+.impact-page .where-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.impact-page .where-card {
+  background: var(--color-white, #fff);
+  border-radius: 16px;
+  padding: 2rem;
+  text-align: center;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--color-paper-300, #e2e8f0);
+}
+
+.impact-page .where-flag {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.impact-page .where-card h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-ink-900, #1e293b);
+  margin: 0 0 0.75rem;
+}
+
+.impact-page .where-card p {
+  font-size: 0.95rem;
+  color: var(--color-ink-600, #475569);
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* Trust section */
+.impact-trust {
+  background: var(--color-white, #fff);
+}
+
+/* CTA section */
+.impact-cta {
+  background: linear-gradient(135deg, #2a3da8 0%, #1e3a8a 100%);
+  color: white;
+  padding: 4rem 0;
+  text-align: center;
+}
+
+.impact-cta h2 {
+  font-family: var(--font-display, 'Fraunces', serif);
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0 0 0.75rem;
+}
+
+.impact-cta p {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  margin: 0 0 2rem;
+}
+
+.impact-cta-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-impact-primary {
+  padding: 0.875rem 2rem;
+  background: white;
+  color: #2a3da8;
+  border-radius: 10px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  font-size: 1rem;
+}
+
+.btn-impact-primary:hover {
+  background: #f0f4ff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.btn-impact-secondary {
+  padding: 0.875rem 2rem;
+  background: transparent;
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  border-radius: 10px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  font-size: 1rem;
+}
+
+.btn-impact-secondary:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: white;
+  transform: translateY(-2px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .impact-hero h1 {
+    font-size: 2rem;
+  }
+
+  .impact-hero p {
+    font-size: 1rem;
+  }
+
+  .impact-page .steps-grid {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2rem;
+  }
+
+  .impact-page .step-connector {
+    display: none;
+  }
+
+  .impact-page .where-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .impact-cta h2 {
+    font-size: 1.5rem;
+  }
+
+  .impact-section .section-title {
+    font-size: 1.5rem;
+  }
+}

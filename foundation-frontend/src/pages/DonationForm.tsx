@@ -7,6 +7,7 @@ import { useSiteName } from '../contexts/ConfigContext';
 import { getCurrencySymbol, amountToCents, centsToAmount } from '../utils/currency';
 import { isValidEmail, isEmpty } from '../utils/validators';
 import { DONATION } from '../config/constants';
+import { useDonationPresets } from '../hooks/useDonationPresets';
 import './DonationForm.css';
 
 type DonationStep = 'amount' | 'personal' | 'payment';
@@ -17,10 +18,24 @@ export default function DonationForm() {
   const { campaignId } = useParams<{ campaignId: string }>();
   const siteName = useSiteName();
 
+  // Preset amounts come from the admin-managed list; fall back to the hardcoded
+  // defaults so the form is never empty if the API is briefly unavailable.
+  const { data: donationPresets } = useDonationPresets();
+  const presetAmounts: number[] = donationPresets?.presets && donationPresets.presets.length > 0
+    ? donationPresets.presets.map((p) => p.amountMinorUnits)
+    : [...DONATION.PRESET_AMOUNTS];
+  const presetLabels: Record<number, string | null> = donationPresets?.presets
+    ? Object.fromEntries(donationPresets.presets.map((p) => [p.amountMinorUnits, p.label]))
+    : {};
+  const defaultAmount: number =
+    donationPresets?.defaultAmountMinorUnits ??
+    (presetAmounts.includes(DONATION.DEFAULT_AMOUNT) ? DONATION.DEFAULT_AMOUNT : presetAmounts[0] ?? DONATION.DEFAULT_AMOUNT);
+
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [currentStep, setCurrentStep] = useState<DonationStep>('amount');
   const [frequency, setFrequency] = useState<DonationFrequency>('one_time');
-  const [amount, setAmount] = useState<number>(DONATION.DEFAULT_AMOUNT);
+  const [amount, setAmount] = useState<number>(defaultAmount);
+  const [amountDirty, setAmountDirty] = useState(false);
   const [currency, setCurrency] = useState<string>('eur');
   const [customAmount, setCustomAmount] = useState('');
   const [donorName, setDonorName] = useState('');
@@ -39,6 +54,14 @@ export default function DonationForm() {
         .catch(() => setCampaignLoadError(t('donation.loadError')));
     }
   }, [campaignId]);
+
+  // When the admin-managed default loads after first render, move the selection to it
+  // — but only if the user hasn't already touched the amount picker.
+  useEffect(() => {
+    if (!amountDirty && donationPresets?.defaultAmountMinorUnits) {
+      setAmount(donationPresets.defaultAmountMinorUnits);
+    }
+  }, [amountDirty, donationPresets?.defaultAmountMinorUnits]);
 
   const handleNextStep = () => {
     if (currentStep === 'amount') {
@@ -107,6 +130,7 @@ export default function DonationForm() {
 
   const handleCustomAmountChange = (value: string) => {
     setCustomAmount(value);
+    setAmountDirty(true);
     const cents = amountToCents(value);
     setAmount(cents > 0 ? cents : 0);
   };
@@ -246,19 +270,24 @@ export default function DonationForm() {
               <div className="form-section">
                 <label className="form-label">{t('donation.selectAmount', { currency: currency.toUpperCase() })}</label>
                 <div className="amount-buttons">
-                  {DONATION.PRESET_AMOUNTS.map(preset => (
-                    <button
-                      key={preset}
-                      type="button"
-                      className={`amount-btn ${amount === preset ? 'active' : ''}`}
-                      onClick={() => {
-                        setAmount(preset);
-                        setCustomAmount('');
-                      }}
-                    >
-                      {getCurrencySymbol(currency)}{(preset / 100).toFixed(0)}
-                    </button>
-                  ))}
+                  {presetAmounts.map(preset => {
+                    const label = presetLabels[preset];
+                    return (
+                      <button
+                        key={preset}
+                        type="button"
+                        className={`amount-btn ${amount === preset ? 'active' : ''}`}
+                        onClick={() => {
+                          setAmount(preset);
+                          setAmountDirty(true);
+                          setCustomAmount('');
+                        }}
+                      >
+                        {getCurrencySymbol(currency)}{(preset / 100).toFixed(0)}
+                        {label ? <span className="amount-btn-label"> · {label}</span> : null}
+                      </button>
+                    );
+                  })}
                 </div>
 
                 <div className="custom-amount">

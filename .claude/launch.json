@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Frontend",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "cd /Users/e141057/Desktop/work/clade_play_area/ngo/foundation-frontend && npm run dev"],
+      "port": 5173
+    },
+    {
+      "name": "Backend API",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "cd /Users/e141057/Desktop/work/clade_play_area/ngo/foundation-backend && mvn spring-boot:run -DskipTests"],
+      "port": 8080
+    }
+  ]
+}

@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Yugal Savitri Seva Foundation — Mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap" rel="stylesheet" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          ink:      { 900:'#0B1220', 800:'#111827', 700:'#1f2937', 500:'#4b5563', 400:'#6b7280', 300:'#9ca3af' },
+          paper:    { 50:'#ffffff', 100:'#f9fafb', 200:'#f3f4f6', 300:'#e5e7eb' },
+          trust:    { 50:'#eff6ff', 100:'#dbeafe', 500:'#3b82f6', 600:'#2563eb', 700:'#1d4ed8', 800:'#1e40af', 900:'#1e3a8a' },
+          saffron:  { 50:'#FFF7ED', 100:'#FFEDD5', 400:'#FB923C', 500:'#F59E0B', 600:'#EA580C', 700:'#C2410C' },
+          moss:     { 500:'#16a34a', 600:'#15803d' }
+        },
+        fontFamily: {
+          sans: ['Inter','system-ui','sans-serif'],
+          display: ['Fraunces','Georgia','serif']
+        },
+        boxShadow: {
+          soft: '0 1px 2px rgba(16,24,40,.04), 0 1px 3px rgba(16,24,40,.08)',
+          lift: '0 8px 24px rgba(16,24,40,.08), 0 2px 6px rgba(16,24,40,.04)'
+        }
+      }
+    }
+  }
+</script>
+<style>
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Inter', system-ui, sans-serif; color:#111827; background:#ffffff; }
+  .font-display { font-family: 'Fraunces', Georgia, serif; letter-spacing:-0.01em; }
+  .hero-bg {
+    background:
+      radial-gradient(900px 420px at 75% -10%, rgba(245,158,11,0.12), transparent 60%),
+      radial-gradient(900px 500px at 10% 10%, rgba(30,64,175,0.08), transparent 60%),
+      linear-gradient(180deg,#ffffff 0%, #f9fafb 100%);
+  }
+  .focus-ring:focus-visible { outline: 3px solid #1e40af; outline-offset: 3px; border-radius: 10px; }
+  .ticker { animation: tick 28s linear infinite; }
+  @keyframes tick { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  @media (prefers-reduced-motion: reduce) { .ticker { animation: none; } }
+  .progress { transition: width .8s cubic-bezier(.2,.8,.2,1); }
+  details > summary { list-style: none; cursor: pointer; }
+  details > summary::-webkit-details-marker { display: none; }
+  .amount-btn[aria-pressed="true"] {
+    background:#F59E0B; color:#111827; border-color:#F59E0B;
+    box-shadow: 0 0 0 4px rgba(245,158,11,0.18);
+  }
+  .pulse-dot { box-shadow: 0 0 0 0 rgba(22,163,74,0.6); animation: pulse 2s infinite; }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(22,163,74,0.6); }
+    70% { box-shadow: 0 0 0 10px rgba(22,163,74,0); }
+    100% { box-shadow: 0 0 0 0 rgba(22,163,74,0); }
+  }
+</style>
+</head>
+<body class="antialiased">
+
+<!-- Skip link for a11y -->
+<a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 bg-trust-800 text-white px-4 py-2 rounded-md">Skip to content</a>
+
+<!-- ===== HEADER ===== -->
+<header class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-paper-300">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+    <a href="#" class="flex items-center gap-3 focus-ring">
+      <div class="w-9 h-9 rounded-lg bg-trust-800 grid place-items-center text-white font-bold">YS</div>
+      <div class="leading-tight">
+        <div class="font-semibold text-ink-900">Yugal Savitri</div>
+        <div class="text-xs text-ink-500 -mt-0.5">Seva Foundation</div>
+      </div>
+    </a>
+    <nav class="hidden md:flex items-center gap-7 text-sm text-ink-700">
+      <a href="#campaigns" class="hover:text-trust-800 focus-ring">Campaigns</a>
+      <a href="#impact" class="hover:text-trust-800 focus-ring">Our impact</a>
+      <a href="#transparency" class="hover:text-trust-800 focus-ring">Transparency</a>
+      <a href="#about" class="hover:text-trust-800 focus-ring">About</a>
+    </nav>
+    <div class="flex items-center gap-2">
+      <button class="hidden md:inline text-sm text-ink-700 hover:text-trust-800 focus-ring px-3 py-2">हिंदी</button>
+      <a href="#donate" class="inline-flex items-center gap-2 bg-saffron-500 hover:bg-saffron-600 text-ink-900 font-semibold px-4 h-10 rounded-lg shadow-soft focus-ring">
+        Donate
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- ===== HERO ===== -->
+<section class="hero-bg">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 md:pt-20 pb-12 md:pb-16 grid md:grid-cols-2 gap-10 md:gap-12 items-center">
+    <div>
+      <div class="inline-flex items-center gap-2 text-xs font-medium text-moss-600 bg-moss-500/10 border border-moss-500/20 px-3 py-1 rounded-full">
+        <span class="w-2 h-2 rounded-full bg-moss-500 pulse-dot"></span>
+        Live campaign · 14 days left
+      </div>
+      <h1 class="mt-4 font-display text-4xl md:text-6xl leading-[1.05] text-ink-900">
+        Education is the <span class="text-trust-800">quiet revolution</span> that changes a life.
+      </h1>
+      <p class="mt-5 text-lg text-ink-500 max-w-xl">
+        Every ₹500 you give today feeds, clothes and teaches a child in rural Uttar Pradesh for one week. We are a community-led foundation — almost every rupee goes straight to the programme.
+      </p>
+      <div class="mt-7 flex flex-wrap items-center gap-3">
+        <a href="#donate" class="inline-flex items-center gap-2 bg-saffron-500 hover:bg-saffron-600 text-ink-900 font-semibold px-6 h-12 rounded-xl shadow-lift focus-ring">
+          Donate now
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <a href="#impact" class="inline-flex items-center gap-2 text-trust-800 hover:text-trust-900 font-semibold px-4 h-12 rounded-xl focus-ring">
+          See the impact
+        </a>
+      </div>
+
+      <!-- Trust strip -->
+      <div class="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-xl">
+        <div class="flex items-center gap-2 text-xs text-ink-500">
+          <div class="w-8 h-8 rounded-full bg-trust-50 grid place-items-center text-trust-700">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+          </div>
+          <span><b class="text-ink-800 block text-sm">Transparent</b>Every rupee tracked</span>
+        </div>
+        <div class="flex items-center gap-2 text-xs text-ink-500">
+          <div class="w-8 h-8 rounded-full bg-trust-50 grid place-items-center text-trust-700">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12l5 5L20 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <span><b class="text-ink-800 block text-sm">Direct</b>No middlemen</span>
+        </div>
+        <div class="flex items-center gap-2 text-xs text-ink-500">
+          <div class="w-8 h-8 rounded-full bg-trust-50 grid place-items-center text-trust-700">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="6" width="18" height="14" rx="2" stroke="currentColor" stroke-width="2"/><path d="M3 10h18" stroke="currentColor" stroke-width="2"/></svg>
+          </div>
+          <span><b class="text-ink-800 block text-sm">Secure</b>Stripe &amp; UPI</span>
+        </div>
+        <div class="flex items-center gap-2 text-xs text-ink-500">
+          <div class="w-8 h-8 rounded-full bg-trust-50 grid place-items-center text-trust-700">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+          <span><b class="text-ink-800 block text-sm">Volunteer-led</b>Community built</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Featured campaign card -->
+    <aside class="bg-white border border-paper-300 rounded-2xl shadow-lift overflow-hidden" aria-label="Featured campaign">
+      <div class="aspect-[16/10] bg-gradient-to-br from-trust-800 via-trust-700 to-saffron-500 relative">
+        <!-- Placeholder illustration of classroom -->
+        <svg class="absolute inset-0 w-full h-full opacity-30" viewBox="0 0 400 250" aria-hidden="true">
+          <circle cx="320" cy="60" r="30" fill="#fff" opacity="0.4"/>
+          <rect x="40" y="150" width="320" height="80" rx="6" fill="#fff" opacity="0.15"/>
+          <rect x="60" y="170" width="60" height="40" rx="4" fill="#fff" opacity="0.3"/>
+          <rect x="140" y="170" width="60" height="40" rx="4" fill="#fff" opacity="0.3"/>
+          <rect x="220" y="170" width="60" height="40" rx="4" fill="#fff" opacity="0.3"/>
+        </svg>
+        <span class="absolute top-3 left-3 bg-white/90 backdrop-blur text-ink-900 text-xs font-semibold px-2.5 py-1 rounded-md">Education</span>
+      </div>
+      <div class="p-5 md:p-6">
+        <h2 class="font-display text-2xl text-ink-900">Build a library for Dhanrua village school</h2>
+        <p class="mt-1.5 text-sm text-ink-500">220 children · Kasganj, Uttar Pradesh</p>
+
+        <!-- Progress -->
+        <div class="mt-5">
+          <div class="flex items-end justify-between text-sm">
+            <span class="text-ink-900 font-semibold text-lg">₹4,73,920</span>
+            <span class="text-ink-500">of ₹7,50,000</span>
+          </div>
+          <div class="mt-2 h-2.5 bg-paper-200 rounded-full overflow-hidden" role="progressbar" aria-valuenow="63" aria-valuemin="0" aria-valuemax="100" aria-label="63% funded">
+            <div class="progress h-full bg-saffron-500" style="width:63%"></div>
+          </div>
+          <div class="mt-2 flex items-center justify-between text-xs text-ink-500">
+            <span><b class="text-ink-800">112</b> donors</span>
+            <span><b class="text-ink-800">14</b> days left</span>
+            <span><b class="text-ink-800">63%</b> funded</span>
+          </div>
+        </div>
+
+        <a href="#donate" class="mt-5 w-full inline-flex items-center justify-center gap-2 bg-saffron-500 hover:bg-saffron-600 text-ink-900 font-semibold h-11 rounded-lg focus-ring">
+          Support this campaign
+        </a>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Recent donor ticker -->
+  <div class="border-y border-paper-300 bg-white/70">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center gap-4">
+      <span class="shrink-0 inline-flex items-center gap-2 text-xs font-medium text-moss-600">
+        <span class="w-2 h-2 rounded-full bg-moss-500 pulse-dot"></span>
+        Live donations
+      </span>
+      <div class="overflow-hidden whitespace-nowrap flex-1">
+        <div class="ticker inline-block text-sm text-ink-700">
+          <span class="inline-flex items-center gap-2 mr-8"><b>Priya</b> gave <b class="text-saffron-600">₹1,000</b> · 3 min ago</span>
+          <span class="inline-flex items-center gap-2 mr-8"><b>Aarav</b> gave <b class="text-saffron-600">₹500</b> · 8 min ago</span>
+          <span class="inline-flex items-center gap-2 mr-8"><b>Anonymous</b> gave <b class="text-saffron-600">₹5,000</b> · 14 min ago</span>
+          <span class="inline-flex items-center gap-2 mr-8"><b>Rohit</b> gave <b class="text-saffron-600">₹250 monthly</b> · 22 min ago</span>
+          <span class="inline-flex items-center gap-2 mr-8"><b>Meera</b> gave <b class="text-saffron-600">₹2,100</b> · 31 min ago</span>
+          <!-- duplicate for seamless loop -->
+          <span class="inline-flex items-center gap-2 mr-8"><b>Priya</b> gave <b class="text-saffron-600">₹1,000</b> · 3 min ago</span>
+          <span class="inline-flex items-center gap-2 mr-8"><b>Aarav</b> gave <b class="text-saffron-600">₹500</b> · 8 min ago</span>
+          <span class="inline-flex items-center gap-2 mr-8"><b>Anonymous</b> gave <b class="text-saffron-600">₹5,000</b> · 14 min ago</span>
+          <span class="inline-flex items-center gap-2 mr-8"><b>Rohit</b> gave <b class="text-saffron-600">₹250 monthly</b> · 22 min ago</span>
+          <span class="inline-flex items-center gap-2 mr-8"><b>Meera</b> gave <b class="text-saffron-600">₹2,100</b> · 31 min ago</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== DONATION PANEL ===== -->
+<section id="donate" class="py-14 md:py-20 bg-paper-100">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center max-w-2xl mx-auto">
+      <h2 class="font-display text-3xl md:text-4xl text-ink-900">Choose how you want to give</h2>
+      <p class="mt-3 text-ink-500">Pick an amount. Every rupee is traceable. A payment receipt will be emailed to you within minutes.</p>
+    </div>
+
+    <div class="mt-10 grid md:grid-cols-5 gap-6">
+      <!-- Left: amount + toggle -->
+      <div class="md:col-span-3 bg-white rounded-2xl border border-paper-300 shadow-soft p-6 md:p-8">
+        <!-- Monthly toggle -->
+        <div class="flex items-center justify-between gap-4 mb-6 p-4 rounded-xl bg-saffron-50 border border-saffron-100">
+          <div>
+            <div class="font-semibold text-ink-900">Make it monthly</div>
+            <div class="text-sm text-ink-500">Sustain a child's learning all year. Cancel anytime.</div>
+          </div>
+          <label class="relative inline-flex cursor-pointer items-center">
+            <input id="monthly" type="checkbox" class="peer sr-only" />
+            <div class="w-12 h-7 bg-paper-300 rounded-full peer-checked:bg-saffron-500 transition"></div>
+            <div class="absolute left-1 top-1 w-5 h-5 bg-white rounded-full transition peer-checked:translate-x-5"></div>
+          </label>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <button class="amount-btn focus-ring text-left p-4 rounded-xl border-2 border-paper-300 hover:border-trust-500 bg-white" aria-pressed="true" data-amount="500">
+            <div class="text-lg font-bold text-ink-900">₹500</div>
+            <div class="text-xs text-ink-500 mt-1">Feeds a child for a week</div>
+          </button>
+          <button class="amount-btn focus-ring text-left p-4 rounded-xl border-2 border-paper-300 hover:border-trust-500 bg-white" aria-pressed="false" data-amount="1500">
+            <div class="text-lg font-bold text-ink-900">₹1,500</div>
+            <div class="text-xs text-ink-500 mt-1">School kit for one child</div>
+          </button>
+          <button class="amount-btn focus-ring text-left p-4 rounded-xl border-2 border-paper-300 hover:border-trust-500 bg-white" aria-pressed="false" data-amount="5000">
+            <div class="text-lg font-bold text-ink-900">₹5,000</div>
+            <div class="text-xs text-ink-500 mt-1">One term of tuition</div>
+          </button>
+          <button class="amount-btn focus-ring text-left p-4 rounded-xl border-2 border-paper-300 hover:border-trust-500 bg-white" aria-pressed="false" data-amount="15000">
+            <div class="text-lg font-bold text-ink-900">₹15,000</div>
+            <div class="text-xs text-ink-500 mt-1">Library shelf in their name</div>
+          </button>
+        </div>
+
+        <div class="mt-4 flex items-center gap-3">
+          <label for="custom" class="text-sm text-ink-500">Or enter amount</label>
+          <div class="flex-1 flex items-center border-2 border-paper-300 rounded-xl focus-within:border-trust-500">
+            <span class="pl-3 pr-1 text-ink-500">₹</span>
+            <input id="custom" type="number" min="100" placeholder="Other amount" class="w-full h-11 bg-transparent outline-none" />
+          </div>
+        </div>
+
+        <!-- Impact line -->
+        <div id="impactLine" class="mt-5 p-4 rounded-xl bg-trust-50 border border-trust-100 text-sm text-trust-900">
+          Your <b>₹500</b> this month will feed a child in Dhanrua for a full week.
+        </div>
+
+        <!-- Action -->
+        <button class="mt-6 w-full inline-flex items-center justify-center gap-2 bg-saffron-500 hover:bg-saffron-600 text-ink-900 font-semibold h-12 rounded-xl shadow-soft focus-ring">
+          Proceed to secure payment
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <p class="mt-3 text-xs text-ink-400 text-center">We accept UPI, cards, netbanking, and wallets. <b>Note:</b> we are not yet registered for 80G tax deduction. We'll email you when that's approved.</p>
+      </div>
+
+      <!-- Right: why give -->
+      <div class="md:col-span-2 space-y-4">
+        <div class="bg-white rounded-2xl border border-paper-300 p-5">
+          <h3 class="font-semibold text-ink-900">Where your money goes</h3>
+          <ul class="mt-3 space-y-2 text-sm text-ink-700">
+            <li class="flex items-start gap-2"><span class="mt-1 w-1.5 h-1.5 rounded-full bg-saffron-500"></span><span><b>92%</b> programmes on the ground</span></li>
+            <li class="flex items-start gap-2"><span class="mt-1 w-1.5 h-1.5 rounded-full bg-saffron-500"></span><span><b>6%</b> programme management</span></li>
+            <li class="flex items-start gap-2"><span class="mt-1 w-1.5 h-1.5 rounded-full bg-saffron-500"></span><span><b>2%</b> fundraising &amp; admin</span></li>
+          </ul>
+          <a href="#transparency" class="mt-3 inline-flex text-sm text-trust-800 font-semibold hover:underline focus-ring">Read our last audit →</a>
+        </div>
+        <div class="bg-trust-900 text-white rounded-2xl p-5">
+          <div class="font-display text-xl leading-snug">"My daughter now reads to me. I couldn't read when I was her age."</div>
+          <div class="mt-3 text-sm text-trust-100/80">— Sushila, mother in Dhanrua village</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== IMPACT STATS ===== -->
+<section id="impact" class="py-14 md:py-20">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="max-w-2xl">
+      <div class="text-xs font-semibold tracking-widest text-saffron-600 uppercase">Our work so far</div>
+      <h2 class="mt-2 font-display text-3xl md:text-4xl text-ink-900">Small gifts. Specific lives. Real numbers.</h2>
+      <p class="mt-3 text-ink-500">Figures below are maintained by our volunteers and cross-checked against school registers. Spending reports are published quarterly.</p>
+    </div>
+
+    <div class="mt-10 grid grid-cols-2 md:grid-cols-4 gap-5">
+      <div class="rounded-2xl border border-paper-300 p-6 bg-white shadow-soft">
+        <div class="font-display text-4xl text-trust-800" data-countup="5432">0</div>
+        <div class="mt-1 text-sm text-ink-500">Children reached</div>
+      </div>
+      <div class="rounded-2xl border border-paper-300 p-6 bg-white shadow-soft">
+        <div class="font-display text-4xl text-trust-800" data-countup="47">0</div>
+        <div class="mt-1 text-sm text-ink-500">Villages served</div>
+      </div>
+      <div class="rounded-2xl border border-paper-300 p-6 bg-white shadow-soft">
+        <div class="font-display text-4xl text-trust-800" data-countup="312">0</div>
+        <div class="mt-1 text-sm text-ink-500">Monthly donors</div>
+      </div>
+      <div class="rounded-2xl border border-paper-300 p-6 bg-white shadow-soft">
+        <div class="font-display text-4xl text-trust-800">92<span class="text-ink-500 text-2xl">%</span></div>
+        <div class="mt-1 text-sm text-ink-500">To programmes</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== IMPACT STORY ===== -->
+<section class="py-10 md:py-16 bg-gradient-to-b from-paper-100 to-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-2 gap-10 items-center">
+    <div class="aspect-[4/3] rounded-2xl bg-gradient-to-br from-saffron-400 to-trust-800 relative overflow-hidden">
+      <svg class="absolute inset-0 w-full h-full opacity-30" viewBox="0 0 400 300" aria-hidden="true">
+        <circle cx="80" cy="100" r="50" fill="#fff" opacity="0.4"/>
+        <rect x="160" y="80" width="200" height="160" rx="8" fill="#fff" opacity="0.2"/>
+        <rect x="180" y="120" width="160" height="8" rx="4" fill="#fff" opacity="0.6"/>
+        <rect x="180" y="140" width="110" height="8" rx="4" fill="#fff" opacity="0.5"/>
+        <rect x="180" y="160" width="140" height="8" rx="4" fill="#fff" opacity="0.4"/>
+      </svg>
+      <div class="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur rounded-xl p-4">
+        <div class="text-xs font-semibold text-saffron-600 uppercase tracking-widest">Story · March 2026</div>
+        <div class="text-sm text-ink-700 mt-1">Anjali, 11, is the first girl from her village to win the state Sanskrit olympiad.</div>
+      </div>
+    </div>
+    <div>
+      <h3 class="font-display text-3xl md:text-4xl text-ink-900 leading-tight">Meet Anjali.</h3>
+      <p class="mt-4 text-ink-700 leading-relaxed">
+        When we first met Anjali in 2022, she was nine and had never held a book. Her school had one textbook shared between forty children. Three years and one donated library later, she read out <em>her own poem</em> at the district fair.
+      </p>
+      <p class="mt-4 text-ink-700 leading-relaxed">
+        The donors who built her library didn't know her name. They saw a campaign, gave ₹500, got a receipt. That's how it works — specific money, specific child, specific change.
+      </p>
+      <a href="#donate" class="mt-6 inline-flex items-center gap-2 text-trust-800 font-semibold hover:underline focus-ring">
+        Fund another library →
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CAMPAIGNS GRID ===== -->
+<section id="campaigns" class="py-14 md:py-20">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-end justify-between flex-wrap gap-4">
+      <div>
+        <div class="text-xs font-semibold tracking-widest text-saffron-600 uppercase">Live campaigns</div>
+        <h2 class="mt-2 font-display text-3xl md:text-4xl text-ink-900">Pick a cause, see the outcome.</h2>
+      </div>
+      <a href="#" class="text-sm text-trust-800 font-semibold hover:underline focus-ring">All campaigns →</a>
+    </div>
+
+    <div class="mt-8 grid md:grid-cols-3 gap-5">
+      <!-- card -->
+      <article class="rounded-2xl bg-white border border-paper-300 shadow-soft overflow-hidden hover:shadow-lift transition">
+        <div class="aspect-[16/10] bg-gradient-to-br from-trust-700 to-saffron-500"></div>
+        <div class="p-5">
+          <span class="text-xs font-semibold text-saffron-700 bg-saffron-50 px-2 py-0.5 rounded">Education</span>
+          <h3 class="mt-3 font-semibold text-ink-900">Library for Dhanrua village school</h3>
+          <div class="mt-3 h-2 bg-paper-200 rounded-full overflow-hidden" role="progressbar" aria-valuenow="63" aria-valuemin="0" aria-valuemax="100"><div class="h-full bg-saffron-500" style="width:63%"></div></div>
+          <div class="mt-2 flex items-center justify-between text-xs text-ink-500"><span>₹4,73,920 of ₹7,50,000</span><span>14 days</span></div>
+        </div>
+      </article>
+      <article class="rounded-2xl bg-white border border-paper-300 shadow-soft overflow-hidden hover:shadow-lift transition">
+        <div class="aspect-[16/10] bg-gradient-to-br from-moss-600 to-trust-700"></div>
+        <div class="p-5">
+          <span class="text-xs font-semibold text-moss-600 bg-moss-500/10 px-2 py-0.5 rounded">Healthcare</span>
+          <h3 class="mt-3 font-semibold text-ink-900">Mobile clinic for Bundelkhand farmers</h3>
+          <div class="mt-3 h-2 bg-paper-200 rounded-full overflow-hidden" role="progressbar" aria-valuenow="41" aria-valuemin="0" aria-valuemax="100"><div class="h-full bg-saffron-500" style="width:41%"></div></div>
+          <div class="mt-2 flex items-center justify-between text-xs text-ink-500"><span>₹2,05,100 of ₹5,00,000</span><span>29 days</span></div>
+        </div>
+      </article>
+      <article class="rounded-2xl bg-white border border-paper-300 shadow-soft overflow-hidden hover:shadow-lift transition">
+        <div class="aspect-[16/10] bg-gradient-to-br from-saffron-500 to-saffron-700"></div>
+        <div class="p-5">
+          <span class="text-xs font-semibold text-saffron-700 bg-saffron-50 px-2 py-0.5 rounded">Livelihood</span>
+          <h3 class="mt-3 font-semibold text-ink-900">Tailoring skills for 40 women</h3>
+          <div class="mt-3 h-2 bg-paper-200 rounded-full overflow-hidden" role="progressbar" aria-valuenow="88" aria-valuemin="0" aria-valuemax="100"><div class="h-full bg-saffron-500" style="width:88%"></div></div>
+          <div class="mt-2 flex items-center justify-between text-xs text-ink-500"><span>₹3,52,000 of ₹4,00,000</span><span>6 days</span></div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ===== TRANSPARENCY ===== -->
+<section id="transparency" class="py-14 md:py-20 bg-trust-900 text-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-3 gap-10">
+    <div class="md:col-span-1">
+      <div class="text-xs font-semibold tracking-widest text-saffron-400 uppercase">Transparency</div>
+      <h2 class="mt-2 font-display text-3xl md:text-4xl">You wrote the cheque. You deserve to see the ledger.</h2>
+    </div>
+    <div class="md:col-span-2 grid sm:grid-cols-2 gap-4">
+      <a href="#" class="p-5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition focus-ring">
+        <div class="font-semibold">Registration status</div>
+        <div class="text-sm text-trust-100/70 mt-1">Our current legal status and what's next.</div>
+      </a>
+      <a href="#" class="p-5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition focus-ring">
+        <div class="font-semibold">Quarterly spending reports</div>
+        <div class="text-sm text-trust-100/70 mt-1">Line-item spend for every campaign, published every quarter.</div>
+      </a>
+      <a href="#" class="p-5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition focus-ring">
+        <div class="font-semibold">Campaign updates</div>
+        <div class="text-sm text-trust-100/70 mt-1">Progress, photos and funds utilised — straight from the field.</div>
+      </a>
+      <a href="#" class="p-5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition focus-ring">
+        <div class="font-semibold">Field photos &amp; stories</div>
+        <div class="text-sm text-trust-100/70 mt-1">Consented, dated, with village names.</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FAQ ===== -->
+<section class="py-14 md:py-20">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+    <h2 class="font-display text-3xl md:text-4xl text-ink-900 text-center">Questions donors ask</h2>
+    <div class="mt-8 divide-y divide-paper-300 border-y border-paper-300">
+      <details class="py-4 group">
+        <summary class="flex items-center justify-between text-ink-900 font-medium"><span>Are my donations tax-deductible?</span><span class="text-ink-400 group-open:rotate-45 transition">+</span></summary>
+        <p class="mt-3 text-ink-500 text-sm">Not yet. We are a community-led foundation and our 80G registration is in progress. You will receive a payment receipt by email immediately. When 80G is granted we will write back to every donor with the update.</p>
+      </details>
+      <details class="py-4 group">
+        <summary class="flex items-center justify-between text-ink-900 font-medium"><span>Can I give from outside India?</span><span class="text-ink-400 group-open:rotate-45 transition">+</span></summary>
+        <p class="mt-3 text-ink-500 text-sm">Our payment partner supports international cards. Please note that formal FCRA clearance for foreign contributions is still being applied for; until then foreign gifts are treated as regular receipts and are not FCRA-reported.</p>
+      </details>
+      <details class="py-4 group">
+        <summary class="flex items-center justify-between text-ink-900 font-medium"><span>How do you spend my money?</span><span class="text-ink-400 group-open:rotate-45 transition">+</span></summary>
+        <p class="mt-3 text-ink-500 text-sm">Almost every rupee goes to programmes on the ground. A small share covers payment gateway fees and essentials like hosting. We publish a spending breakdown per campaign every quarter.</p>
+      </details>
+      <details class="py-4 group">
+        <summary class="flex items-center justify-between text-ink-900 font-medium"><span>Can I cancel a monthly gift?</span><span class="text-ink-400 group-open:rotate-45 transition">+</span></summary>
+        <p class="mt-3 text-ink-500 text-sm">Anytime, from your donor dashboard. Pause or cancel without emailing us. No hard feelings.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="border-t border-paper-300 bg-paper-100">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 grid md:grid-cols-4 gap-10">
+    <div>
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-lg bg-trust-800 grid place-items-center text-white font-bold">YS</div>
+        <div class="leading-tight">
+          <div class="font-semibold text-ink-900">Yugal Savitri</div>
+          <div class="text-xs text-ink-500 -mt-0.5">Seva Foundation</div>
+        </div>
+      </div>
+      <p class="mt-4 text-sm text-ink-500">Education, health, and dignity for rural India. A community-led foundation.</p>
+    </div>
+    <div>
+      <div class="text-xs font-semibold tracking-widest text-ink-400 uppercase">Give</div>
+      <ul class="mt-3 space-y-2 text-sm text-ink-700">
+        <li><a href="#donate" class="hover:text-trust-800 focus-ring">Donate once</a></li>
+        <li><a href="#donate" class="hover:text-trust-800 focus-ring">Give monthly</a></li>
+        <li><a href="#" class="hover:text-trust-800 focus-ring">Corporate / CSR</a></li>
+        <li><a href="#" class="hover:text-trust-800 focus-ring">In memory of</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="text-xs font-semibold tracking-widest text-ink-400 uppercase">About</div>
+      <ul class="mt-3 space-y-2 text-sm text-ink-700">
+        <li><a href="#" class="hover:text-trust-800 focus-ring">Our story</a></li>
+        <li><a href="#" class="hover:text-trust-800 focus-ring">Team &amp; trustees</a></li>
+        <li><a href="#" class="hover:text-trust-800 focus-ring">Annual reports</a></li>
+        <li><a href="#" class="hover:text-trust-800 focus-ring">Careers</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="text-xs font-semibold tracking-widest text-ink-400 uppercase">Legal</div>
+      <ul class="mt-3 space-y-2 text-sm text-ink-700">
+        <li><a href="#" class="hover:text-trust-800 focus-ring">Privacy policy</a></li>
+        <li><a href="#" class="hover:text-trust-800 focus-ring">Terms</a></li>
+        <li><a href="#" class="hover:text-trust-800 focus-ring">Refund policy</a></li>
+        <li><a href="#" class="hover:text-trust-800 focus-ring">Accessibility</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="border-t border-paper-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-wrap items-center justify-between gap-3 text-xs text-ink-400">
+      <div>© 2026 Yugal Savitri Seva Foundation. Community-led foundation · Registration in progress.</div>
+      <div class="flex items-center gap-4">
+        <span>Made with <span class="text-saffron-500">♥</span> in India</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</main>
+
+<!-- ===== STICKY MOBILE DONATE BAR ===== -->
+<div class="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur border-t border-paper-300 p-3">
+  <a href="#donate" class="w-full inline-flex items-center justify-center gap-2 bg-saffron-500 hover:bg-saffron-600 text-ink-900 font-semibold h-12 rounded-xl focus-ring">
+    Donate now · from ₹500
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </a>
+</div>
+
+<script>
+  // --- Amount selection -------------------------------------------------
+  const amountBtns = document.querySelectorAll('.amount-btn');
+  const custom = document.getElementById('custom');
+  const monthly = document.getElementById('monthly');
+  const impactLine = document.getElementById('impactLine');
+
+  const impacts = {
+    500:   'feed a child in Dhanrua for a full week',
+    1500:  'put a school kit into a first-grader\'s hands',
+    5000:  'cover a full term of tuition for one child',
+    15000: 'put a named library shelf in a village school'
+  };
+
+  function setAmount(val, isCustom=false) {
+    amountBtns.forEach(b => b.setAttribute('aria-pressed', b.dataset.amount == val ? 'true' : 'false'));
+    if (!isCustom) custom.value = '';
+    const label = monthly.checked ? 'this month' : 'today';
+    const impactText = impacts[val] || `go straight to the ground`;
+    impactLine.innerHTML = `Your <b>₹${Number(val).toLocaleString('en-IN')}</b> ${label} will ${impactText}.`;
+  }
+
+  amountBtns.forEach(btn => btn.addEventListener('click', () => setAmount(btn.dataset.amount)));
+  custom.addEventListener('input', e => {
+    amountBtns.forEach(b => b.setAttribute('aria-pressed', 'false'));
+    const v = Number(e.target.value || 0);
+    if (v > 0) setAmount(v, true);
+  });
+  monthly.addEventListener('change', () => {
+    const pressed = Array.from(amountBtns).find(b => b.getAttribute('aria-pressed') === 'true');
+    const v = pressed ? pressed.dataset.amount : (Number(custom.value) || 500);
+    setAmount(v, !pressed);
+  });
+
+  // --- Count-up on scroll -----------------------------------------------
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const counters = document.querySelectorAll('[data-countup]');
+  const animate = (el) => {
+    const target = +el.dataset.countup;
+    if (reduce) { el.textContent = target.toLocaleString('en-IN'); return; }
+    const dur = 1400;
+    const start = performance.now();
+    const tick = (now) => {
+      const p = Math.min(1, (now - start) / dur);
+      const eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(target * eased).toLocaleString('en-IN');
+      if (p < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  };
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { animate(e.target); io.unobserve(e.target); } });
+  }, { threshold: 0.4 });
+  counters.forEach(c => io.observe(c));
+</script>
+
+</body>
+</html>

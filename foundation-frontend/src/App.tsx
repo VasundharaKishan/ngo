@@ -21,6 +21,15 @@ const AdminCampaignForm = lazy(() => import('./pages/AdminCampaignForm'));
 const AdminSettingsConsolidated = lazy(() => import('./pages/AdminSettingsConsolidated'));
 const AdminDonatePopupSettings = lazy(() => import('./pages/AdminDonatePopupSettings'));
 const AdminHomepage = lazy(() => import('./pages/AdminHomepage'));
+const AdminHeroPanel = lazy(() => import('./pages/AdminHeroPanel'));
+const AdminTrustBadges = lazy(() => import('./pages/AdminTrustBadges'));
+const AdminDonationPresets = lazy(() => import('./pages/AdminDonationPresets'));
+const AdminMoneyAllocations = lazy(() => import('./pages/AdminMoneyAllocations'));
+const AdminAnnouncementBar = lazy(() => import('./pages/AdminAnnouncementBar'));
+const AdminStories = lazy(() => import('./pages/AdminStories'));
+const AdminFaqs = lazy(() => import('./pages/AdminFaqs'));
+const AdminTransparencyDocuments = lazy(() => import('./pages/AdminTransparencyDocuments'));
+const AdminContactSubmissions = lazy(() => import('./pages/AdminContactSubmissions'));
 const AdminCMS = lazy(() => import('./pages/AdminCMS'));
 const AdminLogin = lazy(() => import('./pages/AdminLogin'));
 const AdminUsers = lazy(() => import('./pages/AdminUsers'));
@@ -30,7 +39,10 @@ const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
 const AccessibilityPage = lazy(() => import('./pages/AccessibilityPage'));
 const CookiesPage = lazy(() => import('./pages/CookiesPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
+const ImpactPage = lazy(() => import('./pages/ImpactPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
+const FaqPage = lazy(() => import('./pages/FaqPage'));
+const TransparencyPage = lazy(() => import('./pages/TransparencyPage'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 import CookieConsent from './components/CookieConsent';
 
@@ -67,6 +79,15 @@ function App() {
               <Route path="settings" element={<AdminSettingsConsolidated />} />
               <Route path="donate-popup-settings" element={<AdminDonatePopupSettings />} />
               <Route path="homepage" element={<AdminHomepage />} />
+              <Route path="hero-panel" element={<AdminHeroPanel />} />
+              <Route path="trust-badges" element={<AdminTrustBadges />} />
+              <Route path="donation-presets" element={<AdminDonationPresets />} />
+              <Route path="money-allocations" element={<AdminMoneyAllocations />} />
+              <Route path="announcement-bar" element={<AdminAnnouncementBar />} />
+              <Route path="stories" element={<AdminStories />} />
+              <Route path="faqs" element={<AdminFaqs />} />
+              <Route path="transparency-documents" element={<AdminTransparencyDocuments />} />
+              <Route path="contact-submissions" element={<AdminContactSubmissions />} />
               <Route path="cms" element={<AdminCMS />} />
             </Route>
             
@@ -79,7 +100,10 @@ function App() {
               <Route path="/donate/success" element={<Success />} />
               <Route path="/donate/cancel" element={<Cancel />} />
               <Route path="/about" element={<AboutPage />} />
+              <Route path="/impact" element={<ImpactPage />} />
               <Route path="/contact" element={<ContactPage />} />
+              <Route path="/faq" element={<FaqPage />} />
+              <Route path="/transparency" element={<TransparencyPage />} />
               <Route path="/terms" element={<TermsPage />} />
               <Route path="/privacy" element={<PrivacyPage />} />
               <Route path="/accessibility" element={<AccessibilityPage />} />

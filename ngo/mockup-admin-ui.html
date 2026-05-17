@@ -1,0 +1,931 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Yugal Savitri — Admin Mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap" rel="stylesheet" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          ink:     { 900:'#0B1220', 800:'#111827', 700:'#1f2937', 600:'#374151', 500:'#4b5563', 400:'#6b7280', 300:'#9ca3af', 200:'#d1d5db' },
+          paper:   { 50:'#ffffff', 100:'#fafbfc', 200:'#f3f4f6', 300:'#e5e7eb', 400:'#d1d5db' },
+          trust:   { 50:'#eff6ff', 100:'#dbeafe', 500:'#3b82f6', 600:'#2563eb', 700:'#1d4ed8', 800:'#1e40af', 900:'#1e3a8a' },
+          saffron: { 50:'#FFF7ED', 100:'#FFEDD5', 400:'#FB923C', 500:'#F59E0B', 600:'#EA580C' },
+          moss:    { 50:'#f0fdf4', 500:'#16a34a', 600:'#15803d' },
+          rose:    { 50:'#fff1f2', 500:'#f43f5e', 600:'#e11d48' },
+        },
+        fontFamily: {
+          sans: ['Inter','system-ui','sans-serif'],
+          display: ['Fraunces','Georgia','serif']
+        },
+        boxShadow: {
+          soft: '0 1px 2px rgba(16,24,40,.04), 0 1px 3px rgba(16,24,40,.08)',
+          lift: '0 8px 24px rgba(16,24,40,.08), 0 2px 6px rgba(16,24,40,.04)'
+        }
+      }
+    }
+  }
+</script>
+<style>
+  html { color-scheme: light; }
+  body { font-family: 'Inter', system-ui, sans-serif; background:#fafbfc; color:#111827; }
+  .focus-ring:focus-visible { outline: 2px solid #1e40af; outline-offset: 2px; border-radius: 8px; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .nav-item[aria-current="true"] { background: #eff6ff; color: #1e40af; }
+  .nav-item[aria-current="true"] .nav-icon { color: #1e40af; }
+  .tab[aria-selected="true"] { color: #1e40af; border-color: #1e40af; }
+  .chip-published { background:#f0fdf4; color:#15803d; border:1px solid #bbf7d0; }
+  .chip-draft     { background:#fffbeb; color:#b45309; border:1px solid #fde68a; }
+  .chip-off       { background:#f3f4f6; color:#4b5563; border:1px solid #e5e7eb; }
+  details > summary { list-style:none; cursor:pointer; }
+  details > summary::-webkit-details-marker { display:none; }
+  .kbd { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; padding: 2px 5px; border-radius: 4px; background:#f3f4f6; border:1px solid #e5e7eb; color:#4b5563; }
+  input, textarea, select { font-family: inherit; }
+  .field input[type="text"],
+  .field input[type="url"],
+  .field input[type="number"],
+  .field textarea,
+  .field select {
+    width: 100%; border: 1px solid #e5e7eb; border-radius: 10px; padding: 10px 12px;
+    font-size: 14px; color:#111827; background:#fff; transition: border-color .15s, box-shadow .15s;
+  }
+  .field input:focus, .field textarea:focus, .field select:focus {
+    outline: none; border-color:#1e40af; box-shadow: 0 0 0 3px rgba(30,64,175,.12);
+  }
+  .field label { display:block; font-size:12px; font-weight:600; color:#374151; margin-bottom:6px; letter-spacing:.01em; }
+  .field .help { font-size:12px; color:#6b7280; margin-top:6px; }
+  .toggle { position:relative; display:inline-flex; align-items:center; cursor:pointer; }
+  .toggle input { position:absolute; opacity:0; inset:0; cursor:pointer; }
+  .toggle .track { width:40px; height:22px; background:#d1d5db; border-radius:999px; transition:background .15s; }
+  .toggle .thumb { position:absolute; top:3px; left:3px; width:16px; height:16px; background:#fff; border-radius:999px; transition:transform .15s; box-shadow: 0 1px 2px rgba(0,0,0,.15); }
+  .toggle input:checked + .track { background:#16a34a; }
+  .toggle input:checked + .track + .thumb { transform: translateX(18px); }
+  .radio-card input { position:absolute; opacity:0; inset:0; cursor:pointer; }
+  .radio-card { position:relative; border:1.5px solid #e5e7eb; border-radius:12px; padding:14px; cursor:pointer; transition:all .15s; }
+  .radio-card:has(input:checked) { border-color:#1e40af; background:#eff6ff; box-shadow: 0 0 0 3px rgba(30,64,175,.08); }
+  .drag-handle { color:#9ca3af; cursor:grab; }
+  .row-hover:hover { background:#fafbfc; }
+  /* Preview frame mimics public site compactly */
+  .preview-scale { transform: scale(.82); transform-origin: top left; width: 122%; }
+  @media (max-width: 1280px) { .preview-scale { transform: scale(.7); width: 143%; } }
+</style>
+</head>
+<body class="h-screen overflow-hidden">
+
+<div class="h-full flex">
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="w-60 shrink-0 bg-white border-r border-paper-300 flex flex-col">
+    <div class="h-14 flex items-center gap-2.5 px-4 border-b border-paper-300">
+      <div class="w-8 h-8 rounded-lg bg-trust-800 grid place-items-center text-white text-sm font-bold">YS</div>
+      <div class="leading-tight">
+        <div class="text-sm font-semibold text-ink-900">Yugal Savitri</div>
+        <div class="text-[11px] text-ink-500 -mt-0.5">Admin console</div>
+      </div>
+    </div>
+
+    <div class="p-3">
+      <button class="w-full flex items-center gap-2 text-sm text-ink-500 hover:text-ink-900 px-2.5 py-1.5 rounded-md border border-paper-300 bg-paper-100 focus-ring">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M21 21l-4.3-4.3M18 10a8 8 0 11-16 0 8 8 0 0116 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Search
+        <span class="ml-auto kbd">⌘K</span>
+      </button>
+    </div>
+
+    <nav class="flex-1 overflow-auto px-2 pb-4 text-sm">
+      <div class="px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-ink-400">Overview</div>
+      <button data-nav="dashboard" class="nav-item w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-ink-700 hover:bg-paper-200 focus-ring">
+        <svg class="nav-icon text-ink-400" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1V10" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+        Dashboard
+      </button>
+
+      <div class="px-2 pt-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-ink-400">Operate</div>
+      <button data-nav="campaigns" class="nav-item w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-ink-700 hover:bg-paper-200 focus-ring">
+        <svg class="nav-icon text-ink-400" width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M3 9h18" stroke="currentColor" stroke-width="1.7"/></svg>
+        Campaigns <span class="ml-auto text-xs text-ink-400">8</span>
+      </button>
+      <button data-nav="donations" class="nav-item w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-ink-700 hover:bg-paper-200 focus-ring">
+        <svg class="nav-icon text-ink-400" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 100 7H14a3.5 3.5 0 110 7H6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        Donations <span class="ml-auto text-xs text-ink-400">312</span>
+      </button>
+
+      <div class="px-2 pt-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-ink-400">Site</div>
+      <button data-nav="content" aria-current="true" class="nav-item w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-ink-700 hover:bg-paper-200 focus-ring">
+        <svg class="nav-icon text-ink-400" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 4h16v4H4zM4 10h10v10H4zM16 10h4v10h-4z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+        Content
+      </button>
+      <button data-nav="settings" class="nav-item w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-ink-700 hover:bg-paper-200 focus-ring">
+        <svg class="nav-icon text-ink-400" width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7"/><path d="M19.4 15a7.97 7.97 0 000-6l2-1.6-2-3.5-2.5 1a8 8 0 00-5.2-3l-.4-2.6h-4l-.4 2.6a8 8 0 00-5.2 3l-2.5-1-2 3.5 2 1.6a7.97 7.97 0 000 6l-2 1.6 2 3.5 2.5-1a8 8 0 005.2 3l.4 2.6h4l.4-2.6a8 8 0 005.2-3l2.5 1 2-3.5-2-1.6z" stroke="currentColor" stroke-width="1.2"/></svg>
+        Settings
+      </button>
+
+      <div class="px-2 pt-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-ink-400">Access</div>
+      <button data-nav="users" class="nav-item w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-ink-700 hover:bg-paper-200 focus-ring">
+        <svg class="nav-icon text-ink-400" width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="9" cy="8" r="4" stroke="currentColor" stroke-width="1.7"/><path d="M3 21c0-3.5 3-6 6-6s6 2.5 6 6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="17" cy="9" r="3" stroke="currentColor" stroke-width="1.7"/><path d="M14.5 15.5c2.8.4 5 2.5 5.5 5.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        Users
+      </button>
+    </nav>
+
+    <div class="border-t border-paper-300 p-3 flex items-center gap-2.5">
+      <div class="w-8 h-8 rounded-full bg-saffron-500 grid place-items-center text-ink-900 text-xs font-bold">KK</div>
+      <div class="leading-tight min-w-0">
+        <div class="text-xs font-medium text-ink-900 truncate">Kishan Kumar</div>
+        <div class="text-[11px] text-ink-500 truncate">Owner</div>
+      </div>
+      <button class="ml-auto text-ink-400 hover:text-ink-700 focus-ring p-1.5 rounded-md" aria-label="Account menu">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="5" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="19" cy="12" r="1.5" fill="currentColor"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN ===== -->
+  <div class="flex-1 flex flex-col min-w-0">
+
+    <!-- Top bar -->
+    <header class="h-14 bg-white border-b border-paper-300 flex items-center justify-between px-6">
+      <div class="flex items-center gap-2 text-sm">
+        <span class="text-ink-400">Site</span>
+        <span class="text-ink-300">/</span>
+        <span id="crumb-section" class="text-ink-700 font-medium">Content</span>
+        <span class="text-ink-300">/</span>
+        <span id="crumb-tab" class="text-ink-900 font-semibold">Hero</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <span id="status-chip" class="text-xs font-medium px-2 py-1 rounded-full chip-draft">Draft · unsaved changes</span>
+        <button class="text-sm text-ink-700 hover:text-ink-900 font-medium px-3 h-9 rounded-md border border-paper-300 bg-white focus-ring">Preview</button>
+        <button class="text-sm text-ink-900 bg-saffron-500 hover:bg-saffron-600 font-semibold px-4 h-9 rounded-md focus-ring">Publish</button>
+      </div>
+    </header>
+
+    <!-- Panels -->
+    <div class="flex-1 overflow-auto">
+
+      <!-- =============== DASHBOARD (placeholder) =============== -->
+      <section data-panel="dashboard" class="panel p-8">
+        <h1 class="font-display text-3xl text-ink-900">Good morning, Kishan.</h1>
+        <p class="mt-2 text-ink-500">Here's what's happened since you last checked.</p>
+        <div class="mt-6 grid md:grid-cols-4 gap-4">
+          <div class="bg-white border border-paper-300 rounded-xl p-5"><div class="text-xs text-ink-500">Donations today</div><div class="font-display text-3xl text-ink-900 mt-1">₹12,500</div><div class="text-xs text-moss-600 mt-1">+₹4,000 vs yesterday</div></div>
+          <div class="bg-white border border-paper-300 rounded-xl p-5"><div class="text-xs text-ink-500">New monthly donors</div><div class="font-display text-3xl text-ink-900 mt-1">3</div><div class="text-xs text-ink-500 mt-1">This week</div></div>
+          <div class="bg-white border border-paper-300 rounded-xl p-5"><div class="text-xs text-ink-500">Active campaigns</div><div class="font-display text-3xl text-ink-900 mt-1">3</div><div class="text-xs text-ink-500 mt-1">2 closing this month</div></div>
+          <div class="bg-white border border-paper-300 rounded-xl p-5"><div class="text-xs text-ink-500">Draft content</div><div class="font-display text-3xl text-ink-900 mt-1">2</div><div class="text-xs text-saffron-600 mt-1">Awaiting publish</div></div>
+        </div>
+      </section>
+
+      <!-- =============== CONTENT =============== -->
+      <section data-panel="content" class="panel active">
+
+        <!-- Tabs -->
+        <div class="bg-white border-b border-paper-300 sticky top-0 z-10">
+          <div class="px-6 flex items-center gap-1 overflow-x-auto">
+            <button data-tab="hero"        aria-selected="true"  class="tab text-sm font-medium text-ink-500 border-b-2 border-transparent px-3 h-12 whitespace-nowrap focus-ring">Hero</button>
+            <button data-tab="badges"      aria-selected="false" class="tab text-sm font-medium text-ink-500 border-b-2 border-transparent px-3 h-12 whitespace-nowrap focus-ring">Trust badges</button>
+            <button data-tab="stats"       aria-selected="false" class="tab text-sm font-medium text-ink-500 border-b-2 border-transparent px-3 h-12 whitespace-nowrap focus-ring">Impact stats</button>
+            <button data-tab="stories"     aria-selected="false" class="tab text-sm font-medium text-ink-500 border-b-2 border-transparent px-3 h-12 whitespace-nowrap focus-ring">Stories</button>
+            <button data-tab="faq"         aria-selected="false" class="tab text-sm font-medium text-ink-500 border-b-2 border-transparent px-3 h-12 whitespace-nowrap focus-ring">FAQ</button>
+            <button data-tab="footer"      aria-selected="false" class="tab text-sm font-medium text-ink-500 border-b-2 border-transparent px-3 h-12 whitespace-nowrap focus-ring">Footer</button>
+            <button data-tab="banner"      aria-selected="false" class="tab text-sm font-medium text-ink-500 border-b-2 border-transparent px-3 h-12 whitespace-nowrap focus-ring">Announcement bar</button>
+            <button data-tab="transparency" aria-selected="false" class="tab text-sm font-medium text-ink-500 border-b-2 border-transparent px-3 h-12 whitespace-nowrap focus-ring">Transparency</button>
+          </div>
+        </div>
+
+        <!-- =========== HERO =========== -->
+        <div data-tabpanel="hero" class="tabpanel p-6 grid xl:grid-cols-[1fr_560px] gap-6">
+          <!-- Form -->
+          <div class="bg-white border border-paper-300 rounded-xl p-6">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <h2 class="text-lg font-semibold text-ink-900">Homepage hero</h2>
+                <p class="text-sm text-ink-500 mt-1">The first thing donors see. Kept short and emotional.</p>
+              </div>
+              <label class="toggle" title="Show hero section">
+                <input type="checkbox" checked />
+                <span class="track"></span><span class="thumb"></span>
+              </label>
+            </div>
+
+            <div class="mt-6 grid gap-5">
+              <div class="field">
+                <label>Eyebrow tag <span class="text-ink-400 font-normal">· small pill above the title</span></label>
+                <input type="text" value="Live campaign · 14 days left" />
+                <div class="help">Use to create urgency. Leave empty to hide.</div>
+              </div>
+
+              <div class="field">
+                <label>Title</label>
+                <input type="text" value="Education is the quiet revolution that changes a life." />
+                <div class="help">Max 80 characters. Supports <code>**bold**</code> for the highlighted phrase.</div>
+              </div>
+
+              <div class="field">
+                <label>Subtitle</label>
+                <textarea rows="3">Every ₹500 you give today feeds, clothes and teaches a child in rural Uttar Pradesh for one week. We are a community-led foundation — almost every rupee goes straight to the programme.</textarea>
+                <div class="help">2–3 lines, plain language. Avoid legal claims here.</div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <div class="field">
+                  <label>Primary CTA label</label>
+                  <input type="text" value="Donate now" />
+                </div>
+                <div class="field">
+                  <label>Primary CTA target</label>
+                  <select>
+                    <option>#donate (donation panel)</option>
+                    <option>/campaigns/library-dhanrua</option>
+                    <option>Custom URL…</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="field">
+                <label>Featured campaign card</label>
+                <select>
+                  <option>Library for Dhanrua village school · 63% funded · 14d</option>
+                  <option>Mobile clinic for Bundelkhand farmers · 41% · 29d</option>
+                  <option>Tailoring skills for 40 women · 88% · 6d</option>
+                  <option>— Hide card —</option>
+                </select>
+                <div class="help">Pointer only — when the campaign closes, pick the next one. No hero re-edit needed.</div>
+              </div>
+
+              <div class="field">
+                <label>Background image</label>
+                <div class="flex items-center gap-3">
+                  <div class="w-24 h-16 rounded-lg bg-gradient-to-br from-trust-700 via-trust-800 to-saffron-500"></div>
+                  <button class="text-sm font-medium text-trust-800 hover:text-trust-900 border border-trust-100 bg-trust-50 px-3 h-9 rounded-md focus-ring">Replace image…</button>
+                  <button class="text-sm text-ink-500 hover:text-ink-900 focus-ring">Remove</button>
+                </div>
+                <div class="help">Recommended 2400 × 1200, &lt;500 KB. EXIF is stripped on upload.</div>
+              </div>
+            </div>
+
+            <div class="mt-6 pt-5 border-t border-paper-300 flex items-center justify-between">
+              <div class="text-xs text-ink-500">Last edited by <b class="text-ink-700">Priya</b> · 2 hours ago · <a href="#" class="text-trust-800 hover:underline">Version history</a></div>
+              <div class="flex items-center gap-2">
+                <button class="text-sm text-ink-700 hover:text-ink-900 px-3 h-9 rounded-md focus-ring">Discard</button>
+                <button class="text-sm text-ink-700 hover:text-ink-900 border border-paper-300 bg-white px-3 h-9 rounded-md focus-ring">Save draft</button>
+                <button class="text-sm text-ink-900 bg-saffron-500 hover:bg-saffron-600 font-semibold px-4 h-9 rounded-md focus-ring">Publish changes</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Live preview -->
+          <div class="bg-white border border-paper-300 rounded-xl overflow-hidden">
+            <div class="flex items-center justify-between px-4 h-11 border-b border-paper-300 bg-paper-100">
+              <div class="flex items-center gap-2 text-xs text-ink-500">
+                <span class="w-2 h-2 rounded-full bg-moss-500"></span>
+                Live preview · yugalsavitri.org/
+              </div>
+              <div class="flex items-center gap-1">
+                <button class="w-7 h-7 grid place-items-center rounded-md text-ink-700 bg-white border border-paper-300 focus-ring" title="Desktop">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="13" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M8 21h8M12 17v4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+                </button>
+                <button class="w-7 h-7 grid place-items-center rounded-md text-ink-400 hover:text-ink-700 focus-ring" title="Mobile">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="7" y="2" width="10" height="20" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M11 18h2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="p-5 bg-gradient-to-b from-white to-paper-100 overflow-hidden" style="height:540px">
+              <div class="preview-scale">
+                <div class="inline-flex items-center gap-2 text-[10px] font-medium text-moss-600 bg-moss-50 border border-moss-500/20 px-2 py-0.5 rounded-full">
+                  <span class="w-1.5 h-1.5 rounded-full bg-moss-500"></span> Live campaign · 14 days left
+                </div>
+                <h1 class="mt-3 font-display text-4xl leading-[1.05] text-ink-900">Education is the <span class="text-trust-800">quiet revolution</span> that changes a life.</h1>
+                <p class="mt-3 text-base text-ink-500 max-w-xl">Every ₹500 you give today feeds, clothes and teaches a child in rural Uttar Pradesh for one week. We are a community-led foundation — almost every rupee goes straight to the programme.</p>
+                <div class="mt-5 flex items-center gap-3">
+                  <span class="inline-flex items-center gap-2 bg-saffron-500 text-ink-900 font-semibold px-4 h-10 rounded-lg">Donate now →</span>
+                  <span class="text-trust-800 font-semibold text-sm">See the impact</span>
+                </div>
+                <div class="mt-6 grid grid-cols-2 gap-3 max-w-sm text-[11px] text-ink-500">
+                  <div class="flex items-center gap-2"><div class="w-6 h-6 rounded-full bg-trust-50 text-trust-700 grid place-items-center text-[10px]">✓</div><span><b class="text-ink-800 block text-[12px]">Transparent</b>Every rupee tracked</span></div>
+                  <div class="flex items-center gap-2"><div class="w-6 h-6 rounded-full bg-trust-50 text-trust-700 grid place-items-center text-[10px]">↗</div><span><b class="text-ink-800 block text-[12px]">Direct</b>No middlemen</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- =========== TRUST BADGES =========== -->
+        <div data-tabpanel="badges" class="tabpanel p-6 hidden">
+          <div class="bg-white border border-paper-300 rounded-xl">
+            <div class="flex items-start justify-between gap-4 p-6 pb-4">
+              <div>
+                <h2 class="text-lg font-semibold text-ink-900">Trust badges</h2>
+                <p class="text-sm text-ink-500 mt-1">Shown in the hero. Keep to four, and only claim things you can defend today.</p>
+              </div>
+              <button class="inline-flex items-center gap-1.5 text-sm font-medium text-trust-800 border border-trust-100 bg-trust-50 px-3 h-9 rounded-md focus-ring">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                Add badge
+              </button>
+            </div>
+
+            <!-- Unregistered warning -->
+            <div class="mx-6 mb-4 p-3 rounded-lg bg-saffron-50 border border-saffron-100 flex items-start gap-3">
+              <svg class="text-saffron-600 mt-0.5 shrink-0" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 9v4M12 17h.01M10.3 3.9L2.4 18a2 2 0 001.7 3h15.8a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <div class="text-xs text-ink-700">
+                <b>Registration not yet granted.</b> 80G / FCRA / "Registered NGO" badges are disabled until your status is updated in <a class="text-trust-800 hover:underline" href="#" data-jump="settings:legal">Settings → Legal</a>. This prevents accidental public claims.
+              </div>
+            </div>
+
+            <div class="divide-y divide-paper-300">
+              <div class="row-hover flex items-center gap-3 px-6 py-3">
+                <span class="drag-handle">⋮⋮</span>
+                <div class="w-9 h-9 rounded-full bg-trust-50 grid place-items-center text-trust-700 shrink-0">✓</div>
+                <div class="flex-1 min-w-0 grid grid-cols-2 gap-3">
+                  <input type="text" value="Transparent" class="text-sm font-medium bg-transparent border-0 p-0 focus:ring-0 text-ink-900 focus-ring" />
+                  <input type="text" value="Every rupee tracked" class="text-sm text-ink-500 bg-transparent border-0 p-0 focus:ring-0 focus-ring" />
+                </div>
+                <span class="chip-published text-[11px] font-medium px-2 py-0.5 rounded-full">Visible</span>
+                <label class="toggle"><input type="checkbox" checked><span class="track"></span><span class="thumb"></span></label>
+              </div>
+              <div class="row-hover flex items-center gap-3 px-6 py-3">
+                <span class="drag-handle">⋮⋮</span>
+                <div class="w-9 h-9 rounded-full bg-trust-50 grid place-items-center text-trust-700 shrink-0">↗</div>
+                <div class="flex-1 min-w-0 grid grid-cols-2 gap-3">
+                  <input type="text" value="Direct" class="text-sm font-medium bg-transparent border-0 p-0 focus:ring-0 text-ink-900 focus-ring" />
+                  <input type="text" value="No middlemen" class="text-sm text-ink-500 bg-transparent border-0 p-0 focus:ring-0 focus-ring" />
+                </div>
+                <span class="chip-published text-[11px] font-medium px-2 py-0.5 rounded-full">Visible</span>
+                <label class="toggle"><input type="checkbox" checked><span class="track"></span><span class="thumb"></span></label>
+              </div>
+              <div class="row-hover flex items-center gap-3 px-6 py-3">
+                <span class="drag-handle">⋮⋮</span>
+                <div class="w-9 h-9 rounded-full bg-trust-50 grid place-items-center text-trust-700 shrink-0">🔒</div>
+                <div class="flex-1 min-w-0 grid grid-cols-2 gap-3">
+                  <input type="text" value="Secure" class="text-sm font-medium bg-transparent border-0 p-0 focus:ring-0 text-ink-900 focus-ring" />
+                  <input type="text" value="Stripe & UPI" class="text-sm text-ink-500 bg-transparent border-0 p-0 focus:ring-0 focus-ring" />
+                </div>
+                <span class="chip-published text-[11px] font-medium px-2 py-0.5 rounded-full">Visible</span>
+                <label class="toggle"><input type="checkbox" checked><span class="track"></span><span class="thumb"></span></label>
+              </div>
+              <div class="row-hover flex items-center gap-3 px-6 py-3">
+                <span class="drag-handle">⋮⋮</span>
+                <div class="w-9 h-9 rounded-full bg-trust-50 grid place-items-center text-trust-700 shrink-0">👋</div>
+                <div class="flex-1 min-w-0 grid grid-cols-2 gap-3">
+                  <input type="text" value="Volunteer-led" class="text-sm font-medium bg-transparent border-0 p-0 focus:ring-0 text-ink-900 focus-ring" />
+                  <input type="text" value="Community built" class="text-sm text-ink-500 bg-transparent border-0 p-0 focus:ring-0 focus-ring" />
+                </div>
+                <span class="chip-published text-[11px] font-medium px-2 py-0.5 rounded-full">Visible</span>
+                <label class="toggle"><input type="checkbox" checked><span class="track"></span><span class="thumb"></span></label>
+              </div>
+              <div class="row-hover flex items-center gap-3 px-6 py-3 opacity-60">
+                <span class="drag-handle">⋮⋮</span>
+                <div class="w-9 h-9 rounded-full bg-paper-200 grid place-items-center text-ink-400 shrink-0">🛡</div>
+                <div class="flex-1 min-w-0 grid grid-cols-2 gap-3">
+                  <input type="text" value="80G — Tax deductible" disabled class="text-sm font-medium bg-transparent border-0 p-0 text-ink-400" />
+                  <input type="text" value="Pending registration" disabled class="text-sm text-ink-400 bg-transparent border-0 p-0" />
+                </div>
+                <span class="chip-off text-[11px] font-medium px-2 py-0.5 rounded-full">Locked · not registered</span>
+                <label class="toggle opacity-50 cursor-not-allowed"><input type="checkbox" disabled><span class="track"></span><span class="thumb"></span></label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- =========== IMPACT STATS =========== -->
+        <div data-tabpanel="stats" class="tabpanel p-6 hidden">
+          <div class="bg-white border border-paper-300 rounded-xl p-6">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <h2 class="text-lg font-semibold text-ink-900">Impact stats</h2>
+                <p class="text-sm text-ink-500 mt-1">Four numbers shown on the homepage with a count-up animation.</p>
+              </div>
+              <button class="inline-flex items-center gap-1.5 text-sm font-medium text-trust-800 border border-trust-100 bg-trust-50 px-3 h-9 rounded-md focus-ring">+ Add stat</button>
+            </div>
+
+            <div class="mt-5 grid sm:grid-cols-2 gap-4">
+              <div class="border border-paper-300 rounded-xl p-4">
+                <div class="flex items-center justify-between mb-3">
+                  <div class="text-xs font-semibold text-ink-500 uppercase tracking-wider">Stat 1</div>
+                  <label class="toggle"><input type="checkbox" checked><span class="track"></span><span class="thumb"></span></label>
+                </div>
+                <div class="field mb-3"><label>Number</label><input type="number" value="5432" /></div>
+                <div class="field"><label>Label</label><input type="text" value="Children reached" /></div>
+              </div>
+              <div class="border border-paper-300 rounded-xl p-4">
+                <div class="flex items-center justify-between mb-3">
+                  <div class="text-xs font-semibold text-ink-500 uppercase tracking-wider">Stat 2</div>
+                  <label class="toggle"><input type="checkbox" checked><span class="track"></span><span class="thumb"></span></label>
+                </div>
+                <div class="field mb-3"><label>Number</label><input type="number" value="47" /></div>
+                <div class="field"><label>Label</label><input type="text" value="Villages served" /></div>
+              </div>
+              <div class="border border-paper-300 rounded-xl p-4">
+                <div class="flex items-center justify-between mb-3">
+                  <div class="text-xs font-semibold text-ink-500 uppercase tracking-wider">Stat 3</div>
+                  <label class="toggle"><input type="checkbox" checked><span class="track"></span><span class="thumb"></span></label>
+                </div>
+                <div class="field mb-3"><label>Number <span class="font-normal text-ink-400">· auto from donations table</span></label><input type="number" value="312" readonly class="bg-paper-100" /></div>
+                <div class="field"><label>Label</label><input type="text" value="Monthly donors" /></div>
+              </div>
+              <div class="border border-paper-300 rounded-xl p-4">
+                <div class="flex items-center justify-between mb-3">
+                  <div class="text-xs font-semibold text-ink-500 uppercase tracking-wider">Stat 4</div>
+                  <label class="toggle"><input type="checkbox" checked><span class="track"></span><span class="thumb"></span></label>
+                </div>
+                <div class="grid grid-cols-3 gap-3">
+                  <div class="field col-span-2"><label>Number</label><input type="number" value="92" /></div>
+                  <div class="field"><label>Suffix</label><input type="text" value="%" /></div>
+                </div>
+                <div class="field mt-3"><label>Label</label><input type="text" value="To programmes" /></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- =========== STORIES =========== -->
+        <div data-tabpanel="stories" class="tabpanel p-6 hidden">
+          <div class="bg-white border border-paper-300 rounded-xl p-6">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <h2 class="text-lg font-semibold text-ink-900">Impact stories</h2>
+                <p class="text-sm text-ink-500 mt-1">Real people, consented photos. One is featured on the homepage.</p>
+              </div>
+              <button class="inline-flex items-center gap-1.5 text-sm font-medium text-trust-800 border border-trust-100 bg-trust-50 px-3 h-9 rounded-md focus-ring">+ New story</button>
+            </div>
+
+            <div class="mt-5 grid md:grid-cols-3 gap-4">
+              <article class="border border-paper-300 rounded-xl overflow-hidden">
+                <div class="aspect-[4/3] bg-gradient-to-br from-saffron-400 to-trust-800 relative">
+                  <span class="absolute top-3 left-3 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-white text-saffron-700">Featured · home</span>
+                </div>
+                <div class="p-4">
+                  <div class="text-xs text-ink-400">March 2026 · Dhanrua</div>
+                  <h3 class="font-semibold text-ink-900 mt-1">Anjali, 11 — first to win state olympiad</h3>
+                  <div class="mt-3 flex items-center justify-between text-xs">
+                    <span class="inline-flex items-center gap-1 text-moss-600"><span class="w-1.5 h-1.5 rounded-full bg-moss-500"></span>Consent on file</span>
+                    <span class="chip-published px-2 py-0.5 rounded-full">Published</span>
+                  </div>
+                </div>
+              </article>
+              <article class="border border-paper-300 rounded-xl overflow-hidden">
+                <div class="aspect-[4/3] bg-gradient-to-br from-moss-500 to-trust-700"></div>
+                <div class="p-4">
+                  <div class="text-xs text-ink-400">Feb 2026 · Bundelkhand</div>
+                  <h3 class="font-semibold text-ink-900 mt-1">Ram Charan's free cataract surgery</h3>
+                  <div class="mt-3 flex items-center justify-between text-xs">
+                    <span class="inline-flex items-center gap-1 text-moss-600"><span class="w-1.5 h-1.5 rounded-full bg-moss-500"></span>Consent on file</span>
+                    <span class="chip-published px-2 py-0.5 rounded-full">Published</span>
+                  </div>
+                </div>
+              </article>
+              <article class="border border-paper-300 rounded-xl overflow-hidden">
+                <div class="aspect-[4/3] bg-paper-200 grid place-items-center text-ink-400">
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.5"/><circle cx="9" cy="9" r="2" stroke="currentColor" stroke-width="1.5"/><path d="M21 15l-5-5L5 21" stroke="currentColor" stroke-width="1.5"/></svg>
+                </div>
+                <div class="p-4">
+                  <div class="text-xs text-ink-400">Draft · no photo yet</div>
+                  <h3 class="font-semibold text-ink-900 mt-1">Meera's tailoring co-op</h3>
+                  <div class="mt-3 flex items-center justify-between text-xs">
+                    <span class="inline-flex items-center gap-1 text-saffron-600"><span class="w-1.5 h-1.5 rounded-full bg-saffron-500"></span>Consent pending</span>
+                    <span class="chip-draft px-2 py-0.5 rounded-full">Draft</span>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+        </div>
+
+        <!-- =========== FAQ =========== -->
+        <div data-tabpanel="faq" class="tabpanel p-6 hidden">
+          <div class="bg-white border border-paper-300 rounded-xl p-6">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <h2 class="text-lg font-semibold text-ink-900">FAQ</h2>
+                <p class="text-sm text-ink-500 mt-1">Drag to reorder. Answers update on the public site instantly on publish.</p>
+              </div>
+              <button class="inline-flex items-center gap-1.5 text-sm font-medium text-trust-800 border border-trust-100 bg-trust-50 px-3 h-9 rounded-md focus-ring">+ New question</button>
+            </div>
+
+            <div class="mt-5 space-y-3">
+              <details class="group border border-paper-300 rounded-xl p-4 bg-paper-50" open>
+                <summary class="flex items-center gap-3">
+                  <span class="drag-handle">⋮⋮</span>
+                  <span class="font-medium text-ink-900 flex-1">Are my donations tax-deductible?</span>
+                  <span class="chip-published text-[11px] font-medium px-2 py-0.5 rounded-full">Published</span>
+                  <span class="text-ink-400 group-open:rotate-45 transition text-xl">+</span>
+                </summary>
+                <div class="mt-4 grid gap-3">
+                  <div class="field"><label>Question</label><input type="text" value="Are my donations tax-deductible?" /></div>
+                  <div class="field"><label>Answer</label><textarea rows="3">Not yet. We are a community-led foundation and our 80G registration is in progress. You will receive a payment receipt by email immediately. When 80G is granted we will write back to every donor with the update.</textarea></div>
+                  <div class="flex items-center justify-between">
+                    <label class="text-xs text-ink-500 flex items-center gap-2"><input type="checkbox" checked> Published on site</label>
+                    <button class="text-xs text-rose-600 hover:text-rose-700 focus-ring">Delete</button>
+                  </div>
+                </div>
+              </details>
+              <details class="group border border-paper-300 rounded-xl p-4">
+                <summary class="flex items-center gap-3">
+                  <span class="drag-handle">⋮⋮</span>
+                  <span class="font-medium text-ink-900 flex-1">Can I give from outside India?</span>
+                  <span class="chip-published text-[11px] font-medium px-2 py-0.5 rounded-full">Published</span>
+                  <span class="text-ink-400 group-open:rotate-45 transition text-xl">+</span>
+                </summary>
+              </details>
+              <details class="group border border-paper-300 rounded-xl p-4">
+                <summary class="flex items-center gap-3">
+                  <span class="drag-handle">⋮⋮</span>
+                  <span class="font-medium text-ink-900 flex-1">How do you spend my money?</span>
+                  <span class="chip-published text-[11px] font-medium px-2 py-0.5 rounded-full">Published</span>
+                  <span class="text-ink-400 group-open:rotate-45 transition text-xl">+</span>
+                </summary>
+              </details>
+              <details class="group border border-paper-300 rounded-xl p-4">
+                <summary class="flex items-center gap-3">
+                  <span class="drag-handle">⋮⋮</span>
+                  <span class="font-medium text-ink-900 flex-1">Can I cancel a monthly gift?</span>
+                  <span class="chip-draft text-[11px] font-medium px-2 py-0.5 rounded-full">Draft</span>
+                  <span class="text-ink-400 group-open:rotate-45 transition text-xl">+</span>
+                </summary>
+              </details>
+            </div>
+          </div>
+        </div>
+
+        <!-- =========== FOOTER =========== -->
+        <div data-tabpanel="footer" class="tabpanel p-6 hidden">
+          <div class="bg-white border border-paper-300 rounded-xl p-6">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <h2 class="text-lg font-semibold text-ink-900">Footer</h2>
+                <p class="text-sm text-ink-500 mt-1">Link groups, legal line, and social links.</p>
+              </div>
+            </div>
+            <div class="mt-5 field">
+              <label>Legal strip (bottom of footer)</label>
+              <input type="text" value="© 2026 Yugal Savitri Seva Foundation. Community-led foundation · Registration in progress." />
+              <div class="help">This string is auto-updated when you change <a class="text-trust-800 hover:underline" href="#" data-jump="settings:legal">registration status</a>.</div>
+            </div>
+            <div class="mt-5 grid md:grid-cols-3 gap-4">
+              <div class="border border-paper-300 rounded-xl p-4">
+                <div class="field mb-2"><label>Group heading</label><input type="text" value="Give" /></div>
+                <ul class="text-sm text-ink-700 space-y-1">
+                  <li class="flex items-center gap-2"><span class="drag-handle">⋮⋮</span>Donate once</li>
+                  <li class="flex items-center gap-2"><span class="drag-handle">⋮⋮</span>Give monthly</li>
+                  <li class="flex items-center gap-2"><span class="drag-handle">⋮⋮</span>Corporate / CSR</li>
+                </ul>
+                <button class="mt-3 text-xs text-trust-800 hover:underline focus-ring">+ Add link</button>
+              </div>
+              <div class="border border-paper-300 rounded-xl p-4">
+                <div class="field mb-2"><label>Group heading</label><input type="text" value="About" /></div>
+                <ul class="text-sm text-ink-700 space-y-1">
+                  <li class="flex items-center gap-2"><span class="drag-handle">⋮⋮</span>Our story</li>
+                  <li class="flex items-center gap-2"><span class="drag-handle">⋮⋮</span>Team &amp; trustees</li>
+                </ul>
+                <button class="mt-3 text-xs text-trust-800 hover:underline focus-ring">+ Add link</button>
+              </div>
+              <div class="border border-paper-300 rounded-xl p-4">
+                <div class="field mb-2"><label>Group heading</label><input type="text" value="Legal" /></div>
+                <ul class="text-sm text-ink-700 space-y-1">
+                  <li class="flex items-center gap-2"><span class="drag-handle">⋮⋮</span>Privacy policy</li>
+                  <li class="flex items-center gap-2"><span class="drag-handle">⋮⋮</span>Terms</li>
+                  <li class="flex items-center gap-2"><span class="drag-handle">⋮⋮</span>Refund policy</li>
+                </ul>
+                <button class="mt-3 text-xs text-trust-800 hover:underline focus-ring">+ Add link</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- =========== ANNOUNCEMENT BAR =========== -->
+        <div data-tabpanel="banner" class="tabpanel p-6 hidden">
+          <div class="bg-white border border-paper-300 rounded-xl p-6 max-w-3xl">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <h2 class="text-lg font-semibold text-ink-900">Announcement bar</h2>
+                <p class="text-sm text-ink-500 mt-1">Thin strip at the very top of every public page. Use sparingly.</p>
+              </div>
+              <label class="toggle"><input type="checkbox"><span class="track"></span><span class="thumb"></span></label>
+            </div>
+            <div class="mt-5 grid gap-4">
+              <div class="field"><label>Message</label><input type="text" value="Monsoon drive: help us stock 5 village libraries before June →" /></div>
+              <div class="grid grid-cols-2 gap-3">
+                <div class="field"><label>CTA label</label><input type="text" value="See the drive" /></div>
+                <div class="field"><label>CTA link</label><input type="text" value="/campaigns/monsoon-libraries" /></div>
+              </div>
+              <div class="field">
+                <label>Style</label>
+                <div class="grid grid-cols-3 gap-2">
+                  <label class="radio-card text-sm"><input type="radio" name="bnr" checked /> Saffron (urgent)</label>
+                  <label class="radio-card text-sm"><input type="radio" name="bnr" /> Blue (info)</label>
+                  <label class="radio-card text-sm"><input type="radio" name="bnr" /> Dark (quiet)</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- =========== TRANSPARENCY =========== -->
+        <div data-tabpanel="transparency" class="tabpanel p-6 hidden">
+          <div class="bg-white border border-paper-300 rounded-xl p-6">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <h2 class="text-lg font-semibold text-ink-900">Transparency documents</h2>
+                <p class="text-sm text-ink-500 mt-1">Shown in the dark transparency section. PDFs or external links.</p>
+              </div>
+              <button class="inline-flex items-center gap-1.5 text-sm font-medium text-trust-800 border border-trust-100 bg-trust-50 px-3 h-9 rounded-md focus-ring">+ Add document</button>
+            </div>
+            <div class="mt-5 divide-y divide-paper-300 border-y border-paper-300">
+              <div class="flex items-center gap-3 py-3 row-hover">
+                <span class="drag-handle">⋮⋮</span>
+                <svg class="text-ink-400" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M14 2v6h6" stroke="currentColor" stroke-width="1.7"/></svg>
+                <div class="flex-1 min-w-0">
+                  <div class="text-sm font-medium text-ink-900">Registration status</div>
+                  <div class="text-xs text-ink-500 truncate">Our current legal status and what's next · auto-linked page</div>
+                </div>
+                <span class="chip-published text-[11px] font-medium px-2 py-0.5 rounded-full">Published</span>
+              </div>
+              <div class="flex items-center gap-3 py-3 row-hover">
+                <span class="drag-handle">⋮⋮</span>
+                <svg class="text-ink-400" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M14 2v6h6" stroke="currentColor" stroke-width="1.7"/></svg>
+                <div class="flex-1 min-w-0">
+                  <div class="text-sm font-medium text-ink-900">Q1 2026 spending report</div>
+                  <div class="text-xs text-ink-500 truncate">spending-q1-2026.pdf · 312 KB</div>
+                </div>
+                <span class="chip-draft text-[11px] font-medium px-2 py-0.5 rounded-full">Draft</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- =============== SETTINGS =============== -->
+      <section data-panel="settings" class="panel">
+        <div class="bg-white border-b border-paper-300 sticky top-0 z-10">
+          <div class="px-6 flex items-center gap-1 overflow-x-auto">
+            <button data-stab="site"     aria-selected="false" class="tab text-sm font-medium text-ink-500 border-b-2 border-transparent px-3 h-12 whitespace-nowrap focus-ring">Site</button>
+            <button data-stab="legal"    aria-selected="true"  class="tab text-sm font-medium text-ink-500 border-b-2 border-transparent px-3 h-12 whitespace-nowrap focus-ring">Legal / Registration</button>
+            <button data-stab="presets"  aria-selected="false" class="tab text-sm font-medium text-ink-500 border-b-2 border-transparent px-3 h-12 whitespace-nowrap focus-ring">Donation presets</button>
+            <button data-stab="money"    aria-selected="false" class="tab text-sm font-medium text-ink-500 border-b-2 border-transparent px-3 h-12 whitespace-nowrap focus-ring">Where money goes</button>
+            <button data-stab="security" aria-selected="false" class="tab text-sm font-medium text-ink-500 border-b-2 border-transparent px-3 h-12 whitespace-nowrap focus-ring">Security</button>
+          </div>
+        </div>
+
+        <!-- LEGAL -->
+        <div data-stabpanel="legal" class="stabpanel p-6 grid xl:grid-cols-[1fr_400px] gap-6">
+          <div class="bg-white border border-paper-300 rounded-xl p-6">
+            <h2 class="text-lg font-semibold text-ink-900">Registration status</h2>
+            <p class="text-sm text-ink-500 mt-1">This one setting controls every legal claim on the public site. Change it once here — 11 places update automatically.</p>
+
+            <div class="mt-5 grid md:grid-cols-3 gap-3">
+              <label class="radio-card">
+                <input type="radio" name="status" checked />
+                <div class="text-sm font-semibold text-ink-900">Unregistered</div>
+                <div class="text-xs text-ink-500 mt-1">Community-led foundation. No 80G, no FCRA claims anywhere.</div>
+              </label>
+              <label class="radio-card">
+                <input type="radio" name="status" />
+                <div class="text-sm font-semibold text-ink-900">Applied</div>
+                <div class="text-xs text-ink-500 mt-1">"Registration in progress" messaging enabled. Still no 80G badge.</div>
+              </label>
+              <label class="radio-card">
+                <input type="radio" name="status" />
+                <div class="text-sm font-semibold text-ink-900">Approved</div>
+                <div class="text-xs text-ink-500 mt-1">Unlocks 80G / FCRA badges, tax-receipt language, auditor name.</div>
+              </label>
+            </div>
+
+            <div class="mt-6 grid gap-4">
+              <div class="field">
+                <label>Public disclosure sentence <span class="font-normal text-ink-400">· appears in donation footnote & FAQ</span></label>
+                <textarea rows="2">We are not yet registered for 80G tax deduction. We'll email you when that's approved.</textarea>
+              </div>
+              <div class="grid grid-cols-2 gap-4">
+                <div class="field">
+                  <label>80G certificate number</label>
+                  <input type="text" placeholder="Will unlock on approval" disabled class="bg-paper-100" />
+                </div>
+                <div class="field">
+                  <label>FCRA certificate number</label>
+                  <input type="text" placeholder="Will unlock on approval" disabled class="bg-paper-100" />
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-6 pt-5 border-t border-paper-300">
+              <div class="text-xs text-ink-500">Last status change: <b class="text-ink-700">Kishan set status to "Unregistered"</b> on 12 Apr 2026.</div>
+            </div>
+          </div>
+
+          <!-- Affected pages panel -->
+          <aside class="bg-white border border-paper-300 rounded-xl p-5 h-fit">
+            <div class="flex items-center gap-2">
+              <svg class="text-trust-800" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 12l2 2 4-4M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="1.7"/></svg>
+              <h3 class="font-semibold text-ink-900">Pages affected</h3>
+            </div>
+            <p class="text-xs text-ink-500 mt-1">Changing status rewrites these 11 places across the public site.</p>
+            <ul class="mt-4 text-sm divide-y divide-paper-200">
+              <li class="py-2 flex items-center justify-between"><span>Home · trust strip (80G tile)</span><span class="text-ink-400 text-xs">hidden</span></li>
+              <li class="py-2 flex items-center justify-between"><span>Home · donation panel footnote</span><span class="text-ink-400 text-xs">disclosure</span></li>
+              <li class="py-2 flex items-center justify-between"><span>Home · FAQ answer 1</span><span class="text-ink-400 text-xs">disclosure</span></li>
+              <li class="py-2 flex items-center justify-between"><span>Home · FAQ answer 2</span><span class="text-ink-400 text-xs">disclosure</span></li>
+              <li class="py-2 flex items-center justify-between"><span>Campaign page · receipt note</span><span class="text-ink-400 text-xs">disclosure</span></li>
+              <li class="py-2 flex items-center justify-between"><span>Donate popup · footnote</span><span class="text-ink-400 text-xs">disclosure</span></li>
+              <li class="py-2 flex items-center justify-between"><span>Success page · receipt wording</span><span class="text-ink-400 text-xs">plain receipt</span></li>
+              <li class="py-2 flex items-center justify-between"><span>Success email · subject &amp; body</span><span class="text-ink-400 text-xs">plain receipt</span></li>
+              <li class="py-2 flex items-center justify-between"><span>Footer · legal strip</span><span class="text-ink-400 text-xs">community-led</span></li>
+              <li class="py-2 flex items-center justify-between"><span>Transparency · certificate tile</span><span class="text-ink-400 text-xs">hidden</span></li>
+              <li class="py-2 flex items-center justify-between"><span>About page · masthead</span><span class="text-ink-400 text-xs">community-led</span></li>
+            </ul>
+          </aside>
+        </div>
+
+        <!-- SITE (compact placeholder) -->
+        <div data-stabpanel="site" class="stabpanel p-6 hidden">
+          <div class="bg-white border border-paper-300 rounded-xl p-6 max-w-2xl grid gap-4">
+            <h2 class="text-lg font-semibold text-ink-900">Site identity</h2>
+            <div class="field"><label>Foundation name</label><input type="text" value="Yugal Savitri Seva Foundation" /></div>
+            <div class="field"><label>Tagline</label><input type="text" value="Education, health, and dignity for rural India." /></div>
+            <div class="grid grid-cols-2 gap-4">
+              <div class="field"><label>Contact email</label><input type="text" value="hello@yugalsavitri.org" /></div>
+              <div class="field"><label>Contact phone</label><input type="text" value="+91 98xxxxxxxx" /></div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div class="field"><label>Brand primary</label><input type="text" value="#1e40af" /></div>
+              <div class="field"><label>Brand accent</label><input type="text" value="#F59E0B" /></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PRESETS -->
+        <div data-stabpanel="presets" class="stabpanel p-6 hidden">
+          <div class="bg-white border border-paper-300 rounded-xl p-6">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <h2 class="text-lg font-semibold text-ink-900">Donation presets</h2>
+                <p class="text-sm text-ink-500 mt-1">Shown as big buttons in the donation panel. Label each with an impact sentence.</p>
+              </div>
+              <button class="inline-flex items-center gap-1.5 text-sm font-medium text-trust-800 border border-trust-100 bg-trust-50 px-3 h-9 rounded-md focus-ring">+ Add preset</button>
+            </div>
+            <table class="w-full mt-5 text-sm">
+              <thead class="text-xs text-ink-500 uppercase tracking-wider">
+                <tr class="border-b border-paper-300">
+                  <th class="text-left py-2.5 w-10"></th>
+                  <th class="text-left py-2.5">Amount (₹)</th>
+                  <th class="text-left py-2.5">Impact label</th>
+                  <th class="text-left py-2.5">Scope</th>
+                  <th class="w-20"></th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-paper-300">
+                <tr class="row-hover">
+                  <td class="py-2 text-ink-300"><span class="drag-handle">⋮⋮</span></td>
+                  <td class="py-2"><input type="number" value="500" class="w-28 border border-paper-300 rounded-md px-2 py-1.5"/></td>
+                  <td class="py-2"><input type="text" value="Feeds a child for a week" class="w-full border border-paper-300 rounded-md px-2 py-1.5"/></td>
+                  <td class="py-2"><select class="border border-paper-300 rounded-md px-2 py-1.5"><option>All campaigns</option><option>Library for Dhanrua</option></select></td>
+                  <td class="py-2 text-right"><button class="text-rose-600 text-xs hover:underline">Remove</button></td>
+                </tr>
+                <tr class="row-hover">
+                  <td class="py-2 text-ink-300"><span class="drag-handle">⋮⋮</span></td>
+                  <td class="py-2"><input type="number" value="1500" class="w-28 border border-paper-300 rounded-md px-2 py-1.5"/></td>
+                  <td class="py-2"><input type="text" value="School kit for one child" class="w-full border border-paper-300 rounded-md px-2 py-1.5"/></td>
+                  <td class="py-2"><select class="border border-paper-300 rounded-md px-2 py-1.5"><option>All campaigns</option></select></td>
+                  <td class="py-2 text-right"><button class="text-rose-600 text-xs hover:underline">Remove</button></td>
+                </tr>
+                <tr class="row-hover">
+                  <td class="py-2 text-ink-300"><span class="drag-handle">⋮⋮</span></td>
+                  <td class="py-2"><input type="number" value="5000" class="w-28 border border-paper-300 rounded-md px-2 py-1.5"/></td>
+                  <td class="py-2"><input type="text" value="One term of tuition" class="w-full border border-paper-300 rounded-md px-2 py-1.5"/></td>
+                  <td class="py-2"><select class="border border-paper-300 rounded-md px-2 py-1.5"><option>All campaigns</option></select></td>
+                  <td class="py-2 text-right"><button class="text-rose-600 text-xs hover:underline">Remove</button></td>
+                </tr>
+                <tr class="row-hover">
+                  <td class="py-2 text-ink-300"><span class="drag-handle">⋮⋮</span></td>
+                  <td class="py-2"><input type="number" value="15000" class="w-28 border border-paper-300 rounded-md px-2 py-1.5"/></td>
+                  <td class="py-2"><input type="text" value="Library shelf in their name" class="w-full border border-paper-300 rounded-md px-2 py-1.5"/></td>
+                  <td class="py-2"><select class="border border-paper-300 rounded-md px-2 py-1.5"><option>All campaigns</option></select></td>
+                  <td class="py-2 text-right"><button class="text-rose-600 text-xs hover:underline">Remove</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- MONEY -->
+        <div data-stabpanel="money" class="stabpanel p-6 hidden">
+          <div class="bg-white border border-paper-300 rounded-xl p-6 max-w-2xl">
+            <h2 class="text-lg font-semibold text-ink-900">Where your money goes</h2>
+            <p class="text-sm text-ink-500 mt-1">Shown in the donation panel as a breakdown. Must total 100%.</p>
+            <div class="mt-5 grid gap-3">
+              <div class="flex items-center gap-3"><input type="number" value="92" class="w-20 border border-paper-300 rounded-md px-2 py-1.5"/><span class="text-ink-400">%</span><input type="text" value="Programmes on the ground" class="flex-1 border border-paper-300 rounded-md px-2 py-1.5"/><button class="text-rose-600 text-xs hover:underline">Remove</button></div>
+              <div class="flex items-center gap-3"><input type="number" value="6" class="w-20 border border-paper-300 rounded-md px-2 py-1.5"/><span class="text-ink-400">%</span><input type="text" value="Programme management" class="flex-1 border border-paper-300 rounded-md px-2 py-1.5"/><button class="text-rose-600 text-xs hover:underline">Remove</button></div>
+              <div class="flex items-center gap-3"><input type="number" value="2" class="w-20 border border-paper-300 rounded-md px-2 py-1.5"/><span class="text-ink-400">%</span><input type="text" value="Fundraising & admin" class="flex-1 border border-paper-300 rounded-md px-2 py-1.5"/><button class="text-rose-600 text-xs hover:underline">Remove</button></div>
+            </div>
+            <div class="mt-4 flex items-center justify-between">
+              <div class="text-sm"><span class="text-ink-500">Total:</span> <b class="text-moss-600">100%</b></div>
+              <button class="text-sm text-trust-800 hover:underline focus-ring">+ Add row</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECURITY -->
+        <div data-stabpanel="security" class="stabpanel p-6 hidden">
+          <div class="bg-white border border-paper-300 rounded-xl p-6 max-w-2xl grid gap-5">
+            <h2 class="text-lg font-semibold text-ink-900">Security</h2>
+            <div class="flex items-start justify-between gap-4 p-4 bg-moss-50 border border-moss-500/20 rounded-xl">
+              <div>
+                <div class="font-semibold text-ink-900 text-sm">Two-factor authentication (TOTP)</div>
+                <div class="text-xs text-ink-500 mt-1">Required for all admin users. Uses any authenticator app.</div>
+              </div>
+              <label class="toggle"><input type="checkbox" checked><span class="track"></span><span class="thumb"></span></label>
+            </div>
+            <div class="flex items-start justify-between gap-4 p-4 border border-paper-300 rounded-xl">
+              <div>
+                <div class="font-semibold text-ink-900 text-sm">Admin IP allowlist</div>
+                <div class="text-xs text-ink-500 mt-1">Only these IPs can reach /admin. Leave empty to allow any.</div>
+              </div>
+              <button class="text-sm text-trust-800 hover:underline focus-ring">Configure</button>
+            </div>
+            <div class="flex items-start justify-between gap-4 p-4 border border-paper-300 rounded-xl">
+              <div>
+                <div class="font-semibold text-ink-900 text-sm">Audit log</div>
+                <div class="text-xs text-ink-500 mt-1">312 events in the last 30 days. Every content change and admin action.</div>
+              </div>
+              <button class="text-sm text-trust-800 hover:underline focus-ring">View log</button>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- =============== CAMPAIGNS, DONATIONS, USERS (compact) =============== -->
+      <section data-panel="campaigns" class="panel p-8">
+        <h1 class="text-2xl font-semibold text-ink-900">Campaigns</h1>
+        <p class="text-ink-500 mt-1">Existing list view — already built in your current admin.</p>
+      </section>
+      <section data-panel="donations" class="panel p-8">
+        <h1 class="text-2xl font-semibold text-ink-900">Donations</h1>
+        <p class="text-ink-500 mt-1">Existing list view — already built.</p>
+      </section>
+      <section data-panel="users" class="panel p-8">
+        <h1 class="text-2xl font-semibold text-ink-900">Users</h1>
+        <p class="text-ink-500 mt-1">Existing list view — already built.</p>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  // Sidebar navigation
+  const navBtns = document.querySelectorAll('[data-nav]');
+  const panels = document.querySelectorAll('[data-panel]');
+  const crumbSection = document.getElementById('crumb-section');
+  const crumbTab = document.getElementById('crumb-tab');
+  const sectionLabels = { dashboard:'Dashboard', content:'Content', settings:'Settings', campaigns:'Campaigns', donations:'Donations', users:'Users' };
+
+  function showSection(name) {
+    navBtns.forEach(b => b.setAttribute('aria-current', b.dataset.nav === name ? 'true' : 'false'));
+    panels.forEach(p => p.classList.toggle('active', p.dataset.panel === name));
+    crumbSection.textContent = sectionLabels[name] || name;
+    if (name === 'content') { showTab('hero'); }
+    else if (name === 'settings') { showSettingsTab('legal'); }
+    else { crumbTab.textContent = ''; }
+  }
+  navBtns.forEach(b => b.addEventListener('click', () => showSection(b.dataset.nav)));
+
+  // Content tabs
+  const tabBtns = document.querySelectorAll('[data-tab]');
+  const tabPanels = document.querySelectorAll('[data-tabpanel]');
+  const tabLabels = { hero:'Hero', badges:'Trust badges', stats:'Impact stats', stories:'Stories', faq:'FAQ', footer:'Footer', banner:'Announcement bar', transparency:'Transparency' };
+  function showTab(name) {
+    tabBtns.forEach(b => b.setAttribute('aria-selected', b.dataset.tab === name ? 'true' : 'false'));
+    tabPanels.forEach(p => p.classList.toggle('hidden', p.dataset.tabpanel !== name));
+    crumbTab.textContent = tabLabels[name];
+  }
+  tabBtns.forEach(b => b.addEventListener('click', () => showTab(b.dataset.tab)));
+
+  // Settings tabs
+  const sTabBtns = document.querySelectorAll('[data-stab]');
+  const sTabPanels = document.querySelectorAll('[data-stabpanel]');
+  const sTabLabels = { site:'Site', legal:'Legal / Registration', presets:'Donation presets', money:'Where money goes', security:'Security' };
+  function showSettingsTab(name) {
+    sTabBtns.forEach(b => b.setAttribute('aria-selected', b.dataset.stab === name ? 'true' : 'false'));
+    sTabPanels.forEach(p => p.classList.toggle('hidden', p.dataset.stabpanel !== name));
+    crumbTab.textContent = sTabLabels[name];
+  }
+  sTabBtns.forEach(b => b.addEventListener('click', () => showSettingsTab(b.dataset.stab)));
+
+  // Cross-links inside admin
+  document.querySelectorAll('[data-jump]').forEach(el => {
+    el.addEventListener('click', e => {
+      e.preventDefault();
+      const [section, tab] = el.dataset.jump.split(':');
+      showSection(section);
+      if (section === 'settings' && tab) showSettingsTab(tab);
+      if (section === 'content' && tab) showTab(tab);
+    });
+  });
+</script>
+
+</body>
+</html>

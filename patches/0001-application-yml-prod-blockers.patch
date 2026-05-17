@@ -1,0 +1,55 @@
+# Patch for foundation-backend/src/main/resources/application.yml
+#
+# Addresses B5 (personal DB username default) and small hardening touches.
+# Also moves actuator exposure into the base config so it works in dev too
+# (the prod profile already overrides it via application-prod.yml).
+#
+# Apply after you have committed or resolved your existing uncommitted edits
+# on foundation-backend/src/main/resources/application.yml.
+#
+# Usage:
+#   cd <repo root>
+#   git apply patches/0001-application-yml-prod-blockers.patch
+#
+# If the patch doesn't apply cleanly (e.g. your in-flight edits collided),
+# the hunks below are short enough to apply by hand.
+#
+# --- a/foundation-backend/src/main/resources/application.yml
+# +++ b/foundation-backend/src/main/resources/application.yml
+# @@ change 1: DB username default
+# -    username: ${DATABASE_USERNAME:e141057}
+# +    username: ${DATABASE_USERNAME:postgres}
+#
+# @@ change 2: JWT secret default — remove unsafe placeholder, rely on env var.
+# - secret: ${JWT_SECRET:change-this-secret-to-a-long-random-value-please}
+# + secret: ${JWT_SECRET:}
+#   (ProductionSafetyValidator will refuse to start prod if blank.
+#    For dev, application-dev.yml should supply a non-prod secret.)
+#
+# @@ change 3: default allow-admin-bootstrap to false; opt-in via env.
+# - allow-admin-bootstrap: ${ALLOW_ADMIN_BOOTSTRAP:true}
+# + allow-admin-bootstrap: ${ALLOW_ADMIN_BOOTSTRAP:false}
+#   (Dev profile can override if needed.)
+#
+# @@ change 4: add actuator exposure for base config (dev + default).
+# + management:
+# +   endpoints:
+# +     web:
+# +       exposure:
+# +         include: health,info
+# +   endpoint:
+# +     health:
+# +       show-details: when-authorized
+# +       probes:
+# +         enabled: true
+#
+# @@ change 5: downgrade prod-risky debug logs to INFO at the default
+#    (prod profile already sets root:WARN; this avoids DEBUG leaking in staging).
+# -    com.myfoundation.school.security: DEBUG
+# -    org.springframework.security: DEBUG
+# -    org.springframework.web.cors: DEBUG
+# -    org.hibernate.SQL: DEBUG
+# +    com.myfoundation.school.security: INFO
+# +    org.springframework.security: INFO
+# +    org.springframework.web.cors: INFO
+# +    org.hibernate.SQL: WARN

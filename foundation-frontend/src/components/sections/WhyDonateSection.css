@@ -1,0 +1,85 @@
+/* WhyDonateSection — "Why Your Donation Matters" cards.
+   Redesigned to match the mockup's clean card style with design system tokens. */
+
+.why-donate {
+  padding: var(--space-14, 3.5rem) 0;
+  background: var(--color-white);
+}
+
+@media (min-width: 768px) {
+  .why-donate {
+    padding: var(--space-20) 0;
+  }
+}
+
+.why-donate .container {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 0 var(--space-4);
+}
+
+@media (min-width: 640px) {
+  .why-donate .container {
+    padding: 0 var(--space-6);
+  }
+}
+
+@media (min-width: 1024px) {
+  .why-donate .container {
+    padding: 0 var(--space-8);
+  }
+}
+
+.why-donate .section-title {
+  text-align: center;
+  font-size: clamp(1.875rem, 3.5vw, 2.25rem);
+  margin-bottom: var(--space-10);
+  color: var(--color-ink-900);
+  line-height: var(--line-height-tight);
+}
+
+.why-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+}
+
+@media (min-width: 768px) {
+  .why-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.why-card {
+  text-align: center;
+  padding: var(--space-8) var(--space-6);
+  background: var(--color-white);
+  border: 1px solid var(--color-paper-300);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-soft);
+  transition: box-shadow 200ms ease, transform 200ms ease;
+}
+
+.why-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lift);
+}
+
+.why-card h3 {
+  font-size: var(--font-size-xl, 1.25rem);
+  color: var(--color-ink-900);
+  margin-bottom: var(--space-3);
+  font-weight: var(--font-weight-semibold);
+}
+
+.why-card p {
+  color: var(--color-ink-500);
+  line-height: var(--line-height-relaxed);
+  font-size: var(--font-size-base);
+}
+
+@media (max-width: 560px) {
+  .why-donate {
+    padding: 3rem 0;
+  }
+}

@@ -3,12 +3,17 @@ import { useTranslation } from 'react-i18next';
 import { Helmet } from 'react-helmet-async';
 import { API_BASE_URL } from '../api';
 import { useSiteName, useSiteLogo } from '../contexts/ConfigContext';
-import HeroCarousel from '../components/HeroCarousel';
+import HeroPanel from '../components/HeroPanel';
+import DonationPanel from '../components/DonationPanel';
 import CampaignCarousel from '../components/CampaignCarousel';
 import FeaturedCampaignsSection from '../components/sections/FeaturedCampaignsSection';
 import StatsSection from '../components/sections/StatsSection';
 import HeroSection from '../components/sections/HeroSection';
 import WhyDonateSection from '../components/sections/WhyDonateSection';
+import MoneyAllocationSection from '../components/sections/MoneyAllocationSection';
+import StoriesSection from '../components/sections/StoriesSection';
+import FaqSection from '../components/sections/FaqSection';
+import TransparencySection from '../components/sections/TransparencySection';
 import SkeletonLoader from '../components/SkeletonLoader';
 import './Home.css';
 
@@ -134,7 +139,16 @@ function SectionRenderer({ section }: { section: HomeSection }) {
   
   switch (section.type) {
     case 'hero_carousel':
-      return <HeroCarousel />;
+    case 'hero_panel':
+      // Carousel was retired in favour of a single editorial hero block. Legacy
+      // `hero_carousel` rows are rendered as `hero_panel` so existing home_sections
+      // don't need a data migration. The DonationPanel follows immediately per mockup.
+      return (
+        <>
+          <HeroPanel />
+          <DonationPanel />
+        </>
+      );
     
     case 'hero_content':
       return <HeroSection config={config} />;
@@ -147,6 +161,21 @@ function SectionRenderer({ section }: { section: HomeSection }) {
     
     case 'why_donate':
       return <WhyDonateSection config={config} />;
+
+    case 'money_allocation':
+      return <MoneyAllocationSection config={config} />;
+
+    case 'donation_panel':
+      return <DonationPanel />;
+
+    case 'stories':
+      return <StoriesSection config={config} />;
+
+    case 'faq':
+      return <FaqSection config={config} />;
+
+    case 'transparency':
+      return <TransparencySection config={config} />;
 
     case 'campaign_carousel':
       return (

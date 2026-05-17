@@ -1,0 +1,106 @@
+/* AnnouncementBar — slim strip above the site header. */
+
+.announcement-bar {
+  width: 100%;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: #0f172a;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.55rem 2.5rem 0.55rem 1rem;
+}
+
+.announcement-bar__inner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.announcement-bar__icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.announcement-bar__message {
+  font-weight: 500;
+}
+
+.announcement-bar__link {
+  font-weight: 600;
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  white-space: nowrap;
+}
+
+.announcement-bar__link:hover,
+.announcement-bar__link:focus {
+  text-decoration-thickness: 2px;
+}
+
+.announcement-bar__dismiss {
+  position: absolute;
+  top: 50%;
+  right: 0.5rem;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: inherit;
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0.25rem 0.55rem;
+  border-radius: 4px;
+  opacity: 0.7;
+}
+
+.announcement-bar__dismiss:hover,
+.announcement-bar__dismiss:focus {
+  opacity: 1;
+  background: rgba(15, 23, 42, 0.08);
+  outline: none;
+}
+
+/* Style variants — soft backgrounds with darker accent border-left for weight */
+.announcement-bar--info {
+  background: #eff6ff;
+  color: #1e3a8a;
+  border-bottom-color: rgba(30, 58, 138, 0.15);
+}
+
+.announcement-bar--success {
+  background: #ecfdf5;
+  color: #065f46;
+  border-bottom-color: rgba(6, 95, 70, 0.15);
+}
+
+.announcement-bar--warning {
+  background: #fffbeb;
+  color: #92400e;
+  border-bottom-color: rgba(146, 64, 14, 0.2);
+}
+
+.announcement-bar--critical {
+  background: #fef2f2;
+  color: #991b1b;
+  border-bottom-color: rgba(153, 27, 27, 0.25);
+  font-weight: 600;
+}
+
+@media (max-width: 560px) {
+  .announcement-bar {
+    padding: 0.5rem 2.25rem 0.5rem 0.75rem;
+    font-size: 0.85rem;
+  }
+  .announcement-bar__inner {
+    gap: 0.35rem;
+  }
+}

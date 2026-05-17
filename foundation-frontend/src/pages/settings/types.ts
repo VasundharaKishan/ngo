@@ -1,8 +1,33 @@
-export type TabType = 'general' | 'contact' | 'footer' | 'banner';
+export type TabType = 'general' | 'contact' | 'footer' | 'banner' | 'legal';
 
 export interface TabRef {
   save: () => Promise<void>;
 }
+
+// --- Legal / Registration ----------------------------------------------------
+
+export type RegistrationStatus = 'UNREGISTERED' | 'APPLIED' | 'APPROVED';
+
+export interface RegistrationInfo {
+  status: RegistrationStatus;
+  registrationNumber: string | null;
+  section8Number: string | null;
+  eightyGNumber: string | null;
+  fcraNumber: string | null;
+  panNumber: string | null;
+  appliedDate: string | null;   // ISO date (yyyy-MM-dd)
+  approvedDate: string | null;
+  disclosureOverride: string | null;
+  eightyGActive: boolean;
+  fcraActive: boolean;
+  updatedAt: string | null;
+  updatedBy: string | null;
+}
+
+export type RegistrationInfoUpdate = Omit<
+  RegistrationInfo,
+  'eightyGActive' | 'fcraActive' | 'updatedAt' | 'updatedBy'
+>;
 
 export interface SiteSetting {
   key: string;
