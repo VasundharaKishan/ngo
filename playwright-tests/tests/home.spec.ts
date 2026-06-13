@@ -75,5 +75,5 @@ test('homepage hero and navigation to campaigns works', async ({ page }) => {
   await page.getByRole('link', { name: /Explore All Campaigns/i }).click();
   await expect(page).toHaveURL(/\/campaigns/);
   await expect(page.getByRole('heading', { name: 'Education for All' })).toBeVisible();
-  await expect(page.getByRole('link', { name: /Donate/ })).toHaveAttribute('href', '/donate/campaign-1');
+  await expect(page.getByRole('link', { name: /Donate/ }).first()).toHaveAttribute('href', '/donate/campaign-1');
 });

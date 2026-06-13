@@ -216,12 +216,12 @@ export default function Layout() {
 
           {/* Desktop nav */}
           <nav className="nav-desktop" role="navigation" aria-label="Main navigation">
-            <Link to="/campaigns" className="nav-link">{t('nav.campaigns')}</Link>
-            <Link to="/impact" className="nav-link">{t('nav.impact')}</Link>
-            <Link to="/transparency" className="nav-link">{t('nav.transparency')}</Link>
-            <Link to="/about" className="nav-link">{t('nav.about')}</Link>
-            <Link to="/faq" className="nav-link">FAQ</Link>
-            <Link to="/contact" className="nav-link">{t('nav.contact')}</Link>
+            <Link to="/campaigns" className="nav-link" data-testid="nav-campaigns">{t('nav.campaigns')}</Link>
+            <Link to="/impact" className="nav-link" data-testid="nav-impact">{t('nav.impact')}</Link>
+            <Link to="/transparency" className="nav-link" data-testid="nav-transparency">{t('nav.transparency')}</Link>
+            <Link to="/about" className="nav-link" data-testid="nav-about">{t('nav.about')}</Link>
+            <Link to="/faq" className="nav-link" data-testid="nav-faq">FAQ</Link>
+            <Link to="/contact" className="nav-link" data-testid="nav-contact">{t('nav.contact')}</Link>
           </nav>
 
           <div className="header-actions">
