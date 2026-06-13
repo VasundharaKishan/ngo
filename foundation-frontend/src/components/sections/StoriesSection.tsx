@@ -47,6 +47,7 @@ export default function StoriesSection({ config }: { config: StoriesSectionConfi
                     alt=""
                     loading="lazy"
                     className="story-card__image"
+                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
                   />
                 )}
                 {/* Overlay caption */}

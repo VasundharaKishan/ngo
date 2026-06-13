@@ -5,6 +5,7 @@ import Layout from './components/Layout';
 import AdminLayout from './components/AdminLayout';
 import ConfigLoader from './components/ConfigLoader';
 import ErrorBoundary from './components/ErrorBoundary';
+import { useSiteName } from './contexts/ConfigContext';
 
 // Lazy load all pages for code splitting
 const Home = lazy(() => import('./pages/Home'));
@@ -36,6 +37,7 @@ const AdminUsers = lazy(() => import('./pages/AdminUsers'));
 const PasswordSetup = lazy(() => import('./pages/PasswordSetup'));
 const TermsPage = lazy(() => import('./pages/TermsPage'));
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
+const RefundPage = lazy(() => import('./pages/RefundPage'));
 const AccessibilityPage = lazy(() => import('./pages/AccessibilityPage'));
 const CookiesPage = lazy(() => import('./pages/CookiesPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
@@ -53,13 +55,24 @@ const LoadingFallback = () => (
   </div>
 );
 
+/**
+ * Sets the document title from the site name resolved via ConfigContext.
+ * Must live inside <ConfigLoader> so the useSiteName hook has a provider.
+ */
+function SiteTitle() {
+  const siteName = useSiteName();
+  return (
+    <Helmet>
+      <title>{siteName}</title>
+      <meta name="description" content="Supporting education, healthcare, and community development through transparent donations." />
+    </Helmet>
+  );
+}
+
 function App() {
   return (
     <ConfigLoader>
-      <Helmet>
-        <title>Donate</title>
-        <meta name="description" content="Supporting education, healthcare, and community development through transparent donations." />
-      </Helmet>
+      <SiteTitle />
       <BrowserRouter>
         <Suspense fallback={<LoadingFallback />}>
           <Routes>
@@ -106,6 +119,7 @@ function App() {
               <Route path="/transparency" element={<TransparencyPage />} />
               <Route path="/terms" element={<TermsPage />} />
               <Route path="/privacy" element={<PrivacyPage />} />
+              <Route path="/refund" element={<RefundPage />} />
               <Route path="/accessibility" element={<AccessibilityPage />} />
               <Route path="/cookies" element={<CookiesPage />} />
               <Route path="*" element={<NotFound />} />

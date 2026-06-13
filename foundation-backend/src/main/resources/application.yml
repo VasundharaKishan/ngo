@@ -10,7 +10,7 @@ spring:
   flyway:
     enabled: true
     baseline-on-migrate: true   # treats existing schema as already at baseline version
-    baseline-version: 14        # V1–V14 are already applied; Flyway tracks from V15 onward
+    baseline-version: 0         # Start from V1 so all migrations run on fresh databases
     locations: classpath:db/migration
 
   jpa:
@@ -68,14 +68,14 @@ app:
   frontend:
     url: ${FRONTEND_URL:http://localhost:5173}
   mail:
-    from-name: ${MAIL_FROM_NAME:Yugal Savitri Seva}
-    reply-to: ${MAIL_REPLY_TO:yugalsavitriseva@gmail.com}
+    from-name: ${MAIL_FROM_NAME:Your Organisation}
+    reply-to: ${MAIL_REPLY_TO:contact@example.org}
     from:
-      account-alerts: ${MAIL_FROM_ACCOUNT_ALERTS:account-alerts@yugalsavitriseva.org}
-      donations: ${MAIL_FROM_DONATIONS:donations@yugalsavitriseva.org}
-      support: ${MAIL_FROM_SUPPORT:support@yugalsavitriseva.org}
-      contact: ${MAIL_FROM_CONTACT:contact@yugalsavitriseva.org}
-      system: ${MAIL_FROM_SYSTEM:noreply@yugalsavitriseva.org}
+      account-alerts: ${MAIL_FROM_ACCOUNT_ALERTS:account-alerts@example.org}
+      donations: ${MAIL_FROM_DONATIONS:donations@example.org}
+      support: ${MAIL_FROM_SUPPORT:support@example.org}
+      contact: ${MAIL_FROM_CONTACT:contact@example.org}
+      system: ${MAIL_FROM_SYSTEM:noreply@example.org}
   jwt:
     secret: ${JWT_SECRET:change-this-secret-to-a-long-random-value-please}
     expiration-minutes: ${JWT_EXPIRATION_MINUTES:60}
@@ -84,7 +84,9 @@ app:
     cookie-name: ${JWT_COOKIE_NAME:admin_jwt}
     cookie-domain: ${JWT_COOKIE_DOMAIN:}
     cookie-secure: ${JWT_COOKIE_SECURE:true}
-  allow-admin-bootstrap: ${ALLOW_ADMIN_BOOTSTRAP:true}
+  allow-admin-bootstrap: ${ALLOW_ADMIN_BOOTSTRAP:false}  # Safe default: must explicitly opt-in
+  bootstrap:
+    admin-email: ${BOOTSTRAP_ADMIN_EMAIL:admin@example.org}  # Set via env var before enabling bootstrap
   auth:
     otp-enabled: ${AUTH_OTP_ENABLED:false}
     otp-expiration-minutes: ${AUTH_OTP_EXPIRATION_MINUTES:5}
@@ -118,7 +120,8 @@ app:
     endpoint-config: ${RATE_LIMIT_ENDPOINT_CONFIG:50}
 
 cors:
-  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:5174,http://localhost:3000,https://yugalsavitriseva.org,https://www.yugalsavitriseva.org,https://frontend-three-psi-17.vercel.app,https://foundation-frontend-three.vercel.app}
+  # Default: production domains only. Add localhost/preview URLs via CORS_ALLOWED_ORIGINS env var in dev.
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:https://yugalsavitriseva.org,https://www.yugalsavitriseva.org}
 
 storage:
   r2:
@@ -143,10 +146,10 @@ springdoc:
 logging:
   level:
     com.myfoundation.school: INFO
-    com.myfoundation.school.security: DEBUG
-    org.springframework.security: DEBUG
-    org.springframework.web.cors: DEBUG
-    org.hibernate.SQL: DEBUG
+    com.myfoundation.school.security: INFO
+    org.springframework.security: WARN
+    org.springframework.web.cors: WARN
+    org.hibernate.SQL: WARN
     org.springframework.web.servlet.resource: WARN
 
 data:

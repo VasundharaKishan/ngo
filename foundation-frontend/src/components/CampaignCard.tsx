@@ -21,17 +21,15 @@ function CampaignCard({ campaign }: CampaignCardProps) {
   return (
     <div className="campaign-card" data-testid="campaign-card">
       <div className="card-image-container">
-        {campaign.imageUrl ? (
-          <img
-            src={getThumbnailUrl(campaign.imageUrl)}
-            alt={campaign.title}
-            className="card-image"
-            loading="lazy"
-            onError={(e) => {
-              e.currentTarget.src = IMAGES.PLACEHOLDER.CAMPAIGN;
-            }}
-          />
-        ) : null}
+        <img
+          src={campaign.imageUrl ? getThumbnailUrl(campaign.imageUrl) : IMAGES.PLACEHOLDER.CAMPAIGN}
+          alt={campaign.title}
+          className="card-image"
+          loading="lazy"
+          onError={(e) => {
+            e.currentTarget.src = IMAGES.PLACEHOLDER.CAMPAIGN;
+          }}
+        />
 
         {/* Badges overlaid on image */}
         <div className="card-badges">

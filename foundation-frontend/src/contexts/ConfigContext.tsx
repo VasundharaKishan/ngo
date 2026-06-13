@@ -25,9 +25,10 @@ interface ConfigContextValue {
 
 const ConfigContext = createContext<ConfigContextValue | undefined>(undefined);
 
-// Default values for graceful fallbacks
+// Default values shown only when the config API is unreachable.
+// Use generic placeholders so no real org data leaks if the API is down.
 const DEFAULT_CONFIG: SiteConfig = {
-  'site.name': 'Yugal Savitri Seva',
+  'site.name': 'Your Organisation',
   'site.tagline': 'Empowering communities worldwide',
   'site.logo_url': '/logo.png',
   'theme.primary_color': '#2563eb',
@@ -35,8 +36,8 @@ const DEFAULT_CONFIG: SiteConfig = {
   'theme.header_height': '76px',
   'homepage.featured_campaigns_count': '3',
   'campaigns_page.items_per_page': '12',
-  'contact.email': 'info@yugalsavitriseva.org',
-  'contact.phone': '+977-1-1234567',
+  'contact.email': 'contact@example.org',
+  'contact.phone': '',
 };
 
 export function ConfigProvider({ children }: { children: ReactNode }) {
@@ -146,7 +147,14 @@ export function useSiteTagline(): string {
 
 export function useSiteLogo(): string {
   const { config } = useConfig();
-  return config['site.logo_url'] || DEFAULT_CONFIG['site.logo_url']!;
+  const raw = config['site.logo_url'] || DEFAULT_CONFIG['site.logo_url']!;
+  // Ensure og:image is always an absolute URL — social crawlers (Facebook, Twitter,
+  // LinkedIn) silently ignore relative paths.  Prepend the current origin when the
+  // stored value starts with "/" (relative path, e.g. the default "/logo.png").
+  if (typeof window !== 'undefined' && raw.startsWith('/')) {
+    return `${window.location.origin}${raw}`;
+  }
+  return raw;
 }
 
 export function useFeaturedCampaignsCount(): number {

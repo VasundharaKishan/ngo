@@ -13,12 +13,13 @@
  *
  * All existing auth, session, and CSRF logic preserved.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import ErrorBoundary from './ErrorBoundary';
 import logger from '../utils/logger';
 import { API_BASE_URL } from '../api';
 import { TIMING, STORAGE_KEYS } from '../config/constants';
+import { useSiteName, useSiteLogo } from '../contexts/ConfigContext';
 import '../styles/AdminCommon.css';
 import './AdminLayout.css';
 
@@ -56,11 +57,6 @@ const UsersIcon = () => (
     <path d="M3 21c0-3.5 3-6 6-6s6 2.5 6 6" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
     <circle cx="17" cy="9" r="3" stroke="currentColor" strokeWidth="1.7" />
     <path d="M14.5 15.5c2.8.4 5 2.5 5.5 5.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-  </svg>
-);
-const SearchIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <path d="M21 21l-4.3-4.3M18 10a8 8 0 11-16 0 8 8 0 0116 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
   </svg>
 );
 const LogoutIcon = () => (
@@ -167,6 +163,11 @@ export default function AdminLayout() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAuthChecked, setIsAuthChecked] = useState(false);
+  const siteName = useSiteName();
+  const logoUrl = useSiteLogo();
+  const logoInitials = useMemo(() =>
+    siteName.trim().split(/\s+/).slice(0, 2).map(w => w[0] ?? '').join('').toUpperCase(),
+  [siteName]);
 
   // Session management
   const SESSION_KEY = STORAGE_KEYS.SESSION_ID;
@@ -313,22 +314,17 @@ export default function AdminLayout() {
 
       {/* ── Sidebar ── */}
       <aside className={`admin-sidebar ${isSidebarOpen ? 'open' : ''}`} data-testid="admin-sidebar">
-        {/* Logo header */}
+        {/* Logo header — derived from admin site name */}
         <div className="sidebar-logo">
-          <div className="sidebar-logo-mark">YS</div>
+          {logoUrl ? (
+            <img src={logoUrl} alt={`${siteName} logo`} className="sidebar-logo-img" />
+          ) : (
+            <div className="sidebar-logo-mark" aria-hidden="true">{logoInitials}</div>
+          )}
           <div className="sidebar-logo-text">
-            <div className="sidebar-logo-name">Yugal Savitri</div>
+            <div className="sidebar-logo-name">{siteName}</div>
             <div className="sidebar-logo-sub">Admin console</div>
           </div>
-        </div>
-
-        {/* Search */}
-        <div className="sidebar-search-wrap">
-          <button className="sidebar-search-btn">
-            <SearchIcon />
-            <span>Search</span>
-            <kbd className="sidebar-kbd">⌘K</kbd>
-          </button>
         </div>
 
         {/* Navigation */}

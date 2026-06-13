@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, Component } from 'react';
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Helmet } from 'react-helmet-async';
 import { API_BASE_URL } from '../api';
-import { useSiteName, useSiteLogo } from '../contexts/ConfigContext';
+import { useSiteName, useSiteLogo, useConfig } from '../contexts/ConfigContext';
 import HeroPanel from '../components/HeroPanel';
 import DonationPanel from '../components/DonationPanel';
 import CampaignCarousel from '../components/CampaignCarousel';
@@ -16,6 +17,16 @@ import FaqSection from '../components/sections/FaqSection';
 import TransparencySection from '../components/sections/TransparencySection';
 import SkeletonLoader from '../components/SkeletonLoader';
 import './Home.css';
+
+/** Catches render errors in a single home section without crashing the whole page. */
+class SectionErrorBoundary extends Component<{ children: ReactNode }, { errored: boolean }> {
+  state = { errored: false };
+  static getDerivedStateFromError() { return { errored: true }; }
+  render() {
+    if (this.state.errored) return null; // silently skip broken section
+    return this.props.children;
+  }
+}
 
 interface HomeSection {
   id: string;
@@ -31,26 +42,31 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const siteName = useSiteName();
   const logoUrl = useSiteLogo();
+  const { config } = useConfig();
+  const seoDescription = config['seo.home_description'] ||
+    `${siteName} — supporting education, healthcare, and community development through transparent donations.`;
+
+  const loadSections = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`${API_BASE_URL}/public/home`);
+
+      if (!response.ok) {
+        throw new Error(`Failed to load home sections (${response.status})`);
+      }
+      const data: HomeSection[] = await response.json();
+      setSections(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unknown error');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const loadSections = async () => {
-      try {
-        const response = await fetch(`${API_BASE_URL}/public/home`);
-
-        if (!response.ok) {
-          throw new Error(`Failed to load home sections (${response.status})`);
-        }
-        const data: HomeSection[] = await response.json();
-        setSections(data);
-        setLoading(false);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Unknown error');
-        setLoading(false);
-      }
-    };
-
     loadSections();
-  }, []);
+  }, [loadSections]);
 
   if (loading) {
     return (
@@ -85,6 +101,22 @@ export default function Home() {
           <p style={{ marginTop: '1rem', fontSize: '0.9rem', color: '#666' }}>
             {t('home.serverDown')}
           </p>
+          <button
+            onClick={loadSections}
+            style={{
+              marginTop: '1.5rem',
+              padding: '0.75rem 2rem',
+              backgroundColor: '#1e3a5f',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '1rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
+            Try again
+          </button>
         </div>
       </div>
     );
@@ -116,14 +148,19 @@ export default function Home() {
     <div className="home">
       <Helmet>
         <title>{t('home.pageTitle', { siteName })}</title>
-        <meta name="description" content="Join us in making a difference through transparent donations to education, healthcare, and community development campaigns in India." />
+        <meta name="description" content={seoDescription} />
         <meta property="og:title" content={siteName} />
-        <meta property="og:description" content="Support meaningful causes through transparent donations." />
+        <meta property="og:description" content={seoDescription} />
         <meta property="og:type" content="website" />
         <meta property="og:image" content={logoUrl} />
+        <meta property="og:site_name" content={siteName} />
+        <meta property="og:url" content={typeof window !== 'undefined' ? window.location.href : ''} />
+        <link rel="canonical" href={typeof window !== 'undefined' ? window.location.href : ''} />
       </Helmet>
       {sections.map((section) => (
-        <SectionRenderer key={section.id} section={section} />
+        <SectionErrorBoundary key={section.id}>
+          <SectionRenderer section={section} />
+        </SectionErrorBoundary>
       ))}
     </div>
   );
@@ -134,8 +171,13 @@ export default function Home() {
  */
 function SectionRenderer({ section }: { section: HomeSection }) {
   const { t } = useTranslation();
-  // Parse config JSON
-  const config = section.configJson ? JSON.parse(section.configJson) : {};
+  // Parse config JSON — malformed rows must not crash the entire page
+  let config: Record<string, unknown> = {};
+  try {
+    if (section.configJson) config = JSON.parse(section.configJson);
+  } catch {
+    // Bad JSON in DB: skip config, let the section render with defaults
+  }
   
   switch (section.type) {
     case 'hero_carousel':
@@ -180,9 +222,9 @@ function SectionRenderer({ section }: { section: HomeSection }) {
     case 'campaign_carousel':
       return (
         <CampaignCarousel
-          title={config.title || t('home.defaultCarouselTitle')}
-          limit={config.limit || 18}
-          featured={config.featured || false}
+          title={(config.title as string) || t('home.defaultCarouselTitle')}
+          limit={(config.limit as number) || 18}
+          featured={(config.featured as boolean) || false}
         />
       );
 

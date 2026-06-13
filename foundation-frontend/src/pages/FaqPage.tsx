@@ -15,7 +15,7 @@
 import { useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
-import { useSiteName } from '../contexts/ConfigContext';
+import { useSiteName, useSiteLogo } from '../contexts/ConfigContext';
 import { useFaqs, type PublicFaq } from '../hooks/useFaqs';
 import './FaqPage.css';
 
@@ -42,6 +42,7 @@ function groupByCategory(faqs: PublicFaq[]): CategoryGroup[] {
 
 export default function FaqPage() {
   const siteName = useSiteName();
+  const logoUrl = useSiteLogo();
   const { loading, faqs } = useFaqs();
 
   const groups = useMemo(() => (faqs ? groupByCategory(faqs) : []), [faqs]);
@@ -54,7 +55,13 @@ export default function FaqPage() {
           name="description"
           content={`Frequently asked questions about ${siteName} — donations, programmes, and how to get involved.`}
         />
+        <meta property="og:description" content={`Frequently asked questions about ${siteName} — donations, programmes, and how to get involved.`} />
         <meta property="og:title" content={`Frequently asked questions | ${siteName}`} />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content={logoUrl} />
+        <meta property="og:site_name" content={siteName} />
+        <meta property="og:url" content={typeof window !== 'undefined' ? window.location.href : ''} />
+        <link rel="canonical" href={typeof window !== 'undefined' ? window.location.href : ''} />
       </Helmet>
 
       <header className="faq-hero">

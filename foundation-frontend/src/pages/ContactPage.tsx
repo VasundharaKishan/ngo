@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useSiteName } from '../contexts/ConfigContext';
+import { useSiteName, useSiteLogo } from '../contexts/ConfigContext';
 import { fetchContactInfo } from '../utils/contactApi';
 import type { ContactInfo } from '../utils/contactApi';
 import { API_BASE_URL } from '../api';
@@ -11,19 +11,20 @@ import './ContactPage.css';
 
 export default function ContactPage() {
   const siteName = useSiteName();
+  const logoUrl = useSiteLogo();
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
 
   // Pre-fill form from URL query params (e.g. from newsletter redirect)
+  // subjectParam must match an <option> value so the select pre-selects correctly.
   const subjectParam = searchParams.get('subject') || '';
   const emailParam = searchParams.get('email') || '';
-  const subjectLabel = subjectParam === 'newsletter' ? 'Newsletter subscription request' : subjectParam;
 
   const [form, setForm] = useState({
     name: '',
     email: emailParam,
-    subject: subjectLabel,
+    subject: subjectParam, // use the raw param as the option value (e.g. "newsletter")
     message: subjectParam === 'newsletter' ? 'Please add me to your newsletter mailing list.' : '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -78,10 +79,15 @@ export default function ContactPage() {
     // Check if Turnstile script is already loaded
     if (window.turnstile) {
       renderWidget();
-      return;
+      return () => {
+        if (turnstileWidgetId.current && window.turnstile) {
+          try { window.turnstile.remove(turnstileWidgetId.current); } catch { /* ignore */ }
+          turnstileWidgetId.current = null;
+        }
+      };
     }
 
-    // Load script
+    // Load script — track the element so we can remove it on unmount
     const script = document.createElement('script');
     script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
     script.async = true;
@@ -92,6 +98,10 @@ export default function ContactPage() {
       if (turnstileWidgetId.current && window.turnstile) {
         try { window.turnstile.remove(turnstileWidgetId.current); } catch { /* ignore */ }
         turnstileWidgetId.current = null;
+      }
+      // Remove the injected script to prevent leaking it on hot-reload / re-mount
+      if (script.parentNode) {
+        script.parentNode.removeChild(script);
       }
     };
   }, [captchaEnabled, captchaSiteKey]);
@@ -148,7 +158,7 @@ export default function ContactPage() {
         throw new Error(data?.message || `Submission failed (HTTP ${res.status})`);
       }
       setStatus('success');
-      setForm({ name: '', email: '', subject: '', message: '' });
+      setForm({ name: '', email: emailParam, subject: subjectParam, message: subjectParam === 'newsletter' ? 'Please add me to your newsletter mailing list.' : '' });
       resetTurnstile();
     } catch (err) {
       logger.error('ContactPage', 'Submission failed', err);
@@ -163,6 +173,13 @@ export default function ContactPage() {
       <Helmet>
         <title>Contact Us | {siteName}</title>
         <meta name="description" content={`Get in touch with ${siteName}. We'd love to hear from you.`} />
+        <meta property="og:title" content={`Contact Us | ${siteName}`} />
+        <meta property="og:description" content={`Get in touch with ${siteName}. We'd love to hear from you.`} />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content={logoUrl} />
+        <meta property="og:site_name" content={siteName} />
+        <meta property="og:url" content={typeof window !== 'undefined' ? window.location.href : ''} />
+        <link rel="canonical" href={typeof window !== 'undefined' ? window.location.href : ''} />
       </Helmet>
 
       {/* Hero */}
@@ -298,6 +315,7 @@ export default function ContactPage() {
                     <option value="volunteer">{t('contact.subjects.volunteer')}</option>
                     <option value="partnership">{t('contact.subjects.partnership')}</option>
                     <option value="media">{t('contact.subjects.media')}</option>
+                    <option value="newsletter">{t('contact.subjects.newsletter', 'Newsletter subscription')}</option>
                     <option value="other">{t('contact.subjects.other')}</option>
                   </select>
                   {errors.subject && (
@@ -316,9 +334,18 @@ export default function ContactPage() {
                     onChange={handleChange}
                     placeholder={t('contact.messagePlaceholder')}
                     rows={6}
+                    maxLength={8000}
                     aria-invalid={!!errors.message}
-                    aria-describedby={errors.message ? 'contact-message-error' : undefined}
+                    aria-describedby={errors.message ? 'contact-message-error' : 'contact-message-count'}
                   />
+                  <span
+                    id="contact-message-count"
+                    className="contact-char-count"
+                    aria-live="polite"
+                    style={{ fontSize: '0.78rem', color: form.message.length > 7500 ? '#dc2626' : '#94a3b8', marginTop: '0.2rem', display: 'block', textAlign: 'right' }}
+                  >
+                    {form.message.length} / 8000
+                  </span>
                   {errors.message && (
                     <span id="contact-message-error" className="contact-error" role="alert">
                       {errors.message}

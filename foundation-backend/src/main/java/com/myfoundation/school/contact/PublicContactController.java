@@ -1,6 +1,7 @@
 package com.myfoundation.school.contact;
 
 import com.myfoundation.school.contact.dto.ContactSubmissionRequest;
+import com.myfoundation.school.security.ClientIpExtractor;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,7 @@ public class PublicContactController {
 
     private final ContactSubmissionService service;
     private final TurnstileVerificationService turnstileService;
+    private final ClientIpExtractor clientIpExtractor;
 
     @org.springframework.beans.factory.annotation.Value("${app.captcha.turnstile.site-key:}")
     private String siteKey;
@@ -66,14 +68,6 @@ public class PublicContactController {
     }
 
     private String extractClientIp(HttpServletRequest request) {
-        String forwarded = request.getHeader("X-Forwarded-For");
-        if (forwarded != null && !forwarded.isBlank()) {
-            return forwarded.split(",")[0].trim();
-        }
-        String realIp = request.getHeader("X-Real-IP");
-        if (realIp != null && !realIp.isBlank()) {
-            return realIp.trim();
-        }
-        return request.getRemoteAddr();
+        return clientIpExtractor.extract(request);
     }
 }

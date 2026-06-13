@@ -88,7 +88,13 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: '../foundation-backend/src/main/resources/static',
+    // On Vercel, build to a local `dist/` so Vercel's static deploy can
+    // pick it up. Locally and in the Spring Boot package step, build into
+    // the backend's resources/static so `mvn package` ships the SPA in
+    // the JAR. Vercel sets VERCEL=1 in the build environment.
+    outDir: process.env.VERCEL
+      ? 'dist'
+      : '../foundation-backend/src/main/resources/static',
     emptyOutDir: true,
     rollupOptions: {
       output: {

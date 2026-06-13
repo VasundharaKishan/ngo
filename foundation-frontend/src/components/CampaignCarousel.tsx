@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api, type Campaign } from '../api';
 import { TIMING, IMAGES } from '../config/constants';
+import { getThumbnailUrl } from '../utils/imageUtils';
 import logger from '../utils/logger';
 import './CampaignCarousel.css';
 
@@ -97,7 +98,7 @@ export default function CampaignCarousel({
               aria-hidden={index !== currentSlide}
             >
               <img
-                src={campaign.imageUrl || IMAGES.PLACEHOLDER.CAMPAIGN}
+                src={campaign.imageUrl ? getThumbnailUrl(campaign.imageUrl) : IMAGES.PLACEHOLDER.CAMPAIGN}
                 alt={campaign.title}
                 loading={index === 0 ? 'eager' : 'lazy'}
                 onError={(e) => {

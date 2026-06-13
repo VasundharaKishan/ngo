@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { RiMegaphoneLine, RiStarLine } from 'react-icons/ri';
 import { api, type CampaignPopupDto, type DonatePopupResponse } from '../api';
 import { formatCurrency } from '../utils/currency';
+import { getThumbnailUrl } from '../utils/imageUtils';
+import { IMAGES } from '../config/constants';
 import { useSiteName } from '../contexts/ConfigContext';
 import logger from '../utils/logger';
 import './FeaturedCampaignModal.css';
@@ -129,12 +131,12 @@ export default function FeaturedCampaignModal({ isOpen, onClose }: FeaturedCampa
           <>
             <div className="modal-image-section">
               <img
-                src={campaign.imageUrl || 'https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?w=800&auto=format&fit=crop&q=80'}
+                src={campaign.imageUrl ? getThumbnailUrl(campaign.imageUrl) : IMAGES.PLACEHOLDER.CAMPAIGN}
                 alt={campaign.title}
                 className="modal-image"
                 loading="lazy"
                 onError={(e) => {
-                  e.currentTarget.src = 'https://placehold.co/800x600/667eea/ffffff?text=Campaign+Image';
+                  e.currentTarget.src = IMAGES.PLACEHOLDER.CAMPAIGN;
                 }}
               />
               <div className="modal-badge">{campaign.badgeText}</div>

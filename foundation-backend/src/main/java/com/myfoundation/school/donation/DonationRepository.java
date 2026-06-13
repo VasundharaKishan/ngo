@@ -13,6 +13,17 @@ import java.util.Optional;
 public interface DonationRepository extends JpaRepository<Donation, String>, JpaSpecificationExecutor<Donation> {
     
     List<Donation> findByCampaignId(String campaignId);
+
+    /** Count all donations (any status) for a campaign — used as a pre-delete guard. */
+    long countByCampaignId(String campaignId);
+
+    /**
+     * Load all donations with their campaign eagerly fetched in a single JOIN query.
+     * Use this in place of {@link #findAll()} wherever {@link #toDonationResponse} is called
+     * in a loop, to prevent the N+1 SELECT pattern caused by the LAZY campaign association.
+     */
+    @Query("SELECT d FROM Donation d JOIN FETCH d.campaign ORDER BY d.createdAt DESC")
+    List<Donation> findAllWithCampaign();
     
     Optional<Donation> findByStripeSessionId(String stripeSessionId);
     

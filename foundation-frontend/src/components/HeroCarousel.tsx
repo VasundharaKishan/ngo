@@ -99,6 +99,7 @@ export default function HeroCarousel() {
               alt={slide.altText}
               style={{ objectPosition: focusMap[slide.focus] }}
               loading={index === 0 ? 'eager' : 'lazy'}
+              onError={(e) => { e.currentTarget.style.display = 'none'; }}
             />
             <div className="carousel-overlay"></div>
             {(slide.title || slide.subtitle) && (

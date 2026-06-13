@@ -198,8 +198,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
   background: none;
   border: none;
   color: var(--color-ink-700);
@@ -351,6 +352,14 @@
   color: var(--color-ink-700);
   text-decoration: none;
   transition: color var(--transition-fast);
+  display: block;
+  padding: var(--space-1) 0;
+}
+
+@media (max-width: 767px) {
+  .footer-links a {
+    padding: var(--space-2) 0;
+  }
 }
 
 .footer-links a:hover {

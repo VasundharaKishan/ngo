@@ -171,7 +171,7 @@ ON CONFLICT (id) DO NOTHING;
 -- ─────────────────────────────────────────────────────────────────────────────
 DO $$
 BEGIN
-    -- cms_content
+    -- cms_content (use section+key conflict to avoid clashing with V3 seed data)
     IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'cms_content') THEN
         INSERT INTO cms_content (id, section, content_key, content_value, content_type, active, display_order, created_at, updated_at) VALUES
             ('cms-hero-001', 'hero', 'title',    'Make a Difference in People''s Lives', 'TEXT', true, 1, NOW(), NOW()),
@@ -185,7 +185,7 @@ BEGIN
             ('cms-why-006', 'why_donate', 'point2_text', 'Track how your contribution is making a difference','TEXT', true, 6, NOW(), NOW()),
             ('cms-why-007', 'why_donate', 'point3_title','Verified Causes',                                    'TEXT', true, 7, NOW(), NOW()),
             ('cms-why-008', 'why_donate', 'point3_text', 'All campaigns are vetted and monitored for impact', 'TEXT', true, 8, NOW(), NOW())
-        ON CONFLICT (id) DO NOTHING;
+        ON CONFLICT (section, content_key) DO NOTHING;
     END IF;
 
     -- homepage_stats

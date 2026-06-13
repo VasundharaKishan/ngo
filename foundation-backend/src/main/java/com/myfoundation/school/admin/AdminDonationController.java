@@ -148,7 +148,8 @@ public class AdminDonationController {
     
     @PostMapping("/campaigns")
     public ResponseEntity<AdminCampaignResponse> createCampaign(@Valid @RequestBody AdminCampaignRequest request) {
-        log.info("POST /api/admin/campaigns - Creating campaign: {}", request.getTitle());
+        log.info("POST /api/admin/campaigns - Creating campaign: {}",
+                 request.getTitle().replaceAll("[\\r\\n]", "_"));
         Campaign campaign = adminCampaignService.createCampaign(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(toAdminCampaignResponse(campaign));
     }
@@ -282,7 +283,10 @@ public class AdminDonationController {
         response.setUpdatedAt(campaign.getUpdatedAt());
 
         if (campaign.getCategory() != null) {
-            response.setCategory(campaign.getCategory());
+            response.setCategoryId(campaign.getCategory().getId());
+            response.setCategoryName(campaign.getCategory().getName());
+            response.setCategoryIcon(campaign.getCategory().getIcon());
+            response.setCategoryColor(campaign.getCategory().getColor());
         }
 
         return response;

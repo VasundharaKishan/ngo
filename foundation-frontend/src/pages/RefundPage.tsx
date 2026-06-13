@@ -1,6 +1,7 @@
+import { sanitizeHtml } from '../utils/sanitize';
 import { Helmet } from 'react-helmet-async';
 import { useCMSContent } from '../hooks/useCMSContent';
-import { useSiteName, useConfig } from '../contexts/ConfigContext';
+import { useSiteName, useSiteLogo, useConfig } from '../contexts/ConfigContext';
 import './LegalPage.css';
 
 /**
@@ -20,6 +21,7 @@ import './LegalPage.css';
 export default function RefundPage() {
   const { content, hasCMSContent } = useCMSContent('legal_refund');
   const siteName = useSiteName();
+  const logoUrl = useSiteLogo();
   const { config } = useConfig();
 
   // Admin-editable variables (all resolve to safe defaults if the setting is missing)
@@ -31,7 +33,7 @@ export default function RefundPage() {
   const contactEmail =
     config['legal.contact_email'] ||
     config['contact.email'] ||
-    'contact@yugalsavitriseva.org';
+    'contact@example.org';
   const contactPhone = config['legal.contact_phone'] || config['contact.phone'] || '';
   const refundWindowDays = parseInt(
     config['legal.refund_window_days'] || '7',
@@ -47,18 +49,25 @@ export default function RefundPage() {
   return (
     <div className="legal-page">
       <Helmet>
-        <title>Refund & Cancellation Policy | {siteName}</title>
+        <title>Refund &amp; Cancellation Policy | {siteName}</title>
         <meta
           name="description"
           content={`Refund and cancellation policy for donations made to ${orgName}. Request window, grounds for refund, and how to contact us.`}
         />
+        <meta property="og:title" content={`Refund & Cancellation Policy | ${siteName}`} />
+        <meta property="og:description" content={`Refund and cancellation policy for donations made to ${orgName}.`} />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content={logoUrl} />
+        <meta property="og:site_name" content={siteName} />
+        <meta property="og:url" content={typeof window !== 'undefined' ? window.location.href : ''} />
+        <link rel="canonical" href={typeof window !== 'undefined' ? window.location.href : ''} />
       </Helmet>
 
       <h1>{content.title || 'Refund & Cancellation Policy'}</h1>
       <p className="last-updated">Last Updated: {effectiveDate}</p>
 
       {hasCMSContent && content.body ? (
-        <div dangerouslySetInnerHTML={{ __html: content.body }} />
+        <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(content.body) }} />
       ) : (
         <>
           <section>

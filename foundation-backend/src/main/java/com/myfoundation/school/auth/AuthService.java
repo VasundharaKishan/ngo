@@ -38,6 +38,9 @@ public class AuthService {
     private final OtpTokenRepository otpTokenRepository;
     private final AuditLogService auditLogService;
 
+    @Value("${app.bootstrap.admin-email:admin@example.org}")
+    private String bootstrapAdminEmail;
+
     @Value("${app.auth.otp-enabled:false}")
     private boolean otpEnabled;
     @Value("${app.auth.otp-expiration-minutes:5}")
@@ -291,7 +294,7 @@ public class AuthService {
         // Create default admin user
         AdminUser admin = AdminUser.builder()
                 .username("admin")
-                .email("admin@hopefoundation.org")
+                .email(bootstrapAdminEmail)
                 .password(passwordEncoder.encode("Admin123!"))
                 .fullName("System Administrator")
                 .role(UserRole.ADMIN)

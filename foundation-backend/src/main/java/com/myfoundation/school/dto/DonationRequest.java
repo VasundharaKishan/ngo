@@ -22,7 +22,8 @@ public class DonationRequest {
     
     @NotBlank(message = "Currency is required")
     @Size(min = 3, max = 3, message = "Currency must be a 3-letter code")
-    @Schema(description = "Currency code (ISO 4217)", example = "USD", required = true)
+    @Pattern(regexp = "(?i)^(inr|usd|eur|gbp|aud|cad)$", message = "Unsupported currency code")
+    @Schema(description = "Currency code (ISO 4217)", example = "INR", required = true)
     private String currency;
     
     @Schema(description = "Donor's full name", example = "John Doe")

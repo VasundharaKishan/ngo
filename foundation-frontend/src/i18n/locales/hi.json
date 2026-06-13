@@ -2,9 +2,11 @@
   "nav": {
     "home": "होम",
     "campaigns": "अभियान",
+    "impact": "हमारा प्रभाव",
+    "transparency": "पारदर्शिता",
     "about": "हमारे बारे में",
     "contact": "संपर्क करें",
-    "donate": "अभी दान करें",
+    "donate": "दान करें",
     "adminPanel": "एडमिन पैनल",
     "openMenu": "मेनू खोलें",
     "closeMenu": "मेनू बंद करें"
@@ -32,7 +34,20 @@
     "mobileLabel": "मोबाइल:",
     "privacyPolicy": "गोपनीयता नीति",
     "defaultTagline": "करुणा और कार्रवाई के माध्यम से दुनिया भर में समुदायों को सशक्त बनाना।",
-    "skipToContent": "मुख्य सामग्री पर जाएं"
+    "skipToContent": "मुख्य सामग्री पर जाएं",
+    "giveHeading": "दान करें",
+    "donateOnce": "एक बार दान",
+    "giveMonthly": "मासिक दान",
+    "allCampaigns": "सभी अभियान",
+    "corporateCsr": "कॉर्पोरेट / CSR",
+    "aboutHeading": "हमारे बारे में",
+    "ourStory": "हमारी कहानी",
+    "ourImpact": "हमारा प्रभाव",
+    "annualReports": "वार्षिक रिपोर्ट",
+    "legalHeading": "कानूनी",
+    "terms": "नियम",
+    "refundPolicy": "वापसी नीति",
+    "accessibility": "अभिगम्यता"
   },
   "home": {
     "heroTitle": "समुदायों को सशक्त बनाना,\nजीवन बदलना",
@@ -281,6 +296,7 @@
     "ctaTitle": "बदलाव लाने के लिए तैयार हैं?",
     "ctaSubtitle": "हमारे सक्रिय अभियान ब्राउज़ करें और अपने लिए महत्वपूर्ण कारण का समर्थन करें।",
     "ctaBrowse": "अभियान ब्राउज़ करें",
+    "ctaImpact": "हमारा प्रभाव देखें",
     "ctaContact": "संपर्क करें"
   },
   "notFound": {

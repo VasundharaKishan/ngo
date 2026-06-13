@@ -59,25 +59,34 @@ public class StripeWebhookController {
         }
 
         log.info("[Webhook] Processing event: {} (ID: {})", event.getType(), event.getId());
-        
-        // Handle the event
-        switch (event.getType()) {
-            case "checkout.session.completed":
-                handleCheckoutSessionCompleted(event);
-                break;
-            case "checkout.session.async_payment_succeeded":
-                handleAsyncPaymentSucceeded(event);
-                break;
-            case "checkout.session.async_payment_failed":
-                handleAsyncPaymentFailed(event);
-                break;
-            case "checkout.session.expired":
-                handleCheckoutSessionExpired(event);
-                break;
-            default:
-                log.info("[Webhook] Unhandled event type: {} - ignoring", event.getType());
+
+        // Handle the event — wrap in try-catch so any unexpected RuntimeException
+        // (e.g. deserialization failure) returns 200 OK rather than 400/500,
+        // preventing Stripe from retrying an event we have already acknowledged.
+        try {
+            switch (event.getType()) {
+                case "checkout.session.completed":
+                    handleCheckoutSessionCompleted(event);
+                    break;
+                case "checkout.session.async_payment_succeeded":
+                    handleAsyncPaymentSucceeded(event);
+                    break;
+                case "checkout.session.async_payment_failed":
+                    handleAsyncPaymentFailed(event);
+                    break;
+                case "checkout.session.expired":
+                    handleCheckoutSessionExpired(event);
+                    break;
+                default:
+                    log.info("[Webhook] Unhandled event type: {} - ignoring", event.getType());
+            }
+        } catch (Exception e) {
+            log.error("[Webhook] Unexpected error processing event {} (type={}): {}",
+                    event.getId(), event.getType(), e.getMessage(), e);
+            // Return 200 so Stripe does not retry; incident logged for manual investigation
+            return ResponseEntity.ok("processing_error");
         }
-        
+
         log.info("[Webhook] Successfully processed event: {}", event.getId());
         return ResponseEntity.ok("ok");
     }

@@ -2,9 +2,11 @@
   "nav": {
     "home": "Home",
     "campaigns": "Campaigns",
+    "impact": "Our impact",
+    "transparency": "Transparency",
     "about": "About",
     "contact": "Contact",
-    "donate": "Donate Now",
+    "donate": "Donate",
     "adminPanel": "Admin Panel",
     "openMenu": "Open menu",
     "closeMenu": "Close menu"
@@ -32,7 +34,20 @@
     "mobileLabel": "Mobile:",
     "privacyPolicy": "Privacy policy",
     "defaultTagline": "Empowering communities worldwide through compassion and action.",
-    "skipToContent": "Skip to main content"
+    "skipToContent": "Skip to main content",
+    "giveHeading": "Give",
+    "donateOnce": "Donate once",
+    "giveMonthly": "Give monthly",
+    "allCampaigns": "All campaigns",
+    "corporateCsr": "Corporate / CSR",
+    "aboutHeading": "About",
+    "ourStory": "Our story",
+    "ourImpact": "Our impact",
+    "annualReports": "Annual reports",
+    "legalHeading": "Legal",
+    "terms": "Terms",
+    "refundPolicy": "Refund policy",
+    "accessibility": "Accessibility"
   },
   "home": {
     "heroTitle": "Empowering Communities,\nChanging Lives",
@@ -281,6 +296,7 @@
     "ctaTitle": "Ready to Make a Difference?",
     "ctaSubtitle": "Browse our active campaigns and support a cause that matters to you.",
     "ctaBrowse": "Browse Campaigns",
+    "ctaImpact": "See our impact",
     "ctaContact": "Get in Touch"
   },
   "notFound": {

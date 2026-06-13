@@ -58,6 +58,26 @@ export default function Success() {
     verifyDonation();
   }, [sessionId]);
 
+  // No session_id in URL — this page was opened directly, not from Stripe
+  if (!sessionId) {
+    return (
+      <div className="container">
+        <Helmet>
+          <title>Invalid page | {siteName}</title>
+          <meta name="robots" content="noindex" />
+        </Helmet>
+        <div className="status-page">
+          <div className="success-icon" style={{ color: '#d97706' }}>!</div>
+          <h1>{t('donation.invalidSession', 'Invalid page')}</h1>
+          <p className="message">{t('donation.invalidSessionMessage', 'This page can only be reached after completing a donation.')}</p>
+          <div className="actions">
+            <Link to="/campaigns" className="btn-primary">{t('donation.viewOtherCampaigns')}</Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="container">
@@ -74,20 +94,40 @@ export default function Success() {
     );
   }
 
+  const isFailed = donation?.status === 'FAILED';
+  const isPending = donation?.status === 'PENDING';
+
   return (
     <div className="container">
       <Helmet>
-        <title>{t('donation.successTitle')} | {siteName}</title>
+        <title>
+          {isFailed
+            ? t('donation.failedTitle', 'Payment failed')
+            : isPending
+            ? t('donation.pendingTitle', 'Payment pending')
+            : t('donation.successTitle')} | {siteName}
+        </title>
         <meta name="robots" content="noindex" />
       </Helmet>
       <div className="status-page">
-        <div className="success-icon">✓</div>
-        <h1>{t('donation.successTitle')}</h1>
+        <div
+          className="success-icon"
+          style={isFailed ? { color: '#dc2626' } : isPending ? { color: '#d97706' } : undefined}
+        >
+          {isFailed ? '✗' : isPending ? '⏳' : '✓'}
+        </div>
+        <h1>
+          {isFailed
+            ? t('donation.failedTitle', 'Payment failed')
+            : isPending
+            ? t('donation.pendingTitle', 'Payment pending')
+            : t('donation.successTitle')}
+        </h1>
 
         {donation && (
           <div className="donation-details" style={{
-            background: '#f0fdf4',
-            border: '1px solid #bbf7d0',
+            background: isFailed ? '#fef2f2' : isPending ? '#fffbeb' : '#f0fdf4',
+            border: `1px solid ${isFailed ? '#fecaca' : isPending ? '#fde68a' : '#bbf7d0'}`,
             borderRadius: '12px',
             padding: '1.25rem',
             marginBottom: '1.5rem',

@@ -5,11 +5,19 @@
  *   Left: live badge, headline (Fraunces), subtitle, CTA buttons, trust strip
  *   Right: featured campaign card with progress bar
  *
- * Below: donor ticker with live-donations marquee.
+ * All content is admin-controlled:
+ *   - Hero copy (eyebrow, headline, subtitle, CTA labels/links) via /api/public/hero-panel
+ *   - Trust strip items via /api/public/trust-badges (showInStrip === true)
+ *   - Featured campaign via /api/campaigns (featured flag)
+ * No hardcoded donor names, fake amounts, or placeholder campaigns are shown.
  */
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useHeroPanel, type PublicHeroPanel } from '../hooks/useHeroPanel';
-import { useFeaturedCampaign } from '../hooks/useFeaturedCampaign';
+import { useFeaturedCampaign, type FeaturedCampaign } from '../hooks/useFeaturedCampaign';
+import { useTrustBadges } from '../hooks/useTrustBadges';
+import { getThumbnailUrl } from '../utils/imageUtils';
+import { IMAGES } from '../config/constants';
 import './HeroPanel.css';
 
 /* ── Icons ── */
@@ -19,89 +27,35 @@ const ArrowIcon = ({ size = 18 }: { size?: number }) => (
   </svg>
 );
 
-const ShieldIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-  </svg>
-);
-
-const CheckIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <path d="M4 12l5 5L20 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
-const CardIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <rect x="3" y="6" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="2" />
-    <path d="M3 10h18" stroke="currentColor" strokeWidth="2" />
-  </svg>
-);
-
-const ClockIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
-    <path d="M12 7v5l3 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-  </svg>
-);
-
-/* ── Static fallback content ── */
-const FALLBACK = {
-  eyebrow: 'Live campaign · 14 days left',
-  headline: 'Education is the quiet revolution that changes a life.',
-  headlineAccent: 'quiet revolution',
-  subtitle:
-    'Every ₹500 you give today feeds, clothes and teaches a child in rural Uttar Pradesh for one week. We are a community-led foundation — almost every rupee goes straight to the programme.',
-  primaryCtaLabel: 'Donate now',
-  primaryCtaHref: '#donate',
-  secondaryCtaLabel: 'See the impact',
-  secondaryCtaHref: '#impact',
-};
-
-/* ── Trust badges ── */
-const TRUST_ITEMS = [
-  { icon: <ShieldIcon />, title: 'Transparent', subtitle: 'Every rupee tracked' },
-  { icon: <CheckIcon />, title: 'Direct', subtitle: 'No middlemen' },
-  { icon: <CardIcon />, title: 'Secure', subtitle: 'Stripe & UPI' },
-  { icon: <ClockIcon />, title: 'Volunteer-led', subtitle: 'Community built' },
-];
-
-/* ── Donor ticker (static for now — will be live when backend supports it) ── */
-const SAMPLE_DONATIONS = [
-  { name: 'Priya', amount: '₹1,000', time: '3 min ago' },
-  { name: 'Aarav', amount: '₹500', time: '8 min ago' },
-  { name: 'Anonymous', amount: '₹5,000', time: '14 min ago' },
-  { name: 'Rohit', amount: '₹250 monthly', time: '22 min ago' },
-  { name: 'Meera', amount: '₹2,100', time: '31 min ago' },
-];
-
 /* ── Featured campaign card ── */
-interface FeaturedCampaign {
-  id: string;
-  title: string;
-  category?: string;
-  location?: string;
-  targetAmount: number;
-  currentAmount: number;
-  donorCount?: number;
-  daysLeft?: number;
+
+function formatCampaignAmount(amount: number, currency: string): string {
+  try {
+    return new Intl.NumberFormat(undefined, {
+      style: 'currency',
+      currency: currency.toUpperCase(),
+      maximumFractionDigits: 0,
+    }).format(amount);
+  } catch {
+    return amount.toLocaleString();
+  }
 }
 
 function FeaturedCampaignCard({ campaign, onDonate }: { campaign: FeaturedCampaign; onDonate?: () => void }) {
-  const pct = Math.min(100, Math.round((campaign.currentAmount / campaign.targetAmount) * 100));
-  const fmt = (n: number) => n.toLocaleString('en-IN');
+  const { t } = useTranslation();
+  const pct = campaign.targetAmount > 0
+    ? Math.min(100, Math.round((campaign.currentAmount / campaign.targetAmount) * 100))
+    : 0;
 
   return (
     <aside className="hero-campaign-card" aria-label="Featured campaign">
-      {/* Placeholder hero image */}
+      {/* Campaign image — real image when available, placeholder otherwise */}
       <div className="hero-campaign-img">
-        <svg className="hero-campaign-img-svg" viewBox="0 0 400 250" aria-hidden="true">
-          <circle cx="320" cy="60" r="30" fill="#fff" opacity="0.4" />
-          <rect x="40" y="150" width="320" height="80" rx="6" fill="#fff" opacity="0.15" />
-          <rect x="60" y="170" width="60" height="40" rx="4" fill="#fff" opacity="0.3" />
-          <rect x="140" y="170" width="60" height="40" rx="4" fill="#fff" opacity="0.3" />
-          <rect x="220" y="170" width="60" height="40" rx="4" fill="#fff" opacity="0.3" />
-        </svg>
+        <img
+          src={campaign.imageUrl ? getThumbnailUrl(campaign.imageUrl) : IMAGES.PLACEHOLDER.CAMPAIGN}
+          alt={campaign.title}
+          onError={(e) => { e.currentTarget.src = IMAGES.PLACEHOLDER.CAMPAIGN; }}
+        />
         {campaign.category && (
           <span className="hero-campaign-badge">{campaign.category}</span>
         )}
@@ -116,8 +70,8 @@ function FeaturedCampaignCard({ campaign, onDonate }: { campaign: FeaturedCampai
         {/* Progress */}
         <div className="hero-campaign-progress">
           <div className="hero-campaign-amounts">
-            <span className="hero-campaign-raised">₹{fmt(campaign.currentAmount)}</span>
-            <span className="hero-campaign-goal">of ₹{fmt(campaign.targetAmount)}</span>
+            <span className="hero-campaign-raised">{formatCampaignAmount(campaign.currentAmount, campaign.currency)}</span>
+            <span className="hero-campaign-goal">of {formatCampaignAmount(campaign.targetAmount, campaign.currency)}</span>
           </div>
           <div
             className="hero-campaign-bar"
@@ -130,9 +84,6 @@ function FeaturedCampaignCard({ campaign, onDonate }: { campaign: FeaturedCampai
             <div className="hero-campaign-bar-fill progress-bar" style={{ width: `${pct}%` }} />
           </div>
           <div className="hero-campaign-stats">
-            {campaign.donorCount != null && (
-              <span><strong>{campaign.donorCount}</strong> donors</span>
-            )}
             {campaign.daysLeft != null && (
               <span><strong>{campaign.daysLeft}</strong> days left</span>
             )}
@@ -145,31 +96,39 @@ function FeaturedCampaignCard({ campaign, onDonate }: { campaign: FeaturedCampai
           className="hero-campaign-cta"
           onClick={onDonate}
         >
-          Support this campaign
+          {t('campaign.supportCta', 'Support this campaign')}
         </Link>
       </div>
     </aside>
   );
 }
 
+/* ── Static fallback trust items shown only when API returns nothing ── */
+const FALLBACK_TRUST = [
+  { iconEmoji: '🛡️', title: 'Transparent', description: 'Every donation tracked' },
+  { iconEmoji: '✅', title: 'Direct', description: 'No middlemen' },
+  { iconEmoji: '🔒', title: 'Secure', description: 'Safe & encrypted' },
+  { iconEmoji: '🤝', title: 'Volunteer-led', description: 'Community built' },
+];
+
 /* ── Main export ── */
 export default function HeroPanel() {
   const { loading, panel } = useHeroPanel();
-  const { campaign: featuredCampaign } = useFeaturedCampaign();
+  const { loading: campaignLoading, campaign: featuredCampaign } = useFeaturedCampaign();
+  const { loading: badgesLoading, badges } = useTrustBadges();
 
-  // Use live hero content or fallback
-  const hero = panel ?? FALLBACK;
-  const headline = (hero as PublicHeroPanel).headline ?? FALLBACK.headline;
-  const subtitle = (hero as PublicHeroPanel).subtitle ?? FALLBACK.subtitle;
-  const eyebrow = (hero as PublicHeroPanel).eyebrow ?? FALLBACK.eyebrow;
-  const ctaLabel = (hero as PublicHeroPanel).primaryCtaLabel ?? FALLBACK.primaryCtaLabel;
-  const ctaHref = (hero as PublicHeroPanel).primaryCtaHref ?? FALLBACK.primaryCtaHref;
+  // Use live hero content or sensible defaults
+  const headline = (panel as PublicHeroPanel)?.headline ?? 'Support families building their way out of poverty.';
+  const subtitle = (panel as PublicHeroPanel)?.subtitle ?? '';
+  const eyebrow = (panel as PublicHeroPanel)?.eyebrow ?? '';
+  const ctaLabel = (panel as PublicHeroPanel)?.primaryCtaLabel ?? 'Donate now';
+  const ctaHref = (panel as PublicHeroPanel)?.primaryCtaHref ?? '/campaigns';
+  const secondaryCtaLabel = (panel as PublicHeroPanel)?.secondaryCtaLabel ?? 'See the impact';
+  const secondaryCtaHref = (panel as PublicHeroPanel)?.secondaryCtaHref ?? '/impact';
 
-  // Format headline with accent if it contains the accent word
-  const accentWord = FALLBACK.headlineAccent;
-  const parts = headline.includes(accentWord)
-    ? headline.split(accentWord)
-    : null;
+  // Trust strip: admin-managed badges filtered for strip display, fallback to static defaults
+  const stripBadges = badges?.filter(b => b.showInStrip) ?? [];
+  const trustItems = (!badgesLoading && stripBadges.length > 0) ? stripBadges : FALLBACK_TRUST;
 
   return (
     <section className="hero-section" data-hero-source={panel ? 'live' : 'fallback'}>
@@ -187,19 +146,9 @@ export default function HeroPanel() {
                 </div>
               )}
 
-              <h1 className="hero-headline font-display">
-                {parts ? (
-                  <>
-                    {parts[0]}
-                    <span className="hero-headline-accent">{accentWord}</span>
-                    {parts[1]}
-                  </>
-                ) : (
-                  headline
-                )}
-              </h1>
+              <h1 className="hero-headline font-display">{headline}</h1>
 
-              <p className="hero-subtitle">{subtitle}</p>
+              {subtitle && <p className="hero-subtitle">{subtitle}</p>}
 
               <div className="hero-cta-group">
                 {ctaLabel && ctaHref && (
@@ -213,64 +162,40 @@ export default function HeroPanel() {
                     </a>
                   )
                 )}
-                <Link to="/about" className="hero-btn-secondary">
-                  {FALLBACK.secondaryCtaLabel}
-                </Link>
+                {secondaryCtaLabel && (
+                  secondaryCtaHref.startsWith('/') ? (
+                    <Link to={secondaryCtaHref} className="hero-btn-secondary">
+                      {secondaryCtaLabel}
+                    </Link>
+                  ) : (
+                    <a href={secondaryCtaHref} className="hero-btn-secondary">
+                      {secondaryCtaLabel}
+                    </a>
+                  )
+                )}
               </div>
 
-              {/* Trust strip */}
+              {/* Trust strip — admin-managed via /api/public/trust-badges */}
               <div className="hero-trust-strip">
-                {TRUST_ITEMS.map((item) => (
+                {trustItems.map((item) => (
                   <div key={item.title} className="hero-trust-item">
-                    <div className="hero-trust-icon">{item.icon}</div>
+                    <div className="hero-trust-icon" aria-hidden="true">{item.iconEmoji}</div>
                     <span className="hero-trust-text">
                       <strong>{item.title}</strong>
-                      {item.subtitle}
+                      {item.description}
                     </span>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Right column — featured campaign card */}
+            {/* Right column — live featured campaign only; nothing shown if none exists */}
             <div className="hero-card-col">
               {featuredCampaign ? (
                 <FeaturedCampaignCard campaign={featuredCampaign} />
-              ) : !loading ? (
-                <FeaturedCampaignCard
-                  campaign={{
-                    id: 'placeholder',
-                    title: 'Build a library for Dhanrua village school',
-                    category: 'Education',
-                    location: '220 children · Kasganj, Uttar Pradesh',
-                    targetAmount: 750000,
-                    currentAmount: 473920,
-                    donorCount: 112,
-                    daysLeft: 14,
-                  }}
-                />
+              ) : campaignLoading || loading ? (
+                <div className="hero-campaign-card hero-campaign-card--loading" aria-busy="true" />
               ) : null}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Donor ticker */}
-      <div className="hero-ticker">
-        <div className="hero-ticker-inner">
-          <span className="hero-ticker-label">
-            <span className="hero-live-dot pulse-dot" />
-            Live donations
-          </span>
-          <div className="hero-ticker-scroll">
-            <div className="hero-ticker-track ticker">
-              {/* Double for seamless loop */}
-              {[...SAMPLE_DONATIONS, ...SAMPLE_DONATIONS].map((d, i) => (
-                <span key={i} className="hero-ticker-item">
-                  <strong>{d.name}</strong> gave{' '}
-                  <strong className="hero-ticker-amount">{d.amount}</strong> · {d.time}
-                </span>
-              ))}
             </div>
           </div>
         </div>

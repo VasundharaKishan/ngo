@@ -118,8 +118,8 @@ export const PAGINATION = {
 
 // ===== Donation Constants =====
 export const DONATION = {
-  PRESET_AMOUNTS: [500, 1000, 2500, 5000, 10000] as const,
-  DEFAULT_AMOUNT: 1000,
+  PRESET_AMOUNTS: [5000, 10000, 25000, 50000, 100000] as const,
+  DEFAULT_AMOUNT: 10000,
   MIN_AMOUNT: 1,
   MAX_AMOUNT: 1000000,
   CURRENCY: 'INR',
@@ -161,7 +161,7 @@ export const VALIDATION = {
   CAMPAIGN_TITLE_MIN: 5,
   CAMPAIGN_TITLE_MAX: 200,
   CAMPAIGN_DESCRIPTION_MIN: 20,
-  CAMPAIGN_DESCRIPTION_MAX: 5000,
+  CAMPAIGN_DESCRIPTION_MAX: 8000,
   
   // OTP
   OTP_LENGTH: 6,
@@ -171,8 +171,8 @@ export const VALIDATION = {
 // ===== Image Constants =====
 export const IMAGES = {
   PLACEHOLDER: {
-    CAMPAIGN: 'https://placehold.co/800x600/667eea/ffffff?text=Campaign+Image',
-    DEFAULT: 'https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?w=800&auto=format&fit=crop&q=80',
+    // Local SVG — no external dependency, no network request, no content-policy issues
+    CAMPAIGN: '/campaign-placeholder.svg',
   },
   MAX_SIZE_MB: 5,
   ALLOWED_TYPES: ['image/jpeg', 'image/png', 'image/webp'] as const,

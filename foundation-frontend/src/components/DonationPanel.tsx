@@ -1,12 +1,21 @@
 /**
  * Donation panel — matches mockup "Choose how you want to give" section.
  *
- * 5-column grid:
- *   Left (3 cols): monthly toggle, amount buttons, custom input, impact line, CTA
- *   Right (2 cols): "Where your money goes" card + testimonial quote card
+ * All content is admin-controlled:
+ *   - Preset amounts  via /api/public/donation-presets
+ *   - Money allocation percentages via /api/public/money-allocations
+ *   - Testimonial quote via /api/public/stories (first available story)
+ *   - 80G disclaimer via /api/admin/registration status
+ *
+ * The allocation and testimonial blocks are hidden entirely when the API
+ * returns no data (e.g. pre-registration) rather than showing fabricated values.
  */
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { useDonationPresets } from '../hooks/useDonationPresets';
+import { useMoneyAllocations } from '../hooks/useMoneyAllocations';
+import { useStories } from '../hooks/useStories';
+import { useRegistrationInfo } from '../hooks/useRegistrationInfo';
 import './DonationPanel.css';
 
 const ArrowIcon = () => (
@@ -15,42 +24,65 @@ const ArrowIcon = () => (
   </svg>
 );
 
-interface AmountOption {
-  value: number;
-  label: string;
-  impact: string;
-}
-
-const AMOUNTS: AmountOption[] = [
-  { value: 500, label: '₹500', impact: 'Feeds a child for a week' },
-  { value: 1500, label: '₹1,500', impact: 'School kit for one child' },
-  { value: 5000, label: '₹5,000', impact: 'One term of tuition' },
-  { value: 15000, label: '₹15,000', impact: 'Library shelf in their name' },
+/* ── Hardcoded fallback preset amounts used only when the API is unavailable ── */
+const FALLBACK_PRESETS = [
+  { amountRupees: 500, label: 'Feeds a child for a week' },
+  { amountRupees: 1500, label: 'School kit for one child' },
+  { amountRupees: 5000, label: 'One term of tuition' },
+  { amountRupees: 15000, label: 'Library shelf in their name' },
 ];
 
-const IMPACTS: Record<number, string> = {
-  500: 'feed a child in Dhanrua for a full week',
-  1500: "put a school kit into a first-grader's hands",
-  5000: 'cover a full term of tuition for one child',
-  15000: 'put a named library shelf in a village school',
-};
-
 export default function DonationPanel() {
-  const [selectedAmount, setSelectedAmount] = useState(500);
+  const { loading: presetsLoading, data: presetsData } = useDonationPresets();
+  const { loading: allocLoading, allocations } = useMoneyAllocations();
+  const { loading: storiesLoading, stories } = useStories();
+  const registration = useRegistrationInfo();
+
+  /* ── Build preset list from API or fallback ── */
+  const presets = useMemo(() => {
+    if (presetsData?.presets?.length) {
+      return presetsData.presets.map(p => ({
+        amountRupees: Math.round(p.amountMinorUnits / 100),
+        label: p.label ?? '',
+      }));
+    }
+    return FALLBACK_PRESETS;
+  }, [presetsData]);
+
+  const defaultAmountRupees = useMemo(() => {
+    if (presetsData?.defaultAmountMinorUnits) {
+      return Math.round(presetsData.defaultAmountMinorUnits / 100);
+    }
+    return presets[0]?.amountRupees ?? 500;
+  }, [presetsData, presets]);
+
+  const [selectedAmountRupees, setSelectedAmountRupees] = useState<number | null>(null);
   const [customAmount, setCustomAmount] = useState('');
   const [isMonthly, setIsMonthly] = useState(false);
 
-  const activeAmount = customAmount ? Number(customAmount) : selectedAmount;
-  const impactText = IMPACTS[activeAmount] || 'go straight to the ground';
+  /* Use defaultAmount once loaded, only if user hasn't selected yet */
+  const effectiveSelected = selectedAmountRupees ?? defaultAmountRupees;
+  const activeAmountRupees = customAmount ? Number(customAmount) : effectiveSelected;
+
+  const selectedPreset = presets.find(p => p.amountRupees === activeAmountRupees);
+  const impactText = selectedPreset?.label ?? '';
   const periodLabel = isMonthly ? 'this month' : 'today';
 
-  const handleAmountClick = (value: number) => {
-    setSelectedAmount(value);
-    setCustomAmount('');
-  };
+  /* ── Testimonial: first story from API ── */
+  const testimonial = useMemo(() => {
+    if (stories && stories.length > 0) return stories[0];
+    return null;
+  }, [stories]);
 
-  const handleCustomChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCustomAmount(e.target.value);
+  /* ── 80G disclaimer: derive from registration status ── */
+  const is80GActive = registration?.eightyGActive ?? false;
+  const disclaimerText = is80GActive
+    ? 'Donations are eligible for 80G tax deduction.'
+    : 'We accept UPI, cards, netbanking, and wallets. 80G tax deduction not yet available — we\'ll email you when it\'s approved.';
+
+  const handleAmountClick = (amountRupees: number) => {
+    setSelectedAmountRupees(amountRupees);
+    setCustomAmount('');
   };
 
   return (
@@ -84,20 +116,22 @@ export default function DonationPanel() {
               </label>
             </div>
 
-            {/* Amount buttons */}
-            <div className="donation-amounts">
-              {AMOUNTS.map((opt) => (
-                <button
-                  key={opt.value}
-                  className="donation-amount-btn"
-                  aria-pressed={!customAmount && selectedAmount === opt.value}
-                  onClick={() => handleAmountClick(opt.value)}
-                >
-                  <div className="donation-amount-value">{opt.label}</div>
-                  <div className="donation-amount-impact">{opt.impact}</div>
-                </button>
-              ))}
-            </div>
+            {/* Amount buttons — from /api/public/donation-presets */}
+            {!presetsLoading && (
+              <div className="donation-amounts">
+                {presets.map((opt) => (
+                  <button
+                    key={opt.amountRupees}
+                    className="donation-amount-btn"
+                    aria-pressed={!customAmount && effectiveSelected === opt.amountRupees}
+                    onClick={() => handleAmountClick(opt.amountRupees)}
+                  >
+                    <div className="donation-amount-value">₹{opt.amountRupees.toLocaleString('en-IN')}</div>
+                    {opt.label && <div className="donation-amount-impact">{opt.label}</div>}
+                  </button>
+                ))}
+              </div>
+            )}
 
             {/* Custom amount */}
             <div className="donation-custom-row">
@@ -112,60 +146,70 @@ export default function DonationPanel() {
                   min={100}
                   placeholder="Other amount"
                   value={customAmount}
-                  onChange={handleCustomChange}
+                  onChange={(e) => { setCustomAmount(e.target.value); setSelectedAmountRupees(null); }}
                   className="donation-custom-input"
                 />
               </div>
             </div>
 
             {/* Impact line */}
-            <div className="donation-impact-line">
-              Your <strong>₹{(activeAmount || 0).toLocaleString('en-IN')}</strong> {periodLabel} will {impactText}.
-            </div>
+            {impactText && (
+              <div className="donation-impact-line">
+                Your <strong>₹{(activeAmountRupees || 0).toLocaleString('en-IN')}</strong> {periodLabel} will {impactText}.
+              </div>
+            )}
 
             {/* CTA */}
-            <Link to={`/donate?amount=${activeAmount}&monthly=${isMonthly}`} className="donation-cta-btn">
+            <Link to={`/donate?amount=${activeAmountRupees * 100}&monthly=${isMonthly}`} className="donation-cta-btn">
               Proceed to secure payment <ArrowIcon />
             </Link>
 
-            <p className="donation-disclaimer">
-              We accept UPI, cards, netbanking, and wallets. <strong>Note:</strong> we are not yet registered for 80G tax deduction. We'll email you when that's approved.
-            </p>
+            {/* 80G disclaimer — driven by registration API */}
+            <p className="donation-disclaimer">{disclaimerText}</p>
           </div>
 
           {/* ── Right: info cards ── */}
           <div className="donation-sidebar">
-            {/* Where money goes */}
-            <div className="donation-allocation-card">
-              <h3>Where your money goes</h3>
-              <ul className="donation-allocation-list">
-                <li>
-                  <span className="donation-alloc-dot" />
-                  <span><strong>92%</strong> programmes on the ground</span>
-                </li>
-                <li>
-                  <span className="donation-alloc-dot" />
-                  <span><strong>6%</strong> programme management</span>
-                </li>
-                <li>
-                  <span className="donation-alloc-dot" />
-                  <span><strong>2%</strong> fundraising &amp; admin</span>
-                </li>
-              </ul>
-              <Link to="/transparency" className="donation-audit-link">
-                Read our last audit →
-              </Link>
-            </div>
+            {/* Money allocation — from /api/public/money-allocations
+                Hidden entirely when API returns no data (pre-registration) */}
+            {!allocLoading && allocations && allocations.length > 0 && (
+              <div className="donation-allocation-card">
+                <h3>Where your money goes</h3>
+                <ul className="donation-allocation-list">
+                  {allocations.map((alloc) => (
+                    <li key={alloc.id}>
+                      <span
+                        className="donation-alloc-dot"
+                        style={alloc.colorHex ? { backgroundColor: alloc.colorHex } : undefined}
+                      />
+                      <span>
+                        <strong>{alloc.percentage}%</strong> {alloc.label}
+                        {alloc.description && (
+                          <span className="donation-alloc-desc"> — {alloc.description}</span>
+                        )}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                <Link to="/transparency" className="donation-audit-link">
+                  Read our last audit →
+                </Link>
+              </div>
+            )}
 
-            {/* Testimonial quote */}
-            <div className="donation-quote-card">
-              <div className="donation-quote-text font-display">
-                "My daughter now reads to me. I couldn't read when I was her age."
+            {/* Testimonial quote — from /api/public/stories (first story)
+                Hidden entirely when API returns no data (pre-registration) */}
+            {!storiesLoading && testimonial && (
+              <div className="donation-quote-card">
+                <div className="donation-quote-text font-display">
+                  "{testimonial.quote}"
+                </div>
+                <div className="donation-quote-author">
+                  — {testimonial.attribution}
+                  {testimonial.location && `, ${testimonial.location}`}
+                </div>
               </div>
-              <div className="donation-quote-author">
-                — Sushila, mother in Dhanrua village
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

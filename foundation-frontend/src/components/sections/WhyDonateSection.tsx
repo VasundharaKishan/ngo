@@ -45,8 +45,8 @@ export default function WhyDonateSection({ config }: WhyDonateSectionProps) {
         <h2 className="section-title font-display">{title}</h2>
         <div className="why-grid">
           <div className="why-card">
-            <h3>{content.card2_title || '🌍 Global Reach'}</h3>
-            <p>{content.card2_text || 'We are starting with focused initiatives in India and Ireland, with a long-term vision to expand our reach responsibly.'}</p>
+            <h3>{content.card2_title || '🌍 Wide Reach'}</h3>
+            <p>{content.card2_text || 'We work across communities with a long-term vision to expand our reach responsibly wherever the need is greatest.'}</p>
           </div>
           <div className="why-card">
             <h3>{content.card3_title || '✅ Proven Results'}</h3>

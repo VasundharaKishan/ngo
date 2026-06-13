@@ -4,6 +4,8 @@ import com.myfoundation.school.audit.AuditAction;
 import com.myfoundation.school.audit.AuditLogService;
 import com.myfoundation.school.auth.EmailService;
 import com.myfoundation.school.contact.dto.ContactSubmissionRequest;
+import com.myfoundation.school.exception.BusinessException;
+import com.myfoundation.school.exception.TooManyRequestsException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,7 +49,7 @@ public class ContactSubmissionService {
         // 1. Verify Turnstile CAPTCHA
         if (!turnstileService.verify(request.turnstileToken(), clientIp)) {
             log.warn("CAPTCHA verification failed for contact submission from IP={}", clientIp);
-            throw new IllegalStateException("CAPTCHA verification failed. Please try again.");
+            throw new BusinessException("CAPTCHA verification failed. Please try again.");
         }
 
         // 2. Per-IP flood check
@@ -55,7 +57,7 @@ public class ContactSubmissionService {
         long recentCount = repository.countByClientIpSince(clientIp, oneHourAgo);
         if (recentCount >= MAX_SUBMISSIONS_PER_IP_PER_HOUR) {
             log.warn("Contact form flood: IP={} has {} submissions in the last hour", clientIp, recentCount);
-            throw new IllegalStateException(
+            throw new TooManyRequestsException(
                     "Too many submissions from your network. Please try again in an hour.");
         }
 
