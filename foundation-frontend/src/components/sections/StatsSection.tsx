@@ -82,12 +82,8 @@ function AnimatedStat({
   );
 }
 
-const DEFAULT_STATS = [
-  { id: 'd1', statValue: '5,432', statLabel: 'Children reached' },
-  { id: 'd2', statValue: '47', statLabel: 'Villages served' },
-  { id: 'd3', statValue: '312', statLabel: 'Monthly donors' },
-  { id: 'd4', statValue: '92%', statLabel: 'To programmes' },
-];
+// No fallback stats — when the CMS has no stats configured, hide the section
+// entirely rather than displaying fake placeholder numbers.
 
 export default function StatsSection({ config }: StatsSectionProps) {
   const {
@@ -133,9 +129,9 @@ export default function StatsSection({ config }: StatsSectionProps) {
     return () => observer.disconnect();
   }, [animated, hasAnimated, loading]);
 
-  if (loading) return null;
+  if (loading || stats.length === 0) return null;
 
-  const displayStats = stats.length > 0 ? stats : DEFAULT_STATS;
+  const displayStats = stats;
 
   return (
     <section

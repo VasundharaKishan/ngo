@@ -22,6 +22,8 @@ export interface PublicHeroPanel {
   subtitle: string | null;
   primaryCtaLabel: string | null;
   primaryCtaHref: string | null;
+  secondaryCtaLabel: string | null;
+  secondaryCtaHref: string | null;
   backgroundImageUrl: string | null;
   backgroundFocus: BackgroundFocus;
 }

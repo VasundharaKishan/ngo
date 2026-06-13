@@ -1,9 +1,9 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Helmet } from 'react-helmet-async';
 import { api, type Campaign } from '../api';
 import CampaignCard from '../components/CampaignCard';
-import { useCampaignsPerPage, useSiteName } from '../contexts/ConfigContext';
+import { useCampaignsPerPage, useSiteName, useSiteLogo } from '../contexts/ConfigContext';
 import { refreshScrollAnimations } from '../utils/scrollAnimations';
 import SkeletonLoader from '../components/SkeletonLoader';
 import './CampaignList.css';
@@ -26,36 +26,36 @@ export default function CampaignList() {
 
   const itemsPerPage = useCampaignsPerPage();
   const siteName = useSiteName();
+  const logoUrl = useSiteLogo();
 
-  // Load all campaigns (fetch all pages to allow client-side search/filter)
-  useEffect(() => {
-    const loadData = async () => {
-      setLoading(true);
-      try {
-        // Fetch first page to discover total page count
-        const firstPage = await api.getCampaignsPaginated({ page: 0, size: 100 });
-        let items = firstPage.items;
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const firstPage = await api.getCampaignsPaginated({ page: 0, size: 100 });
+      let items = firstPage.items;
 
-        // If there are more pages, fetch them all in parallel so none are missed in search
-        if (firstPage.totalPages > 1) {
-          const pageNums = Array.from({ length: firstPage.totalPages - 1 }, (_, i) => i + 1);
-          const rest = await Promise.all(
-            pageNums.map(p => api.getCampaignsPaginated({ page: p, size: 100 }))
-          );
-          items = [...items, ...rest.flatMap(r => r.items)];
-        }
-
-        setAllCampaigns(items);
-        setTotalServerPages(firstPage.totalPages);
-        setLoading(false);
-        setTimeout(() => refreshScrollAnimations(), 100);
-      } catch (err) {
-        setError(t('campaign.loadListError'));
-        setLoading(false);
+      if (firstPage.totalPages > 1) {
+        const pageNums = Array.from({ length: firstPage.totalPages - 1 }, (_, i) => i + 1);
+        const rest = await Promise.all(
+          pageNums.map(p => api.getCampaignsPaginated({ page: p, size: 100 }))
+        );
+        items = [...items, ...rest.flatMap(r => r.items)];
       }
-    };
+
+      setAllCampaigns(items);
+      setTotalServerPages(firstPage.totalPages);
+      setTimeout(() => refreshScrollAnimations(), 100);
+    } catch (err) {
+      setError(t('campaign.loadListError'));
+    } finally {
+      setLoading(false);
+    }
+  }, [t]);
+
+  useEffect(() => {
     loadData();
-  }, []);
+  }, [loadData]);
 
   // Re-observe new campaign cards whenever the page changes
   useEffect(() => {
@@ -149,6 +149,11 @@ export default function CampaignList() {
         <meta name="description" content="Browse all active donation campaigns supporting education, healthcare, and community development." />
         <meta property="og:title" content={`All Campaigns | ${siteName}`} />
         <meta property="og:description" content="Choose a campaign to support our mission." />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content={logoUrl} />
+        <meta property="og:site_name" content={siteName} />
+        <meta property="og:url" content={typeof window !== 'undefined' ? window.location.href : ''} />
+        <link rel="canonical" href={typeof window !== 'undefined' ? window.location.href : ''} />
       </Helmet>
 
       {loading && (
@@ -169,7 +174,35 @@ export default function CampaignList() {
 
       {!loading && error && (
         <div className="container">
-          <p className="error">{error}</p>
+          <div className="error-container" style={{
+            padding: '4rem 2rem',
+            textAlign: 'center',
+            backgroundColor: '#fef2f2',
+            border: '2px solid #ef4444',
+            borderRadius: '8px',
+            margin: '2rem auto',
+            color: '#dc2626',
+            maxWidth: '600px',
+          }}>
+            <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Unable to load campaigns</h2>
+            <p>{error}</p>
+            <button
+              onClick={loadData}
+              style={{
+                marginTop: '1.5rem',
+                padding: '0.75rem 2rem',
+                backgroundColor: '#1e3a5f',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '1rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              Try again
+            </button>
+          </div>
         </div>
       )}
 

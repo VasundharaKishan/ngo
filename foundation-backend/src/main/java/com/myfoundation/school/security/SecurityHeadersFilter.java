@@ -35,26 +35,12 @@ public class SecurityHeadersFilter implements Filter {
         // max-age=31536000 (1 year), includeSubDomains applies to all subdomains
         httpResponse.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
         
-        // Content Security Policy (CSP)
-        // Defines trusted sources for content, prevents XSS attacks
-        // default-src 'self': Only load resources from same origin by default
-        // script-src 'self' 'unsafe-inline': Allow scripts from same origin and inline scripts (needed for React)
-        // style-src 'self' 'unsafe-inline': Allow styles from same origin and inline styles
-        // img-src 'self' data: https:: Allow images from same origin, data URIs, and HTTPS
-        // font-src 'self' data:: Allow fonts from same origin and data URIs
-        // connect-src 'self': Allow AJAX/fetch requests to same origin only
-        // frame-ancestors 'none': Prevent embedding in frames (redundant with X-Frame-Options but more modern)
-        httpResponse.setHeader("Content-Security-Policy", 
-            "default-src 'self'; " +
-            "script-src 'self' 'unsafe-inline'; " +
-            "style-src 'self' 'unsafe-inline'; " +
-            "img-src 'self' data: https:; " +
-            "font-src 'self' data:; " +
-            "connect-src 'self'; " +
-            "frame-ancestors 'none'; " +
-            "base-uri 'self'; " +
-            "form-action 'self'");
-        
+        // Content-Security-Policy is intentionally NOT set here.
+        // SecurityConfig (Spring Security filter, order -100) owns the CSP and includes
+        // all required directives including 'object-src none'. This filter runs at order 1
+        // (after Spring Security), so any setHeader() call here would overwrite — and
+        // silently drop — directives set by SecurityConfig.
+
         // X-Frame-Options
         // Prevents clickjacking by disallowing the page to be embedded in frames
         // DENY: Never allow framing
@@ -73,11 +59,13 @@ public class SecurityHeadersFilter implements Filter {
         // Permissions-Policy (formerly Feature-Policy)
         // Controls which browser features and APIs can be used
         // Disables potentially dangerous features like geolocation, camera, microphone
-        httpResponse.setHeader("Permissions-Policy", 
+        // payment=(self "https://js.stripe.com") — allows Stripe's Payment Request API
+        // (Apple Pay / Google Pay via Stripe) if added in the future.
+        httpResponse.setHeader("Permissions-Policy",
             "geolocation=(), " +
             "microphone=(), " +
             "camera=(), " +
-            "payment=(), " +
+            "payment=(self \"https://js.stripe.com\"), " +
             "usb=(), " +
             "magnetometer=(), " +
             "gyroscope=(), " +

@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { authFetch } from '../utils/auth';
 import { formatCurrency, calculateProgress } from '../utils/currency';
 import { useSiteName } from '../contexts/ConfigContext';
+import { useToast } from '../components/ToastProvider';
 import logger from '../utils/logger';
 
 interface Campaign {
@@ -13,6 +14,7 @@ interface Campaign {
   title: string;
   targetAmount: number;
   currentAmount?: number;
+  currency: string;
   active: boolean;
   category?: {
     id: string;
@@ -23,6 +25,7 @@ interface Campaign {
 
 export default function Campaigns() {
   const siteName = useSiteName();
+  const showToast = useToast();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -45,14 +48,20 @@ export default function Campaigns() {
 
   const deleteCampaign = async (id: string) => {
     if (!confirm('Are you sure you want to delete this campaign?')) return;
-    
+
     try {
-      await authFetch(`${API_BASE_URL}/admin/campaigns/${id}`, {
+      const res = await authFetch(`${API_BASE_URL}/admin/campaigns/${id}`, {
         method: 'DELETE'
       });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        showToast((data as { error?: string }).error || 'Failed to delete campaign', 'error');
+        return;
+      }
       loadCampaigns();
     } catch (error) {
       logger.error('Campaigns', 'Error deleting campaign:', error);
+      showToast('Failed to delete campaign', 'error');
     }
   };
 
@@ -107,8 +116,8 @@ export default function Campaigns() {
                         <span style={{ color: '#94a3b8' }}>No category</span>
                       )}
                     </td>
-                    <td>{formatCurrency(targetCents, 'usd', { decimals: 0 })}</td>
-                    <td>{formatCurrency(currentCents, 'usd', { decimals: 0 })}</td>
+                    <td>{formatCurrency(targetCents, campaign.currency || 'usd', { decimals: 0 })}</td>
+                    <td>{formatCurrency(currentCents, campaign.currency || 'usd', { decimals: 0 })}</td>
                     <td>
                       <span style={{ fontWeight: 'bold', color: progress >= 100 ? '#10b981' : '#667eea' }}>
                         {progress.toFixed(1)}%

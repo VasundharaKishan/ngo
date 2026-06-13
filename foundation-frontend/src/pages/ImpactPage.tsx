@@ -1,13 +1,16 @@
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
-import { useSiteName } from '../contexts/ConfigContext';
+import { useSiteName, useSiteLogo } from '../contexts/ConfigContext';
+import { useCMSContent } from '../hooks/useCMSContent';
 import TrustBadges from '../components/TrustBadges';
 import './ImpactPage.css';
 
 export default function ImpactPage() {
   const siteName = useSiteName();
+  const logoUrl = useSiteLogo();
   const { t } = useTranslation();
+  const { content } = useCMSContent('impact');
 
   return (
     <div className="impact-page" data-testid="impact-page">
@@ -15,15 +18,20 @@ export default function ImpactPage() {
         <title>Our Impact | {siteName}</title>
         <meta name="description" content={`See how ${siteName} is making a difference — our reach, our process, and the trust we've built.`} />
         <meta property="og:title" content={`Our Impact | ${siteName}`} />
+        <meta property="og:description" content={`See how ${siteName} is making a difference — our reach, our process, and the trust we've built.`} />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content={logoUrl} />
+        <meta property="og:site_name" content={siteName} />
+        <meta property="og:url" content={typeof window !== 'undefined' ? window.location.href : ''} />
+        <link rel="canonical" href={typeof window !== 'undefined' ? window.location.href : ''} />
       </Helmet>
 
-      {/* Hero */}
+      {/* Hero — title + subtitle from /api/cms/content/impact */}
       <section className="impact-hero">
         <div className="impact-hero-inner">
-          <h1>Our Impact</h1>
+          <h1>{content.heroTitle || 'Our Impact'}</h1>
           <p>
-            Every rupee you give creates real, measurable change.
-            Here is how we turn your generosity into action.
+            {content.heroSubtitle || 'Every contribution you make creates real, measurable change. Here is how we turn your generosity into action.'}
           </p>
         </div>
       </section>
@@ -90,17 +98,17 @@ export default function ImpactPage() {
         </div>
       </section>
 
-      {/* CTA */}
+      {/* CTA — all labels + destinations from /api/cms/content/impact */}
       <section className="impact-cta">
         <div className="impact-container">
-          <h2>Be part of our next chapter</h2>
-          <p>Your donation directly funds education, healthcare, and livelihoods in rural India.</p>
+          <h2>{content.ctaTitle || 'Be part of our next chapter'}</h2>
+          <p>{content.ctaText || 'Your donation directly funds education, healthcare, and livelihoods in rural India.'}</p>
           <div className="impact-cta-buttons">
-            <Link to="/campaigns" className="btn-impact-primary">
-              Browse campaigns
+            <Link to={content.ctaPrimaryHref || '/campaigns'} className="btn-impact-primary">
+              {content.ctaPrimaryLabel || 'Browse campaigns'}
             </Link>
-            <Link to="/about" className="btn-impact-secondary">
-              Learn about us
+            <Link to={content.ctaSecondaryHref || '/about'} className="btn-impact-secondary">
+              {content.ctaSecondaryLabel || 'Learn about us'}
             </Link>
           </div>
         </div>

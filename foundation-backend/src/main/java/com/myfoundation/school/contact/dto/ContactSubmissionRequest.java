@@ -27,6 +27,9 @@ public record ContactSubmissionRequest(
         @Size(min = 20, max = 8000, message = "Message must be between 20 and 8000 characters")
         String message,
 
-        @NotBlank(message = "CAPTCHA verification is required")
+        // No @NotBlank here — when CAPTCHA is disabled the frontend sends an empty
+        // string and TurnstileVerificationService.verify() returns true without
+        // inspecting the token. When CAPTCHA is enabled, an empty/null token causes
+        // verify() to return false and the service throws IllegalStateException.
         String turnstileToken
 ) {}

@@ -20,7 +20,7 @@
 import { useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
-import { useSiteName } from '../contexts/ConfigContext';
+import { useSiteName, useSiteLogo } from '../contexts/ConfigContext';
 import { useRegistrationInfo, type PublicRegistrationStatus } from '../hooks/useRegistrationInfo';
 import {
   useTransparencyDocuments,
@@ -79,6 +79,7 @@ function formatIssuedDate(iso: string | null, periodLabel: string | null): strin
 
 export default function TransparencyPage() {
   const siteName = useSiteName();
+  const logoUrl = useSiteLogo();
   const registration = useRegistrationInfo();
   const { loading: documentsLoading, documents } = useTransparencyDocuments();
 
@@ -97,7 +98,13 @@ export default function TransparencyPage() {
           name="description"
           content={`Registration status, governance documents, and operational disclosures for ${siteName}.`}
         />
+        <meta property="og:description" content={`Registration status, governance documents, and operational disclosures for ${siteName}.`} />
         <meta property="og:title" content={`Transparency | ${siteName}`} />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content={logoUrl} />
+        <meta property="og:site_name" content={siteName} />
+        <meta property="og:url" content={typeof window !== 'undefined' ? window.location.href : ''} />
+        <link rel="canonical" href={typeof window !== 'undefined' ? window.location.href : ''} />
       </Helmet>
 
       <header className="tx-hero">

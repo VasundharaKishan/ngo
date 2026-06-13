@@ -107,24 +107,42 @@ public class RateLimitingFilter implements Filter {
     }
     
     /**
-     * Get client IP address, considering proxy headers
+     * Private CIDRs — requests arriving directly from these addresses are
+     * considered to be coming from a trusted reverse-proxy, so we accept their
+     * X-Forwarded-For / X-Real-IP headers. Requests from all other IPs use the
+     * socket-level remoteAddr to prevent spoofing.
+     */
+    private static final java.util.Set<String> TRUSTED_PROXY_PREFIXES = java.util.Set.of(
+            "127.", "::1", "10.", "172.16.", "172.17.", "172.18.", "172.19.",
+            "172.20.", "172.21.", "172.22.", "172.23.", "172.24.", "172.25.",
+            "172.26.", "172.27.", "172.28.", "172.29.", "172.30.", "172.31.",
+            "192.168."
+    );
+
+    /**
+     * Get client IP address. Forwarded headers are only trusted when the
+     * immediate TCP peer (remoteAddr) is a known private/loopback address,
+     * preventing clients from spoofing their IP via X-Forwarded-For.
      */
     private String getClientIP(HttpServletRequest request) {
-        // Check for forwarded IP (from proxy/load balancer)
-        String forwardedFor = request.getHeader("X-Forwarded-For");
-        if (forwardedFor != null && !forwardedFor.isEmpty()) {
-            // X-Forwarded-For can contain multiple IPs, use the first one
-            return forwardedFor.split(",")[0].trim();
+        String remoteAddr = request.getRemoteAddr();
+        boolean fromTrustedProxy = TRUSTED_PROXY_PREFIXES.stream()
+                .anyMatch(remoteAddr::startsWith);
+
+        if (fromTrustedProxy) {
+            // Trust forwarded headers only from private-network proxies
+            String forwardedFor = request.getHeader("X-Forwarded-For");
+            if (forwardedFor != null && !forwardedFor.isEmpty()) {
+                return forwardedFor.split(",")[0].trim();
+            }
+            String realIp = request.getHeader("X-Real-IP");
+            if (realIp != null && !realIp.isEmpty()) {
+                return realIp;
+            }
         }
-        
-        // Check X-Real-IP header
-        String realIp = request.getHeader("X-Real-IP");
-        if (realIp != null && !realIp.isEmpty()) {
-            return realIp;
-        }
-        
-        // Fall back to remote address
-        return request.getRemoteAddr();
+
+        // Public internet or untrusted source — use socket address directly
+        return remoteAddr;
     }
     
     /**

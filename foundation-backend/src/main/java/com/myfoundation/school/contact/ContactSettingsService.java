@@ -109,35 +109,28 @@ public class ContactSettingsService {
     
     private ContactInfoResponse getDefaultContactInfo() {
         ContactInfoResponse response = new ContactInfoResponse();
-        response.setEmail("hopefoundationysv@gmail.com");
-        
-        // Issue 9: DRY - Use helper method to avoid duplicate code
+        // Placeholder — update via Admin → Contact Settings before going live
+        response.setEmail("contact@example.org");
         response.setLocations(createDefaultLocations());
         response.setShowInFooter(true);
-        
         return response;
     }
-    
-    // Issue 9: DRY - Extract common default locations creation
+
+    /**
+     * Returns placeholder locations used only when no contact settings exist in the DB.
+     * Admin must update these via Admin → Contact Settings before the site goes live.
+     */
     private List<ContactLocation> createDefaultLocations() {
         List<ContactLocation> locations = new ArrayList<>();
-        
-        ContactLocation ireland = new ContactLocation();
-        ireland.setLabel("Ireland");
-        ireland.setLines(Arrays.asList("4 Sorrel Green", "Sorrel Woods", "Blessington", "Ireland"));
-        ireland.setPostalLabel("Eircode");
-        ireland.setPostalCode("W91PR6F");
-        ireland.setMobile("+353 899540707");
-        locations.add(ireland);
-        
-        ContactLocation india = new ContactLocation();
-        india.setLabel("India");
-        india.setLines(Arrays.asList("Yugal Savitri Bhavan", "Building Number 88", "Hazaribagh", "Jharkhand", "India"));
-        india.setPostalLabel("Pincode");
-        india.setPostalCode("829301");
-        india.setMobile("+91 9987379321");
-        locations.add(india);
-        
+
+        ContactLocation placeholder = new ContactLocation();
+        placeholder.setLabel("Head Office");
+        placeholder.setLines(Arrays.asList("Your Organisation", "Street Address", "City", "Country"));
+        placeholder.setPostalLabel("Postal Code");
+        placeholder.setPostalCode("000000");
+        placeholder.setMobile("+00 0000000000");
+        locations.add(placeholder);
+
         return locations;
     }
     

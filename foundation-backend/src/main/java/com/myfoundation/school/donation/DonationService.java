@@ -129,7 +129,7 @@ public class DonationService {
         
         if (amountInCents < minimumAmount) {
             String formattedMin = String.format("%.2f", minimumAmount / 100.0);
-            throw new IllegalArgumentException(
+            throw new BusinessException(
                 String.format("Minimum donation amount is %s %s", formattedMin, request.getCurrency().toUpperCase())
             );
         }
@@ -175,18 +175,35 @@ public class DonationService {
                     .build();
             
             Session session = Session.create(params);
-            
-            // Update donation with session ID
-            donation.setStripeSessionId(session.getId());
-            donationRepository.save(donation);
-            
+
+            // Update donation with Stripe session ID.
+            //
+            // IMPORTANT: the Stripe session is already live at this point — it is an
+            // external side-effect that cannot be rolled back.  If the save below fails
+            // (e.g. a transient DB error) we must NOT let the @Transactional rollback
+            // silently discard the donation row while the Stripe session persists.
+            // Instead we catch the exception, emit a CRITICAL alert with enough context
+            // for manual reconciliation, and still return the session URL so the donor
+            // can complete their payment.  The webhook handler will re-attempt to
+            // associate the payment with the correct donation on success.
+            try {
+                donation.setStripeSessionId(session.getId());
+                donationRepository.save(donation);
+            } catch (Exception dbEx) {
+                log.error("CRITICAL: Failed to persist Stripe sessionId '{}' for donation '{}'. " +
+                          "Manual DB reconciliation required. Stripe session is live and donor may complete payment.",
+                          session.getId(), donation.getId(), dbEx);
+                // Do not re-throw — the Stripe session is valid and the donor should be
+                // redirected to complete payment.  The webhook will handle status updates.
+            }
+
             log.info("Stripe checkout session created: {}", session.getId());
-            
+
             return CheckoutSessionResponse.builder()
                     .sessionId(session.getId())
                     .url(session.getUrl())
                     .build();
-            
+
         } catch (StripeException e) {
             log.error("Failed to create Stripe checkout session: {} (code: {})", e.getMessage(), e.getCode(), e);
             throw new BusinessException("Failed to create checkout session. Please try again.", e);
@@ -222,7 +239,7 @@ public class DonationService {
                     .format(DateTimeFormatter.ofPattern("MMMM dd, yyyy 'at' hh:mm a z"));
                 
                 // Send thank you email to donor
-                log.info("[Webhook] Sending donation acknowledgement email to donor: {}", donation.getDonorEmail());
+                log.debug("[Webhook] Sending donation acknowledgement email for donation: {}", donationId);
                 emailService.sendDonationAcknowledgement(
                     donation.getDonorEmail(),
                     donation.getDonorName() != null ? donation.getDonorName() : "Anonymous Donor",
@@ -284,7 +301,7 @@ public class DonationService {
     @Transactional(readOnly = true)
     public List<DonationResponse> getAllDonations() {
         log.info("Fetching all donations");
-        return donationRepository.findAll().stream()
+        return donationRepository.findAllWithCampaign().stream()
                 .map(this::toDonationResponse)
                 .collect(Collectors.toList());
     }

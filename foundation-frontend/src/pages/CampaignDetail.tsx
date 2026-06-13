@@ -4,8 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { Helmet } from 'react-helmet-async';
 import { api, type Campaign } from '../api';
 import { formatCurrency, formatCurrencyCode } from '../utils/currency';
-import { useSiteName } from '../contexts/ConfigContext';
+import { useSiteName, useSiteLogo } from '../contexts/ConfigContext';
 import { getDetailUrl } from '../utils/imageUtils';
+import { IMAGES } from '../config/constants';
 import './CampaignDetail.css';
 
 function ShareButtons({ title, url }: { title: string; url: string }) {
@@ -75,6 +76,7 @@ export default function CampaignDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const siteName = useSiteName();
+  const siteLogo = useSiteLogo();
 
   useEffect(() => {
     if (id) {
@@ -108,8 +110,12 @@ export default function CampaignDetail() {
             <title>{campaign.title} | {siteName}</title>
             <meta name="description" content={campaign.shortDescription || `Support ${campaign.title} — make a difference today.`} />
             <meta property="og:title" content={campaign.title} />
-            <meta property="og:description" content={campaign.shortDescription || ''} />
-            {campaign.imageUrl && <meta property="og:image" content={campaign.imageUrl} />}
+            <meta property="og:description" content={campaign.shortDescription || `Support ${campaign.title} — make a difference today.`} />
+            <meta property="og:type" content="website" />
+            <meta property="og:image" content={campaign.imageUrl || siteLogo} />
+            <meta property="og:site_name" content={siteName} />
+            <meta property="og:url" content={typeof window !== 'undefined' ? window.location.href : ''} />
+            <link rel="canonical" href={typeof window !== 'undefined' ? window.location.href : ''} />
           </Helmet>
           <div className="campaign-detail">
             <div className="detail-header">
@@ -117,19 +123,17 @@ export default function CampaignDetail() {
               {campaign.active && <span className="badge-active">{t('campaign.activeCampaign')}</span>}
             </div>
 
-            {campaign.imageUrl && (
-              <div className="detail-image-container">
-                <img
-                  src={getDetailUrl(campaign.imageUrl)}
-                  alt={campaign.title}
-                  className="detail-image"
-                  loading="eager"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
-              </div>
-            )}
+            <div className="detail-image-container">
+              <img
+                src={campaign.imageUrl ? getDetailUrl(campaign.imageUrl) : IMAGES.PLACEHOLDER.CAMPAIGN}
+                alt={campaign.title}
+                className="detail-image"
+                loading="eager"
+                onError={(e) => {
+                  e.currentTarget.src = IMAGES.PLACEHOLDER.CAMPAIGN;
+                }}
+              />
+            </div>
 
             <div className="detail-content">
               <div className="main-content">
@@ -144,10 +148,10 @@ export default function CampaignDetail() {
                     <div className="goal-amount">
                       <span className="amount">
                         {campaign.targetAmount != null 
-                          ? formatCurrency(campaign.targetAmount, campaign.currency || 'eur', { includeSymbol: false })
+                          ? formatCurrency(campaign.targetAmount, campaign.currency || 'inr', { includeSymbol: false })
                           : 'N/A'}
                       </span>
-                      <span className="currency">{formatCurrencyCode(campaign.currency || 'eur')}</span>
+                      <span className="currency">{formatCurrencyCode(campaign.currency || 'inr')}</span>
                     </div>
                     <p className="goal-label">{t('campaign.fundingGoal')}</p>
                   </div>
@@ -171,7 +175,7 @@ export default function CampaignDetail() {
 
             <ShareButtons
               title={campaign.title}
-              url={window.location.href}
+              url={typeof window !== 'undefined' ? window.location.href : ''}
             />
 
             <div className="back-link">

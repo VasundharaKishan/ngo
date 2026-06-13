@@ -324,11 +324,16 @@ public class AdminCMSController {
     public ResponseEntity<CMSContent> createContent(@Valid @RequestBody CMSContentRequest request) {
         log.info("POST /api/admin/cms/content - Creating CMS content for section {}", request.section());
         
+        // Sanitize HTML content before persisting to prevent stored XSS
+        String safeValue = "html".equalsIgnoreCase(request.contentType())
+                ? XssSanitizer.sanitize(request.contentValue())
+                : request.contentValue();
+
         CMSContent content = CMSContent.builder()
                 .section(request.section())
                 .contentKey(request.contentKey())
                 .contentType(request.contentType())
-                .contentValue(request.contentValue())
+                .contentValue(safeValue)
                 .displayOrder(request.displayOrder() != null ? request.displayOrder() : 0)
                 .active(request.active() != null ? request.active() : true)
                 .build();
@@ -345,10 +350,14 @@ public class AdminCMSController {
         
         return cmsContentRepository.findById(id)
                 .map(content -> {
+                    // Sanitize HTML content before persisting to prevent stored XSS
+                    String safeValue = "html".equalsIgnoreCase(request.contentType())
+                            ? XssSanitizer.sanitize(request.contentValue())
+                            : request.contentValue();
                     content.setSection(request.section());
                     content.setContentKey(request.contentKey());
                     content.setContentType(request.contentType());
-                    content.setContentValue(request.contentValue());
+                    content.setContentValue(safeValue);
                     if (request.displayOrder() != null) {
                         content.setDisplayOrder(request.displayOrder());
                     }

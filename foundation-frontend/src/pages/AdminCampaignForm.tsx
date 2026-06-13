@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { amountToCents, formatAmountForInput } from '../utils/currency';
+import { getThumbnailUrl } from '../utils/imageUtils';
 import { API_BASE_URL } from '../api';
 import { authFetch } from '../utils/auth';
 import { useToast } from '../components/ToastProvider';
@@ -15,10 +16,10 @@ interface Category {
 }
 
 const CURRENCY_OPTIONS = [
+  { code: 'INR', symbol: '₹', label: 'INR (₹)' },
   { code: 'USD', symbol: '$', label: 'USD ($)' },
   { code: 'EUR', symbol: '€', label: 'EUR (€)' },
   { code: 'GBP', symbol: '£', label: 'GBP (£)' },
-  { code: 'INR', symbol: '₹', label: 'INR (₹)' },
 ];
 
 function getCurrencySymbol(code: string): string {
@@ -40,8 +41,7 @@ export default function AdminCampaignForm() {
     fullDescription: '',
     categoryId: '',
     targetAmount: '',
-    currentAmount: '0',
-    currency: 'USD',
+    currency: 'INR',
     imageUrl: '',
     imageFilename: '',
     location: '',
@@ -52,12 +52,10 @@ export default function AdminCampaignForm() {
   });
 
   useEffect(() => {
-    // Check if user is logged in
-    const user = localStorage.getItem('adminUser');
-    if (!user) {
-      navigate('/admin/login');
-      return;
-    }
+    // Auth is enforced server-side via JWT httpOnly cookie.
+    // The adminUser localStorage key is not a reliable auth indicator —
+    // it may be stale. We rely on authFetch returning 401 and the
+    // admin layout's session guard to redirect unauthenticated users.
     loadCategories();
     if (isEdit) {
       loadCampaign();
@@ -102,10 +100,9 @@ export default function AdminCampaignForm() {
         title: data.title || '',
         shortDescription: data.shortDescription || '',
         fullDescription: data.fullDescription || '',
-        categoryId: data.category?.id || '',
+        categoryId: data.categoryId || '',
         targetAmount: formatAmountForInput(data.targetAmount || 0),
-        currentAmount: formatAmountForInput(data.currentAmount || 0),
-        currency: data.currency || 'USD',
+        currency: data.currency || 'INR',
         imageUrl: data.imageUrl || '',
         imageFilename: extractFilename(data.imageUrl || ''),
         location: data.location || '',
@@ -125,6 +122,12 @@ export default function AdminCampaignForm() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Client-side size guard — matches backend MAX_FILE_BYTES (5 MB)
+    if (file.size > 5 * 1024 * 1024) {
+      showToast('Image must be under 5 MB', 'error');
+      return;
+    }
+
     const formData = new FormData();
     formData.append('file', file);
 
@@ -134,8 +137,12 @@ export default function AdminCampaignForm() {
         method: 'POST',
         body: formData
       });
-      const data = await res.json();
-      setFormData(prev => ({ ...prev, imageUrl: data.url, imageFilename: data.filename || '' }));
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        showToast((data as { error?: string }).error || 'Failed to upload image', 'error');
+        return;
+      }
+      setFormData(prev => ({ ...prev, imageUrl: (data as { url?: string }).url ?? '', imageFilename: (data as { filename?: string }).filename || '' }));
     } catch (error) {
       logger.error('AdminCampaignForm', 'Error uploading image:', error);
       showToast('Failed to upload image', 'error');
@@ -192,7 +199,7 @@ export default function AdminCampaignForm() {
     const payload = {
       ...cleanForm,
       targetAmount: amountToCents(cleanForm.targetAmount),
-      currentAmount: amountToCents(cleanForm.currentAmount || '0'),
+      // currentAmount is intentionally omitted — it is calculated from donations server-side
       beneficiariesCount: cleanForm.beneficiariesCount ? parseInt(cleanForm.beneficiariesCount) : null
     };
 
@@ -214,7 +221,15 @@ export default function AdminCampaignForm() {
         showToast(isEdit ? 'Campaign updated' : 'Campaign created', 'success');
         navigate('/admin/campaigns');
       } else {
-        showToast('Failed to save campaign', 'error');
+        const data = await res.json().catch(() => ({}));
+        const fieldErrors = (data as { errors?: Record<string, string> }).errors;
+        if (fieldErrors) {
+          const first = Object.entries(fieldErrors)[0];
+          showToast(first ? `${first[0]}: ${first[1]}` : 'Validation failed', 'error');
+        } else {
+          const msg = (data as { message?: string }).message || 'Failed to save campaign';
+          showToast(msg, 'error');
+        }
       }
     } catch (error) {
       logger.error('AdminCampaignForm', 'Error saving campaign:', error);
@@ -234,34 +249,37 @@ export default function AdminCampaignForm() {
       <form onSubmit={handleSubmit} className="admin-form" data-testid="campaign-form">
         <div className="form-grid">
           <div className="form-group full-width">
-            <label>Title *</label>
+            <label>Title * <span className="help-text">({formData.title.length}/200)</span></label>
             <input
               type="text"
               value={formData.title}
               data-testid="campaign-title"
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              maxLength={200}
               required
             />
           </div>
 
           <div className="form-group full-width">
-            <label>Short Description *</label>
+            <label>Short Description * <span className="help-text">({formData.shortDescription.length}/200)</span></label>
               <textarea
                 value={formData.shortDescription}
                 data-testid="campaign-short-description"
                 onChange={(e) => setFormData({ ...formData, shortDescription: e.target.value })}
                 rows={2}
+                maxLength={200}
                 required
               />
           </div>
 
           <div className="form-group full-width">
-            <label>Full Description *</label>
+            <label>Full Description * <span className="help-text">({formData.fullDescription.length}/8000)</span></label>
               <textarea
                 value={formData.fullDescription}
                 data-testid="campaign-full-description"
                 onChange={(e) => setFormData({ ...formData, fullDescription: e.target.value })}
                 rows={5}
+                maxLength={8000}
                 required
               />
           </div>
@@ -319,18 +337,6 @@ export default function AdminCampaignForm() {
           </div>
 
           <div className="form-group">
-            <label>Current Amount ({getCurrencySymbol(formData.currency)})</label>
-            <input
-              type="number"
-              value={formData.currentAmount}
-              data-testid="campaign-current-amount"
-              onChange={(e) => setFormData({ ...formData, currentAmount: e.target.value })}
-              min="0"
-              step="0.01"
-            />
-          </div>
-
-          <div className="form-group">
             <label>Beneficiaries Count</label>
             <input
               type="number"
@@ -346,7 +352,11 @@ export default function AdminCampaignForm() {
               <div className="image-upload-area">
                 {formData.imageUrl && (
                   <div className="image-preview">
-                    <img src={formData.imageUrl} alt="Campaign" />
+                    <img
+                      src={getThumbnailUrl(formData.imageUrl)}
+                      alt="Campaign"
+                      onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                    />
                     <button type="button" className="btn-cancel small" onClick={handleRemoveImage} disabled={uploading}>
                       Remove image
                     </button>
@@ -354,7 +364,7 @@ export default function AdminCampaignForm() {
                 )}
             <input
               type="file"
-              accept="image/*"
+              accept=".jpg,.jpeg,.png,.gif,.webp,image/jpeg,image/png,image/gif,image/webp"
               data-testid="campaign-image-upload"
               onChange={handleImageUpload}
               disabled={uploading}

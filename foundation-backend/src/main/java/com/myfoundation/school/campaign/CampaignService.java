@@ -1,6 +1,7 @@
 package com.myfoundation.school.campaign;
 
 import com.myfoundation.school.donation.DonationRepository;
+import com.myfoundation.school.exception.ResourceNotFoundException;
 import com.myfoundation.school.dto.CampaignPageResponse;
 import com.myfoundation.school.dto.CampaignPopupDto;
 import com.myfoundation.school.dto.CampaignResponse;
@@ -120,12 +121,12 @@ public class CampaignService {
      * 
      * @param id The campaign ID
      * @return Campaign details as CampaignResponse DTO
-     * @throws RuntimeException if campaign not found
+     * @throws ResourceNotFoundException if campaign not found
      */
     public CampaignResponse getCampaignById(String id) {
         log.info("Fetching campaign with id: {}", id);
         Campaign campaign = campaignRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Campaign not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Campaign", id));
         return toCampaignResponse(campaign);
     }
     

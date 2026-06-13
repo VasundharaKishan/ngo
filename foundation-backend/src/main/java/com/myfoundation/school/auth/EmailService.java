@@ -43,7 +43,19 @@ public class EmailService {
     
     @Value("${app.mail.from.system}")
     private String fromSystem;
-    
+
+    /** Returns the org name from admin settings, falling back to the mail from-name. */
+    private String orgName() {
+        String name = siteConfigService.getConfigValue("site.name");
+        return (name != null && !name.isBlank()) ? name : fromName;
+    }
+
+    /** Returns the public contact email from admin settings, falling back to reply-to. */
+    private String contactEmail() {
+        String email = siteConfigService.getConfigValue("contact.email");
+        return (email != null && !email.isBlank()) ? email : replyTo;
+    }
+
     public void sendOtpEmail(String toEmail, String username, String code) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
@@ -78,7 +90,7 @@ public class EmailService {
             helper.setFrom(fromAccountAlerts, fromName);
             helper.setReplyTo(replyTo);
             helper.setTo(toEmail);
-            helper.setSubject("Complete Your Account Setup - Yugal Savitri Seva");
+            helper.setSubject("Complete Your Account Setup - " + orgName());
             
             String setupLink = frontendUrl + "/admin/setup-password?token=" + token;
             
@@ -95,67 +107,27 @@ public class EmailService {
     }
     
     private String buildPasswordSetupEmailHtml(String username, String setupLink) {
+        String org = orgName();
         return """
             <!DOCTYPE html>
             <html>
             <head>
                 <style>
-                    body {
-                        font-family: Arial, sans-serif;
-                        line-height: 1.6;
-                        color: #333;
-                        max-width: 600px;
-                        margin: 0 auto;
-                        padding: 20px;
-                    }
-                    .header {
-                        background: linear-gradient(135deg, #667eea 0%%, #764ba2 100%%);
-                        color: white;
-                        padding: 30px;
-                        text-align: center;
-                        border-radius: 10px 10px 0 0;
-                    }
-                    .content {
-                        background: #f8fafc;
-                        padding: 30px;
-                        border-radius: 0 0 10px 10px;
-                    }
-                    .button {
-                        display: inline-block;
-                        padding: 15px 30px;
-                        background: linear-gradient(135deg, #667eea 0%%, #764ba2 100%%);
-                        color: white;
-                        text-decoration: none;
-                        border-radius: 8px;
-                        margin: 20px 0;
-                        font-weight: bold;
-                    }
-                    .info-box {
-                        background: white;
-                        padding: 20px;
-                        border-left: 4px solid #667eea;
-                        margin: 20px 0;
-                        border-radius: 4px;
-                    }
-                    .footer {
-                        text-align: center;
-                        color: #64748b;
-                        font-size: 14px;
-                        margin-top: 30px;
-                        padding-top: 20px;
-                        border-top: 1px solid #e2e8f0;
-                    }
+                    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+                    .header { background: linear-gradient(135deg, #667eea 0%%, #764ba2 100%%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+                    .content { background: #f8fafc; padding: 30px; border-radius: 0 0 10px 10px; }
+                    .button { display: inline-block; padding: 15px 30px; background: linear-gradient(135deg, #667eea 0%%, #764ba2 100%%); color: white; text-decoration: none; border-radius: 8px; margin: 20px 0; font-weight: bold; }
+                    .info-box { background: white; padding: 20px; border-left: 4px solid #667eea; margin: 20px 0; border-radius: 4px; }
+                    .footer { text-align: center; color: #64748b; font-size: 14px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0; }
                 </style>
             </head>
             <body>
                 <div class="header">
-                    <h1>🎉 Welcome to Yugal Savitri Seva!</h1>
+                    <h1>🎉 Welcome to %s!</h1>
                 </div>
                 <div class="content">
                     <p>Hello <strong>%s</strong>,</p>
-                    
-                    <p>An administrator has created an account for you at Yugal Savitri Seva Admin Portal. To complete your account setup, you need to:</p>
-                    
+                    <p>An administrator has created an account for you at %s Admin Portal. To complete your account setup, you need to:</p>
                     <div class="info-box">
                         <strong>📋 Setup Steps:</strong>
                         <ol>
@@ -163,29 +135,18 @@ public class EmailService {
                             <li>Choose and answer security questions</li>
                         </ol>
                     </div>
-                    
                     <p>Click the button below to get started:</p>
-                    
-                    <center>
-                        <a href="%s" class="button">Complete Account Setup</a>
-                    </center>
-                    
-                    <p style="font-size: 14px; color: #64748b;">
-                        <strong>Note:</strong> This link will expire in 24 hours for security purposes.
-                    </p>
-                    
-                    <p style="font-size: 14px; color: #64748b;">
-                        If you didn't expect this email, please contact your administrator immediately.
-                    </p>
-                    
+                    <center><a href="%s" class="button">Complete Account Setup</a></center>
+                    <p style="font-size: 14px; color: #64748b;"><strong>Note:</strong> This link will expire in 24 hours for security purposes.</p>
+                    <p style="font-size: 14px; color: #64748b;">If you didn't expect this email, please contact your administrator immediately.</p>
                     <div class="footer">
-                        <p>Yugal Savitri Seva Admin Portal</p>
+                        <p>%s Admin Portal</p>
                         <p>Making a difference, one campaign at a time 💙</p>
                     </div>
                 </div>
             </body>
             </html>
-            """.formatted(username, setupLink);
+            """.formatted(org, username, org, setupLink, org);
     }
     
     /**
@@ -205,11 +166,11 @@ public class EmailService {
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
             
             // Use donations@ or no-reply@ for outbound emails
-            // Reply-To will be contact@yugalsavitriseva.org
+            // Reply-To uses the configured replyTo address
             helper.setFrom(fromDonations, fromName);
             helper.setReplyTo(replyTo);
             helper.setTo(toEmail);
-            helper.setSubject("Thank You for Your Generous Donation - Yugal Savitri Seva");
+            helper.setSubject("Thank You for Your Generous Donation - " + orgName());
             
             String htmlContent = buildDonationAcknowledgementHtml(
                 donorName, amount, currency, campaignTitle, donationId, donationDate
@@ -244,7 +205,7 @@ public class EmailService {
             helper.setFrom(fromSystem, fromName);
             String adminEmail = siteConfigService.getConfigValue("admin.notification.email");
             if (adminEmail == null || adminEmail.isBlank()) {
-                adminEmail = "contact@yugalsavitriseva.org";
+                adminEmail = contactEmail();
             }
             helper.setTo(adminEmail);
             helper.setSubject("New Donation Received - " + formatCurrency(amount, currency));
@@ -282,8 +243,10 @@ public class EmailService {
             String campaignTitle,
             String donationId,
             String donationDate) {
-        
+
         String formattedAmount = formatCurrency(amount, currency);
+        String org = orgName();
+        String contact = contactEmail();
         String logoUrl = frontendUrl + "/logo.png";
         
         return """
@@ -407,7 +370,7 @@ public class EmailService {
                     <div class="content">
                         <p style="font-size: 18px; margin-bottom: 10px;">Dear <strong>%s</strong>,</p>
                         
-                        <p>We are deeply grateful for your generous donation to <strong>Yugal Savitri Seva</strong>. Your support enables us to continue our mission and make a positive impact in our community.</p>
+                        <p>We are deeply grateful for your generous donation to <strong>%s</strong>. Your support enables us to continue our mission and make a positive impact in our community.</p>
                         
                         <div class="donation-card">
                             <div style="text-align: center; margin-bottom: 20px;">
@@ -438,32 +401,33 @@ public class EmailService {
                         
                         <p style="margin-top: 30px;">
                             If you have any questions or would like to learn more about our work, please don't hesitate to reach out to us at 
-                            <a href="mailto:contact@yugalsavitriseva.org" style="color: #667eea;">contact@yugalsavitriseva.org</a>
+                            <a href="mailto:%s" style="color: #667eea;">%s</a>
                         </p>
-                        
+
                         <p style="margin-top: 30px; font-size: 18px; font-weight: 600; color: #667eea;">
                             With heartfelt gratitude,<br>
-                            <span style="color: #333;">The Yugal Savitri Seva Team</span>
+                            <span style="color: #333;">The %s Team</span>
                         </p>
                     </div>
-                    
+
                     <div class="footer">
-                        <p><strong>Yugal Savitri Seva</strong></p>
+                        <p><strong>%s</strong></p>
                         <p>Empowering communities through compassion and action</p>
-                        
+
                         <p style="margin-top: 20px; font-size: 12px; color: #9ca3af;">
                             This is an automated message. Please do not reply to this email.<br>
-                            For inquiries, contact us at <a href="mailto:contact@yugalsavitriseva.org">contact@yugalsavitriseva.org</a>
+                            For inquiries, contact us at <a href="mailto:%s">%s</a>
                         </p>
-                        
+
                         <p style="margin-top: 20px; font-size: 12px; color: #9ca3af;">
-                            © 2025 Yugal Savitri Seva. All rights reserved.
+                            © 2025 %s. All rights reserved.
                         </p>
                     </div>
                 </div>
             </body>
             </html>
-            """.formatted(donorName, formattedAmount, campaignTitle, donationDate, donationId);
+            """.formatted(donorName, formattedAmount, campaignTitle, donationDate, donationId,
+                          org, contact, contact, org, contact, org, org, contact, contact, org);
     }
     
     /**
@@ -595,7 +559,8 @@ public class EmailService {
             String donationDate) {
         
         String formattedAmount = formatCurrency(amount, currency);
-        
+        String org = orgName();
+
         return """
             <!DOCTYPE html>
             <html>
@@ -707,19 +672,20 @@ public class EmailService {
                     
                     <div class="footer">
                         <p>This is an automated notification from your donation platform.</p>
-                        <p>Yugal Savitri Seva Admin Dashboard</p>
+                        <p>%s Admin Dashboard</p>
                     </div>
                 </div>
             </body>
             </html>
             """.formatted(
-                formattedAmount, 
-                donorName, 
-                donorEmail, donorEmail, 
-                campaignTitle, 
-                donationDate, 
+                formattedAmount,
+                donorName,
+                donorEmail, donorEmail,
+                campaignTitle,
+                donationDate,
                 donationId,
-                currency.toUpperCase()
+                currency.toUpperCase(),
+                org
             );
     }
 }

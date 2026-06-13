@@ -1,11 +1,13 @@
+import { sanitizeHtml } from '../utils/sanitize';
 import { Helmet } from 'react-helmet-async';
 import { useCMSContent } from '../hooks/useCMSContent';
-import { useSiteName, useConfig } from '../contexts/ConfigContext';
+import { useSiteName, useSiteLogo, useConfig } from '../contexts/ConfigContext';
 import './LegalPage.css';
 
 export default function CookiesPage() {
   const { content, hasCMSContent } = useCMSContent('legal_cookies');
   const siteName = useSiteName();
+  const logoUrl = useSiteLogo();
   const { config } = useConfig();
 
   return (
@@ -13,12 +15,19 @@ export default function CookiesPage() {
       <Helmet>
         <title>Cookie Policy | {siteName}</title>
         <meta name="description" content="How we use cookies on our website." />
+        <meta property="og:title" content={`Cookie Policy | ${siteName}`} />
+        <meta property="og:description" content="How we use cookies on our website." />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content={logoUrl} />
+        <meta property="og:site_name" content={siteName} />
+        <meta property="og:url" content={typeof window !== 'undefined' ? window.location.href : ''} />
+        <link rel="canonical" href={typeof window !== 'undefined' ? window.location.href : ''} />
       </Helmet>
       <h1>{content.title || 'Cookie Policy'}</h1>
       <p className="last-updated">Last Updated: {content.lastUpdated || 'December 2024'}</p>
 
       {hasCMSContent && content.body ? (
-        <div dangerouslySetInnerHTML={{ __html: content.body }} />
+        <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(content.body) }} />
       ) : (
         <>
           <section>

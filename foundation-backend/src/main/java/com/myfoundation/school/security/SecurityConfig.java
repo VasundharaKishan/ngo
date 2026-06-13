@@ -184,11 +184,12 @@ public class SecurityConfig {
                 String cspPolicy =
                         "default-src 'self'; " +
                         "img-src 'self' data: https:; " +
-                        "script-src 'self'; " +
-                        "style-src 'self' 'unsafe-inline'; " +
-                        "connect-src 'self' https://api.stripe.com; " +
+                        "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; " +
+                        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
+                        "font-src 'self' data: https://fonts.gstatic.com; " +
+                        "connect-src 'self' https://api.stripe.com https://challenges.cloudflare.com; " +
+                        "frame-src https://js.stripe.com https://hooks.stripe.com; " +
                         "frame-ancestors 'none'; " +
-                        "font-src 'self' data:; " +
                         "object-src 'none'; " +
                         "base-uri 'self'; " +
                         "form-action 'self'";

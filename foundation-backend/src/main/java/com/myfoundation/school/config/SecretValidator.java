@@ -72,8 +72,9 @@ public class SecretValidator {
     private boolean isDevProfile() {
         String[] activeProfiles = environment.getActiveProfiles();
         if (activeProfiles.length == 0) {
-            // No explicit profile = likely local development
-            return true;
+            // No explicit profile — treat as production (fail-safe).
+            // Dev/test environments must explicitly set spring.profiles.active=dev (or test/local).
+            return false;
         }
         return Arrays.stream(activeProfiles)
                 .anyMatch(profile -> DEV_PROFILES.contains(profile.toLowerCase()));

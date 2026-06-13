@@ -2,6 +2,10 @@
 import { API_BASE_URL } from './config/constants';
 export { API_BASE_URL };
 
+// Re-export the canonical authFetch that includes CSRF token handling.
+// Do NOT define a second authFetch here — use this single source of truth.
+export { authFetch } from './utils/auth';
+
 // Types matching backend DTOs
 export interface Category {
   id: string;
@@ -212,32 +216,8 @@ export const api = {
   },
 };
 
-// Admin API utilities (requires authentication)
-export const authFetch = async (url: string, options: RequestInit = {}) => {
-  // Check if user is logged in (using adminUser in localStorage as indicator)
-  const adminUser = localStorage.getItem('adminUser');
-  if (!adminUser) {
-    throw new Error('No authentication token found');
-  }
-
-  // Use cookies for authentication (httpOnly cookies are sent automatically)
-  const response = await fetch(url, {
-    ...options,
-    credentials: 'include', // Important: Include cookies in the request
-    headers: {
-      ...options.headers,
-      'Content-Type': 'application/json',
-    },
-  });
-
-  if (response.status === 401) {
-    localStorage.removeItem('adminUser');
-    window.location.href = '/admin/login';
-    throw new Error('Unauthorized');
-  }
-
-  return response;
-};
+// authFetch is exported from utils/auth (re-exported above) — do not redefine here.
+import { authFetch as _authFetch } from './utils/auth';
 
 export interface DonationFilters {
   page?: number;
@@ -256,7 +236,7 @@ export const fetchDonationsPaginated = async (filters: DonationFilters): Promise
   if (filters.status && filters.status !== 'ALL') params.set('status', filters.status);
 
   const url = `${API_BASE_URL}/admin/donations?${params.toString()}`;
-  const response = await authFetch(url);
+  const response = await _authFetch(url);
   
   if (!response.ok) {
     throw new Error('Failed to fetch donations');
@@ -268,7 +248,7 @@ export const fetchDonationsPaginated = async (filters: DonationFilters): Promise
 // Admin API for donate popup settings
 export const getDonatePopupSettings = async (): Promise<DonatePopupSettingsResponse> => {
   const url = `${API_BASE_URL}/admin/config/donate-popup`;
-  const response = await authFetch(url);
+  const response = await _authFetch(url);
   
   if (!response.ok) {
     throw new Error('Failed to fetch donate popup settings');
@@ -279,7 +259,7 @@ export const getDonatePopupSettings = async (): Promise<DonatePopupSettingsRespo
 
 export const updateDonatePopupSettings = async (request: DonatePopupSettingsRequest): Promise<DonatePopupSettingsResponse> => {
   const url = `${API_BASE_URL}/admin/config/donate-popup`;
-  const response = await authFetch(url, {
+  const response = await _authFetch(url, {
     method: 'PUT',
     body: JSON.stringify(request),
   });

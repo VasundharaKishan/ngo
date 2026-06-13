@@ -13,16 +13,24 @@ export interface FeaturedCampaign {
   title: string;
   category?: string;
   location?: string;
+  imageUrl?: string;
   targetAmount: number;
   currentAmount: number;
-  donorCount?: number;
+  currency: string;
   daysLeft?: number;
 }
 
 type CacheState = FeaturedCampaign | null | undefined;
 
+// 5-minute TTL — stale after this many milliseconds
+const CACHE_TTL_MS = 5 * 60 * 1000;
 let cached: CacheState = undefined;
+let cachedAt: number | null = null;
 let inflight: Promise<FeaturedCampaign | null> | null = null;
+
+function isCacheStale(): boolean {
+  return cachedAt === null || Date.now() - cachedAt > CACHE_TTL_MS;
+}
 
 function daysUntil(dateStr?: string | null): number | undefined {
   if (!dateStr) return undefined;
@@ -31,7 +39,7 @@ function daysUntil(dateStr?: string | null): number | undefined {
 }
 
 async function fetchFeatured(): Promise<FeaturedCampaign | null> {
-  if (cached !== undefined) return cached;
+  if (cached !== undefined && !isCacheStale()) return cached;
   if (inflight) return inflight;
 
   inflight = (async () => {
@@ -60,17 +68,20 @@ async function fetchFeatured(): Promise<FeaturedCampaign | null> {
         title: raw.title,
         category: raw.categoryName || raw.category || undefined,
         location: raw.location || undefined,
+        imageUrl: raw.imageUrl || undefined,
         targetAmount: raw.targetAmount ?? 0,
         currentAmount: raw.currentAmount ?? 0,
-        donorCount: raw.donorCount ?? raw.donorsCount ?? undefined,
+        currency: raw.currency || 'inr',
         daysLeft: daysUntil(raw.endDate),
       };
 
       cached = campaign;
+      cachedAt = Date.now();
       return campaign;
     } catch (error) {
       logger.error('useFeaturedCampaign', 'Failed to fetch featured campaign', error);
       cached = null;
+      cachedAt = null;
       return null;
     } finally {
       inflight = null;
@@ -91,7 +102,7 @@ export function useFeaturedCampaign(): FeaturedCampaignState {
   );
 
   useEffect(() => {
-    if (cached !== undefined) {
+    if (cached !== undefined && !isCacheStale()) {
       setState({ loading: false, campaign: cached });
       return;
     }

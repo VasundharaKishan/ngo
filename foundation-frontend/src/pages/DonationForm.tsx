@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Helmet } from 'react-helmet-async';
 import { api, type Campaign } from '../api';
-import { useSiteName } from '../contexts/ConfigContext';
+import { useSiteName, useSiteLogo } from '../contexts/ConfigContext';
 import { getCurrencySymbol, amountToCents, centsToAmount } from '../utils/currency';
 import { isValidEmail, isEmpty } from '../utils/validators';
 import { DONATION } from '../config/constants';
@@ -11,12 +11,13 @@ import { useDonationPresets } from '../hooks/useDonationPresets';
 import './DonationForm.css';
 
 type DonationStep = 'amount' | 'personal' | 'payment';
-type DonationFrequency = 'one_time' | 'monthly';
+// DonationFrequency: 'monthly' support is pending backend Stripe Subscription wiring
 
 export default function DonationForm() {
   const { t } = useTranslation();
   const { campaignId } = useParams<{ campaignId: string }>();
   const siteName = useSiteName();
+  const logoUrl = useSiteLogo();
 
   // Preset amounts come from the admin-managed list; fall back to the hardcoded
   // defaults so the form is never empty if the API is briefly unavailable.
@@ -33,10 +34,10 @@ export default function DonationForm() {
 
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [currentStep, setCurrentStep] = useState<DonationStep>('amount');
-  const [frequency, setFrequency] = useState<DonationFrequency>('one_time');
+  // frequency toggle removed — monthly recurring not yet supported by backend
   const [amount, setAmount] = useState<number>(defaultAmount);
   const [amountDirty, setAmountDirty] = useState(false);
-  const [currency, setCurrency] = useState<string>('eur');
+  const [currency, setCurrency] = useState<string>(DONATION.CURRENCY.toLowerCase());
   const [customAmount, setCustomAmount] = useState('');
   const [donorName, setDonorName] = useState('');
   const [donorEmail, setDonorEmail] = useState('');
@@ -50,7 +51,7 @@ export default function DonationForm() {
   useEffect(() => {
     if (campaignId) {
       api.getCampaign(campaignId)
-        .then(setCampaign)
+        .then((c) => { setCampaign(c); if (c.currency) setCurrency(c.currency.toLowerCase()); })
         .catch(() => setCampaignLoadError(t('donation.loadError')));
     }
   }, [campaignId]);
@@ -63,10 +64,19 @@ export default function DonationForm() {
     }
   }, [amountDirty, donationPresets?.defaultAmountMinorUnits]);
 
+  // Minimum amounts per currency (in minor units), matching backend DonationService
+  const MIN_AMOUNTS: Record<string, number> = { inr: 5000, usd: 100, eur: 100, gbp: 100 };
+  const minAmount = MIN_AMOUNTS[currency] ?? 100;
+
   const handleNextStep = () => {
     if (currentStep === 'amount') {
       if (amount <= 0) {
         setError(t('donation.invalidAmount'));
+        return;
+      }
+      if (amount < minAmount) {
+        const { getCurrencySymbol: sym } = { getCurrencySymbol: (c: string) => ({ inr: '₹', usd: '$', eur: '€', gbp: '£' }[c] ?? c.toUpperCase()) };
+        setError(t('donation.amountTooLow', `Minimum donation is ${sym(currency)}${(minAmount / 100).toFixed(0)}`));
         return;
       }
       setError('');
@@ -187,6 +197,12 @@ export default function DonationForm() {
         <title>Donate to {campaign.title} | {siteName}</title>
         <meta name="description" content={`Make a secure donation to support ${campaign.title}. Every contribution makes a difference.`} />
         <meta property="og:title" content={`Support ${campaign.title}`} />
+        <meta property="og:description" content={`Make a secure donation to support ${campaign.title}. Every contribution makes a difference.`} />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content={campaign.imageUrl || logoUrl} />
+        <meta property="og:site_name" content={siteName} />
+        <meta property="og:url" content={typeof window !== 'undefined' ? window.location.href : ''} />
+        <link rel="canonical" href={typeof window !== 'undefined' ? window.location.href : ''} />
         <meta name="robots" content="noindex" />
       </Helmet>
       <div className="donation-form-container">
@@ -229,30 +245,9 @@ export default function DonationForm() {
             <div className="form-step">
               <h2 className="step-title">{t('donation.chooseAmount')}</h2>
 
-              {/* Frequency Toggle */}
-              <div className="frequency-toggle" role="group" aria-label="Donation frequency">
-                <button
-                  type="button"
-                  className={`frequency-btn ${frequency === 'one_time' ? 'active' : ''}`}
-                  onClick={() => setFrequency('one_time')}
-                  data-testid="freq-one-time"
-                >
-                  {t('donation.oneTime')}
-                </button>
-                <button
-                  type="button"
-                  className={`frequency-btn ${frequency === 'monthly' ? 'active monthly' : ''}`}
-                  onClick={() => setFrequency('monthly')}
-                  data-testid="freq-monthly"
-                >
-                  {t('donation.monthly')} ♻️
-                </button>
-              </div>
-              {frequency === 'monthly' && (
-                <p className="frequency-note" data-testid="monthly-note">
-                  💚 {t('donation.monthlyImpact')}
-                </p>
-              )}
+              {/* Frequency toggle: monthly recurring is not yet supported by the backend.
+                  One-time is the only mode. Remove this comment and restore the toggle
+                  once Stripe Subscriptions are wired up end-to-end. */}
 
               <div className="form-section">
                 <label className="form-label">{t('donation.selectCurrency')}</label>
@@ -261,6 +256,7 @@ export default function DonationForm() {
                   value={currency}
                   onChange={(e) => setCurrency(e.target.value)}
                 >
+                  <option value="inr">INR (₹)</option>
                   <option value="eur">EUR (€)</option>
                   <option value="usd">USD ($)</option>
                   <option value="gbp">GBP (£)</option>
@@ -400,7 +396,7 @@ export default function DonationForm() {
                 </div>
                 <div className="summary-row">
                   <span>{t('donation.frequency')}:</span>
-                  <strong>{frequency === 'monthly' ? `${t('donation.monthly')} ♻️` : t('donation.oneTime')}</strong>
+                  <strong>{t('donation.oneTime')}</strong>
                 </div>
                 <div className="summary-row">
                   <span>{t('donation.amount')}:</span>

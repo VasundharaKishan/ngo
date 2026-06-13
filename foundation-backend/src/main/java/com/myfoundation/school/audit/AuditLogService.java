@@ -1,5 +1,6 @@
 package com.myfoundation.school.audit;
 
+import com.myfoundation.school.security.ClientIpExtractor;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +19,7 @@ import java.time.Instant;
 public class AuditLogService {
 
     private final AuditLogRepository repository;
+    private final ClientIpExtractor clientIpExtractor;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void log(AuditAction action, String entityType, String entityId,
@@ -49,12 +51,10 @@ public class AuditLogService {
             ServletRequestAttributes attrs =
                 (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
             if (attrs != null) {
-                HttpServletRequest request = attrs.getRequest();
-                String xff = request.getHeader("X-Forwarded-For");
-                if (xff != null && !xff.isEmpty()) {
-                    return xff.split(",")[0].trim();
-                }
-                return request.getRemoteAddr();
+                // Use the shared ClientIpExtractor which only trusts X-Forwarded-For
+                // from known private-network proxies, preventing audit-log IP spoofing
+                // by authenticated admins who could otherwise inject arbitrary header values.
+                return clientIpExtractor.extract(attrs.getRequest());
             }
         } catch (Exception e) {
             log.trace("Could not resolve client IP", e);

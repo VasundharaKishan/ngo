@@ -32,6 +32,7 @@ import java.util.Map;
 public class RateLimitingInterceptor implements HandlerInterceptor {
 
     private final RateLimiterService rateLimiterService;
+    private final ClientIpExtractor clientIpExtractor;
 
     // ── Window configuration ────────────────────────────────────────────────
 
@@ -102,8 +103,17 @@ public class RateLimitingInterceptor implements HandlerInterceptor {
             return true;
         }
 
+        // Use the matched endpoint prefix as the bucket key — NOT config.hashCode().
+        // hashCode() is identical for any two LimitConfig instances with the same field values,
+        // which would merge the per-client counters across unrelated endpoints (e.g. /api/cms,
+        // /api/config/public, /api/settings/public all share LimitConfig(50,1)).
+        String matchedPrefix = limits.entrySet().stream()
+                .filter(e -> path.startsWith(e.getKey()))
+                .map(Map.Entry::getKey)
+                .findFirst()
+                .orElse(path);
         String client = clientKey(request);
-        boolean allowed = rateLimiterService.isAllowed(client + ":" + config.hashCode(), config.maxRequests, config.windowSeconds);
+        boolean allowed = rateLimiterService.isAllowed(client + ":" + matchedPrefix, config.maxRequests, config.windowSeconds);
         if (!allowed) {
             log.warn("Rate limit exceeded for {} on path {} (limit={} per {}s)", client, path, config.maxRequests, config.windowSeconds);
             response.setStatus(429);
@@ -114,11 +124,7 @@ public class RateLimitingInterceptor implements HandlerInterceptor {
     }
 
     private String clientKey(HttpServletRequest request) {
-        String ip = request.getHeader("X-Forwarded-For");
-        if (ip != null && !ip.isBlank()) {
-            return ip.split(",")[0].trim();
-        }
-        return request.getRemoteAddr();
+        return clientIpExtractor.extract(request);
     }
 
     private record LimitConfig(int maxRequests, long windowSeconds) {}

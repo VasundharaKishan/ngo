@@ -1,11 +1,13 @@
+import { sanitizeHtml } from '../utils/sanitize';
 import { Helmet } from 'react-helmet-async';
 import { useCMSContent } from '../hooks/useCMSContent';
-import { useSiteName, useConfig } from '../contexts/ConfigContext';
+import { useSiteName, useSiteLogo, useConfig } from '../contexts/ConfigContext';
 import './LegalPage.css';
 
 export default function TermsPage() {
   const { content, hasCMSContent } = useCMSContent('legal_terms');
   const siteName = useSiteName();
+  const logoUrl = useSiteLogo();
   const { config } = useConfig();
 
   return (
@@ -13,18 +15,25 @@ export default function TermsPage() {
       <Helmet>
         <title>Terms and Conditions | {siteName}</title>
         <meta name="description" content="Read our terms and conditions for using the donation platform." />
+        <meta property="og:title" content={`Terms and Conditions | ${siteName}`} />
+        <meta property="og:description" content="Read our terms and conditions for using the donation platform." />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content={logoUrl} />
+        <meta property="og:site_name" content={siteName} />
+        <meta property="og:url" content={typeof window !== 'undefined' ? window.location.href : ''} />
+        <link rel="canonical" href={typeof window !== 'undefined' ? window.location.href : ''} />
       </Helmet>
       <h1>{content.title || 'Terms and Conditions'}</h1>
       <p className="last-updated">Last Updated: {content.lastUpdated || 'December 2024'}</p>
 
       {hasCMSContent && content.body ? (
-        <div dangerouslySetInnerHTML={{ __html: content.body }} />
+        <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(content.body) }} />
       ) : (
         <>
           <section>
             <h2>1. Acceptance of Terms</h2>
             <p>
-              By accessing and using the Yugal Savitri Seva Foundation website, you accept and agree to be bound by the terms and provisions of this agreement.
+              By accessing and using the {siteName} website, you accept and agree to be bound by the terms and provisions of this agreement.
             </p>
           </section>
 
@@ -53,14 +62,14 @@ export default function TermsPage() {
           <section>
             <h2>5. Intellectual Property</h2>
             <p>
-              All content on this website, including text, graphics, logos, and images, is the property of Yugal Savitri Seva Foundation and protected by copyright laws.
+              All content on this website, including text, graphics, logos, and images, is the property of {siteName} and protected by copyright laws.
             </p>
           </section>
 
           <section>
             <h2>6. Limitation of Liability</h2>
             <p>
-              Yugal Savitri Seva Foundation shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of the website.
+              {siteName} shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of the website.
             </p>
           </section>
 

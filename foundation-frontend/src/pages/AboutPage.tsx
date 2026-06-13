@@ -1,19 +1,26 @@
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
-import { useSiteName } from '../contexts/ConfigContext';
+import { useSiteName, useSiteLogo } from '../contexts/ConfigContext';
 import './AboutPage.css';
 
 export default function AboutPage() {
   const siteName = useSiteName();
+  const logoUrl = useSiteLogo();
   const { t } = useTranslation();
 
   return (
     <div className="about-page" data-testid="about-page">
       <Helmet>
         <title>{t('about.title')} | {siteName}</title>
-        <meta name="description" content={`${t('about.title')} — ${siteName}`} />
+        <meta name="description" content={`Learn about ${siteName}'s mission, values, and the communities we serve.`} />
         <meta property="og:title" content={`${t('about.title')} | ${siteName}`} />
+        <meta property="og:description" content={`Learn about ${siteName}'s mission, values, and the communities we serve.`} />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content={logoUrl} />
+        <meta property="og:site_name" content={siteName} />
+        <meta property="og:url" content={typeof window !== 'undefined' ? window.location.href : ''} />
+        <link rel="canonical" href={typeof window !== 'undefined' ? window.location.href : ''} />
       </Helmet>
 
       {/* Hero */}
@@ -59,7 +66,7 @@ export default function AboutPage() {
               {t('about.ctaBrowse')}
             </Link>
             <Link to="/impact" className="btn-about-secondary">
-              See our impact
+              {t('about.ctaImpact')}
             </Link>
           </div>
         </div>

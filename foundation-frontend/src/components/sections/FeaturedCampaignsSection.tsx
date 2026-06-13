@@ -10,6 +10,9 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { api, type Campaign } from '../../api';
 import logger from '../../utils/logger';
+import { IMAGES } from '../../config/constants';
+import { getThumbnailUrl } from '../../utils/imageUtils';
+import SkeletonLoader from '../SkeletonLoader';
 import './FeaturedCampaignsSection.css';
 
 interface FeaturedCampaignsSectionProps {
@@ -30,8 +33,17 @@ function getBadgeClass(category?: string): string {
   return 'campaign-card-v2__badge--default';
 }
 
-function formatINR(amount: number): string {
-  return '₹' + amount.toLocaleString('en-IN');
+function formatAmount(amount: number, currency: string): string {
+  try {
+    return new Intl.NumberFormat(undefined, {
+      style: 'currency',
+      currency: currency.toUpperCase(),
+      maximumFractionDigits: 0,
+    }).format(amount);
+  } catch {
+    // Fallback if currency code is unrecognised
+    return `${currency.toUpperCase()} ${amount.toLocaleString()}`;
+  }
 }
 
 export default function FeaturedCampaignsSection({ config }: FeaturedCampaignsSectionProps) {
@@ -60,7 +72,19 @@ export default function FeaturedCampaignsSection({ config }: FeaturedCampaignsSe
     loadCampaigns();
   }, [limit]);
 
-  if (loading) return null;
+  if (loading) {
+    return (
+      <section className="campaigns-section" aria-labelledby="campaigns-section-title" aria-busy="true">
+        <div className="campaigns-container">
+          <div className="campaigns-grid">
+            <SkeletonLoader variant="card" />
+            <SkeletonLoader variant="card" />
+            <SkeletonLoader variant="card" />
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="campaigns-section" aria-labelledby="campaigns-section-title">
@@ -92,12 +116,16 @@ export default function FeaturedCampaignsSection({ config }: FeaturedCampaignsSe
                   key={campaign.id}
                   to={`/campaigns/${campaign.id}`}
                   className="campaign-card-v2"
+                  aria-label={`Donate to ${campaign.title}`}
                 >
-                  {/* Image */}
+                  {/* Image — always rendered; falls back to placeholder when missing */}
                   <div className="campaign-card-v2__image">
-                    {campaign.imageUrl && (
-                      <img src={campaign.imageUrl} alt="" loading="lazy" />
-                    )}
+                    <img
+                      src={campaign.imageUrl ? getThumbnailUrl(campaign.imageUrl) : IMAGES.PLACEHOLDER.CAMPAIGN}
+                      alt={campaign.title}
+                      loading="lazy"
+                      onError={(e) => { e.currentTarget.src = IMAGES.PLACEHOLDER.CAMPAIGN; }}
+                    />
                   </div>
 
                   {/* Body */}
@@ -117,6 +145,7 @@ export default function FeaturedCampaignsSection({ config }: FeaturedCampaignsSe
                       aria-valuenow={pct}
                       aria-valuemin={0}
                       aria-valuemax={100}
+                      aria-label={`${campaign.title} fundraising progress: ${pct}%`}
                     >
                       <div
                         className="campaign-card-v2__progress-fill"
@@ -127,7 +156,7 @@ export default function FeaturedCampaignsSection({ config }: FeaturedCampaignsSe
                     {/* Stats */}
                     <div className="campaign-card-v2__stats">
                       <span>
-                        {formatINR(raised)} of {formatINR(campaign.targetAmount)}
+                        {formatAmount(raised, campaign.currency)} of {formatAmount(campaign.targetAmount, campaign.currency)}
                       </span>
                     </div>
                   </div>

@@ -283,24 +283,50 @@ public class GlobalExceptionHandler {
     }
     
     /**
-     * Handle all other runtime exceptions
+     * Handle rate-limit exceeded exceptions
+     */
+    @ExceptionHandler(TooManyRequestsException.class)
+    public ResponseEntity<ErrorResponse> handleTooManyRequests(
+            TooManyRequestsException ex,
+            HttpServletRequest request) {
+
+        log.warn("Rate limit exceeded: {} - Path: {}", ex.getMessage(), request.getRequestURI());
+
+        ErrorResponse error = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.TOO_MANY_REQUESTS.value())
+                .error("Too Many Requests")
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(error);
+    }
+
+    /**
+     * Handle all other runtime exceptions.
+     *
+     * Raw exception messages are intentionally NOT forwarded to the client — they can
+     * contain SQL schema details (e.g. DataIntegrityViolationException), stack traces,
+     * or other internal information that aids attackers.  The full exception is still
+     * logged server-side for debugging.
      */
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponse> handleRuntimeException(
-            RuntimeException ex, 
+            RuntimeException ex,
             HttpServletRequest request) {
-        
-        log.error("Runtime exception occurred - Path: {}", request.getRequestURI(), ex);
-        
+
+        log.error("Runtime exception occurred - Path: {} - Message: {}", request.getRequestURI(), ex.getMessage(), ex);
+
         ErrorResponse error = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
-                .status(HttpStatus.BAD_REQUEST.value())
-                .error("Bad Request")
-                .message(ex.getMessage() != null ? ex.getMessage() : "An error occurred processing your request")
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .error("Internal Server Error")
+                .message("An unexpected error occurred. Please try again later.")
                 .path(request.getRequestURI())
                 .build();
-        
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
     
     /**

@@ -25,6 +25,8 @@ public interface CampaignRepository extends JpaRepository<Campaign, String> {
     Page<Campaign> findByActiveTrueAndUrgentTrue(Pageable pageable);
     
     Optional<Campaign> findBySlug(String slug);
+
+    boolean existsBySlugAndIdNot(String slug, String id);
     
     @Query("SELECT c FROM Campaign c WHERE c.active = true ORDER BY c.featured DESC, c.urgent DESC, c.updatedAt DESC")
     List<Campaign> findActiveCampaignsForPopup(Pageable pageable);
