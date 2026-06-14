@@ -110,7 +110,6 @@ test.describe('Admin campaign management', () => {
     await page.getByTestId('campaign-category').selectOption('cat-2');
     await page.getByTestId('campaign-location').fill('Kerala, India');
     await page.getByTestId('campaign-target-amount').fill('1000');
-    await page.getByTestId('campaign-current-amount').fill('250');
     await page.getByTestId('campaign-beneficiaries-count').fill('500');
     await page.getByTestId('campaign-featured-toggle').check();
     await page.getByTestId('campaign-urgent-toggle').check();

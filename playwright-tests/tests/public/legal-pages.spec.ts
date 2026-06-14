@@ -86,7 +86,7 @@ test.describe('Legal pages', () => {
       const termsLink = footer.locator('a[href="/terms"]');
       if (await termsLink.count() > 0) {
         await termsLink.click();
-        await expect(page.locator('h1')).toHaveText('Terms and Conditions');
+        await expect(page.getByRole('heading', { level: 1, name: 'Terms and Conditions' })).toBeVisible();
       }
     }
   });
