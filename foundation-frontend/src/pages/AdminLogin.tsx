@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { RiAdminLine, RiAlertLine } from 'react-icons/ri';
 import { API_BASE_URL } from '../api';
@@ -118,6 +118,9 @@ export default function AdminLogin() {
             {loading ? 'Logging in...' : 'Login'}
           </button>
 
+          <Link to="/admin/forgot-password" className="forgot-password-link" data-testid="admin-login-forgot-password">
+            Forgot Password?
+          </Link>
         </form>
 
         <button onClick={() => navigate('/')} className="btn-home" data-testid="admin-login-back">

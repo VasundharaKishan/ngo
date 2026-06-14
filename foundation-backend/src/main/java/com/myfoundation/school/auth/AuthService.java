@@ -191,6 +191,49 @@ public class AuthService {
         auditLogService.log(AuditAction.PASSWORD_SETUP_COMPLETED, "AdminUser", user.getId(), user.getUsername(), null);
     }
     
+    @Transactional
+    public void requestPasswordReset(String email) {
+        String normalizedEmail = email.trim().toLowerCase();
+
+        Optional<AdminUser> userOpt = adminUserRepository.findByEmail(normalizedEmail);
+
+        if (userOpt.isEmpty() || !userOpt.get().getActive()) {
+            // Log the attempt but don't reveal whether the email exists
+            log.info("Password reset requested for email: {} (user not found or inactive)", normalizedEmail);
+            auditLogService.log(AuditAction.PASSWORD_RESET_REQUESTED, "AdminUser", null, normalizedEmail, "User not found or inactive");
+            return;
+        }
+
+        AdminUser user = userOpt.get();
+        String token = generatePasswordSetupToken(user);
+        emailService.sendPasswordResetEmail(user.getEmail(), user.getUsername(), token);
+
+        log.info("Password reset email sent for user: {}", user.getUsername());
+        auditLogService.log(AuditAction.PASSWORD_RESET_REQUESTED, "AdminUser", user.getId(), user.getUsername(), null);
+    }
+
+    @Transactional
+    public void completePasswordReset(String token, String newPassword) {
+        PasswordSetupToken tokenEntity = tokenRepository
+                .findByTokenAndUsedFalseAndExpiresAtAfter(token, Instant.now())
+                .orElseThrow(() -> new RuntimeException("Invalid or expired reset link"));
+
+        validatePasswordStrength(newPassword);
+
+        AdminUser user = tokenEntity.getUser();
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setFailedLoginAttempts(0);
+        user.setLockedUntil(null);
+        user.setUpdatedAt(Instant.now());
+        adminUserRepository.save(user);
+
+        tokenEntity.setUsed(true);
+        tokenRepository.save(tokenEntity);
+
+        log.info("User {} completed password reset", user.getUsername());
+        auditLogService.log(AuditAction.PASSWORD_RESET_COMPLETED, "AdminUser", user.getId(), user.getUsername(), null);
+    }
+
     public AdminUser validateToken(String token) {
         PasswordSetupToken tokenEntity = tokenRepository
                 .findByTokenAndUsedFalseAndExpiresAtAfter(token, Instant.now())

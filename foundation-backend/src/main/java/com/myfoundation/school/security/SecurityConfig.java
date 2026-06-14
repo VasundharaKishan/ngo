@@ -104,6 +104,8 @@ public class SecurityConfig {
                     "/api/auth/validate-token/**",
                     "/api/auth/setup-password/**",
                     "/api/auth/initialize",
+                    "/api/auth/forgot-password",
+                    "/api/auth/reset-password/**",
                     "/api/donations/stripe/create",  // Public donation endpoint
                     "/api/donations/stripe/webhook", // Stripe webhooks can't send CSRF tokens
                     // Admin endpoints are protected by JWT (httpOnly cookie) + CORS.
@@ -134,6 +136,8 @@ public class SecurityConfig {
                     .requestMatchers("/api/auth/validate-token/**").permitAll()
                     .requestMatchers("/api/auth/setup-password/**").permitAll()
                     .requestMatchers("/api/auth/initialize").permitAll()
+                    .requestMatchers("/api/auth/forgot-password").permitAll()
+                    .requestMatchers("/api/auth/reset-password/**").permitAll()
                     .requestMatchers("/api/auth/otp/**").permitAll()
                     .requestMatchers("/api/auth/csrf").authenticated() // Requires authentication, triggers CSRF token
 

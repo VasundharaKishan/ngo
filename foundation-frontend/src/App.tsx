@@ -35,6 +35,8 @@ const AdminCMS = lazy(() => import('./pages/AdminCMS'));
 const AdminLogin = lazy(() => import('./pages/AdminLogin'));
 const AdminUsers = lazy(() => import('./pages/AdminUsers'));
 const PasswordSetup = lazy(() => import('./pages/PasswordSetup'));
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
+const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 const TermsPage = lazy(() => import('./pages/TermsPage'));
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
 const RefundPage = lazy(() => import('./pages/RefundPage'));
@@ -79,6 +81,8 @@ function App() {
             {/* Admin Login (No Sidebar) */}
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin/setup-password" element={<PasswordSetup />} />
+            <Route path="/admin/forgot-password" element={<ForgotPassword />} />
+            <Route path="/admin/reset-password" element={<ResetPassword />} />
             
             {/* Admin Routes - Nested with Sidebar */}
             <Route path="/admin" element={<ErrorBoundary><AdminLayout /></ErrorBoundary>}>
