@@ -172,6 +172,61 @@ public class AdminDonationController {
         return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
     }
 
+    @GetMapping("/dashboard/stats")
+    public ResponseEntity<DashboardStatsResponse> getDashboardStats() {
+        long totalRaised = donationRepository.sumAllSuccessfulDonations();
+        long totalDonations = donationRepository.countSuccessfulDonations();
+        long totalDonors = donationRepository.countDistinctDonors();
+        long averageDonation = totalDonations > 0 ? totalRaised / totalDonations : 0;
+        long activeCampaigns = campaignRepository.countByActiveTrue();
+
+        java.time.Instant monthStart = java.time.YearMonth.now()
+                .atDay(1).atStartOfDay(java.time.ZoneOffset.UTC).toInstant();
+        long monthlyRaised = donationRepository.sumSuccessfulDonationsSince(monthStart);
+        long monthlyDonations = donationRepository.countSuccessfulDonationsSince(monthStart);
+
+        List<Donation> recent = donationRepository.findRecentDonations(PageRequest.of(0, 5));
+        List<DashboardStatsResponse.RecentDonation> recentDtos = recent.stream()
+                .map(d -> DashboardStatsResponse.RecentDonation.builder()
+                        .id(d.getId())
+                        .donorName(d.getDonorName() != null ? d.getDonorName() : "Anonymous")
+                        .amount(d.getAmount())
+                        .currency(d.getCurrency())
+                        .campaignTitle(d.getCampaign() != null ? d.getCampaign().getTitle() : "General")
+                        .status(d.getStatus().name())
+                        .createdAt(d.getCreatedAt().toString())
+                        .build())
+                .collect(Collectors.toList());
+
+        List<Object[]> topRaw = donationRepository.findTopCampaignsByAmountRaised(PageRequest.of(0, 5));
+        List<DashboardStatsResponse.TopCampaign> topDtos = topRaw.stream()
+                .map(row -> {
+                    String cId = (String) row[0];
+                    long target = campaignRepository.findById(cId)
+                            .map(Campaign::getTargetAmount).orElse(0L);
+                    return DashboardStatsResponse.TopCampaign.builder()
+                            .id(cId)
+                            .title((String) row[1])
+                            .raised((Long) row[2])
+                            .target(target)
+                            .donationCount((Long) row[3])
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(DashboardStatsResponse.builder()
+                .totalRaised(totalRaised)
+                .totalDonations(totalDonations)
+                .totalDonors(totalDonors)
+                .averageDonation(averageDonation)
+                .activeCampaigns(activeCampaigns)
+                .monthlyRaised(monthlyRaised)
+                .monthlyDonations(monthlyDonations)
+                .recentDonations(recentDtos)
+                .topCampaigns(topDtos)
+                .build());
+    }
+
     // Campaign CRUD endpoints
     @GetMapping("/campaigns")
     public ResponseEntity<?> getAllCampaigns(

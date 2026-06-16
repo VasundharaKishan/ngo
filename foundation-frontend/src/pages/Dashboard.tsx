@@ -1,40 +1,38 @@
 import { useState, useEffect } from 'react';
-import { RiDashboardLine, RiMoneyDollarCircleLine, RiMegaphoneLine, RiStarLine } from 'react-icons/ri';
-import { API_BASE_URL, getDonatePopupSettings, type DonatePopupSettingsResponse } from '../api';
+import { RiDashboardLine, RiMoneyDollarCircleLine, RiGroupLine, RiCalendarLine, RiMegaphoneLine } from 'react-icons/ri';
+import { API_BASE_URL } from '../api';
 import { authFetch } from '../utils/auth';
 import { formatCurrency, calculateProgress } from '../utils/currency';
 import logger from '../utils/logger';
 
-interface Campaign {
-  id: string;
-  title: string;
-  targetAmount: number;
-  currentAmount?: number;
-  active: boolean;
-  featured?: boolean;
-  urgent?: boolean;
-  category?: {
+interface DashboardStats {
+  totalRaised: number;
+  totalDonations: number;
+  totalDonors: number;
+  averageDonation: number;
+  activeCampaigns: number;
+  monthlyRaised: number;
+  monthlyDonations: number;
+  recentDonations: {
     id: string;
-    name: string;
-    icon: string;
-  };
-}
-
-interface Donation {
-  id: string;
-  amount: number;
-  currency: string;
-  donorName: string;
-  campaignId: string;
-  campaignTitle: string;
-  status: string;
-  createdAt: string;
+    donorName: string;
+    amount: number;
+    currency: string;
+    campaignTitle: string;
+    status: string;
+    createdAt: string;
+  }[];
+  topCampaigns: {
+    id: string;
+    title: string;
+    raised: number;
+    target: number;
+    donationCount: number;
+  }[];
 }
 
 export default function AdminDashboard() {
-  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
-  const [donations, setDonations] = useState<Donation[]>([]);
-  const [spotlightSettings, setSpotlightSettings] = useState<DonatePopupSettingsResponse | null>(null);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [authError, setAuthError] = useState(false);
   const [loadError, setLoadError] = useState('');
@@ -48,30 +46,19 @@ export default function AdminDashboard() {
     setAuthError(false);
     setLoadError('');
     try {
-      const [campaignsRes, donationsRes, spotlightData] = await Promise.all([
-        authFetch(`${API_BASE_URL}/admin/campaigns`),
-        authFetch(`${API_BASE_URL}/admin/donations`),
-        getDonatePopupSettings()
-      ]);
+      const res = await authFetch(`${API_BASE_URL}/admin/dashboard/stats`);
 
-      // Handle auth failure — redirect to login
-      if (campaignsRes.status === 401 || donationsRes.status === 401) {
+      if (res.status === 401) {
         setAuthError(true);
         return;
       }
 
-      if (!campaignsRes.ok) {
-        setLoadError(`Failed to load campaigns (${campaignsRes.status})`);
+      if (!res.ok) {
+        setLoadError(`Failed to load dashboard (${res.status})`);
         return;
       }
 
-      const campaignsData = await campaignsRes.json();
-      const donationsData = donationsRes.ok ? await donationsRes.json() : [];
-
-      // Guard: ensure API returned arrays, not error objects
-      setCampaigns(Array.isArray(campaignsData) ? campaignsData : []);
-      setDonations(Array.isArray(donationsData) ? donationsData : []);
-      setSpotlightSettings(spotlightData);
+      setStats(await res.json());
     } catch (error) {
       logger.error('Dashboard', 'Error loading data:', error);
       setLoadError('Could not reach the server. Please check your connection.');
@@ -94,7 +81,7 @@ export default function AdminDashboard() {
       <div className="content-header">
         <h2><RiDashboardLine style={{verticalAlign: 'middle', marginRight: '0.5rem'}} /> Dashboard</h2>
         <div style={{ marginTop: '1.5rem', padding: '1.5rem', background: '#fff3cd', border: '1px solid #ffc107', borderRadius: '8px', color: '#856404' }}>
-          <strong>⚠️ Session Expired</strong>
+          <strong>Session Expired</strong>
           <p style={{ margin: '0.5rem 0 1rem' }}>Your session has expired. Please log in again to view the dashboard.</p>
           <a href="/admin/login" style={{ background: '#2a3da8', color: 'white', padding: '0.5rem 1.25rem', borderRadius: '6px', textDecoration: 'none', fontWeight: 600 }}>
             Go to Login
@@ -104,12 +91,12 @@ export default function AdminDashboard() {
     );
   }
 
-  if (loadError) {
+  if (loadError || !stats) {
     return (
       <div className="content-header">
         <h2><RiDashboardLine style={{verticalAlign: 'middle', marginRight: '0.5rem'}} /> Dashboard</h2>
         <div style={{ marginTop: '1.5rem', padding: '1.5rem', background: '#fee2e2', border: '1px solid #fca5a5', borderRadius: '8px', color: '#991b1b' }}>
-          <strong>⚠️ Error Loading Dashboard</strong>
+          <strong>Error Loading Dashboard</strong>
           <p style={{ margin: '0.5rem 0 1rem' }}>{loadError}</p>
           <button onClick={loadData} style={{ background: '#2a3da8', color: 'white', padding: '0.5rem 1.25rem', borderRadius: '6px', border: 'none', cursor: 'pointer', fontWeight: 600 }}>
             Retry
@@ -118,31 +105,6 @@ export default function AdminDashboard() {
       </div>
     );
   }
-
-  const successfulDonations = donations.filter(d => d.status === 'SUCCESS').length;
-  const pendingDonations = donations.filter(d => d.status === 'PENDING').length;
-  const featuredCampaignsCount = campaigns.filter(c => c.featured && c.active).length;
-  const spotlightCampaignTitle = spotlightSettings?.spotlightCampaign?.title || null;
-
-  const successfulDonationsByCampaign = donations
-    .filter(d => d.status === 'SUCCESS')
-    .reduce((acc, donation) => {
-      const campaignId = donation.campaignId;
-      if (!acc[campaignId]) {
-        acc[campaignId] = {
-          campaignTitle: donation.campaignTitle,
-          totalAmount: 0,
-          count: 0,
-        };
-      }
-      acc[campaignId].totalAmount += donation.amount;
-      acc[campaignId].count += 1;
-      return acc;
-    }, {} as Record<string, { campaignTitle: string; totalAmount: number; count: number }>);
-
-  const topCampaigns = Object.entries(successfulDonationsByCampaign)
-    .sort(([, a], [, b]) => b.totalAmount - a.totalAmount)
-    .slice(0, 5);
 
   return (
     <>
@@ -153,192 +115,115 @@ export default function AdminDashboard() {
 
       <div className="content-body">
         <div className="dashboard-container">
-          {/* Summary Cards */}
+          {/* KPI Cards */}
           <div className="dashboard-cards">
-            <div className="dashboard-card">
-              <div className="card-icon"><RiMoneyDollarCircleLine size={40} /></div>
+            <div className="dashboard-card" style={{ borderLeft: '4px solid #10b981' }}>
+              <div className="card-icon"><RiMoneyDollarCircleLine size={36} color="#10b981" /></div>
               <div className="card-content">
-                <h3>Total Donations</h3>
-                <p className="card-value">{donations.length}</p>
+                <p className="card-value">{formatCurrency(stats.totalRaised, 'usd', { decimals: 0 })}</p>
+                <h3>Total Raised</h3>
               </div>
             </div>
-            <div className="dashboard-card">
-              <div className="card-icon">✅</div>
+            <div className="dashboard-card" style={{ borderLeft: '4px solid #3b82f6' }}>
+              <div className="card-icon"><RiGroupLine size={36} color="#3b82f6" /></div>
               <div className="card-content">
-                <h3>Successful</h3>
-                <p className="card-value">{successfulDonations}</p>
+                <p className="card-value">{stats.totalDonors}</p>
+                <h3>Total Donors</h3>
               </div>
             </div>
-            <div className="dashboard-card">
-              <div className="card-icon">⏳</div>
+            <div className="dashboard-card" style={{ borderLeft: '4px solid #8b5cf6' }}>
+              <div className="card-icon"><RiMegaphoneLine size={36} color="#8b5cf6" /></div>
               <div className="card-content">
-                <h3>Pending</h3>
-                <p className="card-value">{pendingDonations}</p>
-              </div>
-            </div>
-            <div className="dashboard-card">
-              <div className="card-icon"><RiMegaphoneLine size={40} /></div>
-              <div className="card-content">
+                <p className="card-value">{stats.activeCampaigns}</p>
                 <h3>Active Campaigns</h3>
-                <p className="card-value">{campaigns.filter(c => c.active).length}</p>
               </div>
             </div>
-            <div className="dashboard-card">
-              <div className="card-icon"><RiStarLine size={40} /></div>
+            <div className="dashboard-card" style={{ borderLeft: '4px solid #f59e0b' }}>
+              <div className="card-icon"><RiCalendarLine size={36} color="#f59e0b" /></div>
               <div className="card-content">
-                <h3>Featured Active</h3>
-                <p className="card-value">{featuredCampaignsCount}</p>
+                <p className="card-value">{formatCurrency(stats.monthlyRaised, 'usd', { decimals: 0 })}</p>
+                <h3>This Month ({stats.monthlyDonations} donations)</h3>
               </div>
             </div>
-            {spotlightCampaignTitle && (
-              <div className="dashboard-card" style={{ gridColumn: 'span 2', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
-                <div className="card-icon">🎯</div>
-                <div className="card-content">
-                  <h3>Spotlight Campaign</h3>
-                  <p className="card-value" style={{ fontSize: '1rem', fontWeight: 'normal' }}>{spotlightCampaignTitle}</p>
-                </div>
-              </div>
-            )}
           </div>
 
-          {/* Top Campaigns Chart */}
-          <div className="dashboard-section">
-            <h2>🏆 Top 5 Campaigns by Donations</h2>
-            <div className="campaigns-chart">
-              {topCampaigns.length === 0 ? (
+          {/* Two-column layout: Recent Donations + Top Campaigns */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+            {/* Recent Donations */}
+            <div className="dashboard-section">
+              <h2>Recent Donations</h2>
+              {stats.recentDonations.length === 0 ? (
+                <p style={{ textAlign: 'center', color: '#64748b', padding: '2rem' }}>
+                  No donations yet
+                </p>
+              ) : (
+                <div className="recent-donations-list">
+                  {stats.recentDonations.map((donation) => (
+                    <div key={donation.id} className="recent-donation-item">
+                      <div className="donation-avatar">
+                        {(donation.donorName || 'A').charAt(0).toUpperCase()}
+                      </div>
+                      <div className="donation-details">
+                        <strong>{donation.donorName}</strong>
+                        <span className="donation-campaign">{donation.campaignTitle}</span>
+                      </div>
+                      <div className="donation-amount-badge">
+                        {formatCurrency(donation.amount, donation.currency || 'usd')}
+                      </div>
+                      <span className={`status-badge ${donation.status.toLowerCase()}`}>
+                        {donation.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Top Campaigns */}
+            <div className="dashboard-section">
+              <h2>Top Campaigns</h2>
+              {stats.topCampaigns.length === 0 ? (
                 <p style={{ textAlign: 'center', color: '#64748b', padding: '2rem' }}>
                   No donation data available yet
                 </p>
               ) : (
-                topCampaigns.map(([campaignId, data], index) => {
-                  const campaign = campaigns.find(c => c.id === campaignId);
-                  const percentage = campaign && campaign.targetAmount > 0
-                    ? Math.min((data.totalAmount / campaign.targetAmount) * 100, 100)
-                    : 0;
-
-                  return (
-                    <div key={campaignId} className="campaign-bar-item">
-                      <div className="campaign-bar-header">
-                        <span className="campaign-rank">#{index + 1}</span>
-                        <span className="campaign-name">{data.campaignTitle}</span>
-                        <span className="campaign-stats">
-                          <strong>{formatCurrency(data.totalAmount, 'usd', { decimals: 0 })}</strong>
-                          <span className="donation-count">({data.count} donations)</span>
-                        </span>
-                      </div>
-                      <div className="progress-bar-container">
-                        <div 
-                          className="progress-bar-fill" 
-                          style={{ 
-                            width: `${percentage}%`,
-                            background: `linear-gradient(90deg, 
-                              ${index === 0 ? '#10b981' : index === 1 ? '#3b82f6' : '#8b5cf6'} 0%, 
-                              ${index === 0 ? '#059669' : index === 1 ? '#2563eb' : '#7c3aed'} 100%)`
-                          }}
-                        >
-                          <span className="progress-label">{percentage.toFixed(1)}%</span>
+                <div className="campaigns-chart">
+                  {stats.topCampaigns.map((campaign, index) => {
+                    const percentage = campaign.target > 0
+                      ? Math.min((campaign.raised / campaign.target) * 100, 100)
+                      : 0;
+                    return (
+                      <div key={campaign.id} className="campaign-bar-item">
+                        <div className="campaign-bar-header">
+                          <span className="campaign-rank">#{index + 1}</span>
+                          <span className="campaign-name">{campaign.title}</span>
+                          <span className="campaign-stats">
+                            <strong>{formatCurrency(campaign.raised, 'usd', { decimals: 0 })}</strong>
+                            <span className="donation-count">({campaign.donationCount} donations)</span>
+                          </span>
                         </div>
-                      </div>
-                      {campaign && (
+                        <div className="progress-bar-container">
+                          <div
+                            className="progress-bar-fill"
+                            style={{
+                              width: `${percentage}%`,
+                              background: `linear-gradient(90deg,
+                                ${index === 0 ? '#10b981' : index === 1 ? '#3b82f6' : '#8b5cf6'} 0%,
+                                ${index === 0 ? '#059669' : index === 1 ? '#2563eb' : '#7c3aed'} 100%)`
+                            }}
+                          >
+                            {percentage > 5 && <span className="progress-label">{percentage.toFixed(1)}%</span>}
+                          </div>
+                        </div>
                         <div className="campaign-target">
-                          Target: {formatCurrency(campaign.targetAmount, 'usd', { decimals: 0 })}
+                          Target: {formatCurrency(campaign.target, 'usd', { decimals: 0 })}
                         </div>
-                      )}
-                    </div>
-                  );
-                })
+                      </div>
+                    );
+                  })}
+                </div>
               )}
             </div>
-          </div>
-
-          {/* Recent Donations */}
-          <div className="dashboard-section">
-            <h2>📋 Recent Donations</h2>
-            {donations.length === 0 ? (
-              <p style={{ textAlign: 'center', color: '#64748b', padding: '2rem' }}>
-                No donations yet
-              </p>
-            ) : (
-              <div className="recent-donations-list">
-                {donations.slice(0, 10).map((donation) => (
-                  <div key={donation.id} className="recent-donation-item">
-                    <div className="donation-avatar">
-                      {(donation.donorName || 'A').charAt(0).toUpperCase()}
-                    </div>
-                    <div className="donation-details">
-                      <strong>{donation.donorName || 'Anonymous'}</strong>
-                      <span className="donation-campaign">{donation.campaignTitle || 'Unknown Campaign'}</span>
-                    </div>
-                    <div className="donation-amount-badge">
-                      {formatCurrency(donation.amount || 0, donation.currency || 'eur')}
-                    </div>
-                    <span className={`status-badge ${(donation.status || 'pending').toLowerCase()}`}>
-                      {donation.status || 'PENDING'}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Campaign Performance Grid */}
-          <div className="dashboard-section">
-            <h2>📊 All Campaigns Performance</h2>
-            {campaigns.length === 0 ? (
-              <p style={{ textAlign: 'center', color: '#64748b', padding: '2rem' }}>
-                No campaigns created yet
-              </p>
-            ) : (
-              <div className="campaigns-grid">
-                {campaigns.map((campaign) => {
-                  const successfulCampaignDonations = donations.filter(
-                    d => d.campaignId === campaign.id && d.status === 'SUCCESS'
-                  );
-                  const totalRaised = successfulCampaignDonations.reduce((sum, d) => sum + d.amount, 0);
-                  const progress = calculateProgress(totalRaised, campaign.targetAmount);
-
-                  const isSpotlight = spotlightSettings?.spotlightCampaignId === campaign.id;
-                  
-                  return (
-                    <div key={campaign.id} className="campaign-performance-card">
-                      <div className="campaign-card-header">
-                        <h3>{campaign.title}</h3>
-                        {isSpotlight && <span className="badge-spotlight" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white', padding: '4px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold' }}>🎯 SPOTLIGHT</span>}
-                        {campaign.featured && <span className="badge-featured">⭐ Featured</span>}
-                        {campaign.urgent && <span className="badge-urgent">🔥 Urgent</span>}
-                      </div>
-                      <div className="campaign-card-stats">
-                        <div className="stat-item">
-                          <span className="stat-label">Raised</span>
-                          <span className="stat-value">{formatCurrency(totalRaised, 'usd', { decimals: 0 })}</span>
-                        </div>
-                        <div className="stat-item">
-                          <span className="stat-label">Goal</span>
-                          <span className="stat-value">{formatCurrency(campaign.targetAmount, 'usd', { decimals: 0 })}</span>
-                        </div>
-                        <div className="stat-item">
-                          <span className="stat-label">Donations</span>
-                          <span className="stat-value">{successfulCampaignDonations.length}</span>
-                        </div>
-                      </div>
-                      <div className="progress-bar-container">
-                        <div 
-                          className="progress-bar-fill" 
-                          style={{ width: `${Math.min(progress, 100)}%` }}
-                        >
-                          <span className="progress-label">{progress.toFixed(1)}%</span>
-                        </div>
-                      </div>
-                      <div className="campaign-card-footer">
-                        <span className={`status-indicator ${campaign.active ? 'active' : 'inactive'}`}>
-                          {campaign.active ? '🟢 Active' : '🔴 Inactive'}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
           </div>
         </div>
       </div>

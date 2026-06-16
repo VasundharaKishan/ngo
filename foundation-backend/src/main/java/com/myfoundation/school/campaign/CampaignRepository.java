@@ -14,6 +14,7 @@ public interface CampaignRepository extends JpaRepository<Campaign, String> {
     
     List<Campaign> findByActiveTrue();
     Page<Campaign> findByActiveTrue(Pageable pageable);
+    long countByActiveTrue();
 
     List<Campaign> findByActiveTrueAndCategoryId(String categoryId);
     Page<Campaign> findByActiveTrueAndCategoryId(String categoryId, Pageable pageable);

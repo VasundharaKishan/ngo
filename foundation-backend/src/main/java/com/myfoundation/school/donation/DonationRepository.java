@@ -1,11 +1,13 @@
 package com.myfoundation.school.donation;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,6 +39,36 @@ public interface DonationRepository extends JpaRepository<Donation, String>, Jpa
      */
     @Query("SELECT COALESCE(SUM(d.amount), 0L) FROM Donation d WHERE d.campaign.id = :campaignId AND d.status = 'SUCCESS'")
     Long sumSuccessfulDonationsByCampaignId(@Param("campaignId") String campaignId);
+
+    /** Sum of all successful donations (total raised). */
+    @Query("SELECT COALESCE(SUM(d.amount), 0L) FROM Donation d WHERE d.status = 'SUCCESS'")
+    Long sumAllSuccessfulDonations();
+
+    /** Count of all successful donations. */
+    @Query("SELECT COUNT(d) FROM Donation d WHERE d.status = 'SUCCESS'")
+    Long countSuccessfulDonations();
+
+    /** Count of distinct donor emails in successful donations. */
+    @Query("SELECT COUNT(DISTINCT d.donorEmail) FROM Donation d WHERE d.status = 'SUCCESS' AND d.donorEmail IS NOT NULL")
+    Long countDistinctDonors();
+
+    /** Sum of successful donations created after a given instant. */
+    @Query("SELECT COALESCE(SUM(d.amount), 0L) FROM Donation d WHERE d.status = 'SUCCESS' AND d.createdAt >= :since")
+    Long sumSuccessfulDonationsSince(@Param("since") Instant since);
+
+    /** Count of successful donations created after a given instant. */
+    @Query("SELECT COUNT(d) FROM Donation d WHERE d.status = 'SUCCESS' AND d.createdAt >= :since")
+    Long countSuccessfulDonationsSince(@Param("since") Instant since);
+
+    /** Last N donations (any status), eager-fetching campaign. */
+    @Query("SELECT d FROM Donation d JOIN FETCH d.campaign ORDER BY d.createdAt DESC")
+    List<Donation> findRecentDonations(Pageable pageable);
+
+    /** Top campaigns by amount raised — returns [campaignId, campaignTitle, totalRaised, donationCount]. */
+    @Query("SELECT d.campaign.id, d.campaign.title, COALESCE(SUM(d.amount), 0L), COUNT(d) " +
+           "FROM Donation d WHERE d.status = 'SUCCESS' " +
+           "GROUP BY d.campaign.id, d.campaign.title ORDER BY SUM(d.amount) DESC")
+    List<Object[]> findTopCampaignsByAmountRaised(Pageable pageable);
 
     /**
      * Batch-fetch donation sums for multiple campaigns in a single query.
