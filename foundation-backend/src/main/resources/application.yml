@@ -45,6 +45,11 @@ spring:
       max-request-size: 10MB
       enabled: true
   
+  thymeleaf:
+    # Thymeleaf is used only for email rendering (not web views).
+    # Disable template-location check so the REST API starts cleanly.
+    check-template-location: false
+
   mail:
     host: ${MAIL_HOST:example.brevo.com}
     port: ${MAIL_PORT:587}

@@ -49,6 +49,12 @@
             <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
 
+        <!-- Thymeleaf — used as an offline template engine for email rendering -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
+
         <!-- Spring Boot Actuator — required for /actuator/health used by Docker/Railway healthcheck -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
