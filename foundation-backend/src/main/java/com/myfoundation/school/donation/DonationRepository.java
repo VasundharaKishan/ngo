@@ -25,6 +25,8 @@ public interface DonationRepository extends JpaRepository<Donation, String>, Jpa
     @Query("SELECT d FROM Donation d JOIN FETCH d.campaign ORDER BY d.createdAt DESC")
     List<Donation> findAllWithCampaign();
     
+    List<Donation> findByDonorEmailIgnoreCase(String donorEmail);
+
     Optional<Donation> findByStripeSessionId(String stripeSessionId);
 
     Optional<Donation> findByStripePaymentIntentId(String stripePaymentIntentId);

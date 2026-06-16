@@ -32,6 +32,7 @@ const AdminFaqs = lazy(() => import('./pages/AdminFaqs'));
 const AdminTransparencyDocuments = lazy(() => import('./pages/AdminTransparencyDocuments'));
 const AdminContactSubmissions = lazy(() => import('./pages/AdminContactSubmissions'));
 const AdminCMS = lazy(() => import('./pages/AdminCMS'));
+const AdminErasureRequests = lazy(() => import('./pages/AdminErasureRequests'));
 const AdminLogin = lazy(() => import('./pages/AdminLogin'));
 const AdminUsers = lazy(() => import('./pages/AdminUsers'));
 const PasswordSetup = lazy(() => import('./pages/PasswordSetup'));
@@ -106,6 +107,7 @@ function App() {
               <Route path="transparency-documents" element={<AdminTransparencyDocuments />} />
               <Route path="contact-submissions" element={<AdminContactSubmissions />} />
               <Route path="cms" element={<AdminCMS />} />
+              <Route path="erasure-requests" element={<AdminErasureRequests />} />
             </Route>
             
             {/* Public Routes - With Layout */}

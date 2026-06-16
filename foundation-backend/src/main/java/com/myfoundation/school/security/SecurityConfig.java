@@ -108,6 +108,7 @@ public class SecurityConfig {
                     "/api/auth/reset-password/**",
                     "/api/donations/stripe/create",  // Public donation endpoint
                     "/api/donations/stripe/webhook", // Stripe webhooks can't send CSRF tokens
+                    "/api/public/privacy/**",        // Public GDPR erasure request form
                     // Admin endpoints are protected by JWT (httpOnly cookie) + CORS.
                     // CORS restricts credentialed requests to the trusted frontend origin only,
                     // which means cross-site forged requests are already blocked at the CORS layer.

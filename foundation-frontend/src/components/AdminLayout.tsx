@@ -115,6 +115,7 @@ const NAV_GROUPS: NavGroup[] = [
     heading: 'Settings',
     items: [
       { to: '/admin/settings', label: 'Settings', icon: <SettingsIcon /> },
+      { to: '/admin/erasure-requests', label: 'Erasure requests', icon: <SettingsIcon /> },
     ],
   },
   {
@@ -149,6 +150,7 @@ function useBreadcrumb() {
     'cms': ['Site', 'CMS content'],
     'donate-popup-settings': ['Site', 'Donate popup'],
     'settings': ['Settings', 'Settings'],
+    'erasure-requests': ['Settings', 'Erasure requests'],
     'users': ['Access', 'Users'],
   };
 
