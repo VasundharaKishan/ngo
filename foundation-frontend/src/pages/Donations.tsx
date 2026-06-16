@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
-import { RiMoneyDollarCircleLine } from 'react-icons/ri';
+import { RiMoneyDollarCircleLine, RiDownloadLine } from 'react-icons/ri';
 import { formatCurrency } from '../utils/currency';
-import { fetchDonationsPaginated, refundDonation, type DonationPageResponse } from '../api';
+import { fetchDonationsPaginated, refundDonation, authFetch, API_BASE_URL, type DonationPageResponse } from '../api';
 import { usePaginationParams } from '../hooks/usePaginationParams';
 import { useDebounce } from '../hooks/useDebounce';
 import { formatDateTime } from '../utils/dateUtils';
-import { TIMING } from '../config/constants';
+import { TIMING, API_ENDPOINTS } from '../config/constants';
 import logger from '../utils/logger';
 import './Donations.css';
 
@@ -67,6 +67,29 @@ export default function Donations() {
   const handleClearFilters = () => {
     setSearchInput('');
     reset();
+  };
+
+  const handleDownloadReceipt = async (donationId: string) => {
+    try {
+      const receiptPath = API_ENDPOINTS.DONATIONS.ADMIN_RECEIPT(donationId);
+      const response = await authFetch(`${API_BASE_URL}${receiptPath}`);
+      if (!response.ok) {
+        throw new Error(`Receipt download failed (HTTP ${response.status})`);
+      }
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `receipt-${donationId}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'An unexpected error occurred';
+      logger.error('Donations', 'Receipt download failed:', err);
+      alert(`Receipt download failed: ${message}`);
+    }
   };
 
   const handleSortChange = (field: string) => {
@@ -214,7 +237,27 @@ export default function Donations() {
                             ? formatDateTime(donation.createdAt)
                             : 'N/A'}
                         </td>
-                        <td>
+                        <td style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                          {(donation.status === 'SUCCESS' || donation.status === 'REFUNDED') && (
+                            <button
+                              className="btn-icon"
+                              data-testid={`receipt-btn-${donation.id}`}
+                              title="Download Receipt (PDF)"
+                              onClick={() => handleDownloadReceipt(donation.id)}
+                              style={{
+                                background: 'none',
+                                border: '1px solid #cbd5e1',
+                                borderRadius: '6px',
+                                padding: '0.35rem 0.5rem',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                color: '#475569',
+                              }}
+                            >
+                              <RiDownloadLine />
+                            </button>
+                          )}
                           {donation.status === 'SUCCESS' && (
                             <button
                               className="btn-refund"

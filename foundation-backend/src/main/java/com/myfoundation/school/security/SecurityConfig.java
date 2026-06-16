@@ -128,6 +128,7 @@ public class SecurityConfig {
                     .requestMatchers("/api/settings/public/**").permitAll()
                     .requestMatchers("/api/public/**").permitAll()
                     .requestMatchers("/api/donations/stripe/**").permitAll()
+                    .requestMatchers("/api/donations/*/receipt").permitAll()
                     
                     // Auth endpoints
                     .requestMatchers("/api/auth/login").permitAll()

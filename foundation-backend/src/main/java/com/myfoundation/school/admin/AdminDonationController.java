@@ -8,6 +8,7 @@ import com.myfoundation.school.campaign.CategoryRepository;
 import com.myfoundation.school.config.SiteConfig;
 import com.myfoundation.school.config.SiteConfigRequest;
 import com.myfoundation.school.config.SiteConfigService;
+import com.myfoundation.school.donation.DonationReceiptService;
 import com.myfoundation.school.donation.DonationRepository;
 import com.myfoundation.school.donation.DonationService;
 import com.myfoundation.school.donation.DonationStatus;
@@ -24,7 +25,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -42,6 +45,7 @@ import java.util.stream.Collectors;
 public class AdminDonationController {
     
     private final DonationService donationService;
+    private final DonationReceiptService donationReceiptService;
     private final AdminCampaignService adminCampaignService;
     private final AdminCategoryService adminCategoryService;
     private final CampaignRepository campaignRepository;
@@ -135,6 +139,22 @@ public class AdminDonationController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Map.of("error", e.getMessage()));
         }
+    }
+
+    @GetMapping("/donations/{id}/receipt")
+    public ResponseEntity<byte[]> downloadReceipt(@PathVariable String id) {
+        log.info("GET /api/admin/donations/{}/receipt - Admin receipt download", id);
+
+        byte[] pdfBytes = donationReceiptService.generateReceipt(id);
+
+        String filename = "donation-receipt-" + id + ".pdf";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDispositionFormData("attachment", filename);
+        headers.setContentLength(pdfBytes.length);
+
+        return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
     }
 
     // Campaign CRUD endpoints
