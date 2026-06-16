@@ -58,12 +58,18 @@ public class CampaignService {
      * @return List of campaigns matching filters, transformed to CampaignResponse DTOs
      */
     public List<CampaignResponse> getCampaigns(String categoryId, Boolean featured, Boolean urgent) {
-        log.info("Fetching campaigns with filters: categoryId={}, featured={}, urgent={}",
-                categoryId, featured, urgent);
+        return getCampaigns(categoryId, featured, urgent, null);
+    }
+
+    public List<CampaignResponse> getCampaigns(String categoryId, Boolean featured, Boolean urgent, String search) {
+        log.info("Fetching campaigns with filters: categoryId={}, featured={}, urgent={}, search={}",
+                categoryId, featured, urgent, search);
 
         List<Campaign> campaigns;
 
-        if (featured != null && featured) {
+        if (search != null && !search.trim().isEmpty()) {
+            campaigns = campaignRepository.searchActiveByKeyword(search.trim());
+        } else if (featured != null && featured) {
             campaigns = campaignRepository.findByActiveTrueAndFeaturedTrue();
         } else if (urgent != null && urgent) {
             campaigns = campaignRepository.findByActiveTrueAndUrgentTrue();

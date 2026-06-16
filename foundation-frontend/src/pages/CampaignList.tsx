@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Helmet } from 'react-helmet-async';
+import { RiSearchLine } from 'react-icons/ri';
 import { api, type Campaign } from '../api';
 import CampaignCard from '../components/CampaignCard';
 import { useCampaignsPerPage, useSiteName, useSiteLogo } from '../contexts/ConfigContext';
@@ -220,15 +221,15 @@ export default function CampaignList() {
           <div className="campaigns-filters">
             {/* Search */}
             <div className="campaigns-search-wrap">
-              <span className="search-icon" aria-hidden="true">🔍</span>
+              <RiSearchLine className="search-icon" aria-hidden="true" />
               <input
                 type="text"
                 className="campaigns-search"
-                placeholder={t('campaign.searchPlaceholder')}
+                placeholder={t('campaign.searchPlaceholder', 'Search campaigns...')}
                 value={searchQuery}
                 onChange={e => handleSearch(e.target.value)}
                 aria-label="Search campaigns"
-                data-testid="campaigns-search"
+                data-testid="campaign-search-input"
               />
               {searchQuery && (
                 <button

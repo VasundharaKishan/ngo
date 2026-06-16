@@ -16,6 +16,8 @@ import com.myfoundation.school.dto.CampaignResponse;
 import com.myfoundation.school.dto.DonationResponse;
 import com.myfoundation.school.dto.DonationPageResponse;
 import com.myfoundation.school.donation.Donation;
+import com.myfoundation.school.audit.AuditAction;
+import com.myfoundation.school.audit.AuditLogService;
 import com.myfoundation.school.exception.BusinessException;
 import com.myfoundation.school.exception.ResourceNotFoundException;
 import jakarta.validation.Valid;
@@ -46,6 +48,7 @@ public class AdminDonationController {
     
     private final DonationService donationService;
     private final DonationReceiptService donationReceiptService;
+    private final AuditLogService auditLogService;
     private final AdminCampaignService adminCampaignService;
     private final AdminCategoryService adminCategoryService;
     private final CampaignRepository campaignRepository;
@@ -101,12 +104,21 @@ public class AdminDonationController {
             }
             
             DonationPageResponse response = donationService.getDonationsPaginated(q, statusFilter, pageable);
+
+            String adminUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+            String details = String.format("page=%d, size=%d, q=%s, status=%s, sort=%s", pageNumber, pageSize, q, status, sort);
+            auditLogService.log(AuditAction.DONATION_LIST_VIEWED, "Donation", null, adminUsername, details);
+
             return ResponseEntity.ok(response);
         }
-        
+
         // Legacy non-paginated endpoint
         log.info("GET /api/admin/donations - Fetching all donations");
         List<DonationResponse> donations = donationService.getAllDonations();
+
+        String adminUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+        auditLogService.log(AuditAction.DONATION_LIST_VIEWED, "Donation", null, adminUsername, "legacy non-paginated");
+
         return ResponseEntity.ok(donations);
     }
     
@@ -146,6 +158,9 @@ public class AdminDonationController {
         log.info("GET /api/admin/donations/{}/receipt - Admin receipt download", id);
 
         byte[] pdfBytes = donationReceiptService.generateReceipt(id);
+
+        String adminUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+        auditLogService.log(AuditAction.DONATION_EXPORTED, "Donation", id, adminUsername, "Receipt PDF downloaded");
 
         String filename = "donation-receipt-" + id + ".pdf";
 
