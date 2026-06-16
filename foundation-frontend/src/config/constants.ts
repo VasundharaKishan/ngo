@@ -54,6 +54,7 @@ export const API_ENDPOINTS = {
     BY_ID: (id: string) => `/donations/${id}`,
     CREATE: '/donations',
     WEBHOOK: '/donations/webhook',
+    REFUND: (id: string) => `/admin/donations/${id}/refund`,
   },
   
   // CMS Content

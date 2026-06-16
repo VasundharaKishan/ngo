@@ -26,6 +26,8 @@ public interface DonationRepository extends JpaRepository<Donation, String>, Jpa
     List<Donation> findAllWithCampaign();
     
     Optional<Donation> findByStripeSessionId(String stripeSessionId);
+
+    Optional<Donation> findByStripePaymentIntentId(String stripePaymentIntentId);
     
     /**
      * Calculate the total amount raised for a campaign from successful donations only.

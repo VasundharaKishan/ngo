@@ -14,6 +14,9 @@ import com.myfoundation.school.donation.DonationStatus;
 import com.myfoundation.school.dto.CampaignResponse;
 import com.myfoundation.school.dto.DonationResponse;
 import com.myfoundation.school.dto.DonationPageResponse;
+import com.myfoundation.school.donation.Donation;
+import com.myfoundation.school.exception.BusinessException;
+import com.myfoundation.school.exception.ResourceNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +26,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -102,6 +106,37 @@ public class AdminDonationController {
         return ResponseEntity.ok(donations);
     }
     
+    // Refund request body
+    public record RefundRequest(String reason) {}
+
+    @PostMapping("/donations/{id}/refund")
+    public ResponseEntity<?> refundDonation(
+            @PathVariable String id,
+            @RequestBody(required = false) RefundRequest request) {
+        log.info("POST /api/admin/donations/{}/refund - Initiating refund", id);
+        try {
+            String adminUsername = SecurityContextHolder.getContext()
+                    .getAuthentication().getName();
+            String reason = (request != null) ? request.reason() : null;
+            Donation donation = donationService.refundDonation(id, reason, adminUsername);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("id", donation.getId());
+            response.put("status", donation.getStatus().name());
+            response.put("refundedAt", donation.getRefundedAt());
+            response.put("refundReason", donation.getRefundReason());
+            response.put("stripeRefundId", donation.getStripeRefundId());
+            response.put("message", "Donation refunded successfully");
+            return ResponseEntity.ok(response);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (BusinessException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
     // Campaign CRUD endpoints
     @GetMapping("/campaigns")
     public ResponseEntity<?> getAllCampaigns(

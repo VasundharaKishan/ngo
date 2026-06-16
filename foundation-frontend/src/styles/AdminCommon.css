@@ -396,6 +396,11 @@
   color: #d97706;
 }
 
+.status-badge.refunded {
+  background: #ede9fe;
+  color: #7c3aed;
+}
+
 /* ===== DASHBOARD CARDS ===== */
 
 .dashboard-container {

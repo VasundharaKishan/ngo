@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { RiMoneyDollarCircleLine } from 'react-icons/ri';
 import { formatCurrency } from '../utils/currency';
-import { fetchDonationsPaginated, type DonationPageResponse } from '../api';
+import { fetchDonationsPaginated, refundDonation, type DonationPageResponse } from '../api';
 import { usePaginationParams } from '../hooks/usePaginationParams';
 import { useDebounce } from '../hooks/useDebounce';
 import { formatDateTime } from '../utils/dateUtils';
@@ -14,6 +14,7 @@ export default function Donations() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchInput, setSearchInput] = useState('');
+  const [refundingId, setRefundingId] = useState<string | null>(null);
 
   const { page, size, sort, q, status, setPage, setSize, setSort, setQuery, setStatus, reset } = usePaginationParams();
   const debouncedSearch = useDebounce(searchInput, TIMING.DEBOUNCE_SEARCH);
@@ -23,24 +24,45 @@ export default function Donations() {
     setQuery(debouncedSearch);
   }, [debouncedSearch, setQuery]);
 
+  const loadDonations = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetchDonationsPaginated({ page, size, sort, q, status });
+      setData(response);
+    } catch (err) {
+      logger.error('Donations', 'Error loading donations:', err);
+      setError('Failed to load donations. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }, [page, size, sort, q, status]);
+
   // Load donations when filters change
   useEffect(() => {
-    const loadDonations = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await fetchDonationsPaginated({ page, size, sort, q, status });
-        setData(response);
-      } catch (err) {
-        logger.error('Donations', 'Error loading donations:', err);
-        setError('Failed to load donations. Please try again.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadDonations();
-  }, [page, size, sort, q, status]);
+  }, [loadDonations]);
+
+  const handleRefund = async (donationId: string, donorName: string, amount: number, currency: string) => {
+    const formattedAmount = formatCurrency(amount, currency);
+    const confirmed = window.confirm(
+      `Are you sure you want to refund this donation of ${formattedAmount} to ${donorName}? This cannot be undone.`
+    );
+    if (!confirmed) return;
+
+    setRefundingId(donationId);
+    try {
+      await refundDonation(donationId, 'Admin initiated refund');
+      alert('Refund processed successfully.');
+      await loadDonations();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'An unexpected error occurred';
+      logger.error('Donations', 'Refund failed:', err);
+      alert(`Refund failed: ${message}`);
+    } finally {
+      setRefundingId(null);
+    }
+  };
 
   const handleClearFilters = () => {
     setSearchInput('');
@@ -99,6 +121,7 @@ export default function Donations() {
                 <option value="SUCCESS">Success</option>
                 <option value="PENDING">Pending</option>
                 <option value="FAILED">Failed</option>
+                <option value="REFUNDED">Refunded</option>
               </select>
 
               <select
@@ -159,14 +182,15 @@ export default function Donations() {
                       </th>
                       <th>Campaign</th>
                       <th>Status</th>
-                      <th 
-                        className="sortable" 
+                      <th
+                        className="sortable"
                         onClick={() => handleSortChange('createdAt')}
                         title="Click to sort"
                         data-testid="donations-sort-date"
                       >
                         Date {getSortIcon('createdAt')}
                       </th>
+                      <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -189,6 +213,23 @@ export default function Donations() {
                           {donation.createdAt
                             ? formatDateTime(donation.createdAt)
                             : 'N/A'}
+                        </td>
+                        <td>
+                          {donation.status === 'SUCCESS' && (
+                            <button
+                              className="btn-refund"
+                              data-testid={`refund-btn-${donation.id}`}
+                              disabled={refundingId === donation.id}
+                              onClick={() => handleRefund(
+                                donation.id,
+                                donation.donorName || 'Anonymous',
+                                donation.amount || 0,
+                                donation.currency || 'eur'
+                              )}
+                            >
+                              {refundingId === donation.id ? 'Refunding...' : 'Refund'}
+                            </button>
+                          )}
                         </td>
                       </tr>
                     ))}

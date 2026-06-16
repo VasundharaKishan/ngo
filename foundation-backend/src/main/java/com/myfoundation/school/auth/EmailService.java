@@ -491,6 +491,195 @@ public class EmailService {
     }
     
     /**
+     * Send refund notification email to the donor.
+     */
+    public void sendRefundNotificationEmail(
+            String toEmail,
+            String donorName,
+            Long amount,
+            String currency,
+            String campaignName,
+            String donationId) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(fromDonations, fromName);
+            helper.setReplyTo(replyTo);
+            helper.setTo(toEmail);
+            helper.setSubject("Refund Processed — " + orgName());
+
+            String htmlContent = buildRefundNotificationHtml(donorName, amount, currency, campaignName, donationId);
+            helper.setText(htmlContent, true);
+
+            mailSender.send(message);
+            log.info("Refund notification email sent successfully to: {}", toEmail);
+
+        } catch (MessagingException | UnsupportedEncodingException e) {
+            log.error("Failed to send refund notification email to: {}", toEmail, e);
+            // Don't throw - email failure shouldn't block refund processing
+        }
+    }
+
+    private String buildRefundNotificationHtml(
+            String donorName,
+            Long amount,
+            String currency,
+            String campaignName,
+            String donationId) {
+
+        String formattedAmount = formatCurrency(amount, currency);
+        String org = orgName();
+        String contact = contactEmail();
+
+        return """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <style>
+                    body {
+                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                        line-height: 1.6;
+                        color: #333;
+                        max-width: 600px;
+                        margin: 0 auto;
+                        padding: 0;
+                        background-color: #f5f5f5;
+                    }
+                    .email-container {
+                        background-color: white;
+                        margin: 20px auto;
+                        border-radius: 12px;
+                        overflow: hidden;
+                        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                    }
+                    .header {
+                        background: linear-gradient(135deg, #667eea 0%%, #764ba2 100%%);
+                        color: white;
+                        padding: 40px 30px;
+                        text-align: center;
+                    }
+                    .header h1 {
+                        margin: 0;
+                        font-size: 28px;
+                        font-weight: 600;
+                    }
+                    .content {
+                        padding: 40px 30px;
+                    }
+                    .refund-card {
+                        background: linear-gradient(135deg, #fff7ed 0%%, #ffedd5 100%%);
+                        padding: 25px;
+                        border-radius: 10px;
+                        margin: 25px 0;
+                        border-left: 5px solid #f59e0b;
+                    }
+                    .amount {
+                        font-size: 32px;
+                        font-weight: bold;
+                        color: #f59e0b;
+                        margin: 10px 0;
+                    }
+                    .detail-row {
+                        display: flex;
+                        justify-content: space-between;
+                        padding: 12px 0;
+                        border-bottom: 1px solid #e5e7eb;
+                    }
+                    .detail-row:last-child {
+                        border-bottom: none;
+                    }
+                    .detail-label {
+                        color: #6b7280;
+                        font-weight: 500;
+                    }
+                    .detail-value {
+                        color: #111827;
+                        font-weight: 600;
+                    }
+                    .info-box {
+                        background: #eff6ff;
+                        border-left: 4px solid #3b82f6;
+                        padding: 20px;
+                        margin: 25px 0;
+                        border-radius: 6px;
+                    }
+                    .footer {
+                        background: #f9fafb;
+                        padding: 30px;
+                        text-align: center;
+                        color: #6b7280;
+                        font-size: 14px;
+                    }
+                    .footer a {
+                        color: #667eea;
+                        text-decoration: none;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="email-container">
+                    <div class="header">
+                        <h1>Refund Processed</h1>
+                        <p style="margin: 10px 0 0 0; opacity: 0.95;">Your refund has been initiated</p>
+                    </div>
+
+                    <div class="content">
+                        <p style="font-size: 18px; margin-bottom: 10px;">Dear <strong>%s</strong>,</p>
+
+                        <p>Your donation of <strong>%s</strong> to <strong>%s</strong> has been refunded. The refund should appear in your account within 5-10 business days.</p>
+
+                        <div class="refund-card">
+                            <div style="text-align: center; margin-bottom: 20px;">
+                                <div style="color: #6b7280; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Refund Amount</div>
+                                <div class="amount">%s</div>
+                            </div>
+
+                            <div class="detail-row">
+                                <span class="detail-label">Campaign</span>
+                                <span class="detail-value">%s</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Donation ID</span>
+                                <span class="detail-value">%s</span>
+                            </div>
+                        </div>
+
+                        <div class="info-box">
+                            <strong>Please note:</strong>
+                            <p style="margin: 10px 0 0 0;">Refunds typically take 5-10 business days to appear on your statement, depending on your bank or card issuer.</p>
+                        </div>
+
+                        <p>If you have any questions about this refund, please contact us at
+                            <a href="mailto:%s" style="color: #667eea;">%s</a>.
+                        </p>
+
+                        <p style="margin-top: 30px;">
+                            Best regards,<br>
+                            <span style="font-weight: 600; color: #667eea;">The %s Team</span>
+                        </p>
+                    </div>
+
+                    <div class="footer">
+                        <p><strong>%s</strong></p>
+                        <p style="margin-top: 15px; font-size: 12px; color: #9ca3af;">
+                            This is an automated message. Please do not reply to this email.<br>
+                            For inquiries, contact us at <a href="mailto:%s">%s</a>
+                        </p>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """.formatted(
+                donorName, formattedAmount, campaignName,
+                formattedAmount, campaignName, donationId,
+                contact, contact, org, org, contact, contact
+            );
+    }
+
+    /**
      * Notify admin when a new contact-form submission arrives.
      * Never throws — email failure must not block the submission.
      */

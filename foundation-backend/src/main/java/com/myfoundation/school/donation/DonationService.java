@@ -1,5 +1,7 @@
 package com.myfoundation.school.donation;
 
+import com.myfoundation.school.audit.AuditAction;
+import com.myfoundation.school.audit.AuditLogService;
 import com.myfoundation.school.auth.EmailService;
 import com.myfoundation.school.campaign.Campaign;
 import com.myfoundation.school.campaign.CampaignRepository;
@@ -11,7 +13,9 @@ import com.myfoundation.school.dto.DonationPageResponse;
 import com.myfoundation.school.exception.BusinessException;
 import com.myfoundation.school.exception.ResourceNotFoundException;
 import com.stripe.exception.StripeException;
+import com.stripe.model.Refund;
 import com.stripe.model.checkout.Session;
+import com.stripe.param.RefundCreateParams;
 import com.stripe.param.checkout.SessionCreateParams;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,9 +25,11 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -66,6 +72,7 @@ public class DonationService {
     private final CampaignRepository campaignRepository;
     private final StripeConfig stripeConfig;
     private final EmailService emailService;
+    private final AuditLogService auditLogService;
     
     /**
      * Minimum donation amounts by currency (aligned with Stripe minimums)
@@ -346,6 +353,146 @@ public class DonationService {
                 .orElseThrow(() -> new ResourceNotFoundException("Donation", "sessionId:" + sessionId));
 
         return toDonationResponse(donation);
+    }
+
+    /**
+     * Refund a donation via Stripe and update the donation record.
+     *
+     * @param donationId    the donation ID to refund
+     * @param reason        optional reason for the refund
+     * @param adminUsername the admin who initiated the refund
+     * @return the updated Donation entity
+     * @throws ResourceNotFoundException if donation not found
+     * @throws BusinessException         if donation cannot be refunded or Stripe call fails
+     */
+    @Transactional
+    public Donation refundDonation(String donationId, String reason, String adminUsername) {
+        log.info("Initiating refund for donation {} by admin {}", donationId, adminUsername);
+
+        Donation donation = donationRepository.findById(donationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Donation", donationId));
+
+        if (donation.getStatus() != DonationStatus.SUCCESS) {
+            throw new BusinessException("Only successful donations can be refunded");
+        }
+
+        if (donation.getStripePaymentIntentId() == null || donation.getStripePaymentIntentId().isBlank()) {
+            throw new BusinessException("No Stripe payment found for this donation");
+        }
+
+        try {
+            RefundCreateParams params = RefundCreateParams.builder()
+                    .setPaymentIntent(donation.getStripePaymentIntentId())
+                    .build();
+            Refund refund = Refund.create(params);
+
+            donation.setStatus(DonationStatus.REFUNDED);
+            donation.setRefundedAt(Instant.now());
+            donation.setRefundReason(reason);
+            donation.setStripeRefundId(refund.getId());
+            donation = donationRepository.save(donation);
+
+            log.info("Donation {} refunded successfully. Stripe refund ID: {}", donationId, refund.getId());
+
+            // Send refund notification email to donor
+            if (donation.getDonorEmail() != null && !donation.getDonorEmail().trim().isEmpty()) {
+                try {
+                    String campaignTitle = donation.getCampaign() != null
+                            ? donation.getCampaign().getTitle() : "General Donation";
+                    emailService.sendRefundNotificationEmail(
+                            donation.getDonorEmail(),
+                            donation.getDonorName() != null ? donation.getDonorName() : "Donor",
+                            donation.getAmount(),
+                            donation.getCurrency(),
+                            campaignTitle,
+                            donation.getId()
+                    );
+                } catch (Exception e) {
+                    log.error("Failed to send refund notification email for donation {}, but refund was still processed",
+                            donationId, e);
+                }
+            }
+
+            // Audit log
+            auditLogService.log(
+                    AuditAction.DONATION_REFUNDED,
+                    "Donation",
+                    donationId,
+                    adminUsername,
+                    "Refunded donation of " + donation.getAmount() + " " + donation.getCurrency()
+                            + (reason != null ? ". Reason: " + reason : "")
+            );
+
+            return donation;
+
+        } catch (StripeException e) {
+            log.error("Stripe refund failed for donation {}: {} (code: {})",
+                    donationId, e.getMessage(), e.getCode(), e);
+            throw new BusinessException("Failed to process refund via Stripe: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Mark a donation as refunded from a Stripe webhook event (e.g. charge.refunded).
+     * Used when a refund is initiated directly from the Stripe dashboard.
+     */
+    @Transactional
+    public void markDonationRefundedFromWebhook(String paymentIntentId, String stripeRefundId) {
+        log.info("[Webhook] Processing refund for paymentIntent: {}", paymentIntentId);
+
+        Optional<Donation> optDonation = donationRepository.findByStripePaymentIntentId(paymentIntentId);
+        if (optDonation.isEmpty()) {
+            log.warn("[Webhook] No donation found for paymentIntent: {} - cannot mark as refunded", paymentIntentId);
+            return;
+        }
+
+        Donation donation = optDonation.get();
+
+        if (donation.getStatus() == DonationStatus.REFUNDED) {
+            log.info("[Webhook] Donation {} already marked as REFUNDED - idempotent webhook, skipping", donation.getId());
+            return;
+        }
+
+        if (donation.getStatus() != DonationStatus.SUCCESS) {
+            log.warn("[Webhook] Donation {} has status {} - expected SUCCESS for refund, skipping",
+                    donation.getId(), donation.getStatus());
+            return;
+        }
+
+        donation.setStatus(DonationStatus.REFUNDED);
+        donation.setRefundedAt(Instant.now());
+        donation.setStripeRefundId(stripeRefundId);
+        donation.setRefundReason("Refunded via Stripe Dashboard");
+        donationRepository.save(donation);
+
+        log.info("[Webhook] Donation {} successfully marked as REFUNDED", donation.getId());
+
+        // Send refund notification email to donor
+        if (donation.getDonorEmail() != null && !donation.getDonorEmail().trim().isEmpty()) {
+            try {
+                String campaignTitle = donation.getCampaign() != null
+                        ? donation.getCampaign().getTitle() : "General Donation";
+                emailService.sendRefundNotificationEmail(
+                        donation.getDonorEmail(),
+                        donation.getDonorName() != null ? donation.getDonorName() : "Donor",
+                        donation.getAmount(),
+                        donation.getCurrency(),
+                        campaignTitle,
+                        donation.getId()
+                );
+            } catch (Exception e) {
+                log.error("[Webhook] Failed to send refund notification email for donation {}",
+                        donation.getId(), e);
+            }
+        }
+
+        auditLogService.log(
+                AuditAction.DONATION_REFUNDED,
+                "Donation",
+                donation.getId(),
+                "stripe-webhook",
+                "Refunded via Stripe Dashboard. Stripe refund ID: " + stripeRefundId
+        );
     }
 
     private DonationResponse toDonationResponse(Donation donation) {
