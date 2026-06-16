@@ -199,7 +199,7 @@ public class SecurityConfig {
                         "form-action 'self'";
                 headers.contentSecurityPolicy(csp -> csp.policyDirectives(cspPolicy));
                 headers.permissionsPolicy(policy -> policy
-                    .policy("geolocation=(), microphone=(), camera=(), fullscreen=(self)"));
+                    .policy("geolocation=(), microphone=(), camera=(), payment=(self \"https://js.stripe.com\"), usb=(), magnetometer=(), gyroscope=(), accelerometer=(), fullscreen=(self)"));
             })
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterAfter(new CsrfCookieFilter(cookieSecure), org.springframework.security.web.csrf.CsrfFilter.class);
