@@ -13,8 +13,9 @@
  *
  * All existing auth, session, and CSRF logic preserved.
  */
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { RiArrowDownSLine, RiArrowRightSLine } from 'react-icons/ri';
 import ErrorBoundary from './ErrorBoundary';
 import logger from '../utils/logger';
 import { API_BASE_URL } from '../api';
@@ -158,18 +159,59 @@ function useBreadcrumb() {
   return { section, page };
 }
 
+const SIDEBAR_COLLAPSED_KEY = 'admin-sidebar-collapsed';
+
+function loadCollapsedState(): Record<string, boolean> {
+  try {
+    const raw = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
 export default function AdminLayout() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { section, page } = useBreadcrumb();
   const [currentUser, setCurrentUser] = useState({ fullName: '', role: '', email: '', username: '' });
   const [isAdmin, setIsAdmin] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAuthChecked, setIsAuthChecked] = useState(false);
+  const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>(loadCollapsedState);
   const siteName = useSiteName();
   const logoUrl = useSiteLogo();
   const logoInitials = useMemo(() =>
     siteName.trim().split(/\s+/).slice(0, 2).map(w => w[0] ?? '').join('').toUpperCase(),
   [siteName]);
+
+  // Toggle a sidebar group collapsed/expanded
+  const toggleGroup = useCallback((heading: string) => {
+    setCollapsedGroups((prev) => {
+      const next = { ...prev, [heading]: !prev[heading] };
+      localStorage.setItem(SIDEBAR_COLLAPSED_KEY, JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  // Auto-expand group that contains the active route
+  useEffect(() => {
+    const currentPath = location.pathname;
+    for (const group of NAV_GROUPS) {
+      const hasActiveItem = group.items.some((item) => {
+        if (item.end) return currentPath === item.to;
+        return currentPath === item.to || currentPath.startsWith(item.to + '/');
+      });
+      if (hasActiveItem && collapsedGroups[group.heading]) {
+        setCollapsedGroups((prev) => {
+          const next = { ...prev, [group.heading]: false };
+          localStorage.setItem(SIDEBAR_COLLAPSED_KEY, JSON.stringify(next));
+          return next;
+        });
+        break;
+      }
+    }
+  }, [location.pathname]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Session management
   const SESSION_KEY = STORAGE_KEYS.SESSION_ID;
@@ -336,27 +378,42 @@ export default function AdminLayout() {
               (item) => !item.adminOnly || isAdmin
             );
             if (visibleItems.length === 0) return null;
+            const isCollapsed = !!collapsedGroups[group.heading];
             return (
               <div key={group.heading} className="sidebar-group">
-                <div className="sidebar-group-heading">{group.heading}</div>
-                {visibleItems.map((item) => (
-                  <NavLink
-                    key={item.to}
-                    to={item.to}
-                    end={item.end}
-                    className={({ isActive }) =>
-                      `sidebar-nav-item ${isActive ? 'active' : ''}`
-                    }
-                    onClick={closeSidebar}
-                    data-testid={`nav-${item.to.split('/').pop()}`}
-                  >
-                    <span className="sidebar-nav-icon">{item.icon}</span>
-                    <span>{item.label}</span>
-                    {item.badge && (
-                      <span className="sidebar-nav-badge">{item.badge}</span>
-                    )}
-                  </NavLink>
-                ))}
+                <button
+                  type="button"
+                  className="sidebar-group-heading"
+                  onClick={() => toggleGroup(group.heading)}
+                  aria-expanded={!isCollapsed}
+                >
+                  <span className="sidebar-group-chevron">
+                    {isCollapsed ? <RiArrowRightSLine /> : <RiArrowDownSLine />}
+                  </span>
+                  <span>{group.heading}</span>
+                </button>
+                <div
+                  className={`sidebar-group-items ${isCollapsed ? 'collapsed' : ''}`}
+                >
+                  {visibleItems.map((item) => (
+                    <NavLink
+                      key={item.to}
+                      to={item.to}
+                      end={item.end}
+                      className={({ isActive }) =>
+                        `sidebar-nav-item ${isActive ? 'active' : ''}`
+                      }
+                      onClick={closeSidebar}
+                      data-testid={`nav-${item.to.split('/').pop()}`}
+                    >
+                      <span className="sidebar-nav-icon">{item.icon}</span>
+                      <span>{item.label}</span>
+                      {item.badge && (
+                        <span className="sidebar-nav-badge">{item.badge}</span>
+                      )}
+                    </NavLink>
+                  ))}
+                </div>
               </div>
             );
           })}

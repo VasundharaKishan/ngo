@@ -97,10 +97,10 @@ export default function DonationPanel() {
         <div className="donation-panel-grid">
           {/* ── Left: form ── */}
           <div className="donation-form-card">
-            {/* Monthly toggle */}
-            <div className="donation-monthly-toggle">
+            {/* Monthly toggle — disabled until backend Stripe Subscriptions are wired */}
+            <div className="donation-monthly-toggle" style={{ opacity: 0.55, pointerEvents: 'none' }}>
               <div className="donation-monthly-text">
-                <div className="donation-monthly-title">Make it monthly</div>
+                <div className="donation-monthly-title">Make it monthly <span style={{ fontSize: '0.75rem', fontWeight: 400, color: '#9ca3af' }}>(Coming soon)</span></div>
                 <div className="donation-monthly-desc">
                   Sustain a child's learning all year. Cancel anytime.
                 </div>
@@ -108,9 +108,9 @@ export default function DonationPanel() {
               <label className="donation-switch">
                 <input
                   type="checkbox"
-                  checked={isMonthly}
-                  onChange={(e) => setIsMonthly(e.target.checked)}
-                  aria-label="Toggle monthly giving"
+                  checked={false}
+                  disabled
+                  aria-label="Toggle monthly giving (coming soon)"
                 />
                 <span className="donation-switch-track" />
               </label>
