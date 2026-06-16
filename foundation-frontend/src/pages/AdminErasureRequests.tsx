@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { authFetch, API_BASE_URL } from '../api';
 import { formatDateTime } from '../utils/dateUtils';
+import ConfirmDialog from '../components/ConfirmDialog';
 import logger from '../utils/logger';
 import './Donations.css';
 
@@ -28,6 +29,9 @@ export default function AdminErasureRequests() {
   const [error, setError] = useState<string | null>(null);
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [page, setPage] = useState(0);
+  const [confirmAction, setConfirmAction] = useState<{
+    title: string; message: string; onConfirm: () => void;
+  } | null>(null);
   const size = 25;
 
   const loadRequests = useCallback(async () => {
@@ -52,31 +56,33 @@ export default function AdminErasureRequests() {
     loadRequests();
   }, [loadRequests]);
 
-  const handleProcess = async (id: string, email: string) => {
-    const confirmed = window.confirm(
-      `Are you sure you want to process the erasure request for ${email}?\n\nThis will permanently anonymize all donation records associated with this email. This action cannot be undone.`
-    );
-    if (!confirmed) return;
-
-    setProcessingId(id);
-    try {
-      const response = await authFetch(
-        `${API_BASE_URL}/admin/erasure-requests/${id}/process`,
-        { method: 'POST' }
-      );
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.message || 'Failed to process erasure request');
-      }
-      alert('Erasure request processed successfully. Donor data has been anonymized.');
-      await loadRequests();
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'An unexpected error occurred';
-      logger.error('AdminErasureRequests', 'Process failed:', err);
-      alert(`Failed to process erasure request: ${message}`);
-    } finally {
-      setProcessingId(null);
-    }
+  const handleProcess = (id: string, email: string) => {
+    setConfirmAction({
+      title: 'Process erasure request',
+      message: `Are you sure you want to process the erasure request for ${email}?\n\nThis will permanently anonymize all donation records associated with this email. This action cannot be undone.`,
+      onConfirm: async () => {
+        setConfirmAction(null);
+        setProcessingId(id);
+        try {
+          const response = await authFetch(
+            `${API_BASE_URL}/admin/erasure-requests/${id}/process`,
+            { method: 'POST' }
+          );
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => null);
+            throw new Error(errorData?.message || 'Failed to process erasure request');
+          }
+          alert('Erasure request processed successfully. Donor data has been anonymized.');
+          await loadRequests();
+        } catch (err) {
+          const message = err instanceof Error ? err.message : 'An unexpected error occurred';
+          logger.error('AdminErasureRequests', 'Process failed:', err);
+          alert(`Failed to process erasure request: ${message}`);
+        } finally {
+          setProcessingId(null);
+        }
+      },
+    });
   };
 
   const getStatusBadgeClass = (status: string) => {
@@ -205,6 +211,15 @@ export default function AdminErasureRequests() {
           )}
         </div>
       </div>
+      <ConfirmDialog
+        isOpen={!!confirmAction}
+        title={confirmAction?.title ?? ''}
+        message={confirmAction?.message ?? ''}
+        confirmLabel="Process"
+        variant="danger"
+        onConfirm={() => confirmAction?.onConfirm()}
+        onCancel={() => setConfirmAction(null)}
+      />
     </>
   );
 }

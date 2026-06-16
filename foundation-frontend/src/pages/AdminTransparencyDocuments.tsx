@@ -15,6 +15,7 @@ import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../api';
 import { authFetch } from '../utils/auth';
 import { useToast } from '../components/ToastProvider';
+import ConfirmDialog from '../components/ConfirmDialog';
 import logger from '../utils/logger';
 import './AdminTransparencyDocuments.css';
 
@@ -53,6 +54,9 @@ export default function AdminTransparencyDocuments() {
   const [saving, setSaving] = useState(false);
   const [creating, setCreating] = useState(false);
   const [newTitle, setNewTitle] = useState('');
+  const [confirmAction, setConfirmAction] = useState<{
+    title: string; message: string; onConfirm: () => void;
+  } | null>(null);
 
   useEffect(() => {
     const user = localStorage.getItem('adminUser');
@@ -194,25 +198,30 @@ export default function AdminTransparencyDocuments() {
     }
   };
 
-  const deleteRow = async (id: number) => {
+  const deleteRow = (id: number) => {
     const draft = drafts.find((d) => d.id === id);
     if (!draft) return;
-    const ok = window.confirm(`Delete "${truncate(draft.title, 60)}"? This cannot be undone.`);
-    if (!ok) return;
-    setSaving(true);
-    try {
-      const res = await authFetch(`${API_BASE_URL}/admin/transparency-documents/${id}`, {
-        method: 'DELETE',
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      showToast('Deleted', 'success');
-      await load();
-    } catch (error) {
-      logger.error('AdminTransparencyDocuments', 'Delete failed', error);
-      showToast('Delete failed', 'error');
-    } finally {
-      setSaving(false);
-    }
+    setConfirmAction({
+      title: 'Delete document',
+      message: `Delete "${truncate(draft.title, 60)}"? This cannot be undone.`,
+      onConfirm: async () => {
+        setConfirmAction(null);
+        setSaving(true);
+        try {
+          const res = await authFetch(`${API_BASE_URL}/admin/transparency-documents/${id}`, {
+            method: 'DELETE',
+          });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          showToast('Deleted', 'success');
+          await load();
+        } catch (error) {
+          logger.error('AdminTransparencyDocuments', 'Delete failed', error);
+          showToast('Delete failed', 'error');
+        } finally {
+          setSaving(false);
+        }
+      },
+    });
   };
 
   const createRow = async () => {
@@ -454,6 +463,15 @@ export default function AdminTransparencyDocuments() {
           Enabled.
         </p>
       </div>
+      <ConfirmDialog
+        isOpen={!!confirmAction}
+        title={confirmAction?.title ?? ''}
+        message={confirmAction?.message ?? ''}
+        confirmLabel="Delete"
+        variant="danger"
+        onConfirm={() => confirmAction?.onConfirm()}
+        onCancel={() => setConfirmAction(null)}
+      />
     </div>
   );
 }

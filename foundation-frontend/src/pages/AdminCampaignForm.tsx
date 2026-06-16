@@ -5,6 +5,7 @@ import { getThumbnailUrl } from '../utils/imageUtils';
 import { API_BASE_URL } from '../api';
 import { authFetch } from '../utils/auth';
 import { useToast } from '../components/ToastProvider';
+import ConfirmDialog from '../components/ConfirmDialog';
 import Spinner from '../components/Spinner';
 import logger from '../utils/logger';
 import './AdminCampaignForm.css';
@@ -35,6 +36,9 @@ export default function AdminCampaignForm() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<{
+    title: string; message: string; onConfirm: () => void;
+  } | null>(null);
   const [formData, setFormData] = useState({
     title: '',
     shortDescription: '',
@@ -151,30 +155,34 @@ export default function AdminCampaignForm() {
     }
   };
 
-  const handleRemoveImage = async () => {
+  const handleRemoveImage = () => {
     if (!formData.imageFilename) {
       setFormData(prev => ({ ...prev, imageUrl: '', imageFilename: '' }));
       return;
     }
 
-    const confirmed = window.confirm('Remove this image from storage?');
-    if (!confirmed) return;
-
-    try {
-      const res = await authFetch(`${API_BASE_URL}/admin/upload/image/${encodeURIComponent(formData.imageFilename)}`, {
-        method: 'DELETE'
-      });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        const msg = data.error || 'Failed to delete image';
-        showToast(msg, 'error');
-        return;
-      }
-      setFormData(prev => ({ ...prev, imageUrl: '', imageFilename: '' }));
-    } catch (error) {
-      logger.error('AdminCampaignForm', 'Error deleting image:', error);
-      showToast('Failed to delete image', 'error');
-    }
+    setConfirmAction({
+      title: 'Remove image',
+      message: 'Remove this image from storage?',
+      onConfirm: async () => {
+        setConfirmAction(null);
+        try {
+          const res = await authFetch(`${API_BASE_URL}/admin/upload/image/${encodeURIComponent(formData.imageFilename)}`, {
+            method: 'DELETE'
+          });
+          if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            const msg = data.error || 'Failed to delete image';
+            showToast(msg, 'error');
+            return;
+          }
+          setFormData(prev => ({ ...prev, imageUrl: '', imageFilename: '' }));
+        } catch (error) {
+          logger.error('AdminCampaignForm', 'Error deleting image:', error);
+          showToast('Failed to delete image', 'error');
+        }
+      },
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -239,6 +247,13 @@ export default function AdminCampaignForm() {
     }
   };
 
+  const charCounterClass = (current: number, max: number) => {
+    const ratio = current / max;
+    if (ratio >= 1) return 'char-counter char-counter--limit';
+    if (ratio > 0.9) return 'char-counter char-counter--warn';
+    return 'char-counter';
+  };
+
   return (
     <div className="admin-form-container" data-testid="campaign-form-page">
       <div className="form-header">
@@ -249,7 +264,7 @@ export default function AdminCampaignForm() {
       <form onSubmit={handleSubmit} className="admin-form" data-testid="campaign-form">
         <div className="form-grid">
           <div className="form-group full-width">
-            <label>Title * <span className="help-text">({formData.title.length}/200)</span></label>
+            <label>Title *</label>
             <input
               type="text"
               value={formData.title}
@@ -258,10 +273,13 @@ export default function AdminCampaignForm() {
               maxLength={200}
               required
             />
+            <span className={charCounterClass(formData.title.length, 200)}>
+              {formData.title.length} / 200
+            </span>
           </div>
 
           <div className="form-group full-width">
-            <label>Short Description * <span className="help-text">({formData.shortDescription.length}/200)</span></label>
+            <label>Short Description *</label>
               <textarea
                 value={formData.shortDescription}
                 data-testid="campaign-short-description"
@@ -270,10 +288,13 @@ export default function AdminCampaignForm() {
                 maxLength={200}
                 required
               />
+            <span className={charCounterClass(formData.shortDescription.length, 200)}>
+              {formData.shortDescription.length} / 200
+            </span>
           </div>
 
           <div className="form-group full-width">
-            <label>Full Description * <span className="help-text">({formData.fullDescription.length}/8000)</span></label>
+            <label>Full Description *</label>
               <textarea
                 value={formData.fullDescription}
                 data-testid="campaign-full-description"
@@ -282,6 +303,9 @@ export default function AdminCampaignForm() {
                 maxLength={8000}
                 required
               />
+            <span className={charCounterClass(formData.fullDescription.length, 8000)}>
+              {formData.fullDescription.length} / 8000
+            </span>
           </div>
 
           <div className="form-group">
@@ -436,6 +460,15 @@ export default function AdminCampaignForm() {
           </button>
         </div>
       </form>
+      <ConfirmDialog
+        isOpen={!!confirmAction}
+        title={confirmAction?.title ?? ''}
+        message={confirmAction?.message ?? ''}
+        confirmLabel="Remove"
+        variant="warning"
+        onConfirm={() => confirmAction?.onConfirm()}
+        onCancel={() => setConfirmAction(null)}
+      />
     </div>
   );
 }

@@ -13,6 +13,7 @@ import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../api';
 import { authFetch } from '../utils/auth';
 import { useToast } from '../components/ToastProvider';
+import ConfirmDialog from '../components/ConfirmDialog';
 import logger from '../utils/logger';
 import './AdminStories.css';
 
@@ -55,6 +56,9 @@ export default function AdminStories() {
   const [saving, setSaving] = useState(false);
   const [creating, setCreating] = useState(false);
   const [newTitle, setNewTitle] = useState('');
+  const [confirmAction, setConfirmAction] = useState<{
+    title: string; message: string; onConfirm: () => void;
+  } | null>(null);
 
   useEffect(() => {
     const user = localStorage.getItem('adminUser');
@@ -189,23 +193,28 @@ export default function AdminStories() {
     }
   };
 
-  const deleteRow = async (id: number) => {
+  const deleteRow = (id: number) => {
     const draft = drafts.find((d) => d.id === id);
     if (!draft) return;
-    const ok = window.confirm(`Delete "${draft.title}"? This cannot be undone.`);
-    if (!ok) return;
-    setSaving(true);
-    try {
-      const res = await authFetch(`${API_BASE_URL}/admin/stories/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      showToast(`Deleted "${draft.title}"`, 'success');
-      await load();
-    } catch (error) {
-      logger.error('AdminStories', 'Delete failed', error);
-      showToast('Delete failed', 'error');
-    } finally {
-      setSaving(false);
-    }
+    setConfirmAction({
+      title: 'Delete story',
+      message: `Delete "${draft.title}"? This cannot be undone.`,
+      onConfirm: async () => {
+        setConfirmAction(null);
+        setSaving(true);
+        try {
+          const res = await authFetch(`${API_BASE_URL}/admin/stories/${id}`, { method: 'DELETE' });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          showToast(`Deleted "${draft.title}"`, 'success');
+          await load();
+        } catch (error) {
+          logger.error('AdminStories', 'Delete failed', error);
+          showToast('Delete failed', 'error');
+        } finally {
+          setSaving(false);
+        }
+      },
+    });
   };
 
   const createRow = async () => {
@@ -444,6 +453,15 @@ export default function AdminStories() {
           the quote, attribution, and other fields, then toggle Enabled.
         </p>
       </div>
+      <ConfirmDialog
+        isOpen={!!confirmAction}
+        title={confirmAction?.title ?? ''}
+        message={confirmAction?.message ?? ''}
+        confirmLabel="Delete"
+        variant="danger"
+        onConfirm={() => confirmAction?.onConfirm()}
+        onCancel={() => setConfirmAction(null)}
+      />
     </div>
   );
 }

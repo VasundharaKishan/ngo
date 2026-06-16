@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { RiMoneyDollarCircleLine, RiDownloadLine } from 'react-icons/ri';
 import { formatCurrency } from '../utils/currency';
+import ConfirmDialog from '../components/ConfirmDialog';
 import { fetchDonationsPaginated, refundDonation, authFetch, API_BASE_URL, type DonationPageResponse } from '../api';
 import { usePaginationParams } from '../hooks/usePaginationParams';
 import { useDebounce } from '../hooks/useDebounce';
@@ -15,6 +16,9 @@ export default function Donations() {
   const [error, setError] = useState<string | null>(null);
   const [searchInput, setSearchInput] = useState('');
   const [refundingId, setRefundingId] = useState<string | null>(null);
+  const [confirmAction, setConfirmAction] = useState<{
+    title: string; message: string; onConfirm: () => void;
+  } | null>(null);
 
   const { page, size, sort, q, status, setPage, setSize, setSort, setQuery, setStatus, reset } = usePaginationParams();
   const debouncedSearch = useDebounce(searchInput, TIMING.DEBOUNCE_SEARCH);
@@ -43,25 +47,27 @@ export default function Donations() {
     loadDonations();
   }, [loadDonations]);
 
-  const handleRefund = async (donationId: string, donorName: string, amount: number, currency: string) => {
+  const handleRefund = (donationId: string, donorName: string, amount: number, currency: string) => {
     const formattedAmount = formatCurrency(amount, currency);
-    const confirmed = window.confirm(
-      `Are you sure you want to refund this donation of ${formattedAmount} to ${donorName}? This cannot be undone.`
-    );
-    if (!confirmed) return;
-
-    setRefundingId(donationId);
-    try {
-      await refundDonation(donationId, 'Admin initiated refund');
-      alert('Refund processed successfully.');
-      await loadDonations();
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'An unexpected error occurred';
-      logger.error('Donations', 'Refund failed:', err);
-      alert(`Refund failed: ${message}`);
-    } finally {
-      setRefundingId(null);
-    }
+    setConfirmAction({
+      title: 'Refund donation',
+      message: `Are you sure you want to refund this donation of ${formattedAmount} to ${donorName}? This cannot be undone.`,
+      onConfirm: async () => {
+        setConfirmAction(null);
+        setRefundingId(donationId);
+        try {
+          await refundDonation(donationId, 'Admin initiated refund');
+          alert('Refund processed successfully.');
+          await loadDonations();
+        } catch (err) {
+          const message = err instanceof Error ? err.message : 'An unexpected error occurred';
+          logger.error('Donations', 'Refund failed:', err);
+          alert(`Refund failed: ${message}`);
+        } finally {
+          setRefundingId(null);
+        }
+      },
+    });
   };
 
   const handleClearFilters = () => {
@@ -317,6 +323,15 @@ export default function Donations() {
           )}
         </div>
       </div>
+      <ConfirmDialog
+        isOpen={!!confirmAction}
+        title={confirmAction?.title ?? ''}
+        message={confirmAction?.message ?? ''}
+        confirmLabel="Refund"
+        variant="danger"
+        onConfirm={() => confirmAction?.onConfirm()}
+        onCancel={() => setConfirmAction(null)}
+      />
     </>
   );
 }

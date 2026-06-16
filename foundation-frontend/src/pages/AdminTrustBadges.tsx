@@ -14,6 +14,7 @@ import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../api';
 import { authFetch } from '../utils/auth';
 import { useToast } from '../components/ToastProvider';
+import ConfirmDialog from '../components/ConfirmDialog';
 import logger from '../utils/logger';
 import { useRegistrationInfo } from '../hooks/useRegistrationInfo';
 import './AdminTrustBadges.css';
@@ -61,6 +62,9 @@ export default function AdminTrustBadges() {
   const [creating, setCreating] = useState(false);
   const [newSlotKey, setNewSlotKey] = useState('');
   const [newTitle, setNewTitle] = useState('');
+  const [confirmAction, setConfirmAction] = useState<{
+    title: string; message: string; onConfirm: () => void;
+  } | null>(null);
   const slotKeyTouched = useRef(false);
 
   useEffect(() => {
@@ -183,23 +187,28 @@ export default function AdminTrustBadges() {
     }
   };
 
-  const deleteBadge = async (id: number) => {
+  const deleteBadge = (id: number) => {
     const draft = drafts.find((d) => d.id === id);
     if (!draft) return;
-    const ok = window.confirm(`Delete "${draft.title}"? This cannot be undone.`);
-    if (!ok) return;
-    setSaving(true);
-    try {
-      const res = await authFetch(`${API_BASE_URL}/admin/trust-badges/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      showToast(`Deleted "${draft.title}"`, 'success');
-      await load();
-    } catch (error) {
-      logger.error('AdminTrustBadges', 'Delete failed', error);
-      showToast('Delete failed', 'error');
-    } finally {
-      setSaving(false);
-    }
+    setConfirmAction({
+      title: 'Delete badge',
+      message: `Delete "${draft.title}"? This cannot be undone.`,
+      onConfirm: async () => {
+        setConfirmAction(null);
+        setSaving(true);
+        try {
+          const res = await authFetch(`${API_BASE_URL}/admin/trust-badges/${id}`, { method: 'DELETE' });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          showToast(`Deleted "${draft.title}"`, 'success');
+          await load();
+        } catch (error) {
+          logger.error('AdminTrustBadges', 'Delete failed', error);
+          showToast('Delete failed', 'error');
+        } finally {
+          setSaving(false);
+        }
+      },
+    });
   };
 
   const createBadge = async () => {
@@ -476,6 +485,15 @@ export default function AdminTrustBadges() {
           Save on each card to persist.
         </div>
       )}
+      <ConfirmDialog
+        isOpen={!!confirmAction}
+        title={confirmAction?.title ?? ''}
+        message={confirmAction?.message ?? ''}
+        confirmLabel="Delete"
+        variant="danger"
+        onConfirm={() => confirmAction?.onConfirm()}
+        onCancel={() => setConfirmAction(null)}
+      />
     </div>
   );
 }

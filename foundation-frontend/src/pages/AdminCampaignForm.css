@@ -188,6 +188,26 @@
   box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
 
+/* ===== CHARACTER COUNTER ===== */
+
+.char-counter {
+  display: block;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  text-align: right;
+  margin-top: 0.25rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.char-counter--warn {
+  color: #d97706;
+}
+
+.char-counter--limit {
+  color: #dc2626;
+  font-weight: 600;
+}
+
 @media (max-width: 768px) {
   .admin-form-container {
     padding: 1rem;
