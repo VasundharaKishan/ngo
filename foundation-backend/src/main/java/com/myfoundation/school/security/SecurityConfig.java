@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -44,6 +45,7 @@ import java.util.List;
 @Slf4j
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
     
     @Value("${app.frontend.url}")
@@ -108,14 +110,7 @@ public class SecurityConfig {
                     "/api/auth/reset-password/**",
                     "/api/donations/stripe/create",  // Public donation endpoint
                     "/api/donations/stripe/webhook", // Stripe webhooks can't send CSRF tokens
-                    "/api/public/privacy/**",        // Public GDPR erasure request form
-                    // Admin endpoints are protected by JWT (httpOnly cookie) + CORS.
-                    // CORS restricts credentialed requests to the trusted frontend origin only,
-                    // which means cross-site forged requests are already blocked at the CORS layer.
-                    // Requiring an additional CSRF cookie causes MissingCsrfTokenException in
-                    // cross-origin dev setups (localhost:5173 → localhost:8080) where the browser
-                    // cannot send the XSRF-TOKEN cookie set by the other origin.
-                    "/api/admin/**"
+                    "/api/public/privacy/**"         // Public GDPR erasure request form
                 )
             )
             .authorizeHttpRequests(auth -> {
@@ -190,7 +185,7 @@ public class SecurityConfig {
                 String cspPolicy =
                         "default-src 'self'; " +
                         "img-src 'self' data: https:; " +
-                        "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; " +
+                        "script-src 'self' https://challenges.cloudflare.com; " +
                         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
                         "font-src 'self' data: https://fonts.gstatic.com; " +
                         "connect-src 'self' https://api.stripe.com https://challenges.cloudflare.com; " +

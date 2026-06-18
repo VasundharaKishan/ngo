@@ -33,7 +33,7 @@ public class AdminContactController {
      * Only accessible by authenticated admins.
      */
     @PutMapping("/contact")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ContactInfoResponse> updateContactInfo(
             @Valid @RequestBody ContactInfoRequest request) {
         
@@ -53,7 +53,7 @@ public class AdminContactController {
      * Useful for admin UI to fetch current values for editing.
      */
     @GetMapping("/contact")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ContactInfoResponse> getContactInfo() {
         log.info("GET /api/admin/config/contact - Fetching contact information");
         ContactInfoResponse response = contactSettingsService.getContactInfo();
@@ -64,7 +64,7 @@ public class AdminContactController {
      * Get current donate popup settings including spotlight campaign.
      */
     @GetMapping("/donate-popup")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<DonatePopupSettingsResponse> getDonatePopupSettings() {
         log.info("GET /api/admin/config/donate-popup - Fetching donate popup settings");
         
@@ -86,7 +86,7 @@ public class AdminContactController {
      * Update donate popup settings (set or clear spotlight campaign).
      */
     @PutMapping("/donate-popup")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<DonatePopupSettingsResponse> updateDonatePopupSettings(
             @Valid @RequestBody DonatePopupSettingsRequest request) {
         

@@ -23,7 +23,7 @@ import java.time.Instant;
  */
 @RestController
 @RequestMapping("/api/admin/announcement-bar")
-@PreAuthorize("hasAuthority('ADMIN')")
+@PreAuthorize("hasRole('ADMIN')")
 @RequiredArgsConstructor
 @Slf4j
 public class AdminAnnouncementBarController {

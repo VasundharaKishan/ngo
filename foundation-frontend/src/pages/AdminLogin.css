@@ -30,7 +30,7 @@
 
 .login-header p {
   margin: 0;
-  color: #64748b;
+  color: #475569;
   font-size: var(--font-size-lg);
   font-weight: 600;
 }
@@ -104,7 +104,7 @@
   display: block;
   text-align: center;
   margin-top: 0.5rem;
-  color: #64748b;
+  color: #475569;
   font-size: var(--font-size-sm);
   font-weight: 600;
   text-decoration: none;
@@ -126,7 +126,7 @@
 
 .login-info p {
   margin: 0 0 0.5rem 0;
-  color: #64748b;
+  color: #475569;
   font-size: var(--font-size-sm);
   font-weight: 600;
 }

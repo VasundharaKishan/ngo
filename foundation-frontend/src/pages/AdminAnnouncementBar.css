@@ -10,7 +10,7 @@
 .aab-loading {
   padding: 3rem;
   text-align: center;
-  color: #64748b;
+  color: #475569;
 }
 
 .aab-header {
@@ -29,7 +29,7 @@
 
 .aab-sub {
   margin: 0;
-  color: #64748b;
+  color: #475569;
   font-size: 0.9rem;
   max-width: 64ch;
   line-height: 1.5;
@@ -37,7 +37,7 @@
 
 .aab-sub-small {
   margin: 0 0 0.75rem 0;
-  color: #64748b;
+  color: #475569;
   font-size: 0.85rem;
   line-height: 1.5;
 }
@@ -156,7 +156,7 @@
 
 .aab-hint {
   font-size: 0.78rem;
-  color: #64748b;
+  color: #475569;
 }
 
 .aab-required {
@@ -200,7 +200,7 @@
 }
 
 .aab-audit {
-  color: #64748b;
+  color: #475569;
   font-size: 0.8rem;
   margin-top: 1rem;
   text-align: right;

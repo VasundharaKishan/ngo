@@ -23,7 +23,7 @@
 
 .af-sub {
   margin: 0;
-  color: #64748b;
+  color: #475569;
   font-size: 0.9rem;
   max-width: 64ch;
   line-height: 1.5;
@@ -165,7 +165,7 @@
 
 .af-counter {
   font-size: 0.75rem;
-  color: #64748b;
+  color: #475569;
   align-self: flex-end;
 }
 
@@ -208,7 +208,7 @@
 
 .af-new-hint {
   margin: 0.75rem 0 0 0;
-  color: #64748b;
+  color: #475569;
   font-size: 0.8rem;
   line-height: 1.5;
 }

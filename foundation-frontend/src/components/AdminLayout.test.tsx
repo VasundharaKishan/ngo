@@ -42,7 +42,7 @@ describe('AdminLayout', () => {
   });
 
   it('initializes session and performs logout', async () => {
-    localStorage.setItem('adminUser', JSON.stringify({ fullName: 'Test Admin', role: 'ADMIN', email: 'a@b.com', username: 'admin' }));
+    localStorage.setItem('adminUser', JSON.stringify({ fullName: 'Test Admin', role: 'ADMIN', username: 'admin' }));
 
     render(
       <MemoryRouter>

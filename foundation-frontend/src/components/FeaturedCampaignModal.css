@@ -116,7 +116,7 @@
   align-items: center;
   gap: 0.75rem;
   font-size: 0.85rem;
-  color: #64748b;
+  color: #475569;
 }
 
 .modal-logo {
@@ -224,7 +224,7 @@
 
 .modal-stat-label {
   font-size: 0.8rem;
-  color: #64748b;
+  color: #475569;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -291,7 +291,7 @@
 
 .modal-explore-text {
   font-size: 0.875rem;
-  color: #64748b;
+  color: #475569;
   line-height: 1.6;
   margin: 0.5rem 0 1rem;
 }
@@ -342,7 +342,7 @@
   gap: 0.5rem;
   padding-top: 1rem;
   border-top: 1px solid #e2e8f0;
-  color: #64748b;
+  color: #475569;
   font-size: 0.85rem;
 }
 
@@ -359,7 +359,7 @@
 }
 
 .modal-loading {
-  color: #64748b;
+  color: #475569;
   font-size: 1.1rem;
 }
 
@@ -381,7 +381,7 @@
 }
 
 .modal-error-text {
-  color: #64748b;
+  color: #475569;
   font-size: 1.1rem;
   margin: 0;
   max-width: 400px;
@@ -395,7 +395,7 @@
 }
 
 .modal-no-campaigns p {
-  color: #64748b;
+  color: #475569;
   font-size: 1.1rem;
   margin: 0;
 }

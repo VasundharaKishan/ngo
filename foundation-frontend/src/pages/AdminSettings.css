@@ -62,7 +62,7 @@
 }
 
 .section-description {
-  color: #64748b;
+  color: #475569;
   margin-bottom: 2rem;
   font-size: var(--font-size-sm);
 }
@@ -103,7 +103,7 @@
   border-radius: 4px;
   font-family: 'Courier New', monospace;
   font-size: var(--font-size-xs);
-  color: #64748b;
+  color: #475569;
 }
 
 .config-control {
@@ -346,7 +346,7 @@
 }
 
 .config-description {
-  color: #64748b;
+  color: #475569;
   font-size: var(--font-size-sm);
   margin: 0.25rem 0 0 0;
 }

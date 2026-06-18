@@ -16,6 +16,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 /**
@@ -44,6 +45,9 @@ class EmailServiceTest {
     private SiteConfigService siteConfigService;
 
     @Mock
+    private EmailTemplateService emailTemplateService;
+
+    @Mock
     private MimeMessage mimeMessage;
 
     @InjectMocks
@@ -64,6 +68,8 @@ class EmailServiceTest {
         lenient().when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
         lenient().when(siteConfigService.getConfigValue("admin.notification.email"))
                 .thenReturn("admin@example.com");
+        lenient().when(emailTemplateService.render(anyString(), any()))
+                .thenReturn("<html>test</html>");
     }
 
     // ==================== OTP EMAIL TESTS ====================
@@ -349,7 +355,7 @@ class EmailServiceTest {
     @Test
     void emails_HandlesNullMailSender() {
         // Edge case: if mailSender is null (misconfiguration)
-        EmailService serviceWithNullSender = new EmailService(null, null);
+        EmailService serviceWithNullSender = new EmailService(null, null, null);
         ReflectionTestUtils.setField(serviceWithNullSender, "frontendUrl", "http://localhost:5173");
         ReflectionTestUtils.setField(serviceWithNullSender, "fromAccountAlerts", "test@example.com");
         ReflectionTestUtils.setField(serviceWithNullSender, "fromName", "Test");

@@ -23,7 +23,7 @@
 
 .at-sub {
   margin: 0;
-  color: #64748b;
+  color: #475569;
   font-size: 0.9rem;
   max-width: 64ch;
   line-height: 1.5;
@@ -177,7 +177,7 @@
 
 .at-hint {
   font-size: 0.78rem;
-  color: #64748b;
+  color: #475569;
 }
 
 .at-hint--warn {
@@ -188,7 +188,7 @@
 .at-period-hint {
   margin: -0.2rem 0 0 0;
   font-size: 0.78rem;
-  color: #64748b;
+  color: #475569;
   line-height: 1.45;
 }
 
@@ -227,7 +227,7 @@
 
 .at-new-hint {
   margin: 0.75rem 0 0 0;
-  color: #64748b;
+  color: #475569;
   font-size: 0.8rem;
   line-height: 1.5;
 }

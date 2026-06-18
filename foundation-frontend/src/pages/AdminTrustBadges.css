@@ -22,7 +22,7 @@
 
 .atb-sub {
   margin: 0;
-  color: #64748b;
+  color: #475569;
   font-size: 0.9rem;
   max-width: 60ch;
   line-height: 1.5;
@@ -145,7 +145,7 @@
 .atb-field input:disabled,
 .atb-field input[readonly] {
   background: #f8fafc;
-  color: #64748b;
+  color: #475569;
   cursor: not-allowed;
 }
 
@@ -264,7 +264,7 @@
 }
 
 .field-description {
-  color: #64748b;
+  color: #475569;
   font-size: 0.75rem;
   line-height: 1.4;
 }

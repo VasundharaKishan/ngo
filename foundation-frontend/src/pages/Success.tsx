@@ -16,6 +16,7 @@ interface DonationDetails {
   currency: string;
   status: 'PENDING' | 'SUCCESS' | 'FAILED';
   campaignTitle: string;
+  receiptToken?: string;
 }
 
 function formatAmount(amount: number, currency: string): string {
@@ -100,7 +101,9 @@ export default function Success() {
   const handleDownloadReceipt = () => {
     if (!donation) return;
     const receiptPath = API_ENDPOINTS.DONATIONS.RECEIPT(donation.id);
-    const url = `${API_BASE_URL}${receiptPath}?email=${encodeURIComponent(donation.donorEmail)}`;
+    const url = donation.receiptToken
+      ? `${API_BASE_URL}${receiptPath}?token=${encodeURIComponent(donation.receiptToken)}`
+      : `${API_BASE_URL}${receiptPath}?email=${encodeURIComponent(donation.donorEmail)}`;
     const link = document.createElement('a');
     link.href = url;
     link.target = '_blank';
@@ -170,7 +173,7 @@ export default function Success() {
                  donation.status === 'PENDING' ? t('donation.statusProcessing') : t('donation.statusFailed')}
               </span>
             </p>
-            <p style={{ margin: '0.35rem 0', fontSize: '0.85rem', color: '#64748b' }}>
+            <p style={{ margin: '0.35rem 0', fontSize: '0.85rem', color: '#475569' }}>
               {t('donation.referenceLabel')} {donation.id}
             </p>
           </div>

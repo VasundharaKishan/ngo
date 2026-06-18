@@ -24,7 +24,7 @@
 
 .ama-sub {
   margin: 0;
-  color: #64748b;
+  color: #475569;
   font-size: 0.9rem;
   max-width: 64ch;
   line-height: 1.5;
@@ -83,7 +83,7 @@
 
 .ama-sum-server {
   margin-left: auto;
-  color: #64748b;
+  color: #475569;
   font-size: 0.8rem;
 }
 
@@ -284,7 +284,7 @@
 }
 
 .field-description {
-  color: #64748b;
+  color: #475569;
   font-size: 0.75rem;
   line-height: 1.4;
 }

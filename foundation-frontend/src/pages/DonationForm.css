@@ -35,7 +35,7 @@
 }
 
 .campaign-name {
-  color: #64748b;
+  color: #475569;
   font-size: 1rem;
   line-height: 1.6;
 }
@@ -136,7 +136,7 @@
 .prefix {
   position: absolute;
   left: 1rem;
-  color: #64748b;
+  color: #475569;
   font-weight: 600;
   font-size: 1rem;
 }
@@ -178,7 +178,7 @@
 
 .form-hint {
   font-size: 0.9rem;
-  color: #64748b;
+  color: #475569;
   margin-top: 0.5rem;
 }
 
@@ -247,7 +247,7 @@
 
 .security-note {
   text-align: center;
-  color: #64748b;
+  color: #475569;
   font-size: 0.9rem;
   margin-top: 1rem;
   font-weight: 500;
@@ -455,7 +455,7 @@
 }
 
 .summary-label {
-  color: #64748b;
+  color: #475569;
   font-weight: 600;
 }
 
@@ -490,7 +490,7 @@
   padding: 0.75rem 1rem;
   border: none;
   background: #f8fafc;
-  color: #64748b;
+  color: #475569;
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;

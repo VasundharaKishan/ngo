@@ -177,7 +177,7 @@ export default function AdminContactSettings() {
               </button>
             </div>
             {contactInfo.locations.length === 0 && (
-              <p style={{ color: '#64748b', fontStyle: 'italic', marginBottom: '1rem' }}>
+              <p style={{ color: '#475569', fontStyle: 'italic', marginBottom: '1rem' }}>
                 No locations added. Click "Add Location" to add office addresses.
               </p>
             )}

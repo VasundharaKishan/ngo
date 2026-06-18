@@ -115,7 +115,7 @@ export default function AdminDonatePopupSettings() {
               <p style={{ margin: '0 0 0.5rem 0', fontSize: '1.125rem', fontWeight: 600, color: '#0f172a' }}>
                 {settings.spotlightCampaign.title}
               </p>
-              <div style={{ display: 'flex', gap: '1rem', fontSize: '0.875rem', color: '#64748b' }}>
+              <div style={{ display: 'flex', gap: '1rem', fontSize: '0.875rem', color: '#475569' }}>
                 <span>
                   Status: <strong style={{ color: settings.spotlightCampaign.active ? '#10b981' : '#ef4444' }}>
                     {settings.spotlightCampaign.active ? 'Active' : 'Inactive'}
@@ -131,7 +131,7 @@ export default function AdminDonatePopupSettings() {
           <div className="config-item">
             <div className="config-info">
               <label htmlFor="spotlight-campaign">Spotlight Campaign</label>
-              <p style={{ fontSize: '0.875rem', color: '#64748b', margin: '0.25rem 0 0 0' }}>
+              <p style={{ fontSize: '0.875rem', color: '#475569', margin: '0.25rem 0 0 0' }}>
                 Select a campaign to feature in the Donate Now popup, or leave empty for automatic selection
               </p>
             </div>
@@ -188,7 +188,7 @@ export default function AdminDonatePopupSettings() {
                 style={{
                   padding: '0.875rem 2rem',
                   background: 'white',
-                  color: '#64748b',
+                  color: '#475569',
                   border: '2px solid #e2e8f0',
                   borderRadius: '8px',
                   fontSize: '1rem',
@@ -212,7 +212,7 @@ export default function AdminDonatePopupSettings() {
             <h3 style={{ margin: '0 0 1rem 0', fontSize: '1rem', fontWeight: 600, color: '#0f172a' }}>
               💡 How it works
             </h3>
-            <ul style={{ margin: 0, paddingLeft: '1.5rem', color: '#64748b', lineHeight: 1.6 }}>
+            <ul style={{ margin: 0, paddingLeft: '1.5rem', color: '#475569', lineHeight: 1.6 }}>
               <li>When a spotlight campaign is set, it will always appear in the Donate Now popup</li>
               <li>If no spotlight is set, the system shows the most recent active campaign (prioritized by featured, urgent, then last updated)</li>
               <li>Only active campaigns can be selected as spotlight</li>

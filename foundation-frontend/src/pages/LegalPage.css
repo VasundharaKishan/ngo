@@ -15,7 +15,7 @@
 
 .last-updated {
   text-align: center;
-  color: #64748b;
+  color: #475569;
   font-size: 1rem;
   margin-bottom: 3rem;
   font-style: italic;
@@ -46,7 +46,7 @@
 }
 
 .legal-page p {
-  color: #64748b;
+  color: #475569;
   line-height: 1.8;
   margin-bottom: 1.5rem;
   font-size: 1.05rem;
@@ -58,7 +58,7 @@
 }
 
 .legal-page ul li {
-  color: #64748b;
+  color: #475569;
   line-height: 1.8;
   margin-bottom: 0.75rem;
   font-size: 1.05rem;

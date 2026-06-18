@@ -61,6 +61,10 @@ public class AdminUser {
     @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserSecurityAnswer> securityAnswers;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PasswordSetupToken> passwordSetupTokens;
     
     @PrePersist
     protected void onCreate() {

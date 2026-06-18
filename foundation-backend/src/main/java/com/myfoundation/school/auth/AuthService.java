@@ -179,7 +179,7 @@ public class AuthService {
             UserSecurityAnswer answer = new UserSecurityAnswer();
             answer.setUser(user);
             answer.setQuestion(question);
-            answer.setAnswer(hashPassword(answerReq.getAnswer().toLowerCase().trim()));
+            answer.setAnswer(passwordEncoder.encode(answerReq.getAnswer().toLowerCase().trim()));
             securityAnswerRepository.save(answer);
         }
         
@@ -327,27 +327,28 @@ public class AuthService {
     
     @Transactional
     public void initializeDefaultAdmin() {
-        // Guard: skip if any admin user already exists (not just the default email)
         long userCount = adminUserRepository.count();
         if (userCount > 0) {
             log.info("Admin initialization skipped - {} user(s) already exist", userCount);
             return;
         }
 
-        // Create default admin user
         AdminUser admin = AdminUser.builder()
                 .username("admin")
                 .email(bootstrapAdminEmail)
-                .password(passwordEncoder.encode("Admin123!"))
+                .password("")
                 .fullName("System Administrator")
                 .role(UserRole.ADMIN)
-                .active(true)
+                .active(false)
                 .createdAt(Instant.now())
                 .updatedAt(Instant.now())
                 .build();
 
         adminUserRepository.save(admin);
-        log.info("Created default admin user - disable app.allow-admin-bootstrap in production");
+
+        String token = generatePasswordSetupToken(admin);
+        emailService.sendPasswordSetupEmail(bootstrapAdminEmail, "admin", token);
+        log.info("Created default admin user — password setup email sent to {}", bootstrapAdminEmail);
     }
 
     @Transactional
@@ -419,7 +420,7 @@ public class AuthService {
         return sb.toString();
     }
     
-    private String hashPassword(String password) {
+    private String legacySha256Hash(String password) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hash = digest.digest(password.getBytes(StandardCharsets.UTF_8));
@@ -467,7 +468,7 @@ public class AuthService {
             return passwordEncoder.matches(rawPassword, stored);
         }
 
-        String legacyHash = hashPassword(rawPassword);
+        String legacyHash = legacySha256Hash(rawPassword);
         if (legacyHash.equals(stored)) {
             user.setPassword(passwordEncoder.encode(rawPassword));
             adminUserRepository.save(user);

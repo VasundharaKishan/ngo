@@ -13,7 +13,7 @@
 
 .subtitle {
   text-align: center;
-  color: #64748b;
+  color: #475569;
   font-size: 1rem;
   margin-bottom: 0;
   line-height: 1.6;
@@ -131,7 +131,7 @@
 .filter-clear {
   background: none;
   border: none;
-  color: #64748b;
+  color: #475569;
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
@@ -146,7 +146,7 @@
 
 .campaigns-results-count {
   font-size: 0.9rem;
-  color: #64748b;
+  color: #475569;
   margin: 0 0 1rem;
   font-weight: 500;
 }
@@ -154,7 +154,7 @@
 .campaigns-empty {
   text-align: center;
   padding: 4rem 2rem;
-  color: #64748b;
+  color: #475569;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -281,7 +281,7 @@
 }
 
 .progress-remaining {
-  color: #64748b;
+  color: #475569;
 }
 
 .card-image {
@@ -416,7 +416,7 @@
   display: inline-block;
   padding: 0.75rem 1.5rem;
   background: #f1f5f9;
-  color: #64748b;
+  color: #475569;
   border-radius: 8px;
   font-size: 0.875rem;
   font-weight: 600;
@@ -525,7 +525,7 @@
   align-items: center;
   justify-content: center;
   background: white;
-  color: #64748b;
+  color: #475569;
   border: 2px solid #e2e8f0;
   border-radius: 8px;
   font-weight: 600;
@@ -549,6 +549,6 @@
 .no-campaigns {
   text-align: center;
   padding: 3rem;
-  color: #64748b;
+  color: #475569;
   font-size: 1.125rem;
 }

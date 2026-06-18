@@ -153,7 +153,7 @@ export default function AdminDashboard() {
             <div className="dashboard-section">
               <h2>Recent Donations</h2>
               {stats.recentDonations.length === 0 ? (
-                <p style={{ textAlign: 'center', color: '#64748b', padding: '2rem' }}>
+                <p style={{ textAlign: 'center', color: '#475569', padding: '2rem' }}>
                   No donations yet
                 </p>
               ) : (
@@ -183,7 +183,7 @@ export default function AdminDashboard() {
             <div className="dashboard-section">
               <h2>Top Campaigns</h2>
               {stats.topCampaigns.length === 0 ? (
-                <p style={{ textAlign: 'center', color: '#64748b', padding: '2rem' }}>
+                <p style={{ textAlign: 'center', color: '#475569', padding: '2rem' }}>
                   No donation data available yet
                 </p>
               ) : (

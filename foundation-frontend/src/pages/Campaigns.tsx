@@ -84,7 +84,7 @@ export default function Campaigns() {
         {loading ? (
           <p>Loading campaigns...</p>
         ) : campaigns.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}>
+          <div style={{ textAlign: 'center', padding: '3rem', color: '#475569' }}>
             <p>No campaigns found. Create your first campaign!</p>
           </div>
         ) : (

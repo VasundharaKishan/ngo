@@ -12,12 +12,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * Public endpoint for downloading donation PDF receipts.
- *
- * Security: donors must provide their email address to download a receipt,
- * preventing enumeration of donation IDs by unauthorized parties.
- */
 @RestController
 @RequestMapping("/api/donations")
 @RequiredArgsConstructor
@@ -26,32 +20,38 @@ import org.springframework.web.bind.annotation.*;
 public class DonationReceiptController {
 
     private final DonationReceiptService donationReceiptService;
+    private final ReceiptTokenService receiptTokenService;
 
     @Operation(
         summary = "Download donation receipt PDF",
-        description = "Downloads a PDF receipt for a donation. The donor must provide their email " +
-                      "address as a query parameter for verification. Returns 403 if the email does not match."
+        description = "Downloads a PDF receipt for a donation. Requires a signed token (issued at checkout) " +
+                      "or the donor's email address for verification."
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "PDF receipt returned successfully"),
-        @ApiResponse(responseCode = "403", description = "Email does not match the donation record"),
+        @ApiResponse(responseCode = "403", description = "Invalid token or email mismatch"),
         @ApiResponse(responseCode = "404", description = "Donation not found")
     })
     @GetMapping("/{id}/receipt")
     public ResponseEntity<byte[]> downloadReceipt(
             @PathVariable String id,
+            @RequestParam(required = false) String token,
             @RequestParam(required = false) String email) {
 
         log.info("GET /api/donations/{}/receipt - Receipt download requested", id);
 
-        if (email == null || email.isBlank()) {
-            log.warn("Receipt download denied for donation {} - no email provided", id);
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        boolean authorized = false;
+
+        if (token != null && !token.isBlank()) {
+            authorized = receiptTokenService.validateToken(token, id).isPresent();
         }
 
-        Donation donation = donationReceiptService.findAndVerifyDonation(id, email);
-        if (donation == null) {
-            log.warn("Receipt download denied for donation {} - email mismatch", id);
+        if (!authorized && email != null && !email.isBlank()) {
+            authorized = donationReceiptService.findAndVerifyDonation(id, email) != null;
+        }
+
+        if (!authorized) {
+            log.warn("Receipt download denied for donation {} - invalid credentials", id);
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 

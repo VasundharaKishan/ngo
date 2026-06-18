@@ -122,12 +122,12 @@
 
 .currency {
   font-size: 1.5rem;
-  color: #64748b;
+  color: #475569;
   font-weight: 700;
 }
 
 .goal-label {
-  color: #64748b;
+  color: #475569;
   margin-top: 0.75rem;
   font-size: 0.95rem;
   font-weight: 600;
@@ -160,7 +160,7 @@
 
 .secure-note {
   text-align: center;
-  color: #64748b;
+  color: #475569;
   font-size: 0.9rem;
   margin-top: 1.25rem;
   font-weight: 500;
