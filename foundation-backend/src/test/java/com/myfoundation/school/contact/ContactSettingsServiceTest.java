@@ -147,10 +147,9 @@ class ContactSettingsServiceTest {
 
             // Assert
             assertThat(response).isNotNull();
-            assertThat(response.getEmail()).isEqualTo("hopefoundationysv@gmail.com");
-            assertThat(response.getLocations()).hasSize(2);
-            assertThat(response.getLocations().get(0).getLabel()).isEqualTo("Ireland");
-            assertThat(response.getLocations().get(1).getLabel()).isEqualTo("India");
+            assertThat(response.getEmail()).isEqualTo("contact@example.org");
+            assertThat(response.getLocations()).hasSize(1);
+            assertThat(response.getLocations().get(0).getLabel()).isEqualTo("Head Office");
             assertThat(response.getShowInFooter()).isTrue();
         }
 
@@ -355,9 +354,8 @@ class ContactSettingsServiceTest {
             verify(objectMapper).writeValueAsString(argThat(locations -> {
                 @SuppressWarnings("unchecked")
                 List<ContactLocation> list = (List<ContactLocation>) locations;
-                return list.size() == 2 &&
-                       list.get(0).getLabel().equals("Ireland") &&
-                       list.get(1).getLabel().equals("India");
+                return list.size() == 1 &&
+                       list.get(0).getLabel().equals("Head Office");
             }));
         }
 
@@ -375,19 +373,12 @@ class ContactSettingsServiceTest {
             verify(objectMapper).writeValueAsString(argThat(locations -> {
                 @SuppressWarnings("unchecked")
                 List<ContactLocation> list = (List<ContactLocation>) locations;
-                
-                // Verify Ireland location
-                ContactLocation ireland = list.get(0);
-                assertThat(ireland.getLabel()).isEqualTo("Ireland");
-                assertThat(ireland.getPostalCode()).isEqualTo("W91PR6F");
-                assertThat(ireland.getMobile()).isEqualTo("+353 899540707");
-                
-                // Verify India location
-                ContactLocation india = list.get(1);
-                assertThat(india.getLabel()).isEqualTo("India");
-                assertThat(india.getPostalCode()).isEqualTo("829301");
-                assertThat(india.getMobile()).isEqualTo("+91 9987379321");
-                
+
+                ContactLocation placeholder = list.get(0);
+                assertThat(placeholder.getLabel()).isEqualTo("Head Office");
+                assertThat(placeholder.getPostalCode()).isEqualTo("000000");
+                assertThat(placeholder.getMobile()).isEqualTo("+00 0000000000");
+
                 return true;
             }));
         }
@@ -435,12 +426,11 @@ class ContactSettingsServiceTest {
         void issue3_duplicateCode() {
             // ✅ FIXED: Default location code extracted to createDefaultLocations() method
             // Used by both getDefaultContactInfo() and initializeDefaultSettings()
-            
+
             // Verify consistency by calling both methods
             ContactInfoResponse response = service.getContactInfo();
-            assertThat(response.getLocations()).hasSize(2);
-            assertThat(response.getLocations().get(0).getLabel()).isEqualTo("Ireland");
-            assertThat(response.getLocations().get(1).getLabel()).isEqualTo("India");
+            assertThat(response.getLocations()).hasSize(1);
+            assertThat(response.getLocations().get(0).getLabel()).isEqualTo("Head Office");
         }
 
         @Test

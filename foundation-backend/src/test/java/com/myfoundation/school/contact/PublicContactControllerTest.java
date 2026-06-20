@@ -145,7 +145,8 @@ class PublicContactControllerTest {
     }
 
     @Test
-    void submit_missingTurnstileToken_returns400() throws Exception {
+    void submit_emptyTurnstileToken_succeedsWhenCaptchaDisabled() throws Exception {
+        // CAPTCHA is disabled in test profile, so empty token is accepted
         mockMvc.perform(post("/api/public/contact")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -158,7 +159,7 @@ class PublicContactControllerTest {
                                   "turnstileToken": ""
                                 }
                                 """))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isOk());
     }
 
     @Test

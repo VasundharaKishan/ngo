@@ -68,7 +68,7 @@ public class EmailService {
             helper.setTo(toEmail);
             helper.setSubject("Your verification code");
 
-            String htmlContent = emailTemplateService.render("email/otp",
+            String htmlContent = emailTemplateService.render("otp",
                     Map.of("username", username, "code", code));
             helper.setText(htmlContent, true);
 
@@ -92,7 +92,7 @@ public class EmailService {
 
             String setupLink = frontendUrl + "/admin/setup-password?token=" + token;
 
-            String htmlContent = emailTemplateService.render("email/password-setup",
+            String htmlContent = emailTemplateService.render("password-setup",
                     Map.of("username", username, "orgName", orgName(), "setupLink", setupLink));
             helper.setText(htmlContent, true);
 
@@ -117,7 +117,7 @@ public class EmailService {
 
             String resetLink = frontendUrl + "/admin/reset-password?token=" + token;
 
-            String htmlContent = emailTemplateService.render("email/password-reset",
+            String htmlContent = emailTemplateService.render("password-reset",
                     Map.of("username", username, "orgName", orgName(), "resetLink", resetLink));
             helper.setText(htmlContent, true);
 
@@ -153,7 +153,7 @@ public class EmailService {
             helper.setTo(toEmail);
             helper.setSubject("Thank You for Your Generous Donation - " + orgName());
             
-            String htmlContent = emailTemplateService.render("email/donation-acknowledgement",
+            String htmlContent = emailTemplateService.render("donation-acknowledgement",
                     Map.of(
                             "donorName", donorName,
                             "orgName", orgName(),
@@ -198,7 +198,7 @@ public class EmailService {
             helper.setTo(adminEmail);
             helper.setSubject("New Donation Received - " + formatCurrency(amount, currency));
             
-            String htmlContent = emailTemplateService.render("email/donation-admin-notification",
+            String htmlContent = emailTemplateService.render("donation-admin-notification",
                     Map.of(
                             "formattedAmount", formatCurrency(amount, currency),
                             "donorName", donorName,
@@ -251,7 +251,7 @@ public class EmailService {
             helper.setTo(toEmail);
             helper.setSubject("Refund Processed — " + orgName());
 
-            String htmlContent = emailTemplateService.render("email/refund-notification",
+            String htmlContent = emailTemplateService.render("refund-notification",
                     Map.of(
                             "donorName", donorName,
                             "formattedAmount", formatCurrency(amount, currency),
@@ -296,7 +296,7 @@ public class EmailService {
 
             String adminUrl = frontendUrl + "/admin/contact-submissions";
             String safeMessage = escapeHtml(message).replace("\n", "<br>");
-            String htmlContent = emailTemplateService.render("email/contact-admin-notification",
+            String htmlContent = emailTemplateService.render("contact-admin-notification",
                     Map.of(
                             "senderName", senderName,
                             "senderEmail", senderEmail,

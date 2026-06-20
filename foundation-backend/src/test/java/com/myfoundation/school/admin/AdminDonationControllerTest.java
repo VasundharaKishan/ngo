@@ -1,5 +1,7 @@
 package com.myfoundation.school.admin;
 
+import com.myfoundation.school.FoundationApplication;
+import com.myfoundation.school.TestMailConfig;
 import com.myfoundation.school.auth.AdminUser;
 import com.myfoundation.school.auth.AdminUserRepository;
 import com.myfoundation.school.auth.UserRole;
@@ -9,10 +11,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,10 +26,18 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
+@SpringBootTest(classes = {FoundationApplication.class, TestMailConfig.class})
 @AutoConfigureMockMvc
+@Import(TestMailConfig.class)
 @Transactional
 @ActiveProfiles("test")
+@TestPropertySource(properties = {
+        "spring.sql.init.mode=never",
+        "spring.jpa.hibernate.ddl-auto=create-drop",
+        "app.frontend.url=http://localhost:5173",
+        "app.jwt.secret=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+        "app.jwt.expiration-minutes=60"
+})
 class AdminDonationControllerTest {
 
     @Autowired
@@ -116,7 +128,7 @@ class AdminDonationControllerTest {
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -140,16 +152,16 @@ class AdminDonationControllerTest {
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isNotFound());
     }
 
     @Test
     @WithMockUser(username = "admin_donations", roles = {"ADMIN"})
-    void deleteCampaign_BadRequest() throws Exception {
+    void deleteCampaign_NotFound() throws Exception {
         mockMvc.perform(delete("/api/admin/campaigns/someid")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminJwt)
                         .with(csrf()))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isNotFound());
     }
 
     // Category CRUD endpoints (5)
@@ -194,7 +206,7 @@ class AdminDonationControllerTest {
 
     @Test
     @WithMockUser(username = "admin_donations", roles = {"ADMIN"})
-    void updateCategory_BadRequest() throws Exception {
+    void updateCategory_NotFound() throws Exception {
         String request = """
                 {
                     "name": "Updated Category",
@@ -212,16 +224,16 @@ class AdminDonationControllerTest {
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isNotFound());
     }
 
     @Test
     @WithMockUser(username = "admin_donations", roles = {"ADMIN"})
-    void deleteCategory_BadRequest() throws Exception {
+    void deleteCategory_NotFound() throws Exception {
         mockMvc.perform(delete("/api/admin/categories/someid")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminJwt)
                         .with(csrf()))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isNotFound());
     }
 
     // Site Config endpoints (3)
@@ -254,10 +266,10 @@ class AdminDonationControllerTest {
 
     @Test
     @WithMockUser(username = "admin_donations", roles = {"ADMIN"})
-    void initializeConfigs_BadRequest() throws Exception {
+    void initializeConfigs_Success() throws Exception {
         mockMvc.perform(post("/api/admin/config/initialize")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminJwt)
                         .with(csrf()))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isOk());
     }
 }

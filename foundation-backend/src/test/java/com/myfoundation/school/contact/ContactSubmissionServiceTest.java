@@ -4,6 +4,8 @@ import com.myfoundation.school.audit.AuditAction;
 import com.myfoundation.school.audit.AuditLogService;
 import com.myfoundation.school.auth.EmailService;
 import com.myfoundation.school.contact.dto.ContactSubmissionRequest;
+import com.myfoundation.school.exception.BusinessException;
+import com.myfoundation.school.exception.TooManyRequestsException;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -123,10 +125,10 @@ class ContactSubmissionServiceTest {
         }
 
         @Test
-        void captchaFails_throwsIllegalState() {
+        void captchaFails_throwsBusinessException() {
             when(turnstileService.verify(anyString(), anyString())).thenReturn(false);
 
-            IllegalStateException ex = assertThrows(IllegalStateException.class,
+            BusinessException ex = assertThrows(BusinessException.class,
                     () -> service.submit(validRequest(), CLIENT_IP));
 
             assertTrue(ex.getMessage().contains("CAPTCHA"));
@@ -134,11 +136,11 @@ class ContactSubmissionServiceTest {
         }
 
         @Test
-        void floodLimitExceeded_throwsIllegalState() {
+        void floodLimitExceeded_throwsTooManyRequests() {
             when(turnstileService.verify(anyString(), anyString())).thenReturn(true);
             when(repository.countByClientIpSince(eq(CLIENT_IP), any(Instant.class))).thenReturn(5L);
 
-            IllegalStateException ex = assertThrows(IllegalStateException.class,
+            TooManyRequestsException ex = assertThrows(TooManyRequestsException.class,
                     () -> service.submit(validRequest(), CLIENT_IP));
 
             assertTrue(ex.getMessage().contains("Too many submissions"));

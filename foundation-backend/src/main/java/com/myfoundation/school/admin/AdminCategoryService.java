@@ -4,6 +4,7 @@ import com.myfoundation.school.audit.AuditAction;
 import com.myfoundation.school.audit.AuditLogService;
 import com.myfoundation.school.campaign.Category;
 import com.myfoundation.school.campaign.CategoryRepository;
+import com.myfoundation.school.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,7 +40,7 @@ public class AdminCategoryService {
     @Transactional
     public Category updateCategory(String id, AdminCategoryRequest request) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
         
         category.setName(request.getName());
         category.setSlug(request.getSlug());
@@ -59,7 +60,7 @@ public class AdminCategoryService {
     @Transactional
     public void deleteCategory(String id) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
         categoryRepository.delete(category);
         auditLogService.log(AuditAction.CATEGORY_DELETED, "Category", id, null, "Name: " + category.getName());
     }

@@ -21,7 +21,7 @@ public class SiteConfigService {
     static {
         DEFAULT_CONFIGS.put("homepage.featured_campaigns_count", "3");
         DEFAULT_CONFIGS.put("campaigns_page.items_per_page", "12");
-        DEFAULT_CONFIGS.put("donate_popup.spotlight_campaign_id", null);
+        DEFAULT_CONFIGS.put("donate_popup.spotlight_campaign_id", "");
         DEFAULT_CONFIGS.put("admin.notification.email", "contact@yugalsavitriseva.org");
     }
     
@@ -46,7 +46,7 @@ public class SiteConfigService {
                 .orElse(new SiteConfig());
         
         config.setConfigKey(key);
-        config.setConfigValue(value);
+        config.setConfigValue(value != null ? value : "");
         config.setDescription(description);
         config.setUpdatedAt(Instant.now());
         

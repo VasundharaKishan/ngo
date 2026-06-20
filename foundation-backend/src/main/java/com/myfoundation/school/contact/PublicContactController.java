@@ -1,6 +1,8 @@
 package com.myfoundation.school.contact;
 
 import com.myfoundation.school.contact.dto.ContactSubmissionRequest;
+import com.myfoundation.school.exception.BusinessException;
+import com.myfoundation.school.exception.TooManyRequestsException;
 import com.myfoundation.school.security.ClientIpExtractor;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -49,9 +51,15 @@ public class PublicContactController {
                     "success", true,
                     "message", "Thank you for contacting us. We'll reply within a week."
             ));
-        } catch (IllegalStateException e) {
-            log.warn("Contact submission rejected: {}", e.getMessage());
+        } catch (TooManyRequestsException e) {
+            log.warn("Contact submission rate-limited: {}", e.getMessage());
             return ResponseEntity.status(429).body(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            ));
+        } catch (BusinessException e) {
+            log.warn("Contact submission rejected: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of(
                     "success", false,
                     "message", e.getMessage()
             ));

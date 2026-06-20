@@ -489,16 +489,13 @@ class CampaignServiceTest {
     // ==================== ISSUE DOCUMENTATION TESTS ====================
 
     @Test
-    void getCampaignById_Issue_UsesGenericRuntimeException() {
-        // ISSUE: Uses generic RuntimeException instead of custom CampaignNotFoundException
-        // Better approach: throw new CampaignNotFoundException(id)
+    void getCampaignById_ThrowsResourceNotFoundException() {
         when(campaignRepository.findById("nonexistent")).thenReturn(Optional.empty());
 
         RuntimeException exception = assertThrows(RuntimeException.class,
                 () -> campaignService.getCampaignById("nonexistent"));
 
-        assertEquals(RuntimeException.class, exception.getClass());
-        assertTrue(true, "Documented: Generic RuntimeException used");
+        assertEquals(com.myfoundation.school.exception.ResourceNotFoundException.class, exception.getClass());
     }
 
     @Test

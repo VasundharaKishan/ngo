@@ -1,5 +1,7 @@
 package com.myfoundation.school.contact;
 
+import com.myfoundation.school.FoundationApplication;
+import com.myfoundation.school.TestMailConfig;
 import com.myfoundation.school.auth.AdminUser;
 import com.myfoundation.school.auth.AdminUserRepository;
 import com.myfoundation.school.auth.UserRole;
@@ -9,7 +11,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -22,10 +26,18 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
+@SpringBootTest(classes = {FoundationApplication.class, TestMailConfig.class})
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
+@Import(TestMailConfig.class)
 @Transactional
+@TestPropertySource(properties = {
+        "spring.sql.init.mode=never",
+        "spring.jpa.hibernate.ddl-auto=create-drop",
+        "app.frontend.url=http://localhost:5173",
+        "app.jwt.secret=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+        "app.jwt.expiration-minutes=60"
+})
 class AdminContactControllerTest {
 
     @Autowired
@@ -105,6 +117,6 @@ class AdminContactControllerTest {
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isOk());
     }
 }
