@@ -1,11 +1,12 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { lazy, Suspense } from 'react';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { lazy, Suspense, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import Layout from './components/Layout';
 import AdminLayout from './components/AdminLayout';
 import ConfigLoader from './components/ConfigLoader';
 import ErrorBoundary from './components/ErrorBoundary';
 import { useSiteName } from './contexts/ConfigContext';
+import { trackPageView } from './utils/analytics';
 
 // Lazy load all pages for code splitting
 const Home = lazy(() => import('./pages/Home'));
@@ -72,11 +73,20 @@ function SiteTitle() {
   );
 }
 
+function PageViewTracker() {
+  const location = useLocation();
+  useEffect(() => {
+    trackPageView(location.pathname + location.search, document.title);
+  }, [location]);
+  return null;
+}
+
 function App() {
   return (
     <ConfigLoader>
       <SiteTitle />
       <BrowserRouter>
+        <PageViewTracker />
         <Suspense fallback={<LoadingFallback />}>
           <Routes>
             {/* Admin Login (No Sidebar) */}

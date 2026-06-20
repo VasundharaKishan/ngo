@@ -115,7 +115,20 @@ export default function CampaignDetail() {
             <meta property="og:image" content={campaign.imageUrl || siteLogo} />
             <meta property="og:site_name" content={siteName} />
             <meta property="og:url" content={typeof window !== 'undefined' ? window.location.href : ''} />
+            <meta name="twitter:card" content="summary_large_image" />
+            <meta name="twitter:title" content={campaign.title} />
+            <meta name="twitter:description" content={campaign.shortDescription || `Support ${campaign.title} — make a difference today.`} />
+            <meta name="twitter:image" content={campaign.imageUrl || siteLogo} />
             <link rel="canonical" href={typeof window !== 'undefined' ? window.location.href : ''} />
+            <script type="application/ld+json">{JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'DonateAction',
+              name: campaign.title,
+              description: campaign.shortDescription || '',
+              image: campaign.imageUrl || siteLogo,
+              url: typeof window !== 'undefined' ? window.location.href : '',
+              recipient: { '@type': 'NGO', name: siteName },
+            })}</script>
           </Helmet>
           <div className="campaign-detail">
             <div className="detail-header">

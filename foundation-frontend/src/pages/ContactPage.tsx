@@ -179,6 +179,10 @@ export default function ContactPage() {
         <meta property="og:image" content={logoUrl} />
         <meta property="og:site_name" content={siteName} />
         <meta property="og:url" content={typeof window !== 'undefined' ? window.location.href : ''} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`Contact Us | ${siteName}`} />
+        <meta name="twitter:description" content={`Get in touch with ${siteName}. We'd love to hear from you.`} />
+        <meta name="twitter:image" content={logoUrl} />
         <link rel="canonical" href={typeof window !== 'undefined' ? window.location.href : ''} />
       </Helmet>
 

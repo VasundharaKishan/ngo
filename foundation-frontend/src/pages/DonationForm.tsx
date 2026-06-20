@@ -8,6 +8,7 @@ import { getCurrencySymbol, amountToCents, centsToAmount } from '../utils/curren
 import { isValidEmail, isEmpty } from '../utils/validators';
 import { DONATION } from '../config/constants';
 import { useDonationPresets } from '../hooks/useDonationPresets';
+import { trackEvent } from '../utils/analytics';
 import './DonationForm.css';
 
 type DonationStep = 'amount' | 'personal' | 'payment';
@@ -129,6 +130,7 @@ export default function DonationForm() {
       if (!redirectUrl) {
         throw new Error('Missing checkout URL');
       }
+      trackEvent('begin_checkout', 'donation', campaign?.title, amount);
       setRedirectingUrl(redirectUrl);
       redirectToCheckout(redirectUrl);
     } catch (err) {
@@ -202,6 +204,10 @@ export default function DonationForm() {
         <meta property="og:image" content={campaign.imageUrl || logoUrl} />
         <meta property="og:site_name" content={siteName} />
         <meta property="og:url" content={typeof window !== 'undefined' ? window.location.href : ''} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`Support ${campaign.title}`} />
+        <meta name="twitter:description" content={`Make a secure donation to support ${campaign.title}. Every contribution makes a difference.`} />
+        <meta name="twitter:image" content={campaign.imageUrl || logoUrl} />
         <link rel="canonical" href={typeof window !== 'undefined' ? window.location.href : ''} />
         <meta name="robots" content="noindex" />
       </Helmet>

@@ -6,6 +6,7 @@ import { RiDownloadLine } from 'react-icons/ri';
 import { API_BASE_URL } from '../api';
 import { API_ENDPOINTS } from '../config/constants';
 import { useSiteName } from '../contexts/ConfigContext';
+import { trackEvent } from '../utils/analytics';
 import './Success.css';
 
 interface DonationDetails {
@@ -51,6 +52,9 @@ export default function Success() {
           return;
         }
         const data: DonationDetails = await res.json();
+        if (data.status === 'SUCCESS') {
+          trackEvent('purchase', 'donation', data.campaignTitle, data.amount);
+        }
         setDonation(data);
       } catch {
         setError(true);
