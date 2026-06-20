@@ -61,6 +61,37 @@ public class PasswordSetupController {
         }
     }
     
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Map<String, String>> forgotPassword(
+            @Valid @RequestBody ForgotPasswordRequest request) {
+        try {
+            authService.requestPasswordReset(request.getEmail());
+        } catch (Exception e) {
+            log.error("Error processing forgot password request", e);
+            // Still return 200 to not reveal whether the email exists
+        }
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "If an account with that email exists, a password reset link has been sent.");
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/reset-password/{token}")
+    public ResponseEntity<Map<String, String>> resetPassword(
+            @PathVariable String token,
+            @Valid @RequestBody ResetPasswordRequest request) {
+        try {
+            authService.completePasswordReset(token, request.getPassword());
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Password reset completed successfully");
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            log.error("Password reset failed", e);
+            Map<String, String> response = new HashMap<>();
+            response.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
     @PostMapping("/admin/security-questions")
     public ResponseEntity<SecurityQuestion> createSecurityQuestion(
             @Valid @RequestBody SecurityQuestion question) {

@@ -4,6 +4,7 @@ import { RiFolderLine } from 'react-icons/ri';
 import { API_BASE_URL } from '../api';
 import { authFetch } from '../utils/auth';
 import { useToast } from '../components/ToastProvider';
+import ConfirmDialog from '../components/ConfirmDialog';
 import { useSiteName } from '../contexts/ConfigContext';
 import logger from '../utils/logger';
 
@@ -24,6 +25,9 @@ export default function Categories() {
   const [loading, setLoading] = useState(true);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [imageUploading, setImageUploading] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<{
+    title: string; message: string; onConfirm: () => void;
+  } | null>(null);
 
   useEffect(() => {
     loadCategories();
@@ -89,19 +93,24 @@ export default function Categories() {
     }
   };
 
-  const deleteCategory = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this category?')) return;
-    
-    try {
-      await authFetch(`${API_BASE_URL}/admin/categories/${id}`, {
-        method: 'DELETE'
-      });
-      showToast('Category deleted', 'success');
-      loadCategories();
-    } catch (error) {
-      logger.error('Categories', 'Error deleting category:', error);
-      showToast('Failed to delete category', 'error');
-    }
+  const deleteCategory = (id: string) => {
+    setConfirmAction({
+      title: 'Delete category',
+      message: 'Are you sure you want to delete this category?',
+      onConfirm: async () => {
+        setConfirmAction(null);
+        try {
+          await authFetch(`${API_BASE_URL}/admin/categories/${id}`, {
+            method: 'DELETE'
+          });
+          showToast('Category deleted', 'success');
+          loadCategories();
+        } catch (error) {
+          logger.error('Categories', 'Error deleting category:', error);
+          showToast('Failed to delete category', 'error');
+        }
+      },
+    });
   };
 
   return (
@@ -170,6 +179,16 @@ export default function Categories() {
           </table>
         )}
       </div>
+
+      <ConfirmDialog
+        isOpen={!!confirmAction}
+        title={confirmAction?.title ?? ''}
+        message={confirmAction?.message ?? ''}
+        confirmLabel="Delete"
+        variant="danger"
+        onConfirm={() => confirmAction?.onConfirm()}
+        onCancel={() => setConfirmAction(null)}
+      />
 
       {/* Edit Category Modal */}
       {editingCategory && (

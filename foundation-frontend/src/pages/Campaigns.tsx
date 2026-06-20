@@ -7,6 +7,7 @@ import { authFetch } from '../utils/auth';
 import { formatCurrency, calculateProgress } from '../utils/currency';
 import { useSiteName } from '../contexts/ConfigContext';
 import { useToast } from '../components/ToastProvider';
+import ConfirmDialog from '../components/ConfirmDialog';
 import logger from '../utils/logger';
 
 interface Campaign {
@@ -28,6 +29,7 @@ export default function Campaigns() {
   const showToast = useToast();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string } | null>(null);
 
   useEffect(() => {
     loadCampaigns();
@@ -46,11 +48,10 @@ export default function Campaigns() {
     }
   };
 
-  const deleteCampaign = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this campaign?')) return;
-
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
     try {
-      const res = await authFetch(`${API_BASE_URL}/admin/campaigns/${id}`, {
+      const res = await authFetch(`${API_BASE_URL}/admin/campaigns/${deleteTarget.id}`, {
         method: 'DELETE'
       });
       if (!res.ok) {
@@ -62,6 +63,8 @@ export default function Campaigns() {
     } catch (error) {
       logger.error('Campaigns', 'Error deleting campaign:', error);
       showToast('Failed to delete campaign', 'error');
+    } finally {
+      setDeleteTarget(null);
     }
   };
 
@@ -84,7 +87,7 @@ export default function Campaigns() {
         {loading ? (
           <p>Loading campaigns...</p>
         ) : campaigns.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}>
+          <div style={{ textAlign: 'center', padding: '3rem', color: '#475569' }}>
             <p>No campaigns found. Create your first campaign!</p>
           </div>
         ) : (
@@ -119,7 +122,7 @@ export default function Campaigns() {
                     <td>{formatCurrency(targetCents, campaign.currency || 'usd', { decimals: 0 })}</td>
                     <td>{formatCurrency(currentCents, campaign.currency || 'usd', { decimals: 0 })}</td>
                     <td>
-                      <span style={{ fontWeight: 'bold', color: progress >= 100 ? '#10b981' : '#667eea' }}>
+                      <span style={{ fontWeight: 'bold', color: progress >= 100 ? 'var(--color-success)' : 'var(--color-trust-500)' }}>
                         {progress.toFixed(1)}%
                       </span>
                     </td>
@@ -138,7 +141,7 @@ export default function Campaigns() {
                           Edit
                         </Link>
                         <button
-                          onClick={() => deleteCampaign(campaign.id)}
+                          onClick={() => setDeleteTarget({ id: campaign.id })}
                           className="btn-delete"
                           data-testid={`campaign-delete-${campaign.id}`}
                         >
@@ -153,6 +156,15 @@ export default function Campaigns() {
           </table>
         )}
       </div>
+      <ConfirmDialog
+        isOpen={!!deleteTarget}
+        title="Delete Campaign"
+        message="Are you sure you want to delete this campaign?"
+        confirmLabel="Delete"
+        variant="danger"
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </>
   );
 }

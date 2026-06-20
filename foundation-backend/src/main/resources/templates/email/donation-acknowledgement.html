@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        .email-container {
+            background-color: white;
+            margin: 20px auto;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .logo {
+            max-width: 120px;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .donation-card {
+            background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);
+            padding: 25px;
+            border-radius: 10px;
+            margin: 25px 0;
+            border-left: 5px solid #667eea;
+        }
+        .amount {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+            margin: 10px 0;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        .detail-label {
+            color: #6b7280;
+            font-weight: 500;
+        }
+        .detail-value {
+            color: #111827;
+            font-weight: 600;
+        }
+        .message-box {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 6px;
+        }
+        .footer {
+            background: #f9fafb;
+            padding: 30px;
+            text-align: center;
+            color: #6b7280;
+            font-size: 14px;
+        }
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        .social-links {
+            margin: 20px 0;
+        }
+        .social-links a {
+            display: inline-block;
+            margin: 0 8px;
+            color: #667eea;
+            text-decoration: none;
+        }
+        @media only screen and (max-width: 600px) {
+            .content {
+                padding: 30px 20px;
+            }
+            .donation-card {
+                padding: 20px;
+            }
+            .amount {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <h1>&#128591; Thank You for Your Donation!</h1>
+            <p style="margin: 10px 0 0 0; opacity: 0.95;">Your generosity makes a difference</p>
+        </div>
+
+        <div class="content">
+            <p style="font-size: 18px; margin-bottom: 10px;">Dear <strong th:text="${donorName}">Donor</strong>,</p>
+
+            <p>We are deeply grateful for your generous donation to <strong th:text="${orgName}">Our Foundation</strong>. Your support enables us to continue our mission and make a positive impact in our community.</p>
+
+            <div class="donation-card">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <div style="color: #6b7280; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Donation Amount</div>
+                    <div class="amount" th:text="${formattedAmount}">$100.00</div>
+                </div>
+
+                <div class="detail-row">
+                    <span class="detail-label">Campaign</span>
+                    <span class="detail-value" th:text="${campaignTitle}">General Fund</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Date</span>
+                    <span class="detail-value" th:text="${donationDate}">2025-01-01</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Transaction ID</span>
+                    <span class="detail-value" th:text="${donationId}">TXN-123</span>
+                </div>
+            </div>
+
+            <div class="message-box">
+                <strong>&#128231; Keep this email for your records</strong>
+                <p style="margin: 10px 0 0 0;">This serves as your official donation receipt. Please save it for tax purposes if applicable.</p>
+            </div>
+
+            <p>Your donation will be used to support our programs and initiatives. We will keep you updated on the impact of your contribution.</p>
+
+            <p style="margin-top: 30px;">
+                If you have any questions or would like to learn more about our work, please don't hesitate to reach out to us at
+                <a th:href="'mailto:' + ${contactEmail}" style="color: #667eea;" th:text="${contactEmail}">contact@example.org</a>
+            </p>
+
+            <p style="margin-top: 30px; font-size: 18px; font-weight: 600; color: #667eea;">
+                With heartfelt gratitude,<br/>
+                <span style="color: #333;">The <span th:text="${orgName}">Our Foundation</span> Team</span>
+            </p>
+        </div>
+
+        <div class="footer">
+            <p><strong th:text="${orgName}">Our Foundation</strong></p>
+            <p>Empowering communities through compassion and action</p>
+
+            <p style="margin-top: 20px; font-size: 12px; color: #9ca3af;">
+                This is an automated message. Please do not reply to this email.<br/>
+                For inquiries, contact us at <a th:href="'mailto:' + ${contactEmail}" th:text="${contactEmail}">contact@example.org</a>
+            </p>
+
+            <p style="margin-top: 20px; font-size: 12px; color: #9ca3af;">
+                &#169; 2025 <span th:text="${orgName}">Our Foundation</span>. All rights reserved.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

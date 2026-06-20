@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { RiAdminLine, RiAlertLine } from 'react-icons/ri';
 import { API_BASE_URL } from '../api';
@@ -35,7 +35,6 @@ export default function AdminLogin() {
         // Only store non-sensitive user info for UI display
         localStorage.setItem('adminUser', JSON.stringify({
           username: data.username,
-          email: data.email,
           fullName: data.fullName,
           role: data.role
         }));
@@ -90,8 +89,9 @@ export default function AdminLogin() {
           )}
 
           <div className="form-group">
-            <label>Username</label>
+            <label htmlFor="admin-username">Username</label>
             <input
+              id="admin-username"
               type="text"
               value={username}
               data-testid="admin-login-username"
@@ -99,18 +99,21 @@ export default function AdminLogin() {
               placeholder="Enter your username"
               required
               autoFocus
+              autoComplete="username"
             />
           </div>
 
           <div className="form-group">
-            <label>Password</label>
+            <label htmlFor="admin-password">Password</label>
             <input
+              id="admin-password"
               type="password"
               value={password}
               data-testid="admin-login-password"
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter your password"
               required
+              autoComplete="current-password"
             />
           </div>
 
@@ -118,6 +121,9 @@ export default function AdminLogin() {
             {loading ? 'Logging in...' : 'Login'}
           </button>
 
+          <Link to="/admin/forgot-password" className="forgot-password-link" data-testid="admin-login-forgot-password">
+            Forgot Password?
+          </Link>
         </form>
 
         <button onClick={() => navigate('/')} className="btn-home" data-testid="admin-login-back">

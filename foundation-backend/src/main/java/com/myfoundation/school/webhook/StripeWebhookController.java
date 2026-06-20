@@ -3,6 +3,7 @@ package com.myfoundation.school.webhook;
 import com.myfoundation.school.config.StripeConfig;
 import com.myfoundation.school.donation.DonationService;
 import com.stripe.exception.SignatureVerificationException;
+import com.stripe.model.Charge;
 import com.stripe.model.Event;
 import com.stripe.model.checkout.Session;
 import com.stripe.net.Webhook;
@@ -76,6 +77,9 @@ public class StripeWebhookController {
                     break;
                 case "checkout.session.expired":
                     handleCheckoutSessionExpired(event);
+                    break;
+                case "charge.refunded":
+                    handleChargeRefunded(event);
                     break;
                 default:
                     log.info("[Webhook] Unhandled event type: {} - ignoring", event.getType());
@@ -219,22 +223,22 @@ public class StripeWebhookController {
         Session session = (Session) event.getDataObjectDeserializer()
                 .getObject()
                 .orElseThrow(() -> new RuntimeException("Failed to deserialize session"));
-        
+
         String sessionId = session.getId();
         String sessionStatus = session.getStatus();
-        
+
         log.info("[Webhook] checkout.session.expired - sessionId: {}, session_status: {}", sessionId, sessionStatus);
-        
+
         String donationId = session.getMetadata().get("donationId");
         String campaignId = session.getMetadata().get("campaignId");
-        
+
         log.info("[Webhook] Session metadata - donationId: {}, campaignId: {}", donationId, campaignId);
-        
+
         if (donationId == null) {
             log.warn("[Webhook] No donationId in session metadata - cannot mark donation as failed");
             return;
         }
-        
+
         try {
             log.info("[Webhook] Session expired, marking donation {} as FAILED", donationId);
             donationService.markDonationFailed(donationId);
@@ -242,6 +246,38 @@ public class StripeWebhookController {
         } catch (Exception e) {
             log.error("[Webhook] Failed to process session.expired for donation: {} - Error: {}",
                     donationId, e.getMessage(), e);
+        }
+    }
+
+    private void handleChargeRefunded(Event event) {
+        Charge charge = (Charge) event.getDataObjectDeserializer()
+                .getObject()
+                .orElseThrow(() -> new RuntimeException("Failed to deserialize charge"));
+
+        String chargeId = charge.getId();
+        String paymentIntentId = charge.getPaymentIntent();
+
+        // Extract the most recent refund ID from the refunds list, if available
+        String latestRefundId = null;
+        if (charge.getRefunds() != null && charge.getRefunds().getData() != null
+                && !charge.getRefunds().getData().isEmpty()) {
+            latestRefundId = charge.getRefunds().getData().get(0).getId();
+        }
+
+        log.info("[Webhook] charge.refunded - chargeId: {}, paymentIntent: {}, latestRefund: {}",
+                chargeId, paymentIntentId, latestRefundId);
+
+        if (paymentIntentId == null) {
+            log.warn("[Webhook] No paymentIntent on charge {} - cannot look up donation", chargeId);
+            return;
+        }
+
+        try {
+            donationService.markDonationRefundedFromWebhook(paymentIntentId, latestRefundId);
+            log.info("[Webhook] Successfully processed charge.refunded for paymentIntent {}", paymentIntentId);
+        } catch (Exception e) {
+            log.error("[Webhook] Failed to process charge.refunded for paymentIntent: {} - Error: {}",
+                    paymentIntentId, e.getMessage(), e);
         }
     }
 }

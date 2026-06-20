@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../api';
 import { authFetch } from '../utils/auth';
 import { useToast } from '../components/ToastProvider';
+import ConfirmDialog from '../components/ConfirmDialog';
 import { type JsonConfig } from '../types/common';
 import { RiImageLine, RiLayoutLine } from 'react-icons/ri';
 import logger from '../utils/logger';
@@ -67,6 +68,9 @@ export default function AdminHomepage() {
   // Home Sections State
   const [sections, setSections] = useState<HomeSection[]>([]);
   const [editingConfig, setEditingConfig] = useState<{ [key: string]: string }>({});
+  const [confirmAction, setConfirmAction] = useState<{
+    title: string; message: string; onConfirm: () => void; confirmLabel?: string; variant?: 'danger' | 'warning' | 'info';
+  } | null>(null);
 
   useEffect(() => {
     const user = localStorage.getItem('adminUser');
@@ -256,51 +260,64 @@ export default function AdminHomepage() {
     }
   };
 
-  const handleRemoveUploadedImage = async () => {
+  const handleRemoveUploadedImage = () => {
     if (!newSlide.filename) {
       setNewSlide(prev => ({ ...prev, imageUrl: '', filename: '' }));
       return;
     }
 
-    const confirmed = window.confirm('Remove this image from storage?');
-    if (!confirmed) return;
+    setConfirmAction({
+      title: 'Remove image',
+      message: 'Remove this image from storage?',
+      confirmLabel: 'Remove',
+      variant: 'warning',
+      onConfirm: async () => {
+        setConfirmAction(null);
+        try {
+          const res = await authFetch(`${API_BASE_URL}/admin/upload/image/${encodeURIComponent(newSlide.filename)}`, {
+            method: 'DELETE'
+          });
 
-    try {
-      const res = await authFetch(`${API_BASE_URL}/admin/upload/image/${encodeURIComponent(newSlide.filename)}`, {
-        method: 'DELETE'
-      });
+          if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            const msg = data.error || 'Failed to delete image';
+            showToast(msg, 'error');
+            return;
+          }
 
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        const msg = data.error || 'Failed to delete image';
-        showToast(msg, 'error');
-        return;
-      }
-
-      setNewSlide(prev => ({ ...prev, imageUrl: '', filename: '' }));
-      showToast('Image deleted successfully', 'success');
-    } catch (error) {
-      logger.error('AdminHomepage', 'Error deleting image:', error);
-      showToast('Failed to delete image', 'error');
-    }
+          setNewSlide(prev => ({ ...prev, imageUrl: '', filename: '' }));
+          showToast('Image deleted successfully', 'success');
+        } catch (error) {
+          logger.error('AdminHomepage', 'Error deleting image:', error);
+          showToast('Failed to delete image', 'error');
+        }
+      },
+    });
   };
 
-  const deleteSlide = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this slide?')) return;
+  const deleteSlide = (id: string) => {
+    setConfirmAction({
+      title: 'Delete slide',
+      message: 'Are you sure you want to delete this slide?',
+      confirmLabel: 'Delete',
+      variant: 'danger',
+      onConfirm: async () => {
+        setConfirmAction(null);
+        try {
+          const response = await authFetch(`${API_BASE_URL}/admin/hero-slides/${id}`, {
+            method: 'DELETE'
+          });
 
-    try {
-      const response = await authFetch(`${API_BASE_URL}/admin/hero-slides/${id}`, {
-        method: 'DELETE'
-      });
+          if (!response.ok) throw new Error('Failed to delete slide');
 
-      if (!response.ok) throw new Error('Failed to delete slide');
-
-      showToast('Slide deleted successfully', 'success');
-      await loadSlides();
-    } catch (error) {
-      logger.error('AdminHomepage', 'Error deleting slide:', error);
-      showToast('Failed to delete slide', 'error');
-    }
+          showToast('Slide deleted successfully', 'success');
+          await loadSlides();
+        } catch (error) {
+          logger.error('AdminHomepage', 'Error deleting slide:', error);
+          showToast('Failed to delete slide', 'error');
+        }
+      },
+    });
   };
 
   // ========== HOME SECTIONS FUNCTIONS ==========
@@ -732,6 +749,15 @@ export default function AdminHomepage() {
           </div>
         )}
       </div>
+      <ConfirmDialog
+        isOpen={!!confirmAction}
+        title={confirmAction?.title ?? ''}
+        message={confirmAction?.message ?? ''}
+        confirmLabel={confirmAction?.confirmLabel ?? 'Confirm'}
+        variant={confirmAction?.variant ?? 'danger'}
+        onConfirm={() => confirmAction?.onConfirm()}
+        onCancel={() => setConfirmAction(null)}
+      />
     </div>
   );
 }

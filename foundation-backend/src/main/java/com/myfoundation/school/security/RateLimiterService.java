@@ -1,5 +1,6 @@
 package com.myfoundation.school.security;
 
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -8,12 +9,10 @@ import java.util.Deque;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Very small in-memory sliding window rate limiter keyed by client identifier.
- * Suitable for low-volume endpoints (login, webhook) to reduce brute-force/abuse.
- */
 @Service
 public class RateLimiterService {
+
+    private static final long MAX_WINDOW_SECONDS = 3600;
 
     private static final class Window {
         final Deque<Long> hits = new ArrayDeque<>();
@@ -34,5 +33,19 @@ public class RateLimiterService {
             window.hits.addLast(now);
             return true;
         }
+    }
+
+    @Scheduled(fixedRate = 600_000)
+    void evictStaleEntries() {
+        long cutoff = Instant.now().getEpochSecond() - MAX_WINDOW_SECONDS;
+        buckets.entrySet().removeIf(entry -> {
+            Window w = entry.getValue();
+            synchronized (w) {
+                while (!w.hits.isEmpty() && w.hits.peekFirst() <= cutoff) {
+                    w.hits.removeFirst();
+                }
+                return w.hits.isEmpty();
+            }
+        });
     }
 }

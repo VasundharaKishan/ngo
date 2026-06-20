@@ -23,7 +23,7 @@
 
 .at-sub {
   margin: 0;
-  color: #64748b;
+  color: #475569;
   font-size: 0.9rem;
   max-width: 64ch;
   line-height: 1.5;
@@ -32,7 +32,7 @@
 .at-sub code {
   background: #f1f5f9;
   border: 1px solid #e2e8f0;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   padding: 0.05rem 0.35rem;
   font-size: 0.85em;
   color: #1e293b;
@@ -52,9 +52,9 @@
   display: grid;
   grid-template-columns: 68px 1fr;
   gap: 1rem;
-  background: #ffffff;
+  background: var(--color-paper-50);
   border: 1px solid #e2e8f0;
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   padding: 1.25rem;
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
 }
@@ -134,11 +134,11 @@
 .at-field input[type='date'],
 .at-field textarea {
   border: 1px solid #cbd5e1;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   padding: 0.55rem 0.7rem;
   font-size: 0.95rem;
   color: #0f172a;
-  background: #ffffff;
+  background: var(--color-paper-50);
   font-family: inherit;
 }
 
@@ -150,13 +150,13 @@
 
 .at-field input:focus,
 .at-field textarea:focus {
-  outline: 2px solid #3b82f6;
+  outline: 2px solid var(--color-trust-500);
   outline-offset: 1px;
-  border-color: #3b82f6;
+  border-color: var(--color-trust-500);
 }
 
 .at-field input[aria-invalid='true'] {
-  border-color: #ef4444;
+  border-color: var(--color-error);
 }
 
 .at-toggle {
@@ -177,7 +177,7 @@
 
 .at-hint {
   font-size: 0.78rem;
-  color: #64748b;
+  color: #475569;
 }
 
 .at-hint--warn {
@@ -188,7 +188,7 @@
 .at-period-hint {
   margin: -0.2rem 0 0 0;
   font-size: 0.78rem;
-  color: #64748b;
+  color: #475569;
   line-height: 1.45;
 }
 
@@ -201,9 +201,9 @@
 .at-new {
   margin-top: 2rem;
   padding: 1.25rem;
-  background: #ffffff;
+  background: var(--color-paper-50);
   border: 1px dashed #cbd5e1;
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
 }
 
 .at-new h2 {
@@ -227,7 +227,7 @@
 
 .at-new-hint {
   margin: 0.75rem 0 0 0;
-  color: #64748b;
+  color: #475569;
   font-size: 0.8rem;
   line-height: 1.5;
 }

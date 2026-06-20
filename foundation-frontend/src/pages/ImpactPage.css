@@ -6,14 +6,14 @@
 .impact-container {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0 var(--space-8);
 }
 
 /* Hero */
 .impact-hero {
-  background: linear-gradient(135deg, #2a3da8 0%, #1e3a8a 60%, #312e81 100%);
-  color: white;
-  padding: 5rem 2rem 4rem;
+  background: linear-gradient(135deg, var(--color-trust-800) 0%, var(--color-trust-900) 60%, #312e81 100%);
+  color: var(--text-inverse);
+  padding: var(--space-20) var(--space-8) var(--space-16);
   text-align: center;
 }
 
@@ -39,28 +39,28 @@
 
 /* Shared section styles */
 .impact-section {
-  padding: 4rem 0;
+  padding: var(--space-16) 0;
 }
 
 .impact-section .section-title {
   font-family: var(--font-display, 'Fraunces', serif);
   font-size: 2rem;
   font-weight: 800;
-  color: var(--color-ink-900, #1e293b);
+  color: var(--color-ink-900);
   text-align: center;
   margin: 0 0 0.75rem;
 }
 
 .impact-section .section-subtitle {
   font-size: 1.05rem;
-  color: var(--color-ink-500, #64748b);
+  color: var(--color-ink-500);
   text-align: center;
-  margin: 0 0 3rem;
+  margin: 0 0 var(--space-12);
 }
 
 /* How it works */
 .impact-how-it-works {
-  background: var(--color-white, #fff);
+  background: var(--color-paper-50);
 }
 
 .impact-page .steps-grid {
@@ -72,9 +72,9 @@
 .impact-page .step-card {
   flex: 1;
   text-align: center;
-  padding: 2rem 1.5rem;
-  background: var(--color-trust-50, #f0f9ff);
-  border-radius: 16px;
+  padding: var(--space-8) var(--space-6);
+  background: var(--color-trust-50);
+  border-radius: var(--radius-2xl);
   border: 2px solid #bae6fd;
   position: relative;
 }
@@ -86,9 +86,9 @@
   transform: translateX(-50%);
   width: 32px;
   height: 32px;
-  background: var(--color-trust-800, #1e40af);
-  color: white;
-  border-radius: 50%;
+  background: var(--color-trust-800);
+  color: var(--text-inverse);
+  border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -98,28 +98,28 @@
 
 .impact-page .step-icon {
   font-size: 2.5rem;
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-4);
   display: block;
 }
 
 .impact-page .step-card h3 {
   font-size: 1.1rem;
   font-weight: 700;
-  color: var(--color-ink-900, #1e293b);
+  color: var(--color-ink-900);
   margin: 0 0 0.75rem;
 }
 
 .impact-page .step-card p {
   font-size: 0.9rem;
-  color: var(--color-ink-600, #475569);
+  color: var(--color-ink-600);
   line-height: 1.6;
   margin: 0;
 }
 
 .impact-page .step-connector {
   font-size: 2rem;
-  color: var(--color-ink-300, #94a3b8);
-  padding: 0 0.5rem;
+  color: var(--color-ink-300);
+  padding: 0 var(--space-2);
   padding-top: 3.5rem;
   flex-shrink: 0;
   font-weight: 700;
@@ -127,56 +127,56 @@
 
 /* Where we work */
 .impact-where {
-  background: var(--color-paper-100, #f8fafc);
+  background: var(--color-paper-100);
 }
 
 .impact-page .where-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 2rem;
+  gap: var(--space-8);
   max-width: 800px;
   margin: 0 auto;
 }
 
 .impact-page .where-card {
-  background: var(--color-white, #fff);
-  border-radius: 16px;
-  padding: 2rem;
+  background: var(--color-paper-50);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-8);
   text-align: center;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-  border: 1px solid var(--color-paper-300, #e2e8f0);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-paper-300);
 }
 
 .impact-page .where-flag {
   font-size: 3rem;
   display: block;
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-4);
 }
 
 .impact-page .where-card h3 {
   font-size: 1.25rem;
   font-weight: 700;
-  color: var(--color-ink-900, #1e293b);
+  color: var(--color-ink-900);
   margin: 0 0 0.75rem;
 }
 
 .impact-page .where-card p {
   font-size: 0.95rem;
-  color: var(--color-ink-600, #475569);
+  color: var(--color-ink-600);
   line-height: 1.7;
   margin: 0;
 }
 
 /* Trust section */
 .impact-trust {
-  background: var(--color-white, #fff);
+  background: var(--color-paper-50);
 }
 
 /* CTA section */
 .impact-cta {
-  background: linear-gradient(135deg, #2a3da8 0%, #1e3a8a 100%);
-  color: white;
-  padding: 4rem 0;
+  background: linear-gradient(135deg, var(--color-trust-800) 0%, var(--color-trust-900) 100%);
+  color: var(--text-inverse);
+  padding: var(--space-16) 0;
   text-align: center;
 }
 
@@ -190,48 +190,48 @@
 .impact-cta p {
   font-size: 1.1rem;
   opacity: 0.9;
-  margin: 0 0 2rem;
+  margin: 0 0 var(--space-8);
 }
 
 .impact-cta-buttons {
   display: flex;
-  gap: 1rem;
+  gap: var(--space-4);
   justify-content: center;
   flex-wrap: wrap;
 }
 
 .btn-impact-primary {
-  padding: 0.875rem 2rem;
-  background: white;
-  color: #2a3da8;
-  border-radius: 10px;
+  padding: 0.875rem var(--space-8);
+  background: var(--color-paper-50);
+  color: var(--color-trust-800);
+  border-radius: var(--radius-xl);
   font-weight: 700;
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: all var(--transition-base);
   font-size: 1rem;
 }
 
 .btn-impact-primary:hover {
-  background: #f0f4ff;
+  background: var(--color-trust-50);
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
 }
 
 .btn-impact-secondary {
-  padding: 0.875rem 2rem;
+  padding: 0.875rem var(--space-8);
   background: transparent;
-  color: white;
+  color: var(--text-inverse);
   border: 2px solid rgba(255, 255, 255, 0.6);
-  border-radius: 10px;
+  border-radius: var(--radius-xl);
   font-weight: 700;
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: all var(--transition-base);
   font-size: 1rem;
 }
 
 .btn-impact-secondary:hover {
   background: rgba(255, 255, 255, 0.15);
-  border-color: white;
+  border-color: var(--color-paper-50);
   transform: translateY(-2px);
 }
 
@@ -248,7 +248,7 @@
   .impact-page .steps-grid {
     flex-direction: column;
     align-items: stretch;
-    gap: 2rem;
+    gap: var(--space-8);
   }
 
   .impact-page .step-connector {

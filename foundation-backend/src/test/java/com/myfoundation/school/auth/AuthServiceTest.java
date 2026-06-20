@@ -81,6 +81,7 @@ class AuthServiceTest {
         ReflectionTestUtils.setField(authService, "otpExpirationMinutes", 5L);
         ReflectionTestUtils.setField(authService, "otpMaxAttempts", 5);
         ReflectionTestUtils.setField(authService, "otpLength", 6);
+        ReflectionTestUtils.setField(authService, "bootstrapAdminEmail", "admin@example.org");
         
         testUser = AdminUser.builder()
                 .id("user-123")
@@ -562,17 +563,22 @@ class AuthServiceTest {
     @Test
     void initializeDefaultAdmin_CreatesAdmin_WhenNotExists() {
         when(adminUserRepository.count()).thenReturn(0L);
-        when(passwordEncoder.encode("Admin123!")).thenReturn("$2a$12$encodedAdmin");
-        when(adminUserRepository.save(any(AdminUser.class))).thenAnswer(i -> i.getArgument(0));
+        when(adminUserRepository.save(any(AdminUser.class))).thenAnswer(i -> {
+            AdminUser u = i.getArgument(0);
+            u.setId("generated-id");
+            return u;
+        });
+        when(tokenRepository.save(any(PasswordSetupToken.class))).thenAnswer(i -> i.getArgument(0));
 
         authService.initializeDefaultAdmin();
 
-        verify(adminUserRepository).save(argThat(user -> 
-            user.getUsername().equals("admin") && 
-            user.getEmail().equals("admin@hopefoundation.org") &&
+        verify(adminUserRepository).save(argThat(user ->
+            user.getUsername().equals("admin") &&
             user.getRole() == UserRole.ADMIN &&
-            user.getActive()
+            !user.getActive() &&
+            "".equals(user.getPassword())
         ));
+        verify(emailService).sendPasswordSetupEmail(anyString(), eq("admin"), anyString());
     }
 
     @Test

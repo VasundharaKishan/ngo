@@ -148,3 +148,10 @@
   color: var(--color-ink-500);
   padding: var(--space-8) 0;
 }
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

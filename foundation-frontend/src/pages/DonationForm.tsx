@@ -250,8 +250,9 @@ export default function DonationForm() {
                   once Stripe Subscriptions are wired up end-to-end. */}
 
               <div className="form-section">
-                <label className="form-label">{t('donation.selectCurrency')}</label>
-                <select 
+                <label className="form-label" htmlFor="donation-currency">{t('donation.selectCurrency')}</label>
+                <select
+                  id="donation-currency"
                   className="currency-select"
                   value={currency}
                   onChange={(e) => setCurrency(e.target.value)}
@@ -264,8 +265,8 @@ export default function DonationForm() {
               </div>
 
               <div className="form-section">
-                <label className="form-label">{t('donation.selectAmount', { currency: currency.toUpperCase() })}</label>
-                <div className="amount-buttons">
+                <label className="form-label" id="donation-amount-label">{t('donation.selectAmount', { currency: currency.toUpperCase() })}</label>
+                <div className="amount-buttons" role="group" aria-labelledby="donation-amount-label">
                   {presetAmounts.map(preset => {
                     const label = presetLabels[preset];
                     return (
@@ -287,10 +288,11 @@ export default function DonationForm() {
                 </div>
 
                 <div className="custom-amount">
-                  <label className="form-label">{t('donation.orEnterCustom')}</label>
+                  <label className="form-label" htmlFor="donation-custom-amount">{t('donation.orEnterCustom')}</label>
                   <div className="input-with-prefix">
                     <span className="prefix">{getCurrencySymbol(currency)}</span>
                     <input
+                      id="donation-custom-amount"
                       type="number"
                       className="form-input"
                       placeholder={t('donation.customPlaceholder')}
@@ -338,8 +340,9 @@ export default function DonationForm() {
               {!anonymous && (
                 <>
                   <div className="form-section">
-                    <label className="form-label">{t('donation.donorName')} *</label>
+                    <label className="form-label" htmlFor="donation-donor-name">{t('donation.donorName')} *</label>
                     <input
+                      id="donation-donor-name"
                       type="text"
                       className="form-input"
                       placeholder={t('donation.namePlaceholder')}
@@ -351,8 +354,9 @@ export default function DonationForm() {
                   </div>
 
                   <div className="form-section">
-                    <label className="form-label">{t('donation.donorEmail')} *</label>
+                    <label className="form-label" htmlFor="donation-donor-email">{t('donation.donorEmail')} *</label>
                     <input
+                      id="donation-donor-email"
                       type="email"
                       className="form-input"
                       placeholder={t('donation.emailPlaceholder')}

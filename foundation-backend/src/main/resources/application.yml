@@ -45,6 +45,11 @@ spring:
       max-request-size: 10MB
       enabled: true
   
+  thymeleaf:
+    # Thymeleaf is used only for email rendering (not web views).
+    # Disable template-location check so the REST API starts cleanly.
+    check-template-location: false
+
   mail:
     host: ${MAIL_HOST:example.brevo.com}
     port: ${MAIL_PORT:587}
@@ -77,7 +82,7 @@ app:
       contact: ${MAIL_FROM_CONTACT:contact@example.org}
       system: ${MAIL_FROM_SYSTEM:noreply@example.org}
   jwt:
-    secret: ${JWT_SECRET:change-this-secret-to-a-long-random-value-please}
+    secret: ${JWT_SECRET}
     expiration-minutes: ${JWT_EXPIRATION_MINUTES:60}
     # Cookie-based JWT for secure authentication
     cookie-enabled: ${JWT_COOKIE_ENABLED:true}
@@ -88,7 +93,7 @@ app:
   bootstrap:
     admin-email: ${BOOTSTRAP_ADMIN_EMAIL:admin@example.org}  # Set via env var before enabling bootstrap
   auth:
-    otp-enabled: ${AUTH_OTP_ENABLED:false}
+    otp-enabled: ${AUTH_OTP_ENABLED:true}
     otp-expiration-minutes: ${AUTH_OTP_EXPIRATION_MINUTES:5}
     otp-max-attempts: ${AUTH_OTP_MAX_ATTEMPTS:5}
     otp-length: ${AUTH_OTP_LENGTH:6}

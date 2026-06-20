@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -44,6 +45,7 @@ import java.util.List;
 @Slf4j
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
     
     @Value("${app.frontend.url}")
@@ -104,15 +106,11 @@ public class SecurityConfig {
                     "/api/auth/validate-token/**",
                     "/api/auth/setup-password/**",
                     "/api/auth/initialize",
+                    "/api/auth/forgot-password",
+                    "/api/auth/reset-password/**",
                     "/api/donations/stripe/create",  // Public donation endpoint
                     "/api/donations/stripe/webhook", // Stripe webhooks can't send CSRF tokens
-                    // Admin endpoints are protected by JWT (httpOnly cookie) + CORS.
-                    // CORS restricts credentialed requests to the trusted frontend origin only,
-                    // which means cross-site forged requests are already blocked at the CORS layer.
-                    // Requiring an additional CSRF cookie causes MissingCsrfTokenException in
-                    // cross-origin dev setups (localhost:5173 → localhost:8080) where the browser
-                    // cannot send the XSRF-TOKEN cookie set by the other origin.
-                    "/api/admin/**"
+                    "/api/public/privacy/**"         // Public GDPR erasure request form
                 )
             )
             .authorizeHttpRequests(auth -> {
@@ -126,6 +124,7 @@ public class SecurityConfig {
                     .requestMatchers("/api/settings/public/**").permitAll()
                     .requestMatchers("/api/public/**").permitAll()
                     .requestMatchers("/api/donations/stripe/**").permitAll()
+                    .requestMatchers("/api/donations/*/receipt").permitAll()
                     
                     // Auth endpoints
                     .requestMatchers("/api/auth/login").permitAll()
@@ -134,6 +133,8 @@ public class SecurityConfig {
                     .requestMatchers("/api/auth/validate-token/**").permitAll()
                     .requestMatchers("/api/auth/setup-password/**").permitAll()
                     .requestMatchers("/api/auth/initialize").permitAll()
+                    .requestMatchers("/api/auth/forgot-password").permitAll()
+                    .requestMatchers("/api/auth/reset-password/**").permitAll()
                     .requestMatchers("/api/auth/otp/**").permitAll()
                     .requestMatchers("/api/auth/csrf").authenticated() // Requires authentication, triggers CSRF token
 
@@ -184,7 +185,7 @@ public class SecurityConfig {
                 String cspPolicy =
                         "default-src 'self'; " +
                         "img-src 'self' data: https:; " +
-                        "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; " +
+                        "script-src 'self' https://challenges.cloudflare.com; " +
                         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
                         "font-src 'self' data: https://fonts.gstatic.com; " +
                         "connect-src 'self' https://api.stripe.com https://challenges.cloudflare.com; " +
@@ -195,7 +196,7 @@ public class SecurityConfig {
                         "form-action 'self'";
                 headers.contentSecurityPolicy(csp -> csp.policyDirectives(cspPolicy));
                 headers.permissionsPolicy(policy -> policy
-                    .policy("geolocation=(), microphone=(), camera=(), fullscreen=(self)"));
+                    .policy("geolocation=(), microphone=(), camera=(), payment=(self \"https://js.stripe.com\"), usb=(), magnetometer=(), gyroscope=(), accelerometer=(), fullscreen=(self)"));
             })
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterAfter(new CsrfCookieFilter(cookieSecure), org.springframework.security.web.csrf.CsrfFilter.class);

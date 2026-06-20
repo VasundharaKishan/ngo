@@ -22,7 +22,7 @@
 
 .ahp-sub {
   margin: 0;
-  color: #64748b;
+  color: #475569;
   font-size: 0.9rem;
   max-width: 60ch;
   line-height: 1.5;
@@ -43,9 +43,9 @@
 
 /* Editor card */
 .ahp-editor {
-  background: #ffffff;
+  background: var(--color-paper-50);
   border: 1px solid #e2e8f0;
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
@@ -69,11 +69,11 @@
 .ahp-editor textarea,
 .ahp-editor select {
   border: 1px solid #cbd5e1;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   padding: 0.55rem 0.75rem;
   font-size: 0.95rem;
   color: #0f172a;
-  background: #ffffff;
+  background: var(--color-paper-50);
   font-family: inherit;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
@@ -82,7 +82,7 @@
 .ahp-editor textarea:focus,
 .ahp-editor select:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: var(--color-trust-500);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
 }
 
@@ -93,12 +93,12 @@
 }
 
 .required {
-  color: #dc2626;
+  color: var(--color-error);
   margin-left: 0.15rem;
 }
 
 .field-description {
-  color: #64748b;
+  color: #475569;
   font-size: 0.8rem;
   line-height: 1.4;
 }
@@ -134,7 +134,7 @@
   display: inline-flex;
   align-items: center;
   padding: 0 1rem;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   background: #f1f5f9;
   border: 1px solid #cbd5e1;
   color: #0f172a;
@@ -153,7 +153,7 @@
   margin: 0;
   padding-top: 0.5rem;
   border-top: 1px dashed #e2e8f0;
-  color: #64748b;
+  color: #475569;
   font-size: 0.8rem;
 }
 
@@ -170,26 +170,26 @@
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #64748b;
+  color: #475569;
   font-weight: 600;
 }
 
 .ahp-preview-frame {
   background: #0f172a;
   padding: 0.5rem;
-  border-radius: 16px;
+  border-radius: var(--radius-2xl);
   overflow: hidden;
   box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
 }
 
 .ahp-hero {
   min-height: 360px;
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   padding: 2.25rem 2rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  color: #ffffff;
+  color: var(--color-paper-50);
   background-size: cover;
   background-position: center;
 }
@@ -221,12 +221,12 @@
 
 .ahp-hero-cta {
   display: inline-block;
-  background: #ffffff;
-  color: #1e40af;
+  background: var(--color-paper-50);
+  color: var(--color-trust-800);
   font-weight: 700;
   font-size: 0.9rem;
   padding: 0.65rem 1.2rem;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   width: fit-content;
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.25);
 }

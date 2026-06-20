@@ -16,6 +16,8 @@ export const API_ENDPOINTS = {
     REQUEST_OTP: '/auth/otp/request',
     VERIFY_OTP: '/auth/otp/verify',
     SETUP_PASSWORD: '/auth/setup-password',
+    FORGOT_PASSWORD: '/auth/forgot-password',
+    RESET_PASSWORD: '/auth/reset-password',
     LOGOUT: '/auth/logout',
   },
   
@@ -52,6 +54,9 @@ export const API_ENDPOINTS = {
     BY_ID: (id: string) => `/donations/${id}`,
     CREATE: '/donations',
     WEBHOOK: '/donations/webhook',
+    REFUND: (id: string) => `/admin/donations/${id}/refund`,
+    RECEIPT: (id: string) => `/donations/${id}/receipt`,
+    ADMIN_RECEIPT: (id: string) => `/admin/donations/${id}/receipt`,
   },
   
   // CMS Content

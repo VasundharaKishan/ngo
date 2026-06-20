@@ -1,11 +1,11 @@
 .status-page {
   max-width: 650px;
-  margin: 2.5rem auto;
+  margin: var(--space-10) auto;
   text-align: center;
-  background: white;
-  padding: 2.5rem;
-  border-radius: 20px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  background: var(--color-paper-50);
+  padding: var(--space-10);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-lg);
   animation: fadeInUp 0.6s ease-out;
 }
 
@@ -23,15 +23,15 @@
 .success-icon {
   width: 80px;
   height: 80px;
-  background: linear-gradient(135deg, #10b981, #059669);
-  color: white;
-  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-moss-500), #059669);
+  color: var(--text-inverse);
+  border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 2.75rem;
   font-weight: bold;
-  margin: 0 auto 1.5rem;
+  margin: 0 auto var(--space-6);
   box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
   animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.2s backwards;
 }
@@ -48,72 +48,72 @@
 .cancel-icon {
   width: 80px;
   height: 80px;
-  background: linear-gradient(135deg, #ef4444, #dc2626);
-  color: white;
-  border-radius: 50%;
+  background: linear-gradient(135deg, #ef4444, var(--color-error));
+  color: var(--text-inverse);
+  border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 2.75rem;
   font-weight: bold;
-  margin: 0 auto 1.5rem;
+  margin: 0 auto var(--space-6);
   box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
   animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.2s backwards;
 }
 
 .status-page h1 {
-  color: #1e293b;
-  margin-bottom: 1rem;
+  color: var(--color-ink-800);
+  margin-bottom: var(--space-4);
   font-size: 1.75rem;
   font-weight: 800;
 }
 
 .message {
-  color: #64748b;
+  color: var(--color-ink-500);
   font-size: 1rem;
   line-height: 1.8;
-  margin-bottom: 2rem;
+  margin-bottom: var(--space-8);
 }
 
 .actions {
   display: flex;
-  gap: 1.25rem;
+  gap: var(--space-5);
   justify-content: center;
   flex-wrap: wrap;
 }
 
 .actions .btn-primary,
 .actions .btn-secondary {
-  padding: 0.875rem 1.5rem;
-  border-radius: 50px;
+  padding: 0.875rem var(--space-6);
+  border-radius: var(--radius-full);
   text-decoration: none;
   font-weight: 700;
-  transition: all 0.3s ease;
+  transition: all var(--transition-slow);
   font-size: 1rem;
 }
 
 .actions .btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: linear-gradient(135deg, var(--color-trust-600) 0%, var(--color-trust-800) 100%);
+  color: var(--text-inverse);
   border: none;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 15px rgba(30, 64, 175, 0.3);
 }
 
 .actions .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 25px rgba(102, 126, 234, 0.4);
-  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  box-shadow: 0 6px 25px rgba(30, 64, 175, 0.4);
+  background: linear-gradient(135deg, var(--color-trust-800) 0%, var(--color-trust-600) 100%);
 }
 
 .actions .btn-secondary {
-  background: white;
-  color: #667eea;
-  border: 2px solid #667eea;
+  background: var(--color-paper-50);
+  color: var(--color-trust-600);
+  border: 2px solid var(--color-trust-600);
 }
 
 .actions .btn-secondary:hover {
-  background: #667eea;
-  color: white;
+  background: var(--color-trust-600);
+  color: var(--text-inverse);
   transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 15px rgba(30, 64, 175, 0.3);
 }

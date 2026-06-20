@@ -1,8 +1,135 @@
+import { useState } from 'react';
 import { sanitizeHtml } from '../utils/sanitize';
 import { Helmet } from 'react-helmet-async';
 import { useCMSContent } from '../hooks/useCMSContent';
 import { useSiteName, useSiteLogo, useConfig } from '../contexts/ConfigContext';
+import { API_BASE_URL } from '../api';
 import './LegalPage.css';
+
+function ErasureRequestForm() {
+  const [email, setEmail] = useState('');
+  const [reason, setReason] = useState('');
+  const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [showForm, setShowForm] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setError(null);
+    try {
+      const response = await fetch(`${API_BASE_URL}/public/privacy/erasure-request`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, reason: reason || null }),
+      });
+      if (!response.ok) {
+        const data = await response.json().catch(() => null);
+        throw new Error(data?.message || 'Failed to submit request');
+      }
+      setSubmitted(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (submitted) {
+    return (
+      <div className="erasure-success" data-testid="erasure-request-success">
+        <p>Your request has been received. We will process it within 30 days as required by law.</p>
+      </div>
+    );
+  }
+
+  if (!showForm) {
+    return (
+      <button
+        onClick={() => setShowForm(true)}
+        style={{
+          background: '#dc2626',
+          color: '#fff',
+          border: 'none',
+          padding: '0.6rem 1.2rem',
+          borderRadius: '6px',
+          cursor: 'pointer',
+          fontSize: '0.95rem',
+          marginTop: '0.5rem',
+        }}
+      >
+        Request Data Erasure
+      </button>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit} style={{ marginTop: '1rem', maxWidth: '480px' }}>
+      {error && (
+        <div style={{ color: '#dc2626', marginBottom: '0.75rem', fontSize: '0.9rem' }}>{error}</div>
+      )}
+      <div style={{ marginBottom: '1rem' }}>
+        <label htmlFor="erasure-email" style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 500 }}>
+          Email address *
+        </label>
+        <input
+          id="erasure-email"
+          data-testid="erasure-request-email"
+          type="email"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="your@email.com"
+          style={{
+            width: '100%',
+            padding: '0.5rem',
+            border: '1px solid #d1d5db',
+            borderRadius: '6px',
+            fontSize: '0.95rem',
+          }}
+        />
+      </div>
+      <div style={{ marginBottom: '1rem' }}>
+        <label htmlFor="erasure-reason" style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 500 }}>
+          Reason (optional)
+        </label>
+        <textarea
+          id="erasure-reason"
+          data-testid="erasure-request-reason"
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+          placeholder="Tell us why you want your data deleted..."
+          rows={3}
+          style={{
+            width: '100%',
+            padding: '0.5rem',
+            border: '1px solid #d1d5db',
+            borderRadius: '6px',
+            fontSize: '0.95rem',
+            resize: 'vertical',
+          }}
+        />
+      </div>
+      <button
+        type="submit"
+        data-testid="erasure-request-submit"
+        disabled={submitting}
+        style={{
+          background: submitting ? '#9ca3af' : '#dc2626',
+          color: '#fff',
+          border: 'none',
+          padding: '0.6rem 1.2rem',
+          borderRadius: '6px',
+          cursor: submitting ? 'not-allowed' : 'pointer',
+          fontSize: '0.95rem',
+        }}
+      >
+        {submitting ? 'Submitting...' : 'Submit Erasure Request'}
+      </button>
+    </form>
+  );
+}
 
 export default function PrivacyPage() {
   const { content, hasCMSContent } = useCMSContent('legal_privacy');
@@ -98,6 +225,15 @@ export default function PrivacyPage() {
               If you have questions about this Privacy Statement or want to exercise your privacy rights, please contact us at{' '}
               <a href={`mailto:${config['contact.email'] || 'contact@example.org'}`}>{config['contact.email'] || 'contact@example.org'}</a>.
             </p>
+          </section>
+
+          <section>
+            <h2>Request Data Erasure</h2>
+            <p>
+              Under the GDPR and similar privacy regulations, you have the right to request the deletion of your personal data.
+              Use the form below to submit an erasure request. We will process your request within 30 days.
+            </p>
+            <ErasureRequestForm />
           </section>
         </>
       )}

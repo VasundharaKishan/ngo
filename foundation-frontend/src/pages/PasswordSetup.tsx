@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { API_BASE_URL } from '../api';
 import { useToast } from '../components/ToastProvider';
@@ -150,6 +151,10 @@ export default function PasswordSetup() {
 
   return (
     <div className="password-setup">
+      <Helmet>
+        <title>Set Up Password</title>
+        <meta name="robots" content="noindex" />
+      </Helmet>
       <div className="setup-container">
         <div className="setup-header">
           <h1>🔐 Complete Your Account Setup</h1>
@@ -158,7 +163,7 @@ export default function PasswordSetup() {
 
         <form onSubmit={handleSubmit} className="setup-form">
           {error && (
-            <div className="error-message">
+            <div id="setup-error" className="error-message">
               ⚠️ {error}
             </div>
           )}
@@ -167,26 +172,32 @@ export default function PasswordSetup() {
             <h3>1️⃣ Create Your Password</h3>
             
             <div className="form-group">
-              <label>Password *</label>
+              <label htmlFor="setup-password">Password *</label>
               <input
+                id="setup-password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={6}
                 placeholder="Enter secure password (min 6 characters)"
+                aria-invalid={!!error}
+                aria-describedby={error ? 'setup-error' : undefined}
               />
             </div>
 
             <div className="form-group">
-              <label>Confirm Password *</label>
+              <label htmlFor="setup-confirm-password">Confirm Password *</label>
               <input
+                id="setup-confirm-password"
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
                 minLength={6}
                 placeholder="Re-enter your password"
+                aria-invalid={!!error}
+                aria-describedby={error ? 'setup-error' : undefined}
               />
             </div>
           </div>
@@ -198,8 +209,9 @@ export default function PasswordSetup() {
             {selectedQuestions.map((sq, index) => (
               <div key={index} className="security-question-group">
                 <div className="form-group">
-                  <label>Security Question {index + 1} *</label>
+                  <label htmlFor={`setup-security-question-${index}`}>Security Question {index + 1} *</label>
                   <select
+                    id={`setup-security-question-${index}`}
                     value={sq.questionId}
                     onChange={(e) => {
                       const updated = [...selectedQuestions];
@@ -216,8 +228,9 @@ export default function PasswordSetup() {
                 </div>
 
                 <div className="form-group">
-                  <label>Your Answer *</label>
+                  <label htmlFor={`setup-security-answer-${index}`}>Your Answer *</label>
                   <input
+                    id={`setup-security-answer-${index}`}
                     type="text"
                     value={sq.answer}
                     onChange={(e) => {

@@ -46,7 +46,16 @@ public class Donation {
     
     @Column
     private String stripePaymentIntentId;
-    
+
+    @Column(name = "refunded_at")
+    private Instant refundedAt;
+
+    @Column(name = "refund_reason")
+    private String refundReason;
+
+    @Column(name = "stripe_refund_id")
+    private String stripeRefundId;
+
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
     

@@ -23,4 +23,5 @@ public class DonationResponse {
     private String campaignId;
     private String campaignTitle;
     private Instant createdAt;
+    private String receiptToken;
 }

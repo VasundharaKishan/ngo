@@ -16,12 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Admin endpoints for reading and updating the foundation's registration status.
  *
- * <p>Protected by {@code hasAuthority('ADMIN')}. The path intentionally lives at
+ * <p>Protected by {@code hasRole('ADMIN')}. The path intentionally lives at
  * {@code /api/admin/registration} (singular) because there is only ever one record.</p>
  */
 @RestController
 @RequestMapping("/api/admin/registration")
-@PreAuthorize("hasAuthority('ADMIN')")
+@PreAuthorize("hasRole('ADMIN')")
 @RequiredArgsConstructor
 @Slf4j
 public class AdminRegistrationController {

@@ -54,7 +54,7 @@ export interface DonationResponse {
   currency: string;
   donorName: string;
   donorEmail: string;
-  status: 'PENDING' | 'SUCCESS' | 'FAILED';
+  status: 'PENDING' | 'SUCCESS' | 'FAILED' | 'REFUNDED';
   stripePaymentIntentId?: string;
   stripeSessionId?: string;
   campaignId: string;
@@ -263,10 +263,24 @@ export const updateDonatePopupSettings = async (request: DonatePopupSettingsRequ
     method: 'PUT',
     body: JSON.stringify(request),
   });
-  
+
   if (!response.ok) {
     throw new Error('Failed to update donate popup settings');
   }
-  
+
   return response.json();
+};
+
+export const refundDonation = async (donationId: string, reason: string): Promise<void> => {
+  const url = `${API_BASE_URL}/admin/donations/${donationId}/refund`;
+  const response = await _authFetch(url, {
+    method: 'POST',
+    body: JSON.stringify({ reason }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => null);
+    const message = errorData?.message || `Refund failed (HTTP ${response.status})`;
+    throw new Error(message);
+  }
 };

@@ -5,7 +5,6 @@ import { getCurrencySymbol } from '../utils/currency';
 import { DONATION } from '../config/constants';
 import logger from '../utils/logger';
 import './Layout.css';
-import '../styles/ui-polish.css';
 import FeaturedCampaignModal from './FeaturedCampaignModal';
 import ErrorBoundary from './ErrorBoundary';
 import AnnouncementBar from './AnnouncementBar';

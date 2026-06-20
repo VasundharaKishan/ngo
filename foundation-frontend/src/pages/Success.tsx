@@ -2,17 +2,21 @@ import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Helmet } from 'react-helmet-async';
+import { RiDownloadLine } from 'react-icons/ri';
 import { API_BASE_URL } from '../api';
+import { API_ENDPOINTS } from '../config/constants';
 import { useSiteName } from '../contexts/ConfigContext';
 import './Success.css';
 
 interface DonationDetails {
   id: string;
   donorName: string;
+  donorEmail: string;
   amount: number;
   currency: string;
   status: 'PENDING' | 'SUCCESS' | 'FAILED';
   campaignTitle: string;
+  receiptToken?: string;
 }
 
 function formatAmount(amount: number, currency: string): string {
@@ -94,8 +98,24 @@ export default function Success() {
     );
   }
 
+  const handleDownloadReceipt = () => {
+    if (!donation) return;
+    const receiptPath = API_ENDPOINTS.DONATIONS.RECEIPT(donation.id);
+    const url = donation.receiptToken
+      ? `${API_BASE_URL}${receiptPath}?token=${encodeURIComponent(donation.receiptToken)}`
+      : `${API_BASE_URL}${receiptPath}?email=${encodeURIComponent(donation.donorEmail)}`;
+    const link = document.createElement('a');
+    link.href = url;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const isFailed = donation?.status === 'FAILED';
   const isPending = donation?.status === 'PENDING';
+  const canDownloadReceipt = donation?.status === 'SUCCESS' && donation?.donorEmail;
 
   return (
     <div className="container">
@@ -153,7 +173,7 @@ export default function Success() {
                  donation.status === 'PENDING' ? t('donation.statusProcessing') : t('donation.statusFailed')}
               </span>
             </p>
-            <p style={{ margin: '0.35rem 0', fontSize: '0.85rem', color: '#64748b' }}>
+            <p style={{ margin: '0.35rem 0', fontSize: '0.85rem', color: '#475569' }}>
               {t('donation.referenceLabel')} {donation.id}
             </p>
           </div>
@@ -169,6 +189,24 @@ export default function Success() {
           <p className="message">
             {t('donation.genericSuccess')}
           </p>
+        )}
+
+        {canDownloadReceipt && (
+          <div style={{ marginBottom: '1rem', textAlign: 'center' }}>
+            <button
+              data-testid="download-receipt-btn"
+              onClick={handleDownloadReceipt}
+              className="btn-secondary"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                cursor: 'pointer',
+              }}
+            >
+              <RiDownloadLine /> Download Receipt (PDF)
+            </button>
+          </div>
         )}
 
         <div className="actions">

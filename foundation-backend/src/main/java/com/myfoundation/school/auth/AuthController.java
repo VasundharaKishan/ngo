@@ -88,6 +88,9 @@ public class AuthController {
                 builder.header("Set-Cookie", cookie.toString());
             }
 
+            if (cookieEnabled) {
+                response.setToken(null);
+            }
             log.info("Returning login response for user: {}", request.getUsername());
             return builder.body(response);
         } catch (RuntimeException e) {
@@ -98,9 +101,21 @@ public class AuthController {
     }
 
     @PostMapping("/otp/verify")
-    public ResponseEntity<?> verifyOtp(@Valid @RequestBody OtpVerifyRequest request) {
+    public ResponseEntity<?> verifyOtp(@Valid @RequestBody OtpVerifyRequest request, HttpServletResponse httpResponse) {
         try {
             LoginResponse response = authService.verifyOtp(request);
+            if (cookieEnabled && response.getToken() != null) {
+                ResponseCookie cookie = ResponseCookie.from(cookieName, response.getToken())
+                        .httpOnly(true)
+                        .secure(cookieSecure)
+                        .path("/")
+                        .sameSite(cookieSecure ? "None" : "Lax")
+                        .maxAge(jwtExpiryMinutes * 60)
+                        .domain(cookieDomain.isBlank() ? null : cookieDomain)
+                        .build();
+                httpResponse.addHeader("Set-Cookie", cookie.toString());
+                response.setToken(null);
+            }
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             log.error("OTP verification failed: {}", e.getMessage());
@@ -199,6 +214,9 @@ public class AuthController {
         }
 
         log.info("JWT refreshed for user: {}", username);
+        if (cookieEnabled) {
+            return builder.body(Map.of("message", "Token refreshed"));
+        }
         return builder.body(Map.of("message", "Token refreshed", "token", newToken));
     }
 

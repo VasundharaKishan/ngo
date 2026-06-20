@@ -179,7 +179,7 @@ public class AuthService {
             UserSecurityAnswer answer = new UserSecurityAnswer();
             answer.setUser(user);
             answer.setQuestion(question);
-            answer.setAnswer(hashPassword(answerReq.getAnswer().toLowerCase().trim()));
+            answer.setAnswer(passwordEncoder.encode(answerReq.getAnswer().toLowerCase().trim()));
             securityAnswerRepository.save(answer);
         }
         
@@ -191,6 +191,49 @@ public class AuthService {
         auditLogService.log(AuditAction.PASSWORD_SETUP_COMPLETED, "AdminUser", user.getId(), user.getUsername(), null);
     }
     
+    @Transactional
+    public void requestPasswordReset(String email) {
+        String normalizedEmail = email.trim().toLowerCase();
+
+        Optional<AdminUser> userOpt = adminUserRepository.findByEmail(normalizedEmail);
+
+        if (userOpt.isEmpty() || !userOpt.get().getActive()) {
+            // Log the attempt but don't reveal whether the email exists
+            log.info("Password reset requested for email: {} (user not found or inactive)", normalizedEmail);
+            auditLogService.log(AuditAction.PASSWORD_RESET_REQUESTED, "AdminUser", null, normalizedEmail, "User not found or inactive");
+            return;
+        }
+
+        AdminUser user = userOpt.get();
+        String token = generatePasswordSetupToken(user);
+        emailService.sendPasswordResetEmail(user.getEmail(), user.getUsername(), token);
+
+        log.info("Password reset email sent for user: {}", user.getUsername());
+        auditLogService.log(AuditAction.PASSWORD_RESET_REQUESTED, "AdminUser", user.getId(), user.getUsername(), null);
+    }
+
+    @Transactional
+    public void completePasswordReset(String token, String newPassword) {
+        PasswordSetupToken tokenEntity = tokenRepository
+                .findByTokenAndUsedFalseAndExpiresAtAfter(token, Instant.now())
+                .orElseThrow(() -> new RuntimeException("Invalid or expired reset link"));
+
+        validatePasswordStrength(newPassword);
+
+        AdminUser user = tokenEntity.getUser();
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setFailedLoginAttempts(0);
+        user.setLockedUntil(null);
+        user.setUpdatedAt(Instant.now());
+        adminUserRepository.save(user);
+
+        tokenEntity.setUsed(true);
+        tokenRepository.save(tokenEntity);
+
+        log.info("User {} completed password reset", user.getUsername());
+        auditLogService.log(AuditAction.PASSWORD_RESET_COMPLETED, "AdminUser", user.getId(), user.getUsername(), null);
+    }
+
     public AdminUser validateToken(String token) {
         PasswordSetupToken tokenEntity = tokenRepository
                 .findByTokenAndUsedFalseAndExpiresAtAfter(token, Instant.now())
@@ -284,27 +327,28 @@ public class AuthService {
     
     @Transactional
     public void initializeDefaultAdmin() {
-        // Guard: skip if any admin user already exists (not just the default email)
         long userCount = adminUserRepository.count();
         if (userCount > 0) {
             log.info("Admin initialization skipped - {} user(s) already exist", userCount);
             return;
         }
 
-        // Create default admin user
         AdminUser admin = AdminUser.builder()
                 .username("admin")
                 .email(bootstrapAdminEmail)
-                .password(passwordEncoder.encode("Admin123!"))
+                .password("")
                 .fullName("System Administrator")
                 .role(UserRole.ADMIN)
-                .active(true)
+                .active(false)
                 .createdAt(Instant.now())
                 .updatedAt(Instant.now())
                 .build();
 
         adminUserRepository.save(admin);
-        log.info("Created default admin user - disable app.allow-admin-bootstrap in production");
+
+        String token = generatePasswordSetupToken(admin);
+        emailService.sendPasswordSetupEmail(bootstrapAdminEmail, "admin", token);
+        log.info("Created default admin user — password setup email sent to {}", bootstrapAdminEmail);
     }
 
     @Transactional
@@ -376,7 +420,7 @@ public class AuthService {
         return sb.toString();
     }
     
-    private String hashPassword(String password) {
+    private String legacySha256Hash(String password) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hash = digest.digest(password.getBytes(StandardCharsets.UTF_8));
@@ -424,7 +468,7 @@ public class AuthService {
             return passwordEncoder.matches(rawPassword, stored);
         }
 
-        String legacyHash = hashPassword(rawPassword);
+        String legacyHash = legacySha256Hash(rawPassword);
         if (legacyHash.equals(stored)) {
             user.setPassword(passwordEncoder.encode(rawPassword));
             adminUserRepository.save(user);

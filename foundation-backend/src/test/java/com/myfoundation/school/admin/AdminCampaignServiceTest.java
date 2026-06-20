@@ -5,6 +5,8 @@ import com.myfoundation.school.campaign.Campaign;
 import com.myfoundation.school.campaign.CampaignRepository;
 import com.myfoundation.school.campaign.Category;
 import com.myfoundation.school.campaign.CategoryRepository;
+import com.myfoundation.school.donation.DonationRepository;
+import com.myfoundation.school.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,6 +47,9 @@ class AdminCampaignServiceTest {
 
     @Mock
     private CategoryRepository categoryRepository;
+
+    @Mock
+    private DonationRepository donationRepository;
 
     @Mock
     private AuditLogService auditLogService;
@@ -94,7 +99,7 @@ class AdminCampaignServiceTest {
         assertEquals("Help us build a school", result.getShortDescription());
         assertEquals("Full description of the campaign", result.getDescription());
         assertEquals("build-a-school", result.getSlug());
-        assertEquals("USD", result.getCurrency());
+        assertEquals("INR", result.getCurrency());
         assertEquals(testCategory, result.getCategory());
         assertEquals(100000L, result.getTargetAmount());
         assertEquals("https://example.com/image.jpg", result.getImageUrl());
@@ -131,7 +136,7 @@ class AdminCampaignServiceTest {
 
         Campaign result = adminCampaignService.createCampaign(validRequest);
 
-        assertEquals("help-children-get-education-support-", result.getSlug());
+        assertEquals("help-children-get-education-support", result.getSlug());
     }
 
     @Test
@@ -192,13 +197,13 @@ class AdminCampaignServiceTest {
     }
 
     @Test
-    void createCampaign_SetsCurrencyToUSD() {
+    void createCampaign_SetsCurrencyToINR() {
         when(categoryRepository.findById("cat-123")).thenReturn(Optional.of(testCategory));
         when(campaignRepository.save(any(Campaign.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Campaign result = adminCampaignService.createCampaign(validRequest);
 
-        assertEquals("USD", result.getCurrency());
+        assertEquals("INR", result.getCurrency());
     }
 
     @Test
@@ -345,6 +350,7 @@ class AdminCampaignServiceTest {
         existingCampaign.setTitle("Campaign to Delete");
 
         when(campaignRepository.findById("campaign-123")).thenReturn(Optional.of(existingCampaign));
+        when(donationRepository.countByCampaignId("campaign-123")).thenReturn(0L);
 
         adminCampaignService.deleteCampaign("campaign-123");
 
@@ -416,39 +422,32 @@ class AdminCampaignServiceTest {
     // ==================== ISSUE DOCUMENTATION TESTS ====================
 
     @Test
-    void createCampaign_Issue_UsesRuntimeException() {
-        // ISSUE: Service uses generic RuntimeException instead of custom exceptions
-        // Better approach: Create CampaignNotFoundException, CategoryNotFoundException, InvalidCampaignStateException
-        // This would allow better error handling in controllers
+    void createCampaign_UsesResourceNotFoundException() {
         when(categoryRepository.findById("cat-123")).thenReturn(Optional.empty());
 
-        RuntimeException exception = assertThrows(RuntimeException.class,
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
                 () -> adminCampaignService.createCampaign(validRequest));
 
-        // All exceptions are RuntimeException - can't distinguish error types
-        assertEquals(RuntimeException.class, exception.getClass());
-        assertTrue(true, "Documented: Service uses generic RuntimeException");
+        assertEquals("Category not found", exception.getMessage());
     }
 
     @Test
-    void createCampaign_Issue_NoSlugUniquenessCheck() {
-        // ISSUE: Slug generation doesn't check for uniqueness
-        // "Build School" and "Build-School!" would both create "build-school" slug
-        // Could cause duplicate slug issues if used in URLs
+    void createCampaign_SlugUniquenessCheck() {
         when(categoryRepository.findById("cat-123")).thenReturn(Optional.of(testCategory));
         when(campaignRepository.save(any(Campaign.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
+        // First campaign gets base slug
+        when(campaignRepository.existsBySlugAndIdNot("build-school", "")).thenReturn(false);
         validRequest.setTitle("Build School");
         Campaign first = adminCampaignService.createCampaign(validRequest);
+        assertEquals("build-school", first.getSlug());
 
+        // Second campaign with same slug gets a suffixed version
+        when(campaignRepository.existsBySlugAndIdNot("build-school", "")).thenReturn(true);
+        when(campaignRepository.existsBySlugAndIdNot("build-school-2", "")).thenReturn(false);
         validRequest.setTitle("Build-School!");
         Campaign second = adminCampaignService.createCampaign(validRequest);
-
-        // Both have same slug - potential collision
-        assertEquals("build-school", first.getSlug());
-        assertEquals("build-school-", second.getSlug());
-        // Note: Slugs are actually different due to trailing dash handling
-        assertTrue(true, "Documented: No slug uniqueness check or auto-increment");
+        assertEquals("build-school-2", second.getSlug());
     }
 
     @Test
@@ -470,27 +469,23 @@ class AdminCampaignServiceTest {
     }
 
     @Test
-    void deleteCampaign_Issue_NoSoftDelete() {
-        // ISSUE: Delete is hard delete - campaigns with donations are permanently removed
-        // Better approach: Add 'deleted' flag for soft delete
-        // Preserve historical data for reporting and audit trails
+    void deleteCampaign_WithDonations_ThrowsBusinessException() {
         Campaign campaign = new Campaign();
         campaign.setId("campaign-123");
+        campaign.setTitle("Has Donations");
 
         when(campaignRepository.findById("campaign-123")).thenReturn(Optional.of(campaign));
+        when(donationRepository.countByCampaignId("campaign-123")).thenReturn(3L);
 
-        adminCampaignService.deleteCampaign("campaign-123");
+        RuntimeException exception = assertThrows(RuntimeException.class,
+                () -> adminCampaignService.deleteCampaign("campaign-123"));
 
-        // Hard delete called - data lost forever
-        verify(campaignRepository).delete(campaign);
-        assertTrue(true, "Documented: No soft delete - campaigns permanently removed");
+        assertTrue(exception.getMessage().contains("Cannot delete campaign"));
+        verify(campaignRepository, never()).delete(any());
     }
 
     @Test
-    void createCampaign_Issue_NoSlugUpdateOnTitleChange() {
-        // ISSUE: updateCampaign doesn't regenerate slug when title changes
-        // If title "Build School" becomes "Help Children", slug stays "build-school"
-        // Slug and title become mismatched
+    void updateCampaign_RegeneratesSlugOnTitleChange() {
         Campaign existingCampaign = new Campaign();
         existingCampaign.setId("campaign-123");
         existingCampaign.setSlug("build-school");
@@ -498,14 +493,13 @@ class AdminCampaignServiceTest {
         when(campaignRepository.findById("campaign-123")).thenReturn(Optional.of(existingCampaign));
         when(categoryRepository.findById("cat-123")).thenReturn(Optional.of(testCategory));
         when(campaignRepository.save(any(Campaign.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(campaignRepository.existsBySlugAndIdNot("completely-different-title", "campaign-123")).thenReturn(false);
 
         validRequest.setTitle("Completely Different Title");
 
         Campaign result = adminCampaignService.updateCampaign("campaign-123", validRequest);
 
-        // Slug not updated - still "build-school" even though title changed
-        assertEquals("build-school", result.getSlug());
+        assertEquals("completely-different-title", result.getSlug());
         assertEquals("Completely Different Title", result.getTitle());
-        assertTrue(true, "Documented: Slug not regenerated on title update");
     }
 }

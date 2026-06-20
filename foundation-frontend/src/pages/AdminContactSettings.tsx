@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../api';
 import { authFetch } from '../utils/auth';
 import { useToast } from '../components/ToastProvider';
+import ConfirmDialog from '../components/ConfirmDialog';
 import logger from '../utils/logger';
 import './AdminSettings.css';
 
@@ -25,6 +26,9 @@ export default function AdminContactSettings() {
   const showToast = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<{
+    title: string; message: string; onConfirm: () => void;
+  } | null>(null);
   const [contactInfo, setContactInfo] = useState<ContactInfo>({
     email: '',
     locations: [],
@@ -114,9 +118,15 @@ export default function AdminContactSettings() {
 
   const removeLocation = (index: number) => {
     const label = contactInfo.locations[index]?.label || `Location ${index + 1}`;
-    if (!confirm(`Are you sure you want to remove "${label}"?`)) return;
-    const updatedLocations = contactInfo.locations.filter((_, i) => i !== index);
-    setContactInfo({ ...contactInfo, locations: updatedLocations });
+    setConfirmAction({
+      title: 'Remove location',
+      message: `Are you sure you want to remove "${label}"?`,
+      onConfirm: () => {
+        setConfirmAction(null);
+        const updatedLocations = contactInfo.locations.filter((_, i) => i !== index);
+        setContactInfo({ ...contactInfo, locations: updatedLocations });
+      },
+    });
   };
 
   if (loading) {
@@ -177,7 +187,7 @@ export default function AdminContactSettings() {
               </button>
             </div>
             {contactInfo.locations.length === 0 && (
-              <p style={{ color: '#64748b', fontStyle: 'italic', marginBottom: '1rem' }}>
+              <p style={{ color: '#475569', fontStyle: 'italic', marginBottom: '1rem' }}>
                 No locations added. Click "Add Location" to add office addresses.
               </p>
             )}
@@ -310,6 +320,15 @@ export default function AdminContactSettings() {
           </div>
         </div>
       </div>
+      <ConfirmDialog
+        isOpen={!!confirmAction}
+        title={confirmAction?.title ?? ''}
+        message={confirmAction?.message ?? ''}
+        confirmLabel="Remove"
+        variant="danger"
+        onConfirm={() => confirmAction?.onConfirm()}
+        onCancel={() => setConfirmAction(null)}
+      />
     </div>
   );
 }

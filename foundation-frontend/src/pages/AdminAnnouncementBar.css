@@ -10,7 +10,7 @@
 .aab-loading {
   padding: 3rem;
   text-align: center;
-  color: #64748b;
+  color: var(--color-ink-500);
 }
 
 .aab-header {
@@ -24,12 +24,12 @@
 .aab-header h1 {
   margin: 0 0 0.35rem 0;
   font-size: 1.6rem;
-  color: #0f172a;
+  color: var(--color-ink-800);
 }
 
 .aab-sub {
   margin: 0;
-  color: #64748b;
+  color: var(--color-ink-500);
   font-size: 0.9rem;
   max-width: 64ch;
   line-height: 1.5;
@@ -37,13 +37,13 @@
 
 .aab-sub-small {
   margin: 0 0 0.75rem 0;
-  color: #64748b;
+  color: var(--color-ink-500);
   font-size: 0.85rem;
   line-height: 1.5;
 }
 
 .aab-visibility {
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   padding: 0.7rem 1rem;
   font-size: 0.9rem;
   margin-bottom: 1.25rem;
@@ -64,18 +64,18 @@
 }
 
 .aab-card {
-  background: #ffffff;
+  background: var(--color-paper-50);
   border: 1px solid #e2e8f0;
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   padding: 1.25rem 1.5rem;
   margin-bottom: 1.25rem;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  box-shadow: var(--shadow-xs);
 }
 
 .aab-card h2 {
   margin: 0 0 0.75rem 0;
   font-size: 1.05rem;
-  color: #0f172a;
+  color: var(--color-ink-800);
 }
 
 .aab-row {
@@ -94,7 +94,7 @@
   gap: 0.5rem;
   cursor: pointer;
   font-size: 0.92rem;
-  color: #1e293b;
+  color: var(--color-ink-700);
   font-weight: 500;
 }
 
@@ -127,7 +127,7 @@
 .aab-field label {
   font-size: 0.85rem;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--color-ink-700);
 }
 
 .aab-field input[type='text'],
@@ -135,11 +135,11 @@
 .aab-field textarea,
 .aab-field select {
   border: 1px solid #cbd5e1;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   padding: 0.55rem 0.7rem;
   font-size: 0.95rem;
-  color: #0f172a;
-  background: #ffffff;
+  color: var(--color-ink-800);
+  background: var(--color-paper-50);
   font-family: inherit;
 }
 
@@ -156,11 +156,11 @@
 
 .aab-hint {
   font-size: 0.78rem;
-  color: #64748b;
+  color: var(--color-ink-500);
 }
 
 .aab-required {
-  color: #dc2626;
+  color: var(--color-error);
   margin-left: 0.15rem;
 }
 
@@ -169,14 +169,14 @@
   background: #fffbeb;
   border: 1px solid #fde68a;
   color: #92400e;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   padding: 0.5rem 0.75rem;
   font-size: 0.85rem;
 }
 
 .aab-btn {
   padding: 0.55rem 1.1rem;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   font-size: 0.92rem;
   font-weight: 600;
   cursor: pointer;
@@ -186,12 +186,12 @@
 }
 
 .aab-btn--primary {
-  background: #2563eb;
-  color: #ffffff;
+  background: var(--color-trust-600);
+  color: var(--color-paper-50);
 }
 
 .aab-btn--primary:hover:not(:disabled) {
-  background: #1d4ed8;
+  background: var(--color-trust-700);
 }
 
 .aab-btn--primary:disabled {
@@ -200,7 +200,7 @@
 }
 
 .aab-audit {
-  color: #64748b;
+  color: var(--color-ink-500);
   font-size: 0.8rem;
   margin-top: 1rem;
   text-align: right;

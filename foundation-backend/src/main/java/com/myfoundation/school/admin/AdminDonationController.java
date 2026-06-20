@@ -8,12 +8,18 @@ import com.myfoundation.school.campaign.CategoryRepository;
 import com.myfoundation.school.config.SiteConfig;
 import com.myfoundation.school.config.SiteConfigRequest;
 import com.myfoundation.school.config.SiteConfigService;
+import com.myfoundation.school.donation.DonationReceiptService;
 import com.myfoundation.school.donation.DonationRepository;
 import com.myfoundation.school.donation.DonationService;
 import com.myfoundation.school.donation.DonationStatus;
 import com.myfoundation.school.dto.CampaignResponse;
 import com.myfoundation.school.dto.DonationResponse;
 import com.myfoundation.school.dto.DonationPageResponse;
+import com.myfoundation.school.donation.Donation;
+import com.myfoundation.school.audit.AuditAction;
+import com.myfoundation.school.audit.AuditLogService;
+import com.myfoundation.school.exception.BusinessException;
+import com.myfoundation.school.exception.ResourceNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,8 +27,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -38,6 +47,8 @@ import java.util.stream.Collectors;
 public class AdminDonationController {
     
     private final DonationService donationService;
+    private final DonationReceiptService donationReceiptService;
+    private final AuditLogService auditLogService;
     private final AdminCampaignService adminCampaignService;
     private final AdminCategoryService adminCategoryService;
     private final CampaignRepository campaignRepository;
@@ -93,15 +104,129 @@ public class AdminDonationController {
             }
             
             DonationPageResponse response = donationService.getDonationsPaginated(q, statusFilter, pageable);
+
+            String adminUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+            String details = String.format("page=%d, size=%d, q=%s, status=%s, sort=%s", pageNumber, pageSize, q, status, sort);
+            auditLogService.log(AuditAction.DONATION_LIST_VIEWED, "Donation", null, adminUsername, details);
+
             return ResponseEntity.ok(response);
         }
-        
+
         // Legacy non-paginated endpoint
         log.info("GET /api/admin/donations - Fetching all donations");
         List<DonationResponse> donations = donationService.getAllDonations();
+
+        String adminUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+        auditLogService.log(AuditAction.DONATION_LIST_VIEWED, "Donation", null, adminUsername, "legacy non-paginated");
+
         return ResponseEntity.ok(donations);
     }
     
+    // Refund request body
+    public record RefundRequest(String reason) {}
+
+    @PostMapping("/donations/{id}/refund")
+    public ResponseEntity<?> refundDonation(
+            @PathVariable String id,
+            @RequestBody(required = false) RefundRequest request) {
+        log.info("POST /api/admin/donations/{}/refund - Initiating refund", id);
+        try {
+            String adminUsername = SecurityContextHolder.getContext()
+                    .getAuthentication().getName();
+            String reason = (request != null) ? request.reason() : null;
+            Donation donation = donationService.refundDonation(id, reason, adminUsername);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("id", donation.getId());
+            response.put("status", donation.getStatus().name());
+            response.put("refundedAt", donation.getRefundedAt());
+            response.put("refundReason", donation.getRefundReason());
+            response.put("stripeRefundId", donation.getStripeRefundId());
+            response.put("message", "Donation refunded successfully");
+            return ResponseEntity.ok(response);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (BusinessException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/donations/{id}/receipt")
+    public ResponseEntity<byte[]> downloadReceipt(@PathVariable String id) {
+        log.info("GET /api/admin/donations/{}/receipt - Admin receipt download", id);
+
+        byte[] pdfBytes = donationReceiptService.generateReceipt(id);
+
+        String adminUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+        auditLogService.log(AuditAction.DONATION_EXPORTED, "Donation", id, adminUsername, "Receipt PDF downloaded");
+
+        String filename = "donation-receipt-" + id + ".pdf";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDispositionFormData("attachment", filename);
+        headers.setContentLength(pdfBytes.length);
+
+        return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
+    }
+
+    @GetMapping("/dashboard/stats")
+    public ResponseEntity<DashboardStatsResponse> getDashboardStats() {
+        long totalRaised = donationRepository.sumAllSuccessfulDonations();
+        long totalDonations = donationRepository.countSuccessfulDonations();
+        long totalDonors = donationRepository.countDistinctDonors();
+        long averageDonation = totalDonations > 0 ? totalRaised / totalDonations : 0;
+        long activeCampaigns = campaignRepository.countByActiveTrue();
+
+        java.time.Instant monthStart = java.time.YearMonth.now()
+                .atDay(1).atStartOfDay(java.time.ZoneOffset.UTC).toInstant();
+        long monthlyRaised = donationRepository.sumSuccessfulDonationsSince(monthStart);
+        long monthlyDonations = donationRepository.countSuccessfulDonationsSince(monthStart);
+
+        List<Donation> recent = donationRepository.findRecentDonations(PageRequest.of(0, 5));
+        List<DashboardStatsResponse.RecentDonation> recentDtos = recent.stream()
+                .map(d -> DashboardStatsResponse.RecentDonation.builder()
+                        .id(d.getId())
+                        .donorName(d.getDonorName() != null ? d.getDonorName() : "Anonymous")
+                        .amount(d.getAmount())
+                        .currency(d.getCurrency())
+                        .campaignTitle(d.getCampaign() != null ? d.getCampaign().getTitle() : "General")
+                        .status(d.getStatus().name())
+                        .createdAt(d.getCreatedAt().toString())
+                        .build())
+                .collect(Collectors.toList());
+
+        List<Object[]> topRaw = donationRepository.findTopCampaignsByAmountRaised(PageRequest.of(0, 5));
+        List<DashboardStatsResponse.TopCampaign> topDtos = topRaw.stream()
+                .map(row -> {
+                    String cId = (String) row[0];
+                    long target = campaignRepository.findById(cId)
+                            .map(Campaign::getTargetAmount).orElse(0L);
+                    return DashboardStatsResponse.TopCampaign.builder()
+                            .id(cId)
+                            .title((String) row[1])
+                            .raised((Long) row[2])
+                            .target(target)
+                            .donationCount((Long) row[3])
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(DashboardStatsResponse.builder()
+                .totalRaised(totalRaised)
+                .totalDonations(totalDonations)
+                .totalDonors(totalDonors)
+                .averageDonation(averageDonation)
+                .activeCampaigns(activeCampaigns)
+                .monthlyRaised(monthlyRaised)
+                .monthlyDonations(monthlyDonations)
+                .recentDonations(recentDtos)
+                .topCampaigns(topDtos)
+                .build());
+    }
+
     // Campaign CRUD endpoints
     @GetMapping("/campaigns")
     public ResponseEntity<?> getAllCampaigns(

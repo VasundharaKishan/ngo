@@ -3,7 +3,10 @@
 
 app:
   jwt:
+    secret: dev-only-secret-do-not-use-in-production-minimum-32-bytes
     cookie-secure: false  # Allow HTTP cookies in local development
+  auth:
+    otp-enabled: false  # Skip OTP in local development
 
 springdoc:
   swagger-ui:

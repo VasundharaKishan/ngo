@@ -33,7 +33,7 @@ public class FooterConfigController {
      * Admin endpoint to get footer configuration for editing.
      */
     @GetMapping("/api/admin/config/footer")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<FooterConfigResponse> getAdminFooterConfig() {
         log.info("GET /api/admin/config/footer - Admin fetching footer configuration");
         FooterConfigResponse response = footerSettingsService.getFooterConfig();
@@ -44,7 +44,7 @@ public class FooterConfigController {
      * Admin endpoint to update footer configuration.
      */
     @PutMapping("/api/admin/config/footer")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<FooterConfigResponse> updateFooterConfig(
             @Valid @RequestBody FooterConfigRequest request) {
         log.info("PUT /api/admin/config/footer - Updating footer configuration");

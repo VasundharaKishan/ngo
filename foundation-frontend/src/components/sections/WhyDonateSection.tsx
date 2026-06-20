@@ -40,9 +40,9 @@ export default function WhyDonateSection({ config }: WhyDonateSectionProps) {
   const title = configTitle || content.title || 'Why Your Donation Matters';
 
   return (
-    <section className="why-donate">
+    <section className="why-donate" aria-labelledby="why-donate-title">
       <div className="container">
-        <h2 className="section-title font-display">{title}</h2>
+        <h2 id="why-donate-title" className="section-title font-display">{title}</h2>
         <div className="why-grid">
           <div className="why-card">
             <h3>{content.card2_title || '🌍 Wide Reach'}</h3>

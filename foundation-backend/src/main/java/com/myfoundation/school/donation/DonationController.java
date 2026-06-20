@@ -3,6 +3,7 @@ package com.myfoundation.school.donation;
 import com.myfoundation.school.dto.CheckoutSessionResponse;
 import com.myfoundation.school.dto.DonationRequest;
 import com.myfoundation.school.dto.DonationResponse;
+import com.myfoundation.school.donation.DonationStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -21,8 +22,9 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @Tag(name = "Donations", description = "Donation processing endpoints for Stripe payments")
 public class DonationController {
-    
+
     private final DonationService donationService;
+    private final ReceiptTokenService receiptTokenService;
     
     @Operation(
         summary = "Create Stripe checkout session",
@@ -75,6 +77,9 @@ public class DonationController {
         log.info("GET /api/donations/stripe/verify - Verifying donation for session: {}", sessionId);
 
         DonationResponse response = donationService.verifyDonationBySessionId(sessionId);
+        if (response.getId() != null && response.getStatus() == DonationStatus.SUCCESS) {
+            response.setReceiptToken(receiptTokenService.generateToken(response.getId()));
+        }
         return ResponseEntity.ok(response);
     }
 }

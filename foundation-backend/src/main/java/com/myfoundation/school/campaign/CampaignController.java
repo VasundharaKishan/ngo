@@ -49,12 +49,13 @@ public class CampaignController {
             @Parameter(description = "Filter featured campaigns only") @RequestParam(required = false) Boolean featured,
             @Parameter(description = "Filter urgent campaigns only") @RequestParam(required = false) Boolean urgent,
             @Parameter(description = "Maximum number of campaigns to return") @RequestParam(required = false) Integer limit,
+            @Parameter(description = "Search campaigns by title or description (case-insensitive)") @RequestParam(required = false) String search,
             @Parameter(description = "Page number (0-based) for server-side pagination") @RequestParam(required = false) Integer page,
             @Parameter(description = "Page size for server-side pagination (max 100)") @RequestParam(required = false) Integer size) {
 
         if (page != null) {
-            log.info("GET /api/campaigns (paginated) - page={}, size={}, categoryId={}, featured={}, urgent={}",
-                    page, size, categoryId, featured, urgent);
+            log.info("GET /api/campaigns (paginated) - page={}, size={}, categoryId={}, featured={}, urgent={}, search={}",
+                    page, size, categoryId, featured, urgent, search);
             int pageNum = Math.max(0, page);
             int pageSize = (size != null && size > 0 && size <= 100) ? size : 12;
             Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
@@ -62,15 +63,15 @@ public class CampaignController {
             return ResponseEntity.ok(response);
         }
 
-        log.info("GET /api/campaigns - Fetching campaigns with filters: categoryId={}, featured={}, urgent={}, limit={}",
-                categoryId, featured, urgent, limit);
+        log.info("GET /api/campaigns - Fetching campaigns with filters: categoryId={}, featured={}, urgent={}, limit={}, search={}",
+                categoryId, featured, urgent, limit, search);
 
         // If featured and no explicit limit, use config value
         if (Boolean.TRUE.equals(featured) && limit == null) {
             limit = siteConfigService.getIntConfigValue("homepage.featured_campaigns_count");
         }
         
-        List<CampaignResponse> campaigns = campaignService.getCampaigns(categoryId, featured, urgent);
+        List<CampaignResponse> campaigns = campaignService.getCampaigns(categoryId, featured, urgent, search);
         
         // Apply limit if specified
         if (limit != null && limit > 0 && campaigns.size() > limit) {

@@ -42,14 +42,12 @@ test.describe('Admin category management', () => {
       page.locator('[data-testid="toast-info"]').filter({ hasText: /coming soon/i })
     ).toBeVisible();
 
-    let confirmMessage = '';
-    page.once('dialog', dialog => {
-      confirmMessage = dialog.message();
-      dialog.accept();
-    });
-
     await page.getByTestId(`category-delete-${initialCategories[0].id}`).click();
 
-    expect(confirmMessage).toMatch(/delete this category/i);
+    const dialog = page.getByTestId('confirm-dialog');
+    await expect(dialog).toBeVisible();
+    await expect(dialog).toContainText(/delete this category/i);
+    await page.getByTestId('confirm-dialog-confirm').click();
+    await expect(dialog).not.toBeVisible();
   });
 });

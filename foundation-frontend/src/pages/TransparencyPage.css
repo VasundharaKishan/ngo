@@ -2,7 +2,7 @@
    Three-block layout: registration status, published documents, pending items. */
 
 .transparency-page {
-  background: #ffffff;
+  background: var(--color-paper-50);
   min-height: 100vh;
 }
 
@@ -15,8 +15,8 @@
 /* ---------- hero ---------- */
 
 .tx-hero {
-  background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
-  color: #ffffff;
+  background: linear-gradient(135deg, #0f172a 0%, var(--color-trust-900) 100%);
+  color: var(--color-paper-50);
   padding: 3.5rem 0 3rem;
 }
 
@@ -25,7 +25,7 @@
   text-transform: uppercase;
   letter-spacing: 0.12em;
   font-size: 0.78rem;
-  color: #93c5fd;
+  color: var(--color-trust-300);
   font-weight: 600;
 }
 
@@ -81,18 +81,18 @@
 }
 
 .tx-status--unregistered {
-  border-color: #fcd34d;
+  border-color: var(--color-saffron-300);
   background: #fffbeb;
 }
 
 .tx-status--applied {
-  border-color: #93c5fd;
-  background: #eff6ff;
+  border-color: var(--color-trust-300);
+  background: var(--color-trust-50);
 }
 
 .tx-status--approved {
   border-color: #86efac;
-  background: #f0fdf4;
+  background: var(--color-moss-50);
 }
 
 .tx-status-head {
@@ -113,7 +113,7 @@
 .tx-status-pill {
   display: inline-block;
   padding: 0.25rem 0.7rem;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -121,13 +121,13 @@
 }
 
 .tx-status-pill--unregistered {
-  background: #fde68a;
+  background: var(--color-saffron-200);
   color: #78350f;
 }
 
 .tx-status-pill--applied {
-  background: #bfdbfe;
-  color: #1e3a8a;
+  background: var(--color-trust-200);
+  color: var(--color-trust-900);
 }
 
 .tx-status-pill--approved {
@@ -150,7 +150,7 @@
   padding: 0.75rem 1rem;
   background: rgba(255, 255, 255, 0.6);
   border: 1px solid rgba(15, 23, 42, 0.08);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
 }
 
 .tx-status-meta div {
@@ -164,7 +164,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #64748b;
+  color: #475569;
   margin: 0;
 }
 
@@ -187,13 +187,13 @@
 
 .tx-badge {
   padding: 0.75rem 0.9rem;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   border: 1px solid;
   display: flex;
   flex-direction: column;
   gap: 0.15rem;
   font-size: 0.92rem;
-  background: #ffffff;
+  background: var(--color-paper-50);
 }
 
 .tx-badge strong {
@@ -229,14 +229,14 @@
 .tx-error,
 .tx-empty {
   padding: 1.25rem 1.5rem;
-  border-radius: 10px;
+  border-radius: var(--radius-xl);
   font-size: 0.95rem;
   line-height: 1.55;
 }
 
 .tx-loading {
   text-align: center;
-  color: #64748b;
+  color: #475569;
   padding: 2rem;
 }
 
@@ -258,7 +258,7 @@
 }
 
 .tx-empty a {
-  color: #1e3a8a;
+  color: var(--color-trust-900);
   text-decoration: underline;
 }
 
@@ -289,8 +289,8 @@
 
 .tx-doc-item {
   border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  background: #ffffff;
+  border-radius: var(--radius-xl);
+  background: var(--color-paper-50);
   transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
 }
 
@@ -299,7 +299,7 @@
 }
 
 .tx-doc-item:hover {
-  border-color: #93c5fd;
+  border-color: var(--color-trust-300);
   box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
 }
 
@@ -314,9 +314,9 @@
 }
 
 .tx-doc-link:focus-visible {
-  outline: 2px solid #3b82f6;
+  outline: 2px solid var(--color-trust-500);
   outline-offset: -2px;
-  border-radius: 10px;
+  border-radius: var(--radius-xl);
 }
 
 .tx-doc-text {
@@ -340,7 +340,7 @@
 
 .tx-doc-period {
   font-size: 0.78rem;
-  color: #64748b;
+  color: #475569;
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -348,7 +348,7 @@
 
 .tx-doc-arrow {
   flex: 0 0 auto;
-  color: #1e3a8a;
+  color: var(--color-trust-900);
   font-size: 1.2rem;
   font-weight: 700;
 }
@@ -367,7 +367,7 @@
 .tx-pending-list li {
   padding: 1rem 1.1rem;
   border: 1px dashed #cbd5e1;
-  border-radius: 10px;
+  border-radius: var(--radius-xl);
   background: #f8fafc;
   display: flex;
   flex-direction: column;

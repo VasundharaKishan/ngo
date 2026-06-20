@@ -79,12 +79,12 @@
 
 .admin-homepage .tab-button.active .tab-count {
   background: var(--color-primary);
-  color: white;
+  color: var(--color-paper-50);
 }
 
 /* Content Area */
 .homepage-content {
-  background: white;
+  background: var(--color-paper-50);
   border-radius: var(--border-radius-lg);
   padding: var(--spacing-6);
   box-shadow: var(--shadow-sm);
@@ -127,7 +127,7 @@
 .btn-primary {
   padding: var(--spacing-3) var(--spacing-5);
   background: var(--color-primary);
-  color: white;
+  color: var(--color-paper-50);
   border: none;
   border-radius: var(--border-radius-md);
   font-size: var(--font-size-base);
@@ -166,7 +166,7 @@
 
 .btn-order:hover:not(:disabled) {
   background: var(--color-primary);
-  color: white;
+  color: var(--color-paper-50);
   border-color: var(--color-primary);
 }
 
@@ -178,7 +178,7 @@
 .btn-delete {
   padding: var(--spacing-2) var(--spacing-4);
   background: var(--color-error);
-  color: white;
+  color: var(--color-paper-50);
   border: none;
   border-radius: var(--border-radius-md);
   font-size: var(--font-size-sm);
@@ -188,13 +188,13 @@
 }
 
 .btn-delete:hover {
-  background: #c53030;
+  background: var(--color-rose-600);
 }
 
 .btn-remove-image {
   padding: var(--spacing-2) var(--spacing-3);
   background: var(--color-error);
-  color: white;
+  color: var(--color-paper-50);
   border: none;
   border-radius: var(--border-radius-sm);
   font-size: var(--font-size-xs);
@@ -246,7 +246,7 @@
 .form-group select:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(42, 61, 168, 0.1);
+  box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.15);
 }
 
 .upload-status {
@@ -287,7 +287,7 @@
 
 .slide-card.disabled {
   opacity: 0.6;
-  border-color: #e2e8f0;
+  border-color: var(--color-paper-300);
 }
 
 .slide-card:hover {
@@ -319,7 +319,7 @@
   display: inline-block;
   padding: var(--spacing-1) var(--spacing-3);
   background: rgba(0, 0, 0, 0.7);
-  color: white;
+  color: var(--color-paper-50);
   border-radius: var(--border-radius-sm);
   font-size: var(--font-size-xs);
   font-weight: 600;
@@ -391,7 +391,7 @@
 
 .section-card.disabled {
   opacity: 0.6;
-  border-color: #e2e8f0;
+  border-color: var(--color-paper-300);
 }
 
 .section-card:hover {
@@ -452,13 +452,13 @@
   font-size: var(--font-size-sm);
   line-height: 1.5;
   resize: vertical;
-  background: white;
+  background: var(--color-paper-50);
 }
 
 .section-config textarea:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(42, 61, 168, 0.1);
+  box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.15);
 }
 
 /* Panel Actions */
@@ -564,20 +564,20 @@
 .slide-text-fields input[type="text"] {
   width: 100%;
   padding: 0.4rem 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
+  border: 1px solid var(--color-paper-400);
+  border-radius: var(--radius-md);
   font-size: 0.875rem;
-  color: #374151;
+  color: var(--color-ink-600);
   font-family: inherit;
   transition: border-color 0.2s ease;
 }
 
 .slide-text-fields input[type="text"]:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: var(--color-trust-500);
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
 }
 
 .slide-text-fields input[type="text"]::placeholder {
-  color: #9ca3af;
+  color: var(--color-ink-300);
 }

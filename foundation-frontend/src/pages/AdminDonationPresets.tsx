@@ -16,6 +16,7 @@ import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../api';
 import { authFetch } from '../utils/auth';
 import { useToast } from '../components/ToastProvider';
+import ConfirmDialog from '../components/ConfirmDialog';
 import logger from '../utils/logger';
 import './AdminDonationPresets.css';
 
@@ -62,6 +63,9 @@ export default function AdminDonationPresets() {
   const [creating, setCreating] = useState(false);
   const [newRupees, setNewRupees] = useState('');
   const [newLabel, setNewLabel] = useState('');
+  const [confirmAction, setConfirmAction] = useState<{
+    title: string; message: string; onConfirm: () => void; confirmLabel?: string; variant?: 'danger' | 'warning' | 'info';
+  } | null>(null);
 
   useEffect(() => {
     const user = localStorage.getItem('adminUser');
@@ -183,25 +187,30 @@ export default function AdminDonationPresets() {
     }
   };
 
-  const deletePreset = async (id: number) => {
+  const deletePreset = (id: number) => {
     const draft = drafts.find((d) => d.id === id);
     if (!draft) return;
-    const ok = window.confirm(
-      `Delete ₹${draft.amountMinorUnits / 100}${draft.label ? ` (${draft.label})` : ''}? This cannot be undone.`
-    );
-    if (!ok) return;
-    setSaving(true);
-    try {
-      const res = await authFetch(`${API_BASE_URL}/admin/donation-presets/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      showToast('Deleted preset', 'success');
-      await load();
-    } catch (error) {
-      logger.error('AdminDonationPresets', 'Delete failed', error);
-      showToast('Delete failed', 'error');
-    } finally {
-      setSaving(false);
-    }
+    setConfirmAction({
+      title: 'Delete preset',
+      message: `Delete ₹${draft.amountMinorUnits / 100}${draft.label ? ` (${draft.label})` : ''}? This cannot be undone.`,
+      confirmLabel: 'Delete',
+      variant: 'danger',
+      onConfirm: async () => {
+        setConfirmAction(null);
+        setSaving(true);
+        try {
+          const res = await authFetch(`${API_BASE_URL}/admin/donation-presets/${id}`, { method: 'DELETE' });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          showToast('Deleted preset', 'success');
+          await load();
+        } catch (error) {
+          logger.error('AdminDonationPresets', 'Delete failed', error);
+          showToast('Delete failed', 'error');
+        } finally {
+          setSaving(false);
+        }
+      },
+    });
   };
 
   const createPreset = async () => {
@@ -258,23 +267,30 @@ export default function AdminDonationPresets() {
     }
   };
 
-  const clearDefault = async () => {
-    const ok = window.confirm('Clear the default preset? The donation form will preselect the first enabled amount instead.');
-    if (!ok) return;
-    setSaving(true);
-    try {
-      const res = await authFetch(`${API_BASE_URL}/admin/donation-presets/default`, {
-        method: 'DELETE',
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      showToast('Cleared default', 'success');
-      await load();
-    } catch (error) {
-      logger.error('AdminDonationPresets', 'Clear default failed', error);
-      showToast('Clear default failed', 'error');
-    } finally {
-      setSaving(false);
-    }
+  const clearDefault = () => {
+    setConfirmAction({
+      title: 'Clear default preset',
+      message: 'Clear the default preset? The donation form will preselect the first enabled amount instead.',
+      confirmLabel: 'Clear default',
+      variant: 'warning',
+      onConfirm: async () => {
+        setConfirmAction(null);
+        setSaving(true);
+        try {
+          const res = await authFetch(`${API_BASE_URL}/admin/donation-presets/default`, {
+            method: 'DELETE',
+          });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          showToast('Cleared default', 'success');
+          await load();
+        } catch (error) {
+          logger.error('AdminDonationPresets', 'Clear default failed', error);
+          showToast('Clear default failed', 'error');
+        } finally {
+          setSaving(false);
+        }
+      },
+    });
   };
 
   if (loading) return <div className="loading-state" style={{ padding: '2rem' }}>Loading donation presets…</div>;
@@ -454,6 +470,15 @@ export default function AdminDonationPresets() {
           Save on each card to persist.
         </div>
       )}
+      <ConfirmDialog
+        isOpen={!!confirmAction}
+        title={confirmAction?.title ?? ''}
+        message={confirmAction?.message ?? ''}
+        confirmLabel={confirmAction?.confirmLabel ?? 'Confirm'}
+        variant={confirmAction?.variant ?? 'danger'}
+        onConfirm={() => confirmAction?.onConfirm()}
+        onCancel={() => setConfirmAction(null)}
+      />
     </div>
   );
 }
