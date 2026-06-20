@@ -23,6 +23,10 @@ export default function AboutPage() {
         <meta property="og:image" content={logoUrl} />
         <meta property="og:site_name" content={siteName} />
         <meta property="og:url" content={typeof window !== 'undefined' ? window.location.href : ''} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${t('about.title')} | ${siteName}`} />
+        <meta name="twitter:description" content={`Learn about ${siteName}'s mission, values, and the communities we serve.`} />
+        <meta name="twitter:image" content={logoUrl} />
         <link rel="canonical" href={typeof window !== 'undefined' ? window.location.href : ''} />
       </Helmet>
 

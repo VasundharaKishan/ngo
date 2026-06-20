@@ -154,6 +154,10 @@ export default function CampaignList() {
         <meta property="og:image" content={logoUrl} />
         <meta property="og:site_name" content={siteName} />
         <meta property="og:url" content={typeof window !== 'undefined' ? window.location.href : ''} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`All Campaigns | ${siteName}`} />
+        <meta name="twitter:description" content="Choose a campaign to support our mission." />
+        <meta name="twitter:image" content={logoUrl} />
         <link rel="canonical" href={typeof window !== 'undefined' ? window.location.href : ''} />
       </Helmet>
 

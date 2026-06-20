@@ -23,6 +23,10 @@ export default function ImpactPage() {
         <meta property="og:image" content={logoUrl} />
         <meta property="og:site_name" content={siteName} />
         <meta property="og:url" content={typeof window !== 'undefined' ? window.location.href : ''} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`Our Impact | ${siteName}`} />
+        <meta name="twitter:description" content={`See how ${siteName} is making a difference — our reach, our process, and the trust we've built.`} />
+        <meta name="twitter:image" content={logoUrl} />
         <link rel="canonical" href={typeof window !== 'undefined' ? window.location.href : ''} />
       </Helmet>
 

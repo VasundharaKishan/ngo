@@ -61,6 +61,10 @@ export default function FaqPage() {
         <meta property="og:image" content={logoUrl} />
         <meta property="og:site_name" content={siteName} />
         <meta property="og:url" content={typeof window !== 'undefined' ? window.location.href : ''} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`Frequently asked questions | ${siteName}`} />
+        <meta name="twitter:description" content={`Frequently asked questions about ${siteName} — donations, programmes, and how to get involved.`} />
+        <meta name="twitter:image" content={logoUrl} />
         <link rel="canonical" href={typeof window !== 'undefined' ? window.location.href : ''} />
       </Helmet>
 
