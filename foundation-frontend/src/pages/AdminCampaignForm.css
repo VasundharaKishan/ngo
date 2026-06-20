@@ -9,9 +9,9 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
-  background: white;
+  background: var(--color-paper-50);
   padding: 2rem;
-  border-radius: 16px;
+  border-radius: var(--radius-2xl);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
 }
 
@@ -27,10 +27,10 @@
   color: #475569;
   padding: 0.75rem 1.5rem;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all var(--transition-slow);
 }
 
 .btn-back:hover {
@@ -38,8 +38,8 @@
 }
 
 .admin-form {
-  background: white;
-  border-radius: 16px;
+  background: var(--color-paper-50);
+  border-radius: var(--radius-2xl);
   padding: 2rem;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
 }
@@ -72,9 +72,9 @@
 .form-group textarea {
   padding: 0.875rem;
   border: 2px solid #e2e8f0;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   font-size: var(--font-size-base);
-  transition: all 0.3s ease;
+  transition: all var(--transition-slow);
   font-family: inherit;
 }
 
@@ -82,7 +82,7 @@
 .form-group select:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #2a3da8;
+  border-color: var(--color-trust-800);
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
@@ -101,7 +101,7 @@
   width: 100%;
   max-width: 400px;
   aspect-ratio: 16 / 9;
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   overflow: hidden;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
@@ -113,7 +113,7 @@
 }
 
 .upload-status {
-  color: #2a3da8;
+  color: var(--color-trust-800);
   font-weight: 600;
   font-size: var(--font-size-sm);
 }
@@ -129,7 +129,7 @@
   gap: 2rem;
   padding: 1rem;
   background: #f8fafc;
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   border: 2px solid #e2e8f0;
 }
 
@@ -146,7 +146,7 @@
   width: 20px;
   height: 20px;
   cursor: pointer;
-  accent-color: #2a3da8;
+  accent-color: var(--color-trust-800);
 }
 
 .form-actions {
@@ -161,11 +161,11 @@
 .btn-submit {
   padding: 1rem 2rem;
   border: none;
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   font-weight: 700;
   font-size: var(--font-size-base);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all var(--transition-slow);
 }
 
 .btn-cancel {
@@ -178,8 +178,8 @@
 }
 
 .btn-submit {
-  background: linear-gradient(135deg, #2a3da8 0%, #1e3a8a 100%);
-  color: white;
+  background: linear-gradient(135deg, var(--color-trust-800) 0%, #1e3a8a 100%);
+  color: var(--color-paper-50);
   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }
 
@@ -200,11 +200,11 @@
 }
 
 .char-counter--warn {
-  color: #d97706;
+  color: var(--color-warning);
 }
 
 .char-counter--limit {
-  color: #dc2626;
+  color: var(--color-error);
   font-weight: 600;
 }
 

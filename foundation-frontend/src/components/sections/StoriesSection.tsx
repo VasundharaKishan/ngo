@@ -27,7 +27,7 @@ export default function StoriesSection({ config }: { config: StoriesSectionConfi
   const subtitle = config.subtitle && config.subtitle.trim() ? config.subtitle : null;
 
   return (
-    <section className="stories-section" aria-labelledby="stories-section-title">
+    <section className="stories-section" aria-labelledby={stories.length > 1 ? "stories-section-title" : undefined} aria-label={stories.length <= 1 ? title : undefined}>
       <div className="stories-container">
         {stories.length > 1 && (
           <header className="stories-header">

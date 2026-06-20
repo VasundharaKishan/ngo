@@ -156,7 +156,7 @@ export default function ResetPassword() {
 
         <form onSubmit={handleSubmit} className="reset-password-form">
           {error && (
-            <div className="error-message" data-testid="reset-password-error">
+            <div id="reset-password-error" className="error-message" data-testid="reset-password-error">
               <RiAlertLine style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> {error}
             </div>
           )}
@@ -172,8 +172,9 @@ export default function ResetPassword() {
           ) : (
             <>
               <div className="form-group">
-                <label>New Password</label>
+                <label htmlFor="reset-new-password">New Password</label>
                 <input
+                  id="reset-new-password"
                   type="password"
                   value={password}
                   data-testid="reset-password-password"
@@ -181,18 +182,23 @@ export default function ResetPassword() {
                   placeholder="Enter new password"
                   required
                   autoFocus
+                  aria-invalid={!!error}
+                  aria-describedby={error ? 'reset-password-error' : undefined}
                 />
               </div>
 
               <div className="form-group">
-                <label>Confirm Password</label>
+                <label htmlFor="reset-confirm-password">Confirm Password</label>
                 <input
+                  id="reset-confirm-password"
                   type="password"
                   value={confirmPassword}
                   data-testid="reset-password-confirm"
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Re-enter your password"
                   required
+                  aria-invalid={!!error}
+                  aria-describedby={error ? 'reset-password-error' : undefined}
                 />
               </div>
 

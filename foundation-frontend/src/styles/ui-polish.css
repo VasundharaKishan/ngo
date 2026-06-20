@@ -1,24 +1,25 @@
-/* Global UI polish: light tokens and a few utility surfaces */
+/* Global UI polish: utility surfaces and base element resets.
+   All colour/radius/shadow values reference design-system.css tokens. */
 :root {
-  --primary: #667eea;
-  --primary-strong: #5647d6;
-  --surface: #ffffff;
-  --surface-muted: #f8fafc;
-  --border: #e2e8f0;
-  --shadow-soft: 0 14px 40px rgba(15, 23, 42, 0.12);
-  --radius-md: 12px;
-  --radius-lg: 18px;
+  --primary: var(--color-trust-800);
+  --primary-strong: var(--color-trust-900);
+  --surface: var(--color-paper-50);
+  --surface-muted: var(--color-paper-100);
+  --border: var(--color-paper-300);
+  --shadow-soft: var(--shadow-sm);
+  --radius-md: var(--radius-xl);
+  --radius-lg: var(--radius-2xl);
 }
 
 body {
   background: var(--surface-muted);
-  color: #0f172a;
+  color: var(--text-primary);
 }
 
 a {
   color: inherit;
   text-decoration: none;
-  transition: color 0.2s ease, transform 0.2s ease;
+  transition: color var(--transition-base), transform var(--transition-base);
 }
 
 a:hover {
@@ -32,7 +33,7 @@ textarea {
   font: inherit;
   border-radius: var(--radius-md);
   border: 1px solid var(--border);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  transition: border-color var(--transition-base), box-shadow var(--transition-base), background-color var(--transition-base);
 }
 
 button:focus-visible,
@@ -41,7 +42,7 @@ select:focus-visible,
 textarea:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
-  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+  box-shadow: 0 0 0 4px rgba(30, 64, 175, 0.2);
 }
 
 .card {
@@ -49,7 +50,7 @@ textarea:focus-visible {
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-soft);
-  padding: 1.5rem;
+  padding: var(--space-6);
 }
 
 .pill {
@@ -57,9 +58,9 @@ textarea:focus-visible {
   align-items: center;
   gap: 0.4rem;
   padding: 0.35rem 0.85rem;
-  background: rgba(102, 126, 234, 0.12);
+  background: rgba(30, 64, 175, 0.1);
   color: var(--primary-strong);
-  border-radius: 999px;
-  font-weight: 600;
-  letter-spacing: 0.01em;
+  border-radius: var(--radius-full);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-wide);
 }

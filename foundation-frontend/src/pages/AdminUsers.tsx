@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../api';
 import { authFetch } from '../utils/auth';
 import { useToast } from '../components/ToastProvider';
+import ConfirmDialog from '../components/ConfirmDialog';
 import logger from '../utils/logger';
 import './AdminUsers.css';
 
@@ -22,6 +23,9 @@ export default function AdminUsers() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
+  const [confirmAction, setConfirmAction] = useState<{
+    title: string; message: string; onConfirm: () => void;
+  } | null>(null);
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -87,25 +91,30 @@ export default function AdminUsers() {
     setShowForm(true);
   };
 
-  const handleDelete = async (id: string, username: string, _role: 'ADMIN' | 'OPERATOR') => {
-    if (!confirm(`Are you sure you want to delete user: ${username}?`)) return;
+  const handleDelete = (id: string, username: string, _role: 'ADMIN' | 'OPERATOR') => {
+    setConfirmAction({
+      title: 'Delete user',
+      message: `Are you sure you want to delete user: ${username}?`,
+      onConfirm: async () => {
+        setConfirmAction(null);
+        try {
+          const res = await authFetch(`${API_BASE_URL}/admin/users/${id}`, {
+            method: 'DELETE'
+          });
 
-    try {
-      const res = await authFetch(`${API_BASE_URL}/admin/users/${id}`, {
-        method: 'DELETE'
-      });
-      
-      if (res.ok) {
-        showToast(`User ${username} deleted successfully`, 'success');
-        loadUsers();
-      } else {
-        const errorData = await res.json();
-        showToast(errorData.error || 'Failed to delete user', 'error');
-      }
-    } catch (error) {
-      logger.error('AdminUsers', 'Error deleting user:', error);
-      showToast('Failed to delete user', 'error');
-    }
+          if (res.ok) {
+            showToast(`User ${username} deleted successfully`, 'success');
+            loadUsers();
+          } else {
+            const errorData = await res.json();
+            showToast(errorData.error || 'Failed to delete user', 'error');
+          }
+        } catch (error) {
+          logger.error('AdminUsers', 'Error deleting user:', error);
+          showToast('Failed to delete user', 'error');
+        }
+      },
+    });
   };
 
   const resetForm = () => {
@@ -276,6 +285,15 @@ export default function AdminUsers() {
           </table>
         </div>
       </div>
+      <ConfirmDialog
+        isOpen={!!confirmAction}
+        title={confirmAction?.title ?? ''}
+        message={confirmAction?.message ?? ''}
+        confirmLabel="Delete"
+        variant="danger"
+        onConfirm={() => confirmAction?.onConfirm()}
+        onCancel={() => setConfirmAction(null)}
+      />
     </div>
   );
 }

@@ -19,19 +19,19 @@
 .ama-header h1 {
   margin: 0 0 0.35rem 0;
   font-size: 1.6rem;
-  color: #0f172a;
+  color: var(--color-ink-800);
 }
 
 .ama-sub {
   margin: 0;
-  color: #475569;
+  color: var(--color-ink-500);
   font-size: 0.9rem;
   max-width: 64ch;
   line-height: 1.5;
 }
 
 .ama-banner {
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   padding: 0.75rem 1rem;
   font-size: 0.9rem;
   margin-bottom: 1rem;
@@ -50,7 +50,7 @@
   align-items: baseline;
   gap: 0.5rem 0.9rem;
   padding: 0.7rem 1rem;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   margin-bottom: 1.25rem;
   font-size: 0.9rem;
 }
@@ -83,7 +83,7 @@
 
 .ama-sum-server {
   margin-left: auto;
-  color: #475569;
+  color: var(--color-ink-500);
   font-size: 0.8rem;
 }
 
@@ -100,11 +100,11 @@
   display: grid;
   grid-template-columns: 68px 1fr;
   gap: 1rem;
-  background: #ffffff;
+  background: var(--color-paper-50);
   border: 1px solid #e2e8f0;
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   padding: 1.25rem;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  box-shadow: var(--shadow-xs);
 }
 
 .ama-card--muted {
@@ -161,18 +161,18 @@
 .ama-field label {
   font-size: 0.8rem;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--color-ink-700);
 }
 
 .ama-field input[type='text'],
 .ama-field input[type='number'],
 .ama-field textarea {
   border: 1px solid #cbd5e1;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   padding: 0.55rem 0.7rem;
   font-size: 0.95rem;
-  color: #0f172a;
-  background: #ffffff;
+  color: var(--color-ink-800);
+  background: var(--color-paper-50);
   font-family: inherit;
 }
 
@@ -202,9 +202,9 @@
   width: 40px;
   height: 38px;
   border: 1px solid #cbd5e1;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   padding: 2px;
-  background: #ffffff;
+  background: var(--color-paper-50);
   cursor: pointer;
 }
 
@@ -242,15 +242,15 @@
 .ama-new {
   margin-top: 2rem;
   padding: 1.25rem;
-  background: #ffffff;
+  background: var(--color-paper-50);
   border: 1px dashed #cbd5e1;
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
 }
 
 .ama-new h2 {
   margin: 0 0 0.75rem 0;
   font-size: 1rem;
-  color: #0f172a;
+  color: var(--color-ink-800);
 }
 
 .ama-new-row {
@@ -270,21 +270,21 @@
   position: sticky;
   bottom: 0.75rem;
   margin-top: 1.5rem;
-  background: #1e293b;
+  background: var(--color-ink-700);
   color: #e2e8f0;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   padding: 0.65rem 1rem;
   font-size: 0.85rem;
-  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.25);
+  box-shadow: var(--shadow-xl);
 }
 
 .required {
-  color: #dc2626;
+  color: var(--color-error);
   margin-left: 0.15rem;
 }
 
 .field-description {
-  color: #475569;
+  color: var(--color-ink-500);
   font-size: 0.75rem;
   line-height: 1.4;
 }

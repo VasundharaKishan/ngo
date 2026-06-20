@@ -6,14 +6,14 @@
 .about-container {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0 var(--space-8);
 }
 
 /* Hero */
 .about-hero {
-  background: linear-gradient(135deg, #2a3da8 0%, #1e3a8a 60%, #312e81 100%);
-  color: white;
-  padding: 5rem 2rem 4rem;
+  background: linear-gradient(135deg, var(--color-trust-800) 0%, var(--color-trust-900) 60%, #312e81 100%);
+  color: var(--text-inverse);
+  padding: var(--space-20) var(--space-8) var(--space-16);
   text-align: center;
 }
 
@@ -38,68 +38,68 @@
 
 /* Shared section styles */
 .about-section {
-  padding: 4rem 0;
+  padding: var(--space-16) 0;
 }
 
 .section-title {
   font-size: 2rem;
   font-weight: 800;
-  color: #1e293b;
+  color: var(--color-ink-800);
   text-align: center;
   margin: 0 0 0.75rem;
 }
 
 .section-subtitle {
   font-size: 1.05rem;
-  color: #475569;
+  color: var(--color-ink-500);
   text-align: center;
-  margin: 0 0 3rem;
+  margin: 0 0 var(--space-12);
 }
 
 /* Mission grid */
 .about-mission {
-  background: #f8fafc;
+  background: var(--color-paper-100);
 }
 
 .mission-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
+  gap: var(--space-6);
 }
 
 .mission-card {
-  background: white;
-  border-radius: 16px;
-  padding: 2rem;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-  border: 1px solid #e2e8f0;
+  background: var(--color-paper-50);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-8);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-paper-300);
 }
 
 .mission-icon {
   font-size: 2.5rem;
   display: block;
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-4);
 }
 
 .mission-card h2 {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--color-ink-800);
   margin: 0 0 0.75rem;
 }
 
 .mission-card p {
   font-size: 0.95rem;
-  color: #475569;
+  color: var(--color-ink-500);
   line-height: 1.7;
   margin: 0;
 }
 
 /* CTA section */
 .about-cta {
-  background: linear-gradient(135deg, #2a3da8 0%, #1e3a8a 100%);
-  color: white;
-  padding: 4rem 0;
+  background: linear-gradient(135deg, var(--color-trust-800) 0%, var(--color-trust-900) 100%);
+  color: var(--text-inverse);
+  padding: var(--space-16) 0;
   text-align: center;
 }
 
@@ -112,48 +112,48 @@
 .about-cta p {
   font-size: 1.1rem;
   opacity: 0.9;
-  margin: 0 0 2rem;
+  margin: 0 0 var(--space-8);
 }
 
 .about-cta-buttons {
   display: flex;
-  gap: 1rem;
+  gap: var(--space-4);
   justify-content: center;
   flex-wrap: wrap;
 }
 
 .btn-about-primary {
-  padding: 0.875rem 2rem;
-  background: white;
-  color: #2a3da8;
-  border-radius: 10px;
+  padding: 0.875rem var(--space-8);
+  background: var(--color-paper-50);
+  color: var(--color-trust-800);
+  border-radius: var(--radius-xl);
   font-weight: 700;
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: all var(--transition-base);
   font-size: 1rem;
 }
 
 .btn-about-primary:hover {
-  background: #f0f4ff;
+  background: var(--color-trust-50);
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
 }
 
 .btn-about-secondary {
-  padding: 0.875rem 2rem;
+  padding: 0.875rem var(--space-8);
   background: transparent;
-  color: white;
+  color: var(--text-inverse);
   border: 2px solid rgba(255, 255, 255, 0.6);
-  border-radius: 10px;
+  border-radius: var(--radius-xl);
   font-weight: 700;
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: all var(--transition-base);
   font-size: 1rem;
 }
 
 .btn-about-secondary:hover {
   background: rgba(255, 255, 255, 0.15);
-  border-color: white;
+  border-color: var(--color-paper-50);
   transform: translateY(-2px);
 }
 

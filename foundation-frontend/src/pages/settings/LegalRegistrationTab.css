@@ -4,7 +4,7 @@
 .legal-reg-tab .tab-description {
   margin-top: -0.25rem;
   margin-bottom: 1.25rem;
-  color: #555;
+  color: var(--color-ink-500);
   max-width: 64ch;
   font-size: 0.9rem;
 }
@@ -16,7 +16,7 @@
 }
 
 .legal-reg-tab .status-card {
-  border: 1.5px solid #e5e7eb;
+  border: 1.5px solid var(--color-paper-300);
   border-radius: 10px;
   padding: 0.9rem 1rem;
   cursor: pointer;
@@ -24,7 +24,7 @@
   gap: 0.75rem;
   align-items: flex-start;
   transition: border-color 120ms ease, background 120ms ease;
-  background: #fff;
+  background: var(--color-paper-50);
 }
 
 .legal-reg-tab .status-card:hover {
@@ -32,26 +32,26 @@
 }
 
 .legal-reg-tab .status-card.selected {
-  border-color: #1e40af;
+  border-color: var(--color-trust-800);
   background: #f5f8ff;
   box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.08);
 }
 
 .legal-reg-tab .status-card input[type='radio'] {
   margin-top: 0.2rem;
-  accent-color: #1e40af;
+  accent-color: var(--color-trust-800);
 }
 
 .legal-reg-tab .status-card-body strong {
   display: block;
   font-size: 0.95rem;
   margin-bottom: 0.2rem;
-  color: #111827;
+  color: var(--text-primary);
 }
 
 .legal-reg-tab .status-card-body p {
   margin: 0;
-  color: #4b5563;
+  color: var(--text-secondary);
   font-size: 0.82rem;
   line-height: 1.35;
 }
@@ -60,8 +60,8 @@
   margin-top: 1rem;
   padding: 0.75rem 1rem;
   background: #fef3c7;
-  border: 1px solid #f59e0b;
-  border-radius: 8px;
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-lg);
   color: #78350f;
   font-size: 0.88rem;
 }
@@ -78,8 +78,8 @@
 
 .legal-reg-tab .form-group input:disabled,
 .legal-reg-tab .form-group textarea:disabled {
-  background: #f3f4f6;
-  color: #9ca3af;
+  background: var(--bg-tertiary);
+  color: var(--text-muted);
   cursor: not-allowed;
 }
 
@@ -88,9 +88,9 @@
   margin-left: 0.5rem;
   padding: 0.1rem 0.4rem;
   font-size: 0.7rem;
-  background: #e5e7eb;
-  color: #6b7280;
-  border-radius: 4px;
+  background: var(--color-paper-300);
+  color: var(--text-tertiary);
+  border-radius: var(--radius-sm);
   vertical-align: middle;
   font-weight: 500;
 }
@@ -98,15 +98,15 @@
 .legal-reg-tab .pages-affected {
   margin-top: 1.5rem;
   padding: 1rem 1.2rem;
-  background: #f9fafb;
-  border: 1px dashed #d1d5db;
+  background: var(--bg-secondary);
+  border: 1px dashed var(--color-paper-400);
   border-radius: 10px;
 }
 
 .legal-reg-tab .pages-affected h4 {
   margin: 0 0 0.5rem 0;
   font-size: 0.9rem;
-  color: #374151;
+  color: var(--color-ink-600);
 }
 
 .legal-reg-tab .pages-affected ul {
@@ -114,11 +114,11 @@
   padding-left: 1.2rem;
   columns: 2;
   font-size: 0.85rem;
-  color: #4b5563;
+  color: var(--text-secondary);
 }
 
 .legal-reg-tab .pages-affected small {
-  color: #6b7280;
+  color: var(--text-tertiary);
   font-size: 0.78rem;
 }
 

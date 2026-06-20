@@ -69,7 +69,7 @@ export default function AdminHomepage() {
   const [sections, setSections] = useState<HomeSection[]>([]);
   const [editingConfig, setEditingConfig] = useState<{ [key: string]: string }>({});
   const [confirmAction, setConfirmAction] = useState<{
-    title: string; message: string; onConfirm: () => void;
+    title: string; message: string; onConfirm: () => void; confirmLabel?: string; variant?: 'danger' | 'warning' | 'info';
   } | null>(null);
 
   useEffect(() => {
@@ -269,6 +269,8 @@ export default function AdminHomepage() {
     setConfirmAction({
       title: 'Remove image',
       message: 'Remove this image from storage?',
+      confirmLabel: 'Remove',
+      variant: 'warning',
       onConfirm: async () => {
         setConfirmAction(null);
         try {
@@ -293,22 +295,29 @@ export default function AdminHomepage() {
     });
   };
 
-  const deleteSlide = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this slide?')) return;
+  const deleteSlide = (id: string) => {
+    setConfirmAction({
+      title: 'Delete slide',
+      message: 'Are you sure you want to delete this slide?',
+      confirmLabel: 'Delete',
+      variant: 'danger',
+      onConfirm: async () => {
+        setConfirmAction(null);
+        try {
+          const response = await authFetch(`${API_BASE_URL}/admin/hero-slides/${id}`, {
+            method: 'DELETE'
+          });
 
-    try {
-      const response = await authFetch(`${API_BASE_URL}/admin/hero-slides/${id}`, {
-        method: 'DELETE'
-      });
+          if (!response.ok) throw new Error('Failed to delete slide');
 
-      if (!response.ok) throw new Error('Failed to delete slide');
-
-      showToast('Slide deleted successfully', 'success');
-      await loadSlides();
-    } catch (error) {
-      logger.error('AdminHomepage', 'Error deleting slide:', error);
-      showToast('Failed to delete slide', 'error');
-    }
+          showToast('Slide deleted successfully', 'success');
+          await loadSlides();
+        } catch (error) {
+          logger.error('AdminHomepage', 'Error deleting slide:', error);
+          showToast('Failed to delete slide', 'error');
+        }
+      },
+    });
   };
 
   // ========== HOME SECTIONS FUNCTIONS ==========
@@ -744,8 +753,8 @@ export default function AdminHomepage() {
         isOpen={!!confirmAction}
         title={confirmAction?.title ?? ''}
         message={confirmAction?.message ?? ''}
-        confirmLabel="Remove"
-        variant="warning"
+        confirmLabel={confirmAction?.confirmLabel ?? 'Confirm'}
+        variant={confirmAction?.variant ?? 'danger'}
         onConfirm={() => confirmAction?.onConfirm()}
         onCancel={() => setConfirmAction(null)}
       />

@@ -53,7 +53,7 @@ export default function ForgotPassword() {
 
         <form onSubmit={handleSubmit} className="forgot-password-form">
           {error && (
-            <div className="error-message" data-testid="forgot-password-error">
+            <div id="forgot-email-error" className="error-message" data-testid="forgot-password-error">
               <RiAlertLine style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> {error}
             </div>
           )}
@@ -65,8 +65,9 @@ export default function ForgotPassword() {
           ) : (
             <>
               <div className="form-group">
-                <label>Email Address</label>
+                <label htmlFor="forgot-email">Email Address</label>
                 <input
+                  id="forgot-email"
                   type="email"
                   value={email}
                   data-testid="forgot-password-email"
@@ -74,6 +75,8 @@ export default function ForgotPassword() {
                   placeholder="Enter your email address"
                   required
                   autoFocus
+                  aria-invalid={!!error}
+                  aria-describedby={error ? 'forgot-email-error' : undefined}
                 />
               </div>
 

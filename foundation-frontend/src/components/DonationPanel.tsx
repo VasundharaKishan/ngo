@@ -58,7 +58,7 @@ export default function DonationPanel() {
 
   const [selectedAmountRupees, setSelectedAmountRupees] = useState<number | null>(null);
   const [customAmount, setCustomAmount] = useState('');
-  const [isMonthly, setIsMonthly] = useState(false);
+  const [isMonthly] = useState(false);
 
   /* Use defaultAmount once loaded, only if user hasn't selected yet */
   const effectiveSelected = selectedAmountRupees ?? defaultAmountRupees;

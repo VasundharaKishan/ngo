@@ -5,12 +5,14 @@ import ConfirmDialog from '../components/ConfirmDialog';
 import { fetchDonationsPaginated, refundDonation, authFetch, API_BASE_URL, type DonationPageResponse } from '../api';
 import { usePaginationParams } from '../hooks/usePaginationParams';
 import { useDebounce } from '../hooks/useDebounce';
+import { useToast } from '../components/ToastProvider';
 import { formatDateTime } from '../utils/dateUtils';
 import { TIMING, API_ENDPOINTS } from '../config/constants';
 import logger from '../utils/logger';
 import './Donations.css';
 
 export default function Donations() {
+  const showToast = useToast();
   const [data, setData] = useState<DonationPageResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -57,12 +59,12 @@ export default function Donations() {
         setRefundingId(donationId);
         try {
           await refundDonation(donationId, 'Admin initiated refund');
-          alert('Refund processed successfully.');
+          showToast('Refund processed successfully.', 'success');
           await loadDonations();
         } catch (err) {
           const message = err instanceof Error ? err.message : 'An unexpected error occurred';
           logger.error('Donations', 'Refund failed:', err);
-          alert(`Refund failed: ${message}`);
+          showToast('Refund failed: ' + message, 'error');
         } finally {
           setRefundingId(null);
         }
@@ -94,7 +96,7 @@ export default function Donations() {
     } catch (err) {
       const message = err instanceof Error ? err.message : 'An unexpected error occurred';
       logger.error('Donations', 'Receipt download failed:', err);
-      alert(`Receipt download failed: ${message}`);
+      showToast('Receipt download failed: ' + message, 'error');
     }
   };
 

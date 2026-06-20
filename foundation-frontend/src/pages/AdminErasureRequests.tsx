@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { authFetch, API_BASE_URL } from '../api';
 import { formatDateTime } from '../utils/dateUtils';
 import ConfirmDialog from '../components/ConfirmDialog';
+import { useToast } from '../components/ToastProvider';
 import logger from '../utils/logger';
 import './Donations.css';
 
@@ -24,6 +25,7 @@ interface ErasurePageResponse {
 }
 
 export default function AdminErasureRequests() {
+  const showToast = useToast();
   const [data, setData] = useState<ErasurePageResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -72,12 +74,12 @@ export default function AdminErasureRequests() {
             const errorData = await response.json().catch(() => null);
             throw new Error(errorData?.message || 'Failed to process erasure request');
           }
-          alert('Erasure request processed successfully. Donor data has been anonymized.');
+          showToast('Erasure request processed successfully. Donor data has been anonymized.', 'success');
           await loadRequests();
         } catch (err) {
           const message = err instanceof Error ? err.message : 'An unexpected error occurred';
           logger.error('AdminErasureRequests', 'Process failed:', err);
-          alert(`Failed to process erasure request: ${message}`);
+          showToast('Failed to process erasure request: ' + message, 'error');
         } finally {
           setProcessingId(null);
         }

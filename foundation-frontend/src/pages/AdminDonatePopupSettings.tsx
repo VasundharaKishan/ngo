@@ -168,7 +168,7 @@ export default function AdminDonatePopupSettings() {
               disabled={saving}
               style={{
                 padding: '0.875rem 2rem',
-                background: selectedCampaignId === (settings?.spotlightCampaignId || '') ? '#94a3b8' : '#667eea',
+                background: selectedCampaignId === (settings?.spotlightCampaignId || '') ? 'var(--color-ink-300)' : 'var(--color-trust-500)',
                 color: 'white',
                 border: 'none',
                 borderRadius: '8px',

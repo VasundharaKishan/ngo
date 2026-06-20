@@ -1,13 +1,13 @@
 .legal-page {
-  padding: 4rem 0;
+  padding: var(--space-16) 0;
   min-height: 70vh;
-  background: linear-gradient(to bottom, #ffffff 0%, #f8fafc 100%);
+  background: linear-gradient(to bottom, var(--color-paper-50) 0%, var(--color-paper-100) 100%);
 }
 
 .legal-page h1 {
   font-size: 3rem;
-  color: #1e293b;
-  margin-bottom: 1rem;
+  color: var(--color-ink-800);
+  margin-bottom: var(--space-4);
   font-weight: 800;
   letter-spacing: -0.5px;
   text-align: center;
@@ -15,52 +15,52 @@
 
 .last-updated {
   text-align: center;
-  color: #475569;
+  color: var(--color-ink-500);
   font-size: 1rem;
-  margin-bottom: 3rem;
+  margin-bottom: var(--space-12);
   font-style: italic;
 }
 
 .legal-page section {
-  margin-bottom: 3rem;
-  background: white;
-  padding: 2.5rem;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  margin-bottom: var(--space-12);
+  background: var(--color-paper-50);
+  padding: var(--space-10);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-md);
 }
 
 .legal-page h2 {
   font-size: 1.75rem;
-  color: #667eea;
-  margin-bottom: 1.5rem;
+  color: var(--color-trust-600);
+  margin-bottom: var(--space-6);
   font-weight: 700;
-  border-bottom: 2px solid #e2e8f0;
-  padding-bottom: 0.75rem;
+  border-bottom: 2px solid var(--color-paper-300);
+  padding-bottom: var(--space-3);
 }
 
 .legal-page h3 {
   font-size: 1.25rem;
-  color: #1e293b;
-  margin: 2rem 0 1rem;
+  color: var(--color-ink-800);
+  margin: var(--space-8) 0 var(--space-4);
   font-weight: 700;
 }
 
 .legal-page p {
-  color: #475569;
+  color: var(--color-ink-500);
   line-height: 1.8;
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--space-6);
   font-size: 1.05rem;
 }
 
 .legal-page ul {
-  margin: 1.5rem 0;
-  padding-left: 2rem;
+  margin: var(--space-6) 0;
+  padding-left: var(--space-8);
 }
 
 .legal-page ul li {
-  color: #475569;
+  color: var(--color-ink-500);
   line-height: 1.8;
-  margin-bottom: 0.75rem;
+  margin-bottom: var(--space-3);
   font-size: 1.05rem;
 }
 
@@ -70,7 +70,7 @@
   }
 
   .legal-page section {
-    padding: 1.5rem;
+    padding: var(--space-6);
   }
 
   .legal-page h2 {

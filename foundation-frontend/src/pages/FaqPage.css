@@ -2,7 +2,7 @@
    built on native <details>/<summary> for accessibility. */
 
 .faq-page {
-  background: #ffffff;
+  background: var(--color-paper-50);
   min-height: 100vh;
 }
 
@@ -14,7 +14,7 @@
 
 .faq-hero {
   background: linear-gradient(135deg, #1e3a8a 0%, #312e81 100%);
-  color: #ffffff;
+  color: var(--color-paper-50);
   padding: 3.5rem 0 3rem;
 }
 
@@ -33,7 +33,7 @@
 }
 
 .faq-hero-sub a {
-  color: #ffffff;
+  color: var(--color-paper-50);
   text-decoration: underline;
   text-underline-offset: 2px;
 }
@@ -105,7 +105,7 @@
 }
 
 .faq-item {
-  background: #ffffff;
+  background: var(--color-paper-50);
   border: 1px solid #e2e8f0;
   border-radius: 10px;
   overflow: hidden;
@@ -149,7 +149,7 @@
 }
 
 .faq-summary:focus-visible {
-  outline: 2px solid #3b82f6;
+  outline: 2px solid var(--color-trust-500);
   outline-offset: -2px;
 }
 
@@ -161,7 +161,7 @@
   flex: 0 0 auto;
   width: 28px;
   height: 28px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: #eff6ff;
   color: #1e3a8a;
   display: inline-flex;
@@ -179,7 +179,7 @@
 .faq-details[open] .faq-summary-icon {
   transform: rotate(45deg);
   background: #1e3a8a;
-  color: #ffffff;
+  color: var(--color-paper-50);
 }
 
 .faq-answer {

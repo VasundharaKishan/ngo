@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authFetch } from '../utils/auth';
 import { API_BASE_URL } from '../config/constants';
+import ConfirmDialog from '../components/ConfirmDialog';
 import '../styles/AdminCMS.css';
 
 interface Testimonial {
@@ -52,6 +53,9 @@ function AdminCMS() {
   const [error, setError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<{
+    title: string; message: string; onConfirm: () => void;
+  } | null>(null);
 
   // Check authentication
   useEffect(() => {
@@ -97,20 +101,25 @@ function AdminCMS() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this item?')) return;
+  const handleDelete = (id: string) => {
+    setConfirmAction({
+      title: 'Delete item',
+      message: 'Are you sure you want to delete this item?',
+      onConfirm: async () => {
+        setConfirmAction(null);
+        try {
+          const response = await authFetch(`${API_BASE_URL}/admin/cms/${activeTab}/${id}`, {
+            method: 'DELETE',
+          });
 
-    try {
-      const response = await authFetch(`${API_BASE_URL}/admin/cms/${activeTab}/${id}`, {
-        method: 'DELETE',
-      });
+          if (!response.ok) throw new Error('Failed to delete');
 
-      if (!response.ok) throw new Error('Failed to delete');
-
-      await loadContent();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete');
-    }
+          await loadContent();
+        } catch (err) {
+          setError(err instanceof Error ? err.message : 'Failed to delete');
+        }
+      },
+    });
   };
 
   const handleSave = async (data: any, id?: string) => {
@@ -426,6 +435,15 @@ function AdminCMS() {
         {activeTab === 'social-media' && renderSocialMedia()}
         {activeTab === 'carousel' && renderCarousel()}
       </div>
+      <ConfirmDialog
+        isOpen={!!confirmAction}
+        title={confirmAction?.title ?? ''}
+        message={confirmAction?.message ?? ''}
+        confirmLabel="Delete"
+        variant="danger"
+        onConfirm={() => confirmAction?.onConfirm()}
+        onCancel={() => setConfirmAction(null)}
+      />
     </div>
   );
 }

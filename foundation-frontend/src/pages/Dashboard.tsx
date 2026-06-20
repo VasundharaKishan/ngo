@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { RiDashboardLine, RiMoneyDollarCircleLine, RiGroupLine, RiCalendarLine, RiMegaphoneLine } from 'react-icons/ri';
 import { API_BASE_URL } from '../api';
 import { authFetch } from '../utils/auth';
-import { formatCurrency, calculateProgress } from '../utils/currency';
+import { formatCurrency } from '../utils/currency';
 import logger from '../utils/logger';
 
 interface DashboardStats {

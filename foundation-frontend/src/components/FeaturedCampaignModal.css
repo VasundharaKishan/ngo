@@ -130,7 +130,7 @@
 
 .modal-org-logo {
   font-weight: 700;
-  color: #667eea;
+  color: var(--color-trust-500);
   font-size: 1rem;
 }
 
@@ -198,7 +198,7 @@
 
 .modal-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(90deg, var(--color-trust-500) 0%, var(--color-trust-800) 100%);
   border-radius: 50px;
   transition: width 0.8s ease;
 }
@@ -265,12 +265,12 @@
 
 .modal-btn-secondary {
   background: white;
-  color: #667eea;
-  border: 2px solid #667eea;
+  color: var(--color-trust-500);
+  border: 2px solid var(--color-trust-500);
 }
 
 .modal-btn-secondary:hover {
-  background: #667eea;
+  background: var(--color-trust-500);
   color: white;
 }
 
@@ -299,7 +299,7 @@
 .modal-link-btn {
   background: none;
   border: none;
-  color: #667eea;
+  color: var(--color-trust-500);
   font-weight: 700;
   text-decoration: underline;
   cursor: pointer;
@@ -309,7 +309,7 @@
 }
 
 .modal-link-btn:hover {
-  color: #764ba2;
+  color: var(--color-trust-800);
 }
 
 .modal-campaign-select {
@@ -326,12 +326,12 @@
 }
 
 .modal-campaign-select:hover {
-  border-color: #667eea;
+  border-color: var(--color-trust-500);
 }
 
 .modal-campaign-select:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--color-trust-500);
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 

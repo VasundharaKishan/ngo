@@ -255,7 +255,7 @@ export default function AdminLayout() {
       setCurrentUser(user);
       setIsAdmin(user.role === 'ADMIN');
     } catch {
-      setCurrentUser({ fullName: '', role: '', username: '' });
+      setCurrentUser({ fullName: '', role: '', email: '', username: '' });
     }
   }, []);
 
