@@ -58,12 +58,12 @@ export default function CampaignList() {
     loadData();
   }, [loadData]);
 
-  // Re-observe new campaign cards whenever the page changes
+  // Re-observe new campaign cards whenever the visible set changes
   useEffect(() => {
     if (loading) return;
     const timer = setTimeout(() => refreshScrollAnimations(), 50);
     return () => clearTimeout(timer);
-  }, [currentPage, loading]);
+  }, [currentPage, loading, searchQuery, selectedCategory, selectedBadge]);
 
   // Extract unique categories from loaded campaigns
   const categories = useMemo(() => {
