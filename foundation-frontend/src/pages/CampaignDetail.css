@@ -28,8 +28,8 @@
   padding-top: 1.5rem;
   border-bottom: 3px solid transparent;
   background: linear-gradient(var(--color-paper-50), var(--color-paper-50)) padding-box,
-              linear-gradient(to right, var(--color-trust-500), var(--color-trust-800)) border-box;
-  border-image: linear-gradient(to right, var(--color-trust-500), var(--color-trust-800)) 1;
+              linear-gradient(to right, var(--color-saffron-500), var(--color-saffron-600)) border-box;
+  border-image: linear-gradient(to right, var(--color-saffron-500), var(--color-saffron-600)) 1;
 }
 
 .detail-header h1 {
@@ -85,7 +85,7 @@
   left: 0;
   right: 0;
   height: 8px;
-  background: linear-gradient(to right, var(--color-trust-500), var(--color-trust-800));
+  background: linear-gradient(to right, var(--color-saffron-500), var(--color-saffron-600));
 }
 
 .donation-box h3 {
@@ -114,7 +114,7 @@
 .amount {
   font-size: 2rem;
   font-weight: 800;
-  background: linear-gradient(135deg, var(--color-trust-500) 0%, var(--color-trust-800) 100%);
+  background: linear-gradient(135deg, var(--color-saffron-500) 0%, var(--color-saffron-600) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -134,28 +134,31 @@
 }
 
 .btn-donate-large {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
   width: 100%;
-  background: var(--color-trust-800);
-  color: var(--color-paper-50);
+  background: var(--color-saffron-500);
+  color: var(--color-white);
   padding: 1rem;
-  border-radius: var(--radius-full);
   text-decoration: none;
   font-weight: 700;
   font-size: 1.125rem;
   text-align: center;
   transition: all var(--transition-slow);
   border: none;
-  box-shadow: 0 6px 20px rgba(42, 61, 168, 0.4);
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   border-radius: var(--radius-2xl);
 }
 
 .btn-donate-large:hover {
   transform: translateY(-3px);
   box-shadow: 0 8px 30px rgba(245, 158, 11, 0.5);
-  background: var(--color-primary);
+  background: var(--color-saffron-600);
+  color: var(--color-white);
 }
 
 .secure-note {
@@ -260,7 +263,7 @@
 }
 
 .back-link a {
-  color: var(--color-primary, #2a3da8);
+  color: var(--color-saffron-600);
   text-decoration: none;
   font-weight: 700;
   transition: all var(--transition-slow);
@@ -271,7 +274,7 @@
 }
 
 .back-link a:hover {
-  color: var(--color-trust-800);
+  color: var(--color-saffron-500);
   transform: translateX(-4px);
 }
 

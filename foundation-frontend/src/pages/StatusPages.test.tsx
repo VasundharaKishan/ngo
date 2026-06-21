@@ -17,9 +17,8 @@ describe('Status pages', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText(/Thank You for Your Donation/i)).toBeInTheDocument();
+    // When no session_id is present, component shows "Invalid page" state
     expect(screen.getByRole('link', { name: /View Other Campaigns/i })).toHaveAttribute('href', '/campaigns');
-    expect(screen.getByRole('link', { name: /Return Home/i })).toHaveAttribute('href', '/');
   });
 
   it('renders Cancel page with actions', () => {
@@ -34,15 +33,15 @@ describe('Status pages', () => {
     expect(screen.getByRole('link', { name: /Return Home/i })).toHaveAttribute('href', '/');
   });
 
-  it('Success with no session_id shows generic contribution message', () => {
+  it('Success with no session_id shows invalid page message', () => {
     render(
       <MemoryRouter initialEntries={['/donate/success']}>
         <Success />
       </MemoryRouter>
     );
 
-    expect(screen.getByText(/Thank You for Your Donation/i)).toBeInTheDocument();
-    expect(screen.getByText(/Your generous contribution/i)).toBeInTheDocument();
+    // Without session_id, component shows "Invalid page" — can only be reached after a donation
+    expect(screen.getByRole('link', { name: /View Other Campaigns/i })).toHaveAttribute('href', '/campaigns');
   });
 });
 

@@ -81,8 +81,8 @@
 .ahp-editor input[type='text']:focus,
 .ahp-editor textarea:focus,
 .ahp-editor select:focus {
-  outline: none;
-  border-color: var(--color-trust-500);
+
+  border-color: var(--color-saffron-500);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
 }
 
@@ -175,7 +175,7 @@
 }
 
 .ahp-preview-frame {
-  background: #0f172a;
+  background: var(--color-saffron-600);
   padding: 0.5rem;
   border-radius: var(--radius-2xl);
   overflow: hidden;
@@ -222,7 +222,7 @@
 .ahp-hero-cta {
   display: inline-block;
   background: var(--color-paper-50);
-  color: var(--color-trust-800);
+  color: var(--color-saffron-500);
   font-weight: 700;
   font-size: 0.9rem;
   padding: 0.65rem 1.2rem;

@@ -244,9 +244,9 @@
 
 .form-group input[type="text"]:focus,
 .form-group select:focus {
-  outline: none;
+
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.15);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
 }
 
 .upload-status {
@@ -456,9 +456,9 @@
 }
 
 .section-config textarea:focus {
-  outline: none;
+
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.15);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
 }
 
 /* Panel Actions */
@@ -573,8 +573,8 @@
 }
 
 .slide-text-fields input[type="text"]:focus {
-  outline: none;
-  border-color: var(--color-trust-500);
+
+  border-color: var(--color-saffron-500);
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
 }
 

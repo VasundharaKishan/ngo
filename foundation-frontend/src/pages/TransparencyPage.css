@@ -15,7 +15,7 @@
 /* ---------- hero ---------- */
 
 .tx-hero {
-  background: linear-gradient(135deg, #0f172a 0%, var(--color-trust-900) 100%);
+  background: linear-gradient(135deg, var(--color-saffron-600) 0%, var(--color-saffron-500) 100%);
   color: var(--color-paper-50);
   padding: 3.5rem 0 3rem;
 }
@@ -25,7 +25,7 @@
   text-transform: uppercase;
   letter-spacing: 0.12em;
   font-size: 0.78rem;
-  color: var(--color-trust-300);
+  color: var(--color-saffron-300);
   font-weight: 600;
 }
 
@@ -86,8 +86,8 @@
 }
 
 .tx-status--applied {
-  border-color: var(--color-trust-300);
-  background: var(--color-trust-50);
+  border-color: var(--color-saffron-300);
+  background: var(--color-saffron-50);
 }
 
 .tx-status--approved {
@@ -126,8 +126,8 @@
 }
 
 .tx-status-pill--applied {
-  background: var(--color-trust-200);
-  color: var(--color-trust-900);
+  background: var(--color-saffron-200);
+  color: var(--color-saffron-500);
 }
 
 .tx-status-pill--approved {
@@ -258,7 +258,7 @@
 }
 
 .tx-empty a {
-  color: var(--color-trust-900);
+  color: var(--color-saffron-500);
   text-decoration: underline;
 }
 
@@ -299,7 +299,7 @@
 }
 
 .tx-doc-item:hover {
-  border-color: var(--color-trust-300);
+  border-color: var(--color-saffron-300);
   box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
 }
 
@@ -314,7 +314,7 @@
 }
 
 .tx-doc-link:focus-visible {
-  outline: 2px solid var(--color-trust-500);
+  outline: 2px solid var(--color-saffron-500);
   outline-offset: -2px;
   border-radius: var(--radius-xl);
 }
@@ -348,7 +348,7 @@
 
 .tx-doc-arrow {
   flex: 0 0 auto;
-  color: var(--color-trust-900);
+  color: var(--color-saffron-500);
   font-size: 1.2rem;
   font-weight: 700;
 }

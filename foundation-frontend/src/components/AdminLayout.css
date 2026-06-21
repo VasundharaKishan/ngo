@@ -25,7 +25,7 @@
   width: 32px;
   height: 32px;
   border: 3px solid var(--color-paper-300, #e5e7eb);
-  border-top-color: var(--color-trust-800, #1e40af);
+  border-top-color: var(--color-saffron-500, #f59e0b);
   border-radius: 50%;
   animation: admin-spin 0.7s linear infinite;
 }
@@ -66,7 +66,7 @@
   width: 2rem;
   height: 2rem;
   border-radius: 0.5rem;
-  background: var(--color-trust-800, #1e40af);
+  background: var(--color-saffron-500, #f59e0b);
   color: var(--color-white, #fff);
   font-size: 0.75rem;
   font-weight: 700;
@@ -213,8 +213,8 @@
 }
 
 .sidebar-nav-item.active {
-  background: var(--color-trust-50, #eff6ff);
-  color: var(--color-trust-800, #1e40af);
+  background: var(--color-saffron-50, #FFF7ED);
+  color: var(--color-saffron-500, #f59e0b);
   font-weight: 600;
 }
 
@@ -227,7 +227,7 @@
 }
 
 .sidebar-nav-item.active .sidebar-nav-icon {
-  color: var(--color-trust-800, #1e40af);
+  color: var(--color-saffron-500, #f59e0b);
 }
 
 .sidebar-nav-badge {
@@ -251,7 +251,7 @@
   height: 2rem;
   border-radius: 50%;
   background: var(--color-saffron-500, #f59e0b);
-  color: var(--color-ink-900, #0b1220);
+  color: var(--color-white);
   font-size: 0.75rem;
   font-weight: 700;
   display: grid;
@@ -386,7 +386,7 @@
   display: block;
   width: 20px;
   height: 2.5px;
-  background: var(--color-trust-800, #1e40af);
+  background: var(--color-saffron-500, #f59e0b);
   border-radius: 2px;
 }
 
@@ -448,7 +448,7 @@
   height: 20px;
   border: 3px solid var(--color-paper-300, #e5e7eb);
   border-radius: 50%;
-  border-top-color: var(--color-trust-800, #1e40af);
+  border-top-color: var(--color-saffron-500, #f59e0b);
   animation: admin-spin 0.8s linear infinite;
 }
 
@@ -458,18 +458,14 @@
   border-width: 4px;
 }
 
-/* Focus ring */
-*:focus-visible {
-  outline: 2px solid var(--color-trust-800, #1e40af);
-  outline-offset: 2px;
-}
+/* Focus ring — handled by accessibility.css */
 
 /* Skip to main content */
 .skip-to-main {
   position: absolute;
   top: -40px;
   left: 0;
-  background: var(--color-trust-800, #1e40af);
+  background: var(--color-saffron-500, #f59e0b);
   color: var(--color-white, #fff);
   padding: 0.5rem 1rem;
   text-decoration: none;

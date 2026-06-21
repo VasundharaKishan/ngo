@@ -3,7 +3,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, var(--color-trust-900) 0%, var(--color-trust-800) 100%);
+  background: linear-gradient(135deg, var(--color-saffron-600) 0%, var(--color-saffron-500) 100%);
   padding: 2rem;
 }
 
@@ -71,14 +71,14 @@
 }
 
 .form-group input:focus {
-  outline: none;
-  border-color: var(--color-trust-800);
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+
+  border-color: var(--color-saffron-500);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
 }
 
 .btn-login {
   padding: 1.25rem;
-  background: linear-gradient(135deg, var(--color-trust-800) 0%, var(--color-trust-900) 100%);
+  background: linear-gradient(135deg, var(--color-saffron-500) 0%, var(--color-saffron-600) 100%);
   color: var(--bg-primary);
   border: none;
   border-radius: var(--radius-xl);
@@ -86,12 +86,12 @@
   font-weight: 700;
   cursor: pointer;
   transition: all var(--transition-slow);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
 }
 
 .btn-login:hover:not(:disabled) {
   transform: translateY(-3px);
-  box-shadow: 0 8px 30px rgba(102, 126, 234, 0.5);
+  box-shadow: 0 8px 30px rgba(245, 158, 11, 0.5);
 }
 
 .btn-login:disabled {
@@ -112,7 +112,7 @@
 }
 
 .forgot-password-link:hover {
-  color: var(--color-trust-800);
+  color: var(--color-saffron-500);
   text-decoration: underline;
 }
 
@@ -146,8 +146,8 @@
   margin-top: 1.5rem;
   padding: 0.875rem;
   background: var(--bg-primary);
-  color: var(--color-trust-800);
-  border: 2px solid var(--color-trust-800);
+  color: var(--color-saffron-500);
+  border: 2px solid var(--color-saffron-500);
   border-radius: var(--radius-xl);
   font-weight: 600;
   cursor: pointer;
@@ -155,7 +155,7 @@
 }
 
 .btn-home:hover {
-  background: var(--color-trust-800);
+  background: var(--color-saffron-600);
   color: var(--bg-primary);
 }
 

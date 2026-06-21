@@ -4,59 +4,50 @@ import Dashboard from './Dashboard';
 import { API_BASE_URL } from '../api';
 
 const mockAuthFetch = vi.fn();
-const mockGetDonatePopupSettings = vi.fn();
 
 vi.mock('../utils/auth', () => ({
   authFetch: (...args: unknown[]) => mockAuthFetch(...args),
 }));
-
-vi.mock('../api', async () => {
-  const actual = await vi.importActual('../api');
-  return {
-    ...actual,
-    getDonatePopupSettings: (...args: unknown[]) => mockGetDonatePopupSettings(...args),
-  };
-});
 
 describe('Admin Dashboard page', () => {
   beforeEach(() => {
     vi.resetAllMocks();
   });
 
-  it('loads campaigns, donations, and spotlight settings then renders summaries', async () => {
-    mockAuthFetch
-      .mockResolvedValueOnce({
-        ok: true,
-        json: () =>
-          Promise.resolve([
-            { id: 'c1', title: 'Water', targetAmount: 2000, currentAmount: 500, active: true, featured: true },
-          ]),
-      })
-      .mockResolvedValueOnce({
-        ok: true,
-        json: () =>
-          Promise.resolve([
-            { id: 'd1', amount: 1000, currency: 'usd', donorName: 'Alice', campaignId: 'c1', campaignTitle: 'Water', status: 'SUCCESS' },
-            { id: 'd2', amount: 500, currency: 'usd', donorName: 'Bob', campaignId: 'c1', campaignTitle: 'Water', status: 'PENDING' },
-          ]),
-      });
+  it('loads dashboard stats and renders summaries', async () => {
+    const statsPayload = {
+      totalRaised: 15000,
+      totalDonations: 2,
+      totalDonors: 2,
+      averageDonation: 7500,
+      activeCampaigns: 1,
+      monthlyRaised: 15000,
+      monthlyDonations: 2,
+      recentDonations: [
+        { id: 'd1', donorName: 'Alice', amount: 1000, currency: 'usd', campaignTitle: 'Water', status: 'SUCCESS', createdAt: '2024-01-01' },
+        { id: 'd2', donorName: 'Bob', amount: 500, currency: 'usd', campaignTitle: 'Water', status: 'PENDING', createdAt: '2024-01-02' },
+      ],
+      topCampaigns: [
+        { id: 'c1', title: 'Water', raised: 15000, target: 200000, donationCount: 2 },
+      ],
+    };
 
-    mockGetDonatePopupSettings.mockResolvedValueOnce({
-      enabled: true,
-      spotlightCampaign: { id: 'c1', title: 'Water' },
+    mockAuthFetch.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: () => Promise.resolve(statsPayload),
     });
 
     render(<Dashboard />);
 
     expect(screen.getByText(/Loading dashboard/)).toBeInTheDocument();
 
-    await waitFor(() => expect(mockAuthFetch).toHaveBeenCalledWith(`${API_BASE_URL}/admin/campaigns`));
-    expect(mockAuthFetch).toHaveBeenCalledWith(`${API_BASE_URL}/admin/donations`);
-    expect(mockGetDonatePopupSettings).toHaveBeenCalled();
+    await waitFor(() =>
+      expect(mockAuthFetch).toHaveBeenCalledWith(`${API_BASE_URL}/admin/dashboard/stats`)
+    );
 
-    expect(await screen.findByText('Total Donations')).toBeInTheDocument();
-    expect(screen.getByText('2')).toBeInTheDocument(); // donation count
-    expect(screen.getByText(/Featured Active/)).toBeInTheDocument();
+    expect(await screen.findByText('Total Raised')).toBeInTheDocument();
+    expect(screen.getByText('Active Campaigns')).toBeInTheDocument();
     expect(screen.getAllByText(/Water/).length).toBeGreaterThanOrEqual(1);
   });
 });

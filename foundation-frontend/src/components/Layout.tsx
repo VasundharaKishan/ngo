@@ -39,10 +39,11 @@ const getSocialIcon = (platform: string) => {
 /* ── Derive a two-line logo name from the full site name ── */
 function splitLogoName(name: string): [string, string] {
   const words = name.trim().split(/\s+/);
-  if (words.length <= 1) return [name, ''];
-  if (words.length === 2) return [words[0], words[1]];
+  if (words.length <= 2) return [name.trim(), 'Foundation'];
   const mid = Math.ceil(words.length / 2);
-  return [words.slice(0, mid).join(' '), words.slice(mid).join(' ')];
+  const line2 = words.slice(mid).join(' ');
+  const suffix = line2.toLowerCase().includes('foundation') ? '' : ' Foundation';
+  return [words.slice(0, mid).join(' '), line2 + suffix];
 }
 
 /* ── Derive initials (up to 2) from site name ── */

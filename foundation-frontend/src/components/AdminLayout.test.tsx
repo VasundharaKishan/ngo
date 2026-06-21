@@ -16,6 +16,16 @@ vi.mock('react-router-dom', async () => {
   };
 });
 
+vi.mock('../contexts/ConfigContext', () => ({
+  useConfig: () => ({ config: {}, loading: false, error: null, refetch: () => {} }),
+  useSiteName: () => 'Test Site',
+  useSiteLogo: () => '',
+  useSiteTagline: () => 'Test tagline',
+  useFeaturedCampaignsCount: () => 3,
+  useCampaignsPerPage: () => 12,
+  ConfigProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 describe('AdminLayout', () => {
   beforeEach(() => {
     vi.resetAllMocks();

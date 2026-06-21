@@ -138,9 +138,9 @@
 .form-group input[type="tel"]:focus,
 .form-group input[type="number"]:focus,
 .form-group textarea:focus {
-  outline: none;
+
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(42, 61, 168, 0.1);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
 }
 
 .form-group input[type="color"] {

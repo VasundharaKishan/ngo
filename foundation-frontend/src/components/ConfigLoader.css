@@ -6,7 +6,7 @@
   min-height: 100vh;
   gap: var(--space-md, 1rem);
   padding: var(--space-2xl, 2rem);
-  background: linear-gradient(135deg, var(--color-trust-500) 0%, var(--color-trust-800) 100%);
+  background: linear-gradient(135deg, var(--color-saffron-500) 0%, var(--color-saffron-600) 100%);
   color: white;
 }
 

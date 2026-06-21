@@ -5,9 +5,9 @@
 
 /* ===== FOCUS INDICATORS ===== */
 
-/* Enhanced focus visible for keyboard navigation */
+/* Enhanced focus visible for keyboard navigation — single authoritative rule */
 *:focus-visible {
-  outline: 3px solid var(--color-primary-600);
+  outline: 3px solid var(--color-saffron-600);
   outline-offset: 2px;
   border-radius: var(--radius-sm);
 }
@@ -41,7 +41,7 @@ select:focus-visible {
   outline: 3px solid var(--color-primary-600);
   outline-offset: 0;
   border-color: var(--color-primary-600);
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.1);
 }
 
 /* ===== COLOR CONTRAST ENHANCEMENTS ===== */
@@ -68,7 +68,7 @@ select:focus-visible {
 /* Button text contrast */
 .btn-primary,
 .modal-btn-primary {
-  background: var(--gradient-accent);
+  background: var(--color-saffron-500);
   color: var(--color-white);
   font-weight: var(--font-weight-semibold);
 }

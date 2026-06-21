@@ -98,11 +98,15 @@ describe('AdminContactSettings', () => {
   it('removes a location with confirmation', async () => {
     localStorage.setItem('adminUser', JSON.stringify({ username: 'admin' }));
     mockAuthFetch.mockResolvedValue({ json: async () => sampleContact });
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
     renderWithRouter();
     await screen.findByDisplayValue(sampleContact.email);
     const removeBtn = screen.getByRole('button', { name: /Remove/i });
     fireEvent.click(removeBtn);
+
+    // Wait for ConfirmDialog to appear and click the confirm button
+    const confirmBtn = await screen.findByTestId('confirm-dialog-confirm');
+    fireEvent.click(confirmBtn);
+
     await waitFor(() => expect(screen.queryByDisplayValue('Ireland')).toBeNull());
   });
 

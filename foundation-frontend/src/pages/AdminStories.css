@@ -39,9 +39,9 @@
 }
 
 .as-banner--info {
-  background: var(--color-trust-50);
-  border: 1px solid var(--color-trust-200);
-  color: var(--color-trust-900);
+  background: var(--color-saffron-50);
+  border: 1px solid var(--color-saffron-200);
+  color: var(--color-saffron-500);
 }
 
 .as-list {

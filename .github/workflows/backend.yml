@@ -1,0 +1,35 @@
+name: Backend CI
+
+on:
+  pull_request:
+    paths:
+      - 'foundation-backend/**'
+      - '.github/workflows/backend.yml'
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: maven
+          cache-dependency-path: foundation-backend/pom.xml
+
+      - name: Run tests with coverage
+        working-directory: foundation-backend
+        run: mvn verify -B -q
+
+      - name: Upload JaCoCo report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report
+          path: foundation-backend/target/site/jacoco

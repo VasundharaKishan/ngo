@@ -71,8 +71,8 @@
 
 /* Style variants — soft backgrounds with darker accent border-left for weight */
 .announcement-bar--info {
-  background: #eff6ff;
-  color: #1e3a8a;
+  background: var(--color-saffron-50);
+  color: #f59e0b;
   border-bottom-color: rgba(30, 58, 138, 0.15);
 }
 

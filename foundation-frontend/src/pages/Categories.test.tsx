@@ -24,7 +24,6 @@ describe('Categories page', () => {
   beforeEach(() => {
     mockAuthFetch.mockReset();
     mockToast.mockReset();
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
   });
 
   it('renders categories table after loading', async () => {
@@ -65,6 +64,10 @@ describe('Categories page', () => {
 
     const deleteButton = await screen.findByRole('button', { name: /Delete/i });
     deleteButton.click();
+
+    // Wait for ConfirmDialog to appear and click the confirm button
+    const confirmBtn = await screen.findByTestId('confirm-dialog-confirm');
+    fireEvent.click(confirmBtn);
 
     await waitFor(() =>
       expect(mockAuthFetch).toHaveBeenCalledWith(`${API_BASE_URL}/admin/categories/cat2`, { method: 'DELETE' })

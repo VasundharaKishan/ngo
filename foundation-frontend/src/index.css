@@ -82,19 +82,19 @@ h3, h4, h5, h6 {
 
 button:focus,
 button:focus-visible {
-  outline: 3px solid var(--color-trust-800);
+  outline: 3px solid var(--color-saffron-500);
   outline-offset: 2px;
 }
 
 /* Anchor defaults */
 a {
-  color: var(--color-trust-800);
+  color: var(--color-saffron-500);
   text-decoration: none;
   transition: color var(--transition-fast);
 }
 
 a:hover {
-  color: var(--color-trust-600);
+  color: var(--color-saffron-600);
 }
 
 /* Image defaults */

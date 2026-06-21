@@ -123,12 +123,12 @@
 }
 
 .confirm-dialog-btn--confirm-info {
-  background: var(--color-trust-800, #1e40af);
+  background: var(--color-saffron-500);
   color: #fff;
 }
 
 .confirm-dialog-btn--confirm-info:hover:not(:disabled) {
-  background: var(--color-trust-900, #1e3a8a);
+  background: var(--color-saffron-600);
 }
 
 @media (max-width: 480px) {

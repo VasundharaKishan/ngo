@@ -40,7 +40,7 @@
 }
 
 .toast-info {
-  background: #eef2ff;
-  border-color: #c7d2fe;
-  color: #1e3a8a;
+  background: var(--color-saffron-50);
+  border-color: var(--color-saffron-200);
+  color: var(--color-saffron-500);
 }

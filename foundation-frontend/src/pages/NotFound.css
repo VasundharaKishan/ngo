@@ -13,7 +13,7 @@
   font-weight: 900;
   line-height: 1;
   margin: 0 0 var(--space-2);
-  background: linear-gradient(135deg, var(--color-trust-600) 0%, var(--color-trust-900) 100%);
+  background: linear-gradient(135deg, var(--color-saffron-600) 0%, var(--color-saffron-500) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

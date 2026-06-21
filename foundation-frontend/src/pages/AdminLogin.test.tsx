@@ -59,7 +59,11 @@ describe('AdminLogin', () => {
         expect.objectContaining({ method: 'POST' })
       );
       expect(mockNavigate).toHaveBeenCalledWith('/admin');
-      expect(localStorage.getItem('adminUser')).toContain('admin@example.com');
+      // Login stores { username, fullName, role } — email is NOT stored (JWT is in httpOnly cookie)
+      const adminUser = JSON.parse(localStorage.getItem('adminUser') || '{}');
+      expect(adminUser.username).toBe('admin');
+      expect(adminUser.fullName).toBe('Admin User');
+      expect(adminUser.role).toBe('ADMIN');
       expect(sessionStorage.getItem('admin_session_id')).toBeTruthy();
     });
   });

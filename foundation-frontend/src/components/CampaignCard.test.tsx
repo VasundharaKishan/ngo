@@ -179,7 +179,7 @@ describe('CampaignCard', () => {
     expect(img).toHaveAttribute('alt', 'Test Campaign');
   });
 
-  it('renders image container without img element when imageUrl is absent', () => {
+  it('renders placeholder image when imageUrl is absent', () => {
     const noImage = { ...mockCampaign, imageUrl: undefined };
     const { container } = render(
       <BrowserRouter>
@@ -187,7 +187,10 @@ describe('CampaignCard', () => {
       </BrowserRouter>
     );
     expect(container.querySelector('.card-image-container')).toBeInTheDocument();
-    expect(container.querySelector('.card-image')).not.toBeInTheDocument();
+    // Component renders a placeholder img when imageUrl is absent
+    const img = container.querySelector('.card-image') as HTMLImageElement | null;
+    expect(img).toBeInTheDocument();
+    expect(img?.alt).toBe('Test Campaign');
   });
 
   it('sets loading="lazy" on campaign image', () => {

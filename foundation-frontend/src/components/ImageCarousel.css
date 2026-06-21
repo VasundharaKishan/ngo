@@ -55,7 +55,7 @@
   background: white;
   transform: translateY(-50%) scale(1.1);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-  color: var(--color-trust-500);
+  color: var(--color-saffron-500);
 }
 
 .carousel-btn:active {
