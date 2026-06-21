@@ -19,7 +19,7 @@
 .users-header h1 {
   margin: 0;
   font-size: var(--font-size-3xl);
-  background: linear-gradient(135deg, var(--color-trust-800) 0%, var(--color-trust-900) 100%);
+  background: linear-gradient(135deg, var(--color-saffron-500) 0%, var(--color-saffron-600) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -50,7 +50,7 @@
 }
 
 .btn-back {
-  background: var(--color-trust-800);
+  background: var(--color-saffron-600);
   color: var(--color-paper-50);
 }
 
@@ -72,7 +72,7 @@
 
 .btn-add-user {
   padding: 1rem 2rem;
-  background: linear-gradient(135deg, var(--color-trust-800) 0%, var(--color-trust-900) 100%);
+  background: linear-gradient(135deg, var(--color-saffron-500) 0%, var(--color-saffron-600) 100%);
   color: var(--color-paper-50);
   border: none;
   border-radius: var(--radius-xl);
@@ -84,7 +84,7 @@
 
 .btn-add-user:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 30px rgba(102, 126, 234, 0.5);
+  box-shadow: 0 8px 30px rgba(245, 158, 11, 0.5);
 }
 
 .user-form-container {
@@ -108,8 +108,8 @@
 }
 
 .info-box {
-  background: var(--color-trust-50);
-  border: 1px solid var(--color-trust-200);
+  background: var(--color-saffron-50);
+  border: 1px solid var(--color-saffron-200);
   border-radius: var(--radius-lg);
   padding: 1rem 1.25rem;
   margin: 0.5rem 0;
@@ -117,13 +117,13 @@
 
 .info-box strong {
   display: block;
-  color: var(--color-trust-800);
+  color: var(--color-saffron-500);
   margin-bottom: 0.5rem;
 }
 
 .info-box p {
   margin: 0.5rem 0;
-  color: var(--color-trust-900);
+  color: var(--color-saffron-500);
   font-size: var(--font-size-sm);
 }
 
@@ -156,9 +156,9 @@
 
 .form-group input:focus,
 .form-group select:focus {
-  outline: none;
-  border-color: var(--color-trust-800);
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+
+  border-color: var(--color-saffron-500);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
 }
 
 .checkbox-label {
@@ -222,7 +222,7 @@
 .users-table th {
   text-align: left;
   padding: 1rem;
-  background: linear-gradient(135deg, var(--color-trust-800) 0%, var(--color-trust-900) 100%);
+  background: linear-gradient(135deg, var(--color-saffron-500) 0%, var(--color-saffron-600) 100%);
   color: var(--color-paper-50);
   font-weight: 700;
   font-size: var(--font-size-sm);

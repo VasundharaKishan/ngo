@@ -170,12 +170,7 @@ describe('api.ts authFetch', () => {
     localStorage.clear();
   });
 
-  it('throws when no adminUser in localStorage', async () => {
-    await expect(authFetch('/some-url')).rejects.toThrow('No authentication token found');
-  });
-
-  it('makes authenticated request when adminUser exists', async () => {
-    localStorage.setItem('adminUser', JSON.stringify({ username: 'admin' }));
+  it('makes authenticated request using httpOnly cookies', async () => {
     global.fetch = vi.fn().mockResolvedValueOnce({
       ok: true,
       status: 200,
@@ -189,26 +184,15 @@ describe('api.ts authFetch', () => {
     }));
   });
 
-  it('clears adminUser and redirects on 401 response', async () => {
-    localStorage.setItem('adminUser', JSON.stringify({ username: 'admin' }));
-    global.fetch = vi.fn().mockResolvedValueOnce({
-      ok: false,
-      status: 401,
-    } as Response);
+  it('returns 401 response when server rejects the request', async () => {
+    // authFetch tries refresh on 401; mock both initial 401 and refresh failure
+    global.fetch = vi.fn()
+      .mockResolvedValueOnce({ ok: false, status: 401 } as Response)
+      .mockRejectedValueOnce(new Error('network error')); // refresh attempt fails
 
-    // Mock window.location.href setter
-    const hrefSetter = vi.fn();
-    Object.defineProperty(window, 'location', {
-      value: { href: '' },
-      writable: true,
-    });
-    Object.defineProperty(window.location, 'href', {
-      set: hrefSetter,
-      get: () => '',
-    });
-
-    await expect(authFetch('/api/admin/protected')).rejects.toThrow('Unauthorized');
-    expect(localStorage.getItem('adminUser')).toBeNull();
+    const result = await authFetch('/api/admin/protected');
+    expect(result.ok).toBe(false);
+    expect(result.status).toBe(401);
   });
 });
 

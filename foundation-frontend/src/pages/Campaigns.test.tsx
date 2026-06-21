@@ -4,6 +4,11 @@ import { MemoryRouter } from 'react-router-dom';
 import Campaigns from './Campaigns';
 import { API_BASE_URL } from '../api';
 
+vi.mock('../components/ToastProvider', () => ({
+  useToast: vi.fn(() => vi.fn()),
+  ToastProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 vi.mock('../contexts/ConfigContext', () => ({
   useSiteName: () => 'Test Foundation',
   useConfig: () => ({ config: {}, loading: false, refetch: vi.fn() }),
@@ -74,6 +79,10 @@ describe('Campaigns page', () => {
 
     const deleteButton = await screen.findByRole('button', { name: /Delete/i });
     deleteButton.click();
+
+    // ConfirmDialog opens — click the confirm button to trigger the actual DELETE call
+    const confirmButton = await screen.findByTestId('confirm-dialog-confirm');
+    confirmButton.click();
 
     await waitFor(() =>
       expect(mockAuthFetch).toHaveBeenCalledWith(`${API_BASE_URL}/admin/campaigns/2`, { method: 'DELETE' })

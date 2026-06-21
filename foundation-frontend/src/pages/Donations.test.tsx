@@ -2,6 +2,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import Donations from './Donations';
 
+vi.mock('../components/ToastProvider', () => ({
+  useToast: vi.fn(() => vi.fn()),
+  ToastProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 const mockFetchDonationsPaginated = vi.fn();
 
 vi.mock('../api', () => ({

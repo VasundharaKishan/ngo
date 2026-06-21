@@ -164,12 +164,12 @@
 }
 
 .donation-amount-btn:hover {
-  border-color: var(--color-trust-500);
+  border-color: var(--color-saffron-500);
 }
 
 .donation-amount-btn[aria-pressed="true"] {
   background: var(--color-saffron-500);
-  color: var(--color-ink-900);
+  color: var(--color-white);
   border-color: var(--color-saffron-500);
   box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.18);
 }
@@ -214,7 +214,7 @@
 }
 
 .donation-custom-input-wrap:focus-within {
-  border-color: var(--color-trust-500);
+  border-color: var(--color-saffron-500);
 }
 
 .donation-custom-prefix {
@@ -242,10 +242,10 @@
   margin-top: var(--space-5);
   padding: var(--space-4);
   border-radius: var(--radius-xl);
-  background: var(--color-trust-50);
-  border: 1px solid rgba(59, 130, 246, 0.15);
+  background: var(--color-saffron-50);
+  border: 1px solid rgba(245, 158, 11, 0.15);
   font-size: var(--font-size-sm);
-  color: var(--color-trust-900);
+  color: var(--color-saffron-600);
   line-height: var(--line-height-relaxed);
 }
 
@@ -258,7 +258,7 @@
   margin-top: var(--space-6);
   width: 100%;
   background: var(--color-saffron-500);
-  color: var(--color-ink-900);
+  color: var(--color-white);
   font-weight: var(--font-weight-semibold);
   height: 3rem;
   border-radius: var(--radius-xl);
@@ -272,7 +272,7 @@
 
 .donation-cta-btn:hover {
   background: var(--color-saffron-600);
-  color: var(--color-ink-900);
+  color: var(--color-white);
 }
 
 /* Disclaimer */
@@ -335,7 +335,7 @@
   display: inline-flex;
   margin-top: var(--space-3);
   font-size: var(--font-size-sm);
-  color: var(--color-trust-800);
+  color: var(--color-saffron-500);
   font-weight: var(--font-weight-semibold);
   text-decoration: none;
   transition: color var(--transition-fast);
@@ -347,7 +347,7 @@
 
 /* Quote card */
 .donation-quote-card {
-  background: var(--color-trust-900);
+  background: var(--color-saffron-500);
   color: var(--color-white);
   border-radius: var(--radius-2xl);
   padding: var(--space-5);

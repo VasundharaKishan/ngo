@@ -2,7 +2,19 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import Layout from './Layout';
-import { ConfigProvider } from '../contexts/ConfigContext';
+
+vi.mock('../contexts/ConfigContext', () => ({
+  useConfig: () => ({ config: {}, loading: false, error: null, refetch: () => {} }),
+  useSiteName: () => 'Yugal Savitri Seva',
+  useSiteLogo: () => '',
+  useSiteTagline: () => 'Test tagline',
+  useFeaturedCampaignsCount: () => 3,
+  useCampaignsPerPage: () => 12,
+  ConfigProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
+
+
 
 const mockContactInfo = {
   email: 'info@test.org',
@@ -15,11 +27,9 @@ const fetchMock = vi.fn();
 
 const renderWithProviders = () =>
   render(
-    <ConfigProvider value={{ siteName: 'Test Site', logoUrl: '/logo.png', primaryColor: '#000', secondaryColor: '#000' }}>
-      <MemoryRouter>
-        <Layout />
-      </MemoryRouter>
-    </ConfigProvider>
+    <MemoryRouter>
+      <Layout />
+    </MemoryRouter>
   );
 
 describe('Layout', () => {

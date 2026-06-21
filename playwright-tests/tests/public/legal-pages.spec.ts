@@ -80,14 +80,12 @@ test.describe('Legal pages', () => {
 
     await page.goto('/');
 
-    // Try to find legal links in footer
+    // Navigate to terms page via footer link
     const footer = page.locator('footer');
-    if (await footer.count() > 0) {
-      const termsLink = footer.locator('a[href="/terms"]');
-      if (await termsLink.count() > 0) {
-        await termsLink.click();
-        await expect(page.getByRole('heading', { level: 1, name: 'Terms and Conditions' })).toBeVisible();
-      }
-    }
+    await expect(footer).toBeVisible();
+    const termsLink = footer.locator('a[href="/terms"]');
+    await expect(termsLink).toBeVisible();
+    await termsLink.click();
+    await expect(page.getByRole('heading', { level: 1, name: 'Terms and Conditions' })).toBeVisible();
   });
 });

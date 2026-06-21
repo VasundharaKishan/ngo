@@ -130,7 +130,7 @@
 
 .modal-org-logo {
   font-weight: 700;
-  color: var(--color-trust-500);
+  color: var(--color-saffron-500);
   font-size: 1rem;
 }
 
@@ -198,7 +198,7 @@
 
 .modal-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--color-trust-500) 0%, var(--color-trust-800) 100%);
+  background: linear-gradient(90deg, var(--color-saffron-500) 0%, var(--color-saffron-600) 100%);
   border-radius: 50px;
   transition: width 0.8s ease;
 }
@@ -249,29 +249,29 @@
 }
 
 .modal-btn-primary {
-  background: #2a3da8;
-  color: white;
-  box-shadow: 0 4px 15px rgba(42, 61, 168, 0.4);
+  background: var(--color-saffron-500);
+  color: var(--color-white);
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   border-radius: 1rem;
 }
 
 .modal-btn-primary:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5);
-  background: #f59e0b;
+  background: var(--color-saffron-600);
 }
 
 .modal-btn-secondary {
   background: white;
-  color: var(--color-trust-500);
-  border: 2px solid var(--color-trust-500);
+  color: var(--color-saffron-600);
+  border: 2px solid var(--color-saffron-500);
 }
 
 .modal-btn-secondary:hover {
-  background: var(--color-trust-500);
-  color: white;
+  background: var(--color-saffron-500);
+  color: var(--color-white);
 }
 
 .modal-campaigns-selector {
@@ -299,7 +299,7 @@
 .modal-link-btn {
   background: none;
   border: none;
-  color: var(--color-trust-500);
+  color: var(--color-saffron-500);
   font-weight: 700;
   text-decoration: underline;
   cursor: pointer;
@@ -309,7 +309,7 @@
 }
 
 .modal-link-btn:hover {
-  color: var(--color-trust-800);
+  color: var(--color-saffron-500);
 }
 
 .modal-campaign-select {
@@ -326,13 +326,13 @@
 }
 
 .modal-campaign-select:hover {
-  border-color: var(--color-trust-500);
+  border-color: var(--color-saffron-500);
 }
 
 .modal-campaign-select:focus {
-  outline: none;
-  border-color: var(--color-trust-500);
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+
+  border-color: var(--color-saffron-500);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
 }
 
 .modal-footer-note {

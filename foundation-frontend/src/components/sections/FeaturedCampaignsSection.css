@@ -45,7 +45,7 @@
   font-weight: var(--font-weight-semibold);
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--color-saffron-600);
+  color: var(--color-saffron-500);
 }
 
 .campaigns-title {
@@ -57,7 +57,7 @@
 
 .campaigns-all-link {
   font-size: var(--font-size-sm);
-  color: var(--color-trust-800);
+  color: var(--color-saffron-500);
   font-weight: var(--font-weight-semibold);
   text-decoration: none;
   transition: color 180ms ease;
@@ -109,7 +109,7 @@
 /* Card image */
 .campaign-card-v2__image {
   aspect-ratio: 16 / 10;
-  background: linear-gradient(135deg, var(--color-trust-700, #1e40af), var(--color-saffron-500));
+  background: linear-gradient(135deg, var(--color-saffron-600), var(--color-saffron-500));
   overflow: hidden;
 }
 
@@ -140,7 +140,7 @@
 }
 
 .campaign-card-v2__badge--education {
-  color: var(--color-saffron-700, #b45309);
+  color: var(--color-saffron-600, #b45309);
   background: var(--color-saffron-50);
 }
 
@@ -150,13 +150,13 @@
 }
 
 .campaign-card-v2__badge--livelihood {
-  color: var(--color-saffron-700, #b45309);
+  color: var(--color-saffron-600, #b45309);
   background: var(--color-saffron-50);
 }
 
 .campaign-card-v2__badge--default {
-  color: var(--color-trust-800);
-  background: var(--color-trust-50, #eff6ff);
+  color: var(--color-saffron-500);
+  background: var(--color-saffron-50);
 }
 
 /* Card title */

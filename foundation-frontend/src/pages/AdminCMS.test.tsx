@@ -69,7 +69,6 @@ describe('AdminCMS', () => {
 
   it('clicking Delete on a testimonial calls handleDelete with confirmation', async () => {
     localStorage.setItem('adminUser', JSON.stringify({ username: 'admin' }));
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
 
     mockAuthFetch
       .mockResolvedValueOnce({ ok: true, json: async () => testimonialData }) // initial load
@@ -84,6 +83,10 @@ describe('AdminCMS', () => {
 
     const deleteBtn = await screen.findByRole('button', { name: /Delete/i });
     fireEvent.click(deleteBtn);
+
+    // Wait for ConfirmDialog to appear and click the confirm button
+    const confirmBtn = await screen.findByTestId('confirm-dialog-confirm');
+    fireEvent.click(confirmBtn);
 
     await waitFor(() =>
       expect(mockAuthFetch).toHaveBeenCalledWith(

@@ -160,13 +160,15 @@ describe('AdminHomepage', () => {
       return { ok: true, json: () => Promise.resolve({}) } as any;
     });
 
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
-
     renderPage();
     await screen.findByText(/Homepage Management/i);
 
     const deleteBtn = await screen.findByRole('button', { name: /Delete/i });
     fireEvent.click(deleteBtn);
+
+    // Wait for ConfirmDialog to appear and click the confirm button
+    const confirmBtn = await screen.findByTestId('confirm-dialog-confirm');
+    fireEvent.click(confirmBtn);
 
     await waitFor(() =>
       expect(mockAuthFetch).toHaveBeenCalledWith(

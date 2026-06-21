@@ -4,9 +4,16 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import DonationForm from './DonationForm';
 
 vi.mock('../contexts/ConfigContext', () => ({
-  useSiteName: () => 'Test Foundation',
-  useConfig: () => ({ config: {}, loading: false, refetch: vi.fn() }),
+  useSiteName: vi.fn(() => 'Test Foundation'),
+  useSiteLogo: vi.fn(() => ''),
+  useConfig: vi.fn(() => ({ config: {}, loading: false, error: null, refetch: vi.fn() })),
 }));
+vi.mock('../hooks/useDonationPresets', () => ({
+  useDonationPresets: () => ({ loading: false, data: null }),
+  __resetDonationPresetsCacheForTests: () => {},
+}));
+
+
 
 const mockGetCampaign = vi.fn();
 const mockCreateStripeSession = vi.fn();

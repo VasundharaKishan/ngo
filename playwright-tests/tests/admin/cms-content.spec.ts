@@ -114,10 +114,9 @@ test.describe('Admin CMS content management', () => {
     );
 
     // Click CMS Content in sidebar
-    const cmsLink = page.locator('nav a[href="/admin/cms"], nav a:has-text("CMS Content")');
-    if (await cmsLink.count() > 0) {
-      await cmsLink.first().click();
-      await expect(page).toHaveURL(/\/admin\/cms/);
-    }
+    const cmsLink = page.locator('nav a[href="/admin/cms"], nav a:has-text("CMS Content")').first();
+    await expect(cmsLink).toBeVisible();
+    await cmsLink.click();
+    await expect(page).toHaveURL(/\/admin\/cms/);
   });
 });

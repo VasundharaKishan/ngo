@@ -5,7 +5,7 @@
 
 /* Hero */
 .contact-hero {
-  background: linear-gradient(135deg, var(--color-trust-800) 0%, var(--color-trust-900) 100%);
+  background: linear-gradient(135deg, var(--color-saffron-500) 0%, var(--color-saffron-600) 100%);
   color: var(--color-paper-50);
   padding: 4rem 2rem 3rem;
   text-align: center;
@@ -97,7 +97,7 @@
 }
 
 .contact-info-item a:hover {
-  color: var(--color-trust-800);
+  color: var(--color-saffron-500);
   text-decoration: underline;
 }
 
@@ -110,7 +110,7 @@
 
 .contact-location-label {
   font-weight: 600;
-  color: var(--color-trust-800) !important;
+  color: var(--color-saffron-500) !important;
 }
 
 .contact-ways {
@@ -192,9 +192,9 @@
 .contact-field input:focus,
 .contact-field select:focus,
 .contact-field textarea:focus {
-  outline: none;
-  border-color: var(--color-trust-800);
-  box-shadow: 0 0 0 3px rgba(42, 61, 168, 0.3);
+
+  border-color: var(--color-saffron-500);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.3);
 }
 
 .contact-field.has-error input,
@@ -225,20 +225,20 @@
 .btn-contact-submit {
   width: 100%;
   padding: 0.875rem;
-  background: linear-gradient(135deg, var(--color-trust-800) 0%, var(--color-trust-900) 100%);
-  color: var(--color-paper-50);
+  background: var(--color-saffron-500);
+  color: var(--color-white);
   border: none;
   border-radius: var(--radius-xl);
   font-size: 1rem;
   font-weight: 700;
   cursor: pointer;
   transition: all var(--transition-base);
-  box-shadow: 0 4px 12px rgba(42, 61, 168, 0.3);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
 }
 
 .btn-contact-submit:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(42, 61, 168, 0.4);
+  box-shadow: 0 6px 16px rgba(245, 158, 11, 0.4);
 }
 
 .btn-contact-submit:disabled {
@@ -274,9 +274,9 @@
 
 .btn-contact-again {
   padding: 0.75rem 2rem;
-  background: #f0f4ff;
-  color: var(--color-trust-800);
-  border: 2px solid var(--color-trust-800);
+  background: var(--color-white);
+  color: var(--color-saffron-600);
+  border: 2px solid var(--color-saffron-500);
   border-radius: var(--radius-xl);
   font-size: 0.95rem;
   font-weight: 700;
@@ -285,8 +285,8 @@
 }
 
 .btn-contact-again:hover {
-  background: var(--color-trust-800);
-  color: var(--color-paper-50);
+  background: var(--color-saffron-500);
+  color: var(--color-white);
 }
 
 /* Responsive */

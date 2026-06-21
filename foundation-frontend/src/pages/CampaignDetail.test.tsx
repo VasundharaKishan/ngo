@@ -6,8 +6,9 @@ import { api } from '../api';
 import type { Campaign } from '../api';
 
 vi.mock('../contexts/ConfigContext', () => ({
-  useSiteName: () => 'Test Foundation',
-  useConfig: () => ({ config: {}, loading: false, refetch: vi.fn() }),
+  useSiteName: vi.fn(() => 'Test Foundation'),
+  useSiteLogo: vi.fn(() => ''),
+  useConfig: vi.fn(() => ({ config: {}, loading: false, error: null, refetch: vi.fn() })),
 }));
 
 vi.mock('../api', () => ({
@@ -236,7 +237,7 @@ describe('CampaignDetail', () => {
     });
   });
 
-  it('hides image on load error', async () => {
+  it('shows placeholder on image load error', async () => {
     render(
       <MemoryRouter initialEntries={['/campaigns/1']}>
         <Routes>
@@ -247,8 +248,8 @@ describe('CampaignDetail', () => {
 
     const img = await screen.findByRole('img');
     expect(img).toBeInTheDocument();
-    // Simulate image load error
+    // Simulate image load error — component swaps src to placeholder
     fireEvent.error(img);
-    expect(img).toHaveStyle('display: none');
+    expect(img).toHaveAttribute('src', '/campaign-placeholder.svg');
   });
 });

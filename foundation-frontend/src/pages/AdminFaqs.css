@@ -142,9 +142,9 @@
 
 .af-field input:focus,
 .af-field textarea:focus {
-  outline: 2px solid var(--color-trust-500);
+  outline: 2px solid var(--color-saffron-500);
   outline-offset: 1px;
-  border-color: var(--color-trust-500);
+  border-color: var(--color-saffron-500);
 }
 
 .af-toggle {

@@ -93,27 +93,27 @@
 }
 
 .actions .btn-primary {
-  background: linear-gradient(135deg, var(--color-trust-600) 0%, var(--color-trust-800) 100%);
+  background: var(--color-saffron-500);
   color: var(--text-inverse);
   border: none;
-  box-shadow: 0 4px 15px rgba(30, 64, 175, 0.3);
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
 }
 
 .actions .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 25px rgba(30, 64, 175, 0.4);
-  background: linear-gradient(135deg, var(--color-trust-800) 0%, var(--color-trust-600) 100%);
+  box-shadow: 0 6px 25px rgba(245, 158, 11, 0.4);
+  background: var(--color-saffron-600);
 }
 
 .actions .btn-secondary {
   background: var(--color-paper-50);
-  color: var(--color-trust-600);
-  border: 2px solid var(--color-trust-600);
+  color: var(--color-saffron-500);
+  border: 2px solid var(--color-saffron-500);
 }
 
 .actions .btn-secondary:hover {
-  background: var(--color-trust-600);
+  background: var(--color-saffron-500);
   color: var(--text-inverse);
   transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(30, 64, 175, 0.3);
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
 }

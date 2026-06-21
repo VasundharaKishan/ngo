@@ -34,6 +34,8 @@ const existingCampaign = {
   title: 'Existing Campaign',
   shortDescription: 'Help children',
   fullDescription: 'Detailed description',
+  // Component uses data.categoryId (not data.category.id)
+  categoryId: 'cat-2',
   category: { id: 'cat-2', name: 'Education', icon: '📚' },
   targetAmount: 500000,
   currentAmount: 125000,
@@ -71,11 +73,13 @@ describe('AdminCampaignForm', () => {
     localStorage.clear();
   });
 
-  it('redirects to login when admin token is missing', async () => {
+  it('loads categories even when no adminUser in localStorage', async () => {
+    // Auth is now server-side (httpOnly cookie) — the form no longer redirects based on localStorage.
+    // It always attempts to load categories via authFetch; the server returns 401 if unauthenticated.
+    mockAuthFetch.mockResolvedValueOnce({ ok: true, json: async () => [] });
     renderCreate();
 
-    await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/admin/login'));
-    expect(mockAuthFetch).not.toHaveBeenCalled();
+    await waitFor(() => expect(mockAuthFetch).toHaveBeenCalledWith(`${API_BASE_URL}/admin/categories`));
   });
 
   it('submits a new campaign with required fields', async () => {
@@ -133,8 +137,8 @@ describe('AdminCampaignForm', () => {
 
     expect(await screen.findByDisplayValue(existingCampaign.title)).toBeInTheDocument();
     expect(screen.getByDisplayValue(existingCampaign.shortDescription)).toBeInTheDocument();
-    expect(screen.getByDisplayValue('5000.00')).toBeInTheDocument(); // target in dollars
-    expect(screen.getByDisplayValue('1250.00')).toBeInTheDocument(); // current amount
+    expect(screen.getByDisplayValue('5000.00')).toBeInTheDocument(); // targetAmount 500000 cents → 5000.00
+    // currentAmount is not shown in the form (it's server-side calculated from donations)
     const comboboxes = screen.getAllByRole('combobox');
     // First combobox is Category, second is Currency
     expect((comboboxes[0] as HTMLSelectElement).value).toBe('cat-2');
@@ -147,7 +151,7 @@ describe('AdminCampaignForm', () => {
       if (url === `${API_BASE_URL}/admin/categories`) {
         return Promise.resolve({ ok: true, json: async () => categories });
       }
-      if (url === `${API_BASE_URL}/admin/campaigns/${existingCampaign.id}` && !options) {
+      if (url === `${API_BASE_URL}/admin/campaigns/${existingCampaign.id}` && !options?.method) {
         return Promise.resolve({ ok: true, json: async () => existingCampaign });
       }
       if (url === `${API_BASE_URL}/admin/campaigns/${existingCampaign.id}` && options?.method === 'PUT') {

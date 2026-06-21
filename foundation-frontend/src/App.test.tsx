@@ -19,6 +19,16 @@ vi.mock('react-router-dom', async () => {
   };
 });
 
+vi.mock('./contexts/ConfigContext', () => ({
+  useConfig: vi.fn(() => ({ config: {}, loading: false, error: null, refetch: vi.fn() })),
+  useSiteName: vi.fn(() => 'Test Site'),
+  useSiteLogo: vi.fn(() => ''),
+  useSiteTagline: vi.fn(() => 'Test tagline'),
+  useFeaturedCampaignsCount: vi.fn(() => 3),
+  useCampaignsPerPage: vi.fn(() => 12),
+  ConfigProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 vi.mock('./components/ConfigLoader', () => ({
   __esModule: true,
   default: ({ children }: { children: React.ReactNode }) => <>{children}</>,

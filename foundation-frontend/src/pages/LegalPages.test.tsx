@@ -7,6 +7,7 @@ import CookiesPage from './CookiesPage';
 
 vi.mock('../contexts/ConfigContext', () => ({
   useSiteName: () => 'Test Foundation',
+  useSiteLogo: () => '',
   useConfig: () => ({ config: {}, loading: false, refetch: vi.fn() }),
 }));
 

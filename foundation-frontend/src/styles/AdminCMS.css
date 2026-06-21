@@ -49,13 +49,13 @@
 }
 
 .tab:hover {
-  color: var(--color-trust-800);
+  color: var(--color-saffron-500);
   background: var(--color-paper-100);
 }
 
 .tab.active {
-  color: var(--color-trust-800);
-  border-bottom-color: var(--color-trust-800);
+  color: var(--color-saffron-500);
+  border-bottom-color: var(--color-saffron-500);
 }
 
 /* Content Section */
@@ -135,8 +135,8 @@
 
 .order-badge {
   padding: 0.25rem 0.75rem;
-  background: var(--color-trust-50);
-  color: var(--color-trust-800);
+  background: var(--color-saffron-50);
+  color: var(--color-saffron-500);
   border-radius: var(--radius-full);
   font-size: var(--font-size-sm);
   font-weight: 600;
@@ -169,7 +169,7 @@
 
 .social-url {
   display: block;
-  color: var(--color-trust-800);
+  color: var(--color-saffron-500);
   text-decoration: none;
   font-size: var(--font-size-sm);
   margin: 0.5rem 0;
@@ -217,16 +217,16 @@
 }
 
 .btn-primary {
-  background: var(--color-trust-800);
+  background: var(--color-saffron-500);
   color: var(--color-paper-50);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--color-trust-900);
+  background: var(--color-saffron-600);
 }
 
 .btn-primary:disabled {
-  background: var(--color-trust-300);
+  background: var(--color-saffron-300);
   cursor: not-allowed;
   opacity: 0.6;
 }
@@ -273,8 +273,8 @@
 
 .edit-form input:focus,
 .edit-form textarea:focus {
-  outline: none;
-  border-color: var(--color-trust-800);
+
+  border-color: var(--color-saffron-500);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
@@ -406,7 +406,7 @@
 }
 
 .toggle-label input[type="checkbox"]:checked + .toggle-switch {
-  background: var(--color-trust-800);
+  background: var(--color-saffron-500);
 }
 
 .toggle-label input[type="checkbox"]:checked + .toggle-switch::after {
@@ -428,8 +428,8 @@
 }
 
 .full-width-input:focus {
-  outline: none;
-  border-color: var(--color-trust-800);
+
+  border-color: var(--color-saffron-500);
 }
 
 .full-width-input:disabled {

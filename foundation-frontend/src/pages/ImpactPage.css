@@ -11,7 +11,7 @@
 
 /* Hero */
 .impact-hero {
-  background: linear-gradient(135deg, var(--color-trust-800) 0%, var(--color-trust-900) 60%, #312e81 100%);
+  background: linear-gradient(135deg, var(--color-saffron-500) 0%, var(--color-saffron-600) 60%, var(--color-saffron-600) 100%);
   color: var(--text-inverse);
   padding: var(--space-20) var(--space-8) var(--space-16);
   text-align: center;
@@ -73,7 +73,7 @@
   flex: 1;
   text-align: center;
   padding: var(--space-8) var(--space-6);
-  background: var(--color-trust-50);
+  background: var(--color-saffron-50);
   border-radius: var(--radius-2xl);
   border: 2px solid #bae6fd;
   position: relative;
@@ -86,7 +86,7 @@
   transform: translateX(-50%);
   width: 32px;
   height: 32px;
-  background: var(--color-trust-800);
+  background: var(--color-saffron-500);
   color: var(--text-inverse);
   border-radius: var(--radius-full);
   display: flex;
@@ -174,7 +174,7 @@
 
 /* CTA section */
 .impact-cta {
-  background: linear-gradient(135deg, var(--color-trust-800) 0%, var(--color-trust-900) 100%);
+  background: linear-gradient(135deg, var(--color-saffron-500) 0%, var(--color-saffron-600) 100%);
   color: var(--text-inverse);
   padding: var(--space-16) 0;
   text-align: center;
@@ -203,7 +203,7 @@
 .btn-impact-primary {
   padding: 0.875rem var(--space-8);
   background: var(--color-paper-50);
-  color: var(--color-trust-800);
+  color: var(--color-saffron-500);
   border-radius: var(--radius-xl);
   font-weight: 700;
   text-decoration: none;
@@ -212,7 +212,7 @@
 }
 
 .btn-impact-primary:hover {
-  background: var(--color-trust-50);
+  background: var(--color-saffron-50);
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
 }

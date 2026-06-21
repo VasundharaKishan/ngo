@@ -39,7 +39,7 @@
   font-weight: var(--font-weight-semibold);
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--color-saffron-600);
+  color: var(--color-saffron-500);
 }
 
 .stats-title {
@@ -81,7 +81,7 @@
 
 .stats-card-number {
   font-size: clamp(2rem, 4vw, 2.25rem);
-  color: var(--color-trust-800);
+  color: var(--color-saffron-500);
   line-height: 1.2;
 }
 

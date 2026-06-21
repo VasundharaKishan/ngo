@@ -150,9 +150,9 @@
 
 .at-field input:focus,
 .at-field textarea:focus {
-  outline: 2px solid var(--color-trust-500);
+  outline: 2px solid var(--color-saffron-500);
   outline-offset: 1px;
-  border-color: var(--color-trust-500);
+  border-color: var(--color-saffron-500);
 }
 
 .at-field input[aria-invalid='true'] {

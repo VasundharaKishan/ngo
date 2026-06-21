@@ -1,8 +1,8 @@
 /* Global UI polish: utility surfaces and base element resets.
    All colour/radius/shadow values reference design-system.css tokens. */
 :root {
-  --primary: var(--color-trust-800);
-  --primary-strong: var(--color-trust-900);
+  --primary: var(--color-saffron-500);
+  --primary-strong: var(--color-saffron-600);
   --surface: var(--color-paper-50);
   --surface-muted: var(--color-paper-100);
   --border: var(--color-paper-300);
@@ -42,7 +42,7 @@ select:focus-visible,
 textarea:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
-  box-shadow: 0 0 0 4px rgba(30, 64, 175, 0.2);
+  box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.2);
 }
 
 .card {
@@ -58,7 +58,7 @@ textarea:focus-visible {
   align-items: center;
   gap: 0.4rem;
   padding: 0.35rem 0.85rem;
-  background: rgba(30, 64, 175, 0.1);
+  background: rgba(245, 158, 11, 0.1);
   color: var(--primary-strong);
   border-radius: var(--radius-full);
   font-weight: var(--font-weight-semibold);

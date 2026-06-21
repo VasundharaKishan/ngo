@@ -55,8 +55,7 @@ test.describe('Admin donate popup settings', () => {
 
     // Find and click save button
     const saveBtn = page.locator('button:has-text("Save")');
-    if (await saveBtn.count() > 0) {
-      await saveBtn.click();
-    }
+    await expect(saveBtn).toBeVisible();
+    await saveBtn.click();
   });
 });
